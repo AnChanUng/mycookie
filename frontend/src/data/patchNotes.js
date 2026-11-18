@@ -3,6 +3,18 @@
 // status: 'released' 배포됨(master) | 'dev' 개발 브랜치에만 있음 | 'wip' 작업 중
 export const PATCH_NOTES = [
   {
+    version: '0.20.1',
+    date: '2026-11-18',
+    title: 'GitHub 저장소 비공개 전환',
+    status: 'released',
+    summary: '관리자 전용 학습 자료 파일이 공개 저장소에서 보이던 문제를 막기 위해 저장소를 비공개로 바꿨습니다.',
+    items: [
+      { type: 'security', text: '저장소 AnChanUng/mycookie를 private으로 전환. 코드 · 커밋 · PR 기록이 외부에서 보이지 않음(비로그인 404 확인).' },
+      { type: 'infra', text: '비공개 전환 뒤에도 Vercel · Render 자동 배포가 동작하는지 이 배포로 확인.' },
+      { type: 'docs', text: '다시 공개하려면 관리자 전용 자료를 저장소에서 빼서 서버(관리자 키 보호)로 옮긴 뒤 기록을 정리해야 함.' },
+    ],
+  },
+  {
     version: '0.20.0',
     date: '2026-11-18',
     title: '새 메인 화면(벤토 그리드) · 소개 페이지 분리',
