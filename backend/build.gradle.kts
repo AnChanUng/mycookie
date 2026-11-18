@@ -39,6 +39,8 @@ dependencies {
     // HikariCP 커넥션 풀 지표(active · idle · pending · 획득 시간)를 Micrometer로 본다
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.security:spring-security-crypto")
+    // 비밀번호 재설정 · 이메일 인증 메일. 온프레미스 SMTP 서버를 그대로 쓴다
+    implementation("org.springframework.boot:spring-boot-starter-mail")
 
     // RAG 학습 도우미: ChromaDB 벡터 저장소, OpenAI 호환 임베딩(로컬 TEI의 bge-m3), Gemini 답변 생성, RAG 어드바이저
     implementation("org.springframework.ai:spring-ai-starter-vector-store-chroma")

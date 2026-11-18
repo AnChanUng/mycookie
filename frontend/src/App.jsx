@@ -46,6 +46,8 @@ const SsafyPage = lazy(() => import('./pages/SsafyPage'));
 const AptitudePage = lazy(() => import('./pages/AptitudePage'));
 const CosProPage = lazy(() => import('./pages/CosProPage'));
 const AuthCallbackPage = lazy(() => import('./pages/AuthCallbackPage'));
+const VerifyEmailPage = lazy(() => import('./pages/AuthEmailPage').then(m => ({ default: m.VerifyEmailPage })));
+const ResetPasswordPage = lazy(() => import('./pages/AuthEmailPage').then(m => ({ default: m.ResetPasswordPage })));
 
 function WebEssentialsRedirect() {
   const { hash, search } = useLocation();
@@ -83,6 +85,8 @@ function App() {
           <Route path="account" element={<AccountPage />} />
           <Route path="account/retry" element={<AccountRetryPage />} />
           <Route path="auth/callback" element={<AuthCallbackPage />} />
+          <Route path="auth/verify-email" element={<VerifyEmailPage />} />
+          <Route path="auth/reset-password" element={<ResetPasswordPage />} />
           <Route path="stats" element={<StatsPage />} />
           <Route path="cs" element={<CsHubPage />} />
           <Route path="interview" element={<InterviewPracticePage />} />

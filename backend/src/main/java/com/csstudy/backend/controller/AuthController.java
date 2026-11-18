@@ -5,6 +5,8 @@ import com.csstudy.backend.entity.User;
 import com.csstudy.backend.repository.UserRepository;
 import com.csstudy.backend.service.AuthService;
 import com.csstudy.backend.service.CredentialService;
+import com.csstudy.backend.service.EmailAccountService;
+import com.csstudy.backend.service.MailService;
 import com.csstudy.backend.service.MembershipService;
 import com.csstudy.backend.service.NicknameService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -30,6 +32,8 @@ public class AuthController {
     private final MembershipService membershipService;
     private final NicknameService nicknames;
     private final CredentialService credentials;
+    private final EmailAccountService emailAccounts;
+    private final MailService mail;
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     @PostMapping("/register")
@@ -88,6 +92,37 @@ public class AuthController {
     @GetMapping("/password")
     public Map<String, Object> passwordStatus(HttpServletRequest request) {
         return Map.of("hasPassword", authService.requireUser(request).hasOwnPassword());
+    }
+
+    // 이메일: 등록(현재 비밀번호 확인 → 인증 메일) → 링크로 인증. 인증된 이메일로만 비밀번호를 재설정할 수 있다
+    @GetMapping("/email")
+    public Map<String, Object> email(HttpServletRequest request) {
+        User user = authService.requireUser(request);
+        return Map.of("email", Objects.toString(user.getEmail(), ""), "mailEnabled", mail.configured());
+    }
+
+    @PostMapping("/email")
+    public Map<String, Object> requestEmail(@RequestBody Map<String, String> body, HttpServletRequest request) {
+        emailAccounts.requestVerification(authService.requireUser(request), body.get("email"), body.get("currentPassword"));
+        return Map.of("ok", true);
+    }
+
+    @PostMapping("/email/verify")
+    public Map<String, Object> verifyEmail(@RequestBody Map<String, String> body) {
+        return Map.of("email", emailAccounts.verify(body.get("token")));
+    }
+
+    // 가입 여부를 알려 주지 않도록 주소 형식만 맞으면 항상 같은 응답
+    @PostMapping("/password/forgot")
+    public Map<String, Object> forgotPassword(@RequestBody Map<String, String> body) {
+        emailAccounts.requestReset(body.get("email"));
+        return Map.of("ok", true);
+    }
+
+    @PostMapping("/password/reset")
+    public Map<String, Object> resetPassword(@RequestBody Map<String, String> body) {
+        emailAccounts.reset(body.get("token"), body.get("password"));
+        return Map.of("ok", true);
     }
 
     @GetMapping("/me")

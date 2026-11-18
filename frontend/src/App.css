@@ -4238,6 +4238,7 @@ a.goal-exam:hover { border-color: var(--accent-blue); }
 .account-nav-link { white-space: nowrap; font-size: .8rem; font-weight: 700; color: var(--text-primary); text-decoration: none; padding: 8px; border: 1px solid var(--border-color); border-radius: 8px; }
 .account-nav-link.active { color: var(--accent-blue); background: var(--accent-blue-light); }
 .member-menu-actions { display: flex; align-items: center; gap: 6px; flex: none; }
+.password-reset-link:hover, .password-reset-link:focus-visible { color: var(--accent-blue); background: var(--accent-blue-light); }
 
 .lounge-participants { max-height: 150px; overflow-y: auto; padding: 10px 14px; border-bottom: 1px solid var(--border-color); font-size: .78rem; }
 .lounge-participants > strong { display: block; margin-bottom: 6px; }
@@ -4280,6 +4281,9 @@ a.goal-exam:hover { border-color: var(--accent-blue); }
 @media (max-width: 640px) {
   .member-menu-actions { position: absolute; top: 8px; right: 16px; }
   .member-menu { max-width: 150px; }
+  .password-reset-link { padding: 6px; }
+  .password-reset-link + .member-menu { max-width: 112px; }
+  .header-inner:has(.password-reset-link) .logo { max-width: calc(100% - 202px); }
   .logo { min-width: 0; max-width: calc(100% - 155px); min-height: 30px; }
   .logo-title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .header-right { width: 100%; }

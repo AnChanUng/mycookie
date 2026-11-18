@@ -110,6 +110,19 @@ export async function changePassword(currentPassword, newPassword) {
   setAccount({ id: data.id, nickname: data.nickname, token: data.token });
 }
 
+export async function emailStatus() {
+  const { data } = await api.get('/auth/email', auth());
+  return { email: data?.email || '', mailEnabled: data?.mailEnabled !== false };
+}
+
+export async function requestEmailVerification(email, currentPassword) {
+  await api.post('/auth/email', { email, currentPassword }, { ...auth(), timeout: 90000 });
+}
+
+export async function requestPasswordReset(email) {
+  await api.post('/auth/password/forgot', { email }, { timeout: 90000 });
+}
+
 export async function signOut() {
   try { await api.post('/auth/logout', null, auth()); } catch { /* 서버에 닿지 않아도 이 기기에서는 로그아웃한다 */ }
   setAccount(null);

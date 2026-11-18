@@ -133,6 +133,7 @@ sudo -u devcookie nano /srv/devcookie/.env
 | `STAGING_DATABASE_URL` | Render 스테이징에 넣어 둔 Neon **staging** 연결 문자열 |
 | `PROD_ADMIN_KEY` / `STAGING_ADMIN_KEY` | Render에 쓰던 값을 그대로 쓰거나 `openssl rand -hex 24`로 새로 만든 값(서로 다르게) |
 | `TUNNEL_TOKEN` | 6번에서 받는 토큰 |
+| `MAIL_HOST` 외 `MAIL_*` | 비밀번호 재설정 메일을 보낼 SMTP 서버. 비우면 이메일 등록과 비밀번호 찾기만 꺼집니다 |
 
 ## 6. Cloudflare Tunnel
 

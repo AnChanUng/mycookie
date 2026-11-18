@@ -33,6 +33,10 @@ public class User {
         return !Boolean.FALSE.equals(passwordSet);
     }
 
+    // 인증을 마친 이메일만 저장한다(비밀번호 재설정 메일을 받는 주소). 인증 전 주소는 email_tokens에만 있다
+    @Column(unique = true, length = 254)
+    private String email;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "base_tier", length = 16)
     private UserTier baseTier;

@@ -1,6 +1,6 @@
 import { useEffect, useState, useSyncExternalStore } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { account, changeNickname, changePassword, onAccountChange, passwordStatus, signIn, signOut } from '../sync';
+import { account, changeNickname, changePassword, emailStatus, onAccountChange, passwordStatus, requestEmailVerification, requestPasswordReset, signIn, signOut } from '../sync';
 import { loadAccountRecords, summarizeAccount } from '../accountRecords';
 import { CS_NOTES, migrateNotesCompletion } from '../data/csNotes';
 import { WEB_ESSENTIALS } from '../data/webEssentials';
@@ -25,12 +25,16 @@ export default function AccountPage() {
     settings?.focus?.({ preventScroll: true });
   }, [location.hash, location.key]);
   // 비밀번호를 바꾸면 토큰만 새로 받으므로 계정이 같으면 화면 상태(안내 문구)를 유지한다
-  return <AccountDashboard key={token ? account()?.id : ''} user={token ? account() : null} />;
+  const openForgot = new URLSearchParams(location.search).get('forgot') === '1';
+  return <AccountDashboard key={`${token ? account()?.id : ''}:${openForgot}`} user={token ? account() : null} openForgot={openForgot} />;
 }
-function AccountDashboard({ user }) {
+function AccountDashboard({ user, openForgot }) {
   const [form, setForm] = useState({ nickname: '', password: '' });
   const [passwords, setPasswords] = useState({ current: '', next: '' });
   const [hasPassword, setHasPassword] = useState(true);
+  const [emailInfo, setEmailInfo] = useState({ email: '', mailEnabled: true });
+  const [emailForm, setEmailForm] = useState({ email: '', current: '' });
+  const [forgot, setForgot] = useState({ open: openForgot, email: '' });
   const [authBusy, setAuthBusy] = useState(false);
   const [nicknameDraft, setNicknameDraft] = useState(user?.nickname || savedNickname());
   const [message, setMessage] = useState('');
@@ -66,8 +70,15 @@ function AccountDashboard({ user }) {
     if (!user) return;
     let alive = true;
     passwordStatus().then(value => { if (alive) setHasPassword(value); }).catch(() => {});
+    emailStatus().then(value => { if (alive) setEmailInfo(value); }).catch(() => {});
     return () => { alive = false; };
   }, [user?.token]); // eslint-disable-line react-hooks/exhaustive-deps
+  async function run(action, done) {
+    setAuthBusy(true); setMessage('');
+    try { await action(); setMessage(done); }
+    catch (error) { setMessage(error?.response?.data?.error || '요청을 처리하지 못했습니다. 잠시 후 다시 시도해 주세요.'); }
+    finally { setAuthBusy(false); }
+  }
   async function submitPassword() {
     setAuthBusy(true); setMessage('');
     try {
@@ -102,13 +113,35 @@ function AccountDashboard({ user }) {
           {hasPassword && <input aria-label="현재 비밀번호" type="password" placeholder="현재 비밀번호" autoComplete="current-password" maxLength={72} disabled={authBusy} value={passwords.current} onChange={e => setPasswords({ ...passwords, current: e.target.value })} />}
           <input aria-label="새 비밀번호" type="password" placeholder={hasPassword ? '새 비밀번호' : '로그인용 비밀번호 정하기'} autoComplete="new-password" maxLength={72} disabled={authBusy} value={passwords.next} onChange={e => setPasswords({ ...passwords, next: e.target.value })} />
           <button className="exam-btn sm" disabled={authBusy || (hasPassword && !passwords.current) || !passwords.next.trim()}>비밀번호 변경</button>
-        </form></> : <form onSubmit={e => { e.preventDefault(); authenticate('login'); }}>
+        </form>
+        <p className="account-hint">{emailInfo.email ? `비밀번호 찾기 이메일: ${emailInfo.email}` : '이메일을 등록해 두면 비밀번호를 잊었을 때 재설정 메일을 받을 수 있어요.'}</p>
+        <form onSubmit={e => {
+          e.preventDefault();
+          const email = emailForm.email.trim();
+          run(async () => { await requestEmailVerification(email, emailForm.current); setEmailForm({ email: '', current: '' }); },
+            `${email}로 인증 메일을 보냈습니다. 메일의 링크를 눌러야 등록이 끝나요.`);
+        }}>
+          <input aria-label="이메일" type="email" placeholder={emailInfo.email ? '바꿀 이메일' : '이메일'} autoComplete="email" maxLength={254} disabled={authBusy} value={emailForm.email} onChange={e => setEmailForm({ ...emailForm, email: e.target.value })} />
+          {hasPassword && <input aria-label="이메일 등록용 현재 비밀번호" type="password" placeholder="현재 비밀번호" autoComplete="current-password" maxLength={72} disabled={authBusy} value={emailForm.current} onChange={e => setEmailForm({ ...emailForm, current: e.target.value })} />}
+          <button className="exam-btn sm" disabled={authBusy || !emailInfo.mailEnabled || !emailForm.email.trim() || (hasPassword && !emailForm.current)}>{emailInfo.email ? '이메일 변경' : '이메일 등록'}</button>
+        </form>
+        {!emailInfo.mailEnabled && <p className="account-hint">지금은 메일 서버가 준비되지 않아 이메일을 등록할 수 없어요.</p>}</> : <form onSubmit={e => { e.preventDefault(); authenticate('login'); }}>
         <input aria-label="닉네임" placeholder="닉네임" autoComplete="username" maxLength={20} value={form.nickname} onChange={e => setForm({ ...form, nickname: e.target.value })} />
         <input aria-label="비밀번호" type="password" placeholder="비밀번호" autoComplete="current-password" maxLength={72} value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} />
         <button className="exam-btn sm primary" disabled={authBusy || !form.nickname.trim() || !form.password}>로그인</button>
         <button type="button" className="exam-btn sm" disabled={authBusy || !form.nickname.trim() || !form.password} onClick={() => authenticate('register')}>새 계정 만들기</button>
       </form>}
-      {!user && <p className="account-hint">비밀번호를 잊었다면 연결해 둔 소셜 계정으로 로그인한 뒤 바꿀 수 있습니다.</p>}
+      {!user && (forgot.open ? <form onSubmit={e => {
+        e.preventDefault();
+        run(() => requestPasswordReset(forgot.email.trim()), '입력한 주소로 등록된 계정이 있으면 재설정 메일을 보냈습니다. 메일함을 확인해 주세요.');
+      }}>
+        <input aria-label="비밀번호 찾기 이메일" type="email" placeholder="등록한 이메일" autoComplete="email" maxLength={254} disabled={authBusy} value={forgot.email} onChange={e => setForgot({ ...forgot, email: e.target.value })} />
+        <button className="exam-btn sm primary" disabled={authBusy || !forgot.email.trim()}>재설정 메일 받기</button>
+        <button type="button" className="exam-btn sm" disabled={authBusy} onClick={() => setForgot({ open: false, email: '' })}>취소</button>
+      </form> : <p className="account-hint">
+        <button type="button" className="exam-btn sm" onClick={() => { setForgot({ open: true, email: '' }); setMessage(''); }}>비밀번호 찾기</button>
+        {' '}이메일을 등록하지 않았다면 연결해 둔 소셜 계정으로 로그인한 뒤 바꿀 수 있어요.
+      </p>)}
       <SocialLogin user={user} />
       {!user && <form onSubmit={async e => {
         e.preventDefault(); setAuthBusy(true); setMessage('');
