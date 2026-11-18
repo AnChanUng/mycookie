@@ -7,7 +7,7 @@
 CS·기술면접, 코딩테스트, 실전 대결, 학습 기록을 하나로 잇는 학습 서비스입니다.<br>
 지금은 **개발자 취업 준비 사이트로 리뉴얼 중**이며, 11월 말 다시 열 예정입니다.
 
-[사이트](https://cs-study-platform.vercel.app/) | [패치노트](https://cs-study-platform.vercel.app/changelog) | [개발 문서](#개발-문서)
+[사이트](https://mycookie.dev/) | [패치노트](https://mycookie.dev/changelog) | [개발 문서](#개발-문서)
 
 ![React](https://img.shields.io/badge/React_19-20232A?logo=react&logoColor=61DAFB)
 ![Spring Boot](https://img.shields.io/badge/Spring_Boot_3.5-6DB33F?logo=springboot&logoColor=white)
@@ -44,7 +44,7 @@ CS·기술면접, 코딩테스트, 실전 대결, 학습 기록을 하나로 잇
 1. 작업마다 GitHub 이슈를 한글로 등록합니다.
 2. 기능 브랜치에서 작업하고, 이슈를 연결한 PR을 `dev`로 올립니다.
 3. `dev`에 병합되면 스테이징(Vercel 미리보기 → 스테이징 백엔드 → 스테이징 DB)에서 확인합니다.
-4. `dev` → `master` PR로 운영에 배포하고, 바뀐 내용은 [패치노트](https://cs-study-platform.vercel.app/changelog)와 GitHub Release에 기록합니다.
+4. `dev` → `master` PR로 운영에 배포하고, 바뀐 내용은 [패치노트](https://mycookie.dev/changelog)와 GitHub Release에 기록합니다.
 
 환경 구성과 설정 방법은 [docs/staging.md](docs/staging.md)를 참고하세요.
 
