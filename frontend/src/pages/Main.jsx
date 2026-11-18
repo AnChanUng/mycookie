@@ -6,6 +6,7 @@ import { useMembership, TIER_NAMES } from '../membership';
 import { factForDay, koreanDay } from '../data/todayCs';
 import TierBadge from '../components/TierBadge';
 import LineIcon from '../components/LineIcon';
+import HomeRank from '../components/HomeRank';
 import { quoteForDay } from '../data/quotes';
 import './Main.css';
 
@@ -118,7 +119,7 @@ export default function Main() {
       <section className="mn-top">
         <div className="mn-hello">
           <p className="ds-eyebrow">{dateLabel}</p>
-          <h1 className="mn-h1">{user?.nickname ? `${user.nickname}님, 오늘 할 공부예요` : '개발자 취업 준비, 오늘은 여기서 시작해요'}</h1>
+          <h1 className="mn-h1">{user?.nickname ? `${user.nickname}님, 오늘은 뭘 공부해 볼까요?` : '개발자 공부, 여기 다 있어요'}</h1>
           <p className="mn-sub">AI, 컴퓨터공학, 웹 개발 모든 공부를 한곳에서</p>
           <div className="mn-chips">
             {membership && <Link to="/account" className="ds-chip"><TierBadge tier={membership.tier} division={membership.division} />{TIER_NAMES[membership.tier]}</Link>}
@@ -170,20 +171,6 @@ export default function Main() {
         </div>
       </Section>}
 
-      {/* 학습 현황: 한 줄 요약 */}
-      <Section id="mn-stats" title="내 학습 현황" more={{ to: '/stats', label: '자세히 보기' }}>
-        <div className="mn-statbar">
-          <Stat label="이번 주 푼 문제" value={learning ? learning.week : '–'} />
-          <Stat label="정답률" value={learning?.rate != null ? `${learning.rate}%` : '–'} />
-          <Stat label="누적" value={learning ? learning.solved.toLocaleString() : '–'} />
-          <Link to="/weak" className="mn-stat mn-stat--link">
-            <span>다시 풀 오답</span>
-            <b>{learning ? (learning.wrongOpen || 0) : '–'}</b>
-            <small>{learning?.weak?.[0] ? `약한 주제: ${learning.weak[0].name} ${learning.weak[0].rate}%` : '풀수록 약한 주제를 알려 드려요'}</small>
-          </Link>
-        </div>
-      </Section>
-
       <Section id="mn-cs" title="컴퓨터공학 · 면접" more={{ to: '/cs', label: '전체 보기' }}>
         <div className="mn-cards">{CS_STUDY.map(item => <Category key={item.to} {...item} />)}</div>
       </Section>
@@ -191,6 +178,24 @@ export default function Main() {
       <Section id="mn-dev" title="AI · 웹 개발">
         <div className="mn-cards">{DEV_STUDY.map(item => <Category key={item.to} {...item} />)}</div>
       </Section>
+
+      <Section id="mn-rank" title="회원 순위" note="푼 문제 수 기준" more={{ to: '/all', label: '전체 순위' }}>
+        <HomeRank />
+      </Section>
+
+      {/* 학습 현황: 한 문제라도 푼 뒤에만 보여 준다(처음 온 사람에게 0만 늘어놓지 않는다) */}
+      {learning?.solved > 0 && <Section id="mn-stats" title="내 학습 현황" more={{ to: '/stats', label: '자세히 보기' }}>
+        <div className="mn-statbar">
+          <Stat label="이번 주 푼 문제" value={learning.week} />
+          <Stat label="정답률" value={learning.rate != null ? `${learning.rate}%` : '–'} />
+          <Stat label="누적" value={learning.solved.toLocaleString()} />
+          <Link to="/weak" className="mn-stat mn-stat--link">
+            <span>다시 풀 오답</span>
+            <b>{learning.wrongOpen || 0}</b>
+            <small>{learning.weak?.[0] ? `약한 주제: ${learning.weak[0].name} ${learning.weak[0].rate}%` : '풀수록 약한 주제를 알려 드려요'}</small>
+          </Link>
+        </div>
+      </Section>}
 
       <Section id="mn-practice" title="전공필기" more={{ to: '/exam', label: '전체 보기' }}>
         <div className="mn-cards">{PRACTICE.map(item => <Category key={item.to} {...item} />)}</div>

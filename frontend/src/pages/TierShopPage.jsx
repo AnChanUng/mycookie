@@ -1,8 +1,8 @@
-import { useEffect, useState, useSyncExternalStore } from 'react';
+import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { Link } from 'react-router-dom';
 import TierBadge from '../components/TierBadge';
 import { account, onAccountChange } from '../sync';
-import { buyTier, tierLevel, tierProducts } from '../tierPayment';
+import { createTierOrder, isWidgetKey, mountWidgets, openPaymentWindow, tierLevel, tierProducts } from '../tierPayment';
 import './TierShopPage.css';
 
 // 등급 구매. 풀이 수로 오르는 기준은 그대로이고, 산 등급 아래로는 내려가지 않는다
@@ -31,13 +31,37 @@ export default function TierShopPage() {
   const m = data.membership;
   const current = m ? tierLevel(m.tier, m.division) : -1;
 
-  async function buy(tier) {
-    setBusy(tier); setMessage('');
-    try { await buyTier(tier, data.clientKey); }
-    catch (error) {
-      // 결제창을 닫으면 토스가 USER_CANCEL 오류를 낸다. 그때는 조용히 넘어간다
-      if (error?.code !== 'USER_CANCEL') setMessage(error?.response?.data?.error || error?.message || '결제를 시작하지 못했습니다.');
-    } finally { setBusy(''); }
+  // 결제위젯 키일 때 화면에 펼치는 결제 칸. 주문이 생기면 위젯을 그린다
+  const [checkout, setCheckout] = useState(null);
+  const handle = useRef(null);
+  useEffect(() => {
+    if (!checkout?.order) return;
+    let alive = true;
+    handle.current = null;
+    mountWidgets(checkout.order, data.clientKey, '#ts-methods', '#ts-agreement')
+      .then(h => { if (alive) { handle.current = h; setCheckout(c => c && { ...c, ready: true }); } })
+      .catch(error => { if (alive) { setCheckout(null); setMessage(error?.message || '결제 화면을 불러오지 못했습니다.'); } });
+    return () => { alive = false; };
+  }, [checkout?.order, data.clientKey]);
+
+  const fail = error => {
+    // 결제창을 닫으면 토스가 USER_CANCEL 오류를 낸다. 그때는 조용히 넘어간다
+    if (error?.code !== 'USER_CANCEL') setMessage(error?.response?.data?.error || error?.message || '결제를 시작하지 못했습니다.');
+  };
+
+  async function buy(product) {
+    setBusy(product.tier); setMessage('');
+    try {
+      const order = await createTierOrder(product.tier);
+      if (isWidgetKey(data.clientKey)) setCheckout({ order, product, ready: false });
+      else await openPaymentWindow(order, data.clientKey);
+    } catch (error) { fail(error); }
+    finally { setBusy(''); }
+  }
+
+  async function pay() {
+    setBusy('pay'); setMessage('');
+    try { await handle.current?.pay(); } catch (error) { fail(error); } finally { setBusy(''); }
   }
 
   return <div className="ts fade-in">
@@ -60,14 +84,31 @@ export default function TierShopPage() {
           <b className="ts-name">{p.name}</b>
           <p className="ts-perk">{PERKS[p.tier]}</p>
           <span className="ts-price">{p.price.toLocaleString()}원</span>
-          <button type="button" className="ts-buy" disabled={owned || !token || !data.enabled || !!busy} onClick={() => buy(p.tier)}>
-            {owned ? '보유 중' : busy === p.tier ? '결제창 여는 중…' : '구매하기'}
+          <button type="button" className="ts-buy" disabled={owned || !token || !data.enabled || !!busy || !!checkout} onClick={() => buy(p)}>
+            {owned ? '보유 중' : busy === p.tier ? '결제 준비 중…' : checkout?.product.tier === p.tier ? '아래에서 결제' : '구매하기'}
           </button>
         </div>;
       })}
       {data.loading && <p role="status">등급 정보를 불러오는 중…</p>}
     </div>
     {message && <p className="ts-banner" role="alert">{message}</p>}
+
+    {checkout && <section className="ts-checkout" aria-label="결제">
+      <div className="ts-checkout-head">
+        <TierBadge tier={checkout.product.tier} />
+        <b>{checkout.order.orderName}</b>
+        <span className="ts-price">{checkout.order.amount.toLocaleString()}원</span>
+      </div>
+      <div id="ts-methods" />
+      <div id="ts-agreement" />
+      {!checkout.ready && <p className="ts-banner" role="status">결제 수단을 불러오는 중…</p>}
+      <div className="ts-checkout-actions">
+        <button type="button" className="ts-link" disabled={busy === 'pay'} onClick={() => setCheckout(null)}>취소</button>
+        <button type="button" className="ts-buy" disabled={!checkout.ready || busy === 'pay'} onClick={pay}>
+          {busy === 'pay' ? '결제 진행 중…' : `${checkout.order.amount.toLocaleString()}원 결제하기`}
+        </button>
+      </div>
+    </section>}
 
     <ul className="ts-notes">
       <li>한 번 결제하면 기간 제한 없이 유지돼요. 문제를 더 풀어 더 높은 등급에 오르면 그 등급이 보여요.</li>

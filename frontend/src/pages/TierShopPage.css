@@ -25,3 +25,12 @@
 .ts-link { font-size: var(--ds-fs-small); color: var(--ds-text-2); }
 @media (max-width: 900px) { .ts-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 420px) { .ts-grid { grid-template-columns: 1fr; } }
+
+/* 결제위젯: 등급 카드 아래 펼치는 결제 칸 */
+.ts-checkout { max-width: 640px; margin: var(--ds-s6) auto 0; padding: var(--ds-s6); border: 1px solid var(--ds-brand); border-radius: var(--ds-r-xl); background: var(--ds-surface); }
+.ts-checkout-head { display: flex; align-items: center; gap: var(--ds-s3); padding-bottom: var(--ds-s4); border-bottom: 1px solid var(--ds-line); }
+.ts-checkout-head .tier-badge { width: 32px; height: 32px; }
+.ts-checkout-head .ts-price { margin-left: auto; font-size: var(--ds-fs-title); }
+.ts-checkout-actions { display: flex; justify-content: flex-end; align-items: center; gap: var(--ds-s4); margin-top: var(--ds-s4); }
+.ts-checkout-actions .ts-buy { width: auto; padding: 0 var(--ds-s6); margin: 0; }
+.ts-checkout-actions .ts-link { border: 0; background: none; cursor: pointer; font: inherit; font-size: var(--ds-fs-small); }
