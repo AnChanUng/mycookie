@@ -58,7 +58,7 @@ const FEATURES = [
     eyebrow: 'CS · 기술면접',
     title: ['면접 질문, 먼저 말해 보고', '답을 펼쳐 보세요'],
     body: '기술면접 질문 152개와 전공노트를 주제별로 정리했어요. 직접 설명해 본 뒤 예시 답변과 꼬리질문으로 빈틈을 채워요.',
-    to: '/technical-interview',
+    to: '/cs',
     cta: 'CS · 면접 준비하기',
     visual: 'interview',
   },
