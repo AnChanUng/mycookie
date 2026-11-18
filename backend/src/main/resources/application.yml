@@ -79,6 +79,12 @@ app:
   security:
     rate-limit-enabled: true
     trust-forwarded-for: ${TRUST_FORWARDED_FOR:${RENDER:false}}
+  # 건의 · 버그 제보를 GitHub 이슈로 올린다. 토큰이 비어 있으면 DB에만 저장한다
+  # 토큰: GitHub fine-grained token, 이 저장소만 · Issues: Read and write 권한만
+  feedback:
+    github:
+      token: ${FEEDBACK_GITHUB_TOKEN:}
+      repo: ${FEEDBACK_GITHUB_REPO:AnChanUng/mycookie}
   # 소셜 · 깃허브 로그인. 클라이언트 ID가 비어 있는 제공자는 버튼을 숨긴다
   # 각 제공자 콘솔에 등록할 리디렉션 주소: <사이트 주소>/auth/callback (예: https://mycookie.dev/auth/callback)
   oauth:
