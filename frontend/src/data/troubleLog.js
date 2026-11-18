@@ -3,6 +3,19 @@
 // 수치는 직접 측정한 값만 적는다(측정 환경은 각 항목의 env에 적는다).
 export const TROUBLES = [
   {
+    id: 'grounding-calibration',
+    date: '2026-11-18',
+    area: 'RAG',
+    title: 'LLM 답변 없이 출처 검증 기준을 정하기',
+    status: 'note',
+    symptom: '답변 문장마다 근거가 있는지 표시하는 기준 점수가 필요했지만, Gemini 키가 없어 실제 답변으로 보정할 수 없었다.',
+    cause: '기준을 감으로 정하면 근거 있는 문장을 의심하거나, 지어낸 문장을 통과시킬 수 있다.',
+    fix: '정답 문서의 문장(근거 있음)과 다른 과목 문서의 문장(근거 없음) 30쌍을 같은 근거 조각과 cross-encoder로 대조해 기준을 골랐다.',
+    result: '기준 0.3에서 근거 있는 문장 오판 0/30, 근거 없는 문장 통과 0/30(0.05에서는 1/30 통과). 점수 중앙값 0.9999 대 0.0015.',
+    env: 'bge-reranker-v2-m3 · GroundingCalibrationTest',
+    lesson: '근거 있는 문장을 원문에서 그대로 가져와 실제보다 쉬운 조건이다. 바꿔 말한 LLM 답변으로 다시 보정해야 한다.',
+  },
+  {
     id: 'private-gate-vs-admin-key',
     date: '2026-11-18',
     area: '보안',

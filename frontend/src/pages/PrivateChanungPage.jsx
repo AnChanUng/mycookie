@@ -45,14 +45,14 @@ export default function PrivateChanungPage() {
   if (trouble) return <TroubleLog />;
   if (assistant) return <RagAssistant />;
   if (patches) return <PatchNotes />;
-  if (admin) return <Suspense fallback={<p role="status">관리자 화면을 불러오는 중…</p>}><AdminPage back={{ to: BASE, label: '← 비공개 문제집' }} /></Suspense>;
+  if (admin) return <Suspense fallback={<p role="status">관리자 화면을 불러오는 중…</p>}><AdminPage back={{ to: BASE, label: '← 관리자 페이지' }} /></Suspense>;
   if (loadError) return <div className="fade-in"><p role="alert">문제집을 불러오지 못했습니다. 새로고침해 주세요.</p></div>;
   if (!data) return <div className="fade-in"><p role="status">문제집을 불러오는 중…</p></div>;
 
   if (id) {
     const found = data.findPrivateBank(id);
     if (!found) return <div className="fade-in"><p role="alert">찾을 수 없는 문제집입니다. <Link to={BASE}>비공개 문제집 목록</Link></p></div>;
-    return <CompanyExam company={found.bank} back={{ to: BASE, label: '← 비공개 문제집' }} />;
+    return <CompanyExam company={found.bank} back={{ to: BASE, label: '← 관리자 페이지' }} />;
   }
   return <PrivateList data={data} onLock={() => { try { sessionStorage.removeItem(STORE); } catch { /* 저장소를 못 쓰면 새로고침으로 잠긴다 */ } setUnlocked(false); }} />;
 }
@@ -76,7 +76,7 @@ function PatchNotes() {
   return (
     <div className="fade-in">
       <div className="page-header">
-        <Link to={BASE} className="back-link">← 비공개 문제집</Link>
+        <Link to={BASE} className="back-link">← 관리자 페이지</Link>
         <h1>개발 패치노트</h1>
         <p>버전 {notes.length}개 · {Object.entries(PATCH_TYPE).filter(([k]) => counts[k]).map(([k, v]) => `${v} ${counts[k]}`).join(' · ')}</p>
       </div>
@@ -120,7 +120,7 @@ function TroubleLog() {
   return (
     <div className="fade-in">
       <div className="page-header">
-        <Link to={BASE} className="back-link">← 비공개 문제집</Link>
+        <Link to={BASE} className="back-link">← 관리자 페이지</Link>
         <h1>트러블슈팅 기록</h1>
         <p>개발하면서 실제로 겪은 기술 문제와 원인, 해결, 측정 결과입니다. 전체 {items.length}건 · 해결 {items.length - open}건 · 진행 중 {open}건</p>
       </div>
@@ -175,7 +175,7 @@ function Gate({ onUnlock }) {
     <div className="fade-in">
       <div className="page-header">
         <Link to="/" className="back-link">← 홈으로</Link>
-        <h1>비공개 문제집</h1>
+        <h1>관리자 페이지</h1>
         <p>비밀번호를 입력해야 볼 수 있습니다.</p>
       </div>
       <form onSubmit={submit} style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
@@ -193,12 +193,14 @@ function Gate({ onUnlock }) {
 }
 
 function PrivateList({ data, onLock }) {
+  const [banksOpen, setBanksOpen] = useState(false);
+  const bankCount = data.PRIVATE_GROUPS.reduce((n, g) => n + g.banks.length, 0);
   return (
     <div className="fade-in">
       <div className="page-header">
         <Link to="/" className="back-link">← 홈으로</Link>
-        <h1>비공개 문제집</h1>
-        <p>실제 응시 후기·복기 자료로 만든 문제집과 컴퓨터일반 문제집입니다. 공개 메뉴에는 나오지 않습니다.</p>
+        <h1>관리자 페이지</h1>
+        <p>개발 기록과 운영 지표, 비공개 학습 자료를 모아 둔 곳입니다. 공개 메뉴에는 나오지 않습니다.</p>
         <button type="button" className="exam-btn" onClick={onLock}>잠그기</button>
       </div>
       <section style={{ marginTop: 24 }}>
@@ -226,7 +228,14 @@ function PrivateList({ data, onLock }) {
           </Link>
         </div>
       </section>
-      {data.PRIVATE_GROUPS.map(group => (
+      <section style={{ marginTop: 32 }}>
+        <button type="button" className="exam-btn" aria-expanded={banksOpen} aria-controls="private-banks" onClick={() => setBanksOpen(o => !o)}
+          style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px', fontSize: 16 }}>
+          <span><strong>비공개 문제집</strong> <span style={{ opacity: 0.7, fontWeight: 400 }}>· 복기 문제집 · SSAFY · 컴퓨터일반 {bankCount}개</span></span>
+          <span aria-hidden="true">{banksOpen ? '접기 ▲' : '펼치기 ▼'}</span>
+        </button>
+        <div id="private-banks" hidden={!banksOpen}>
+      {banksOpen && data.PRIVATE_GROUPS.map(group => (
         <section key={group.key} style={{ marginTop: 24 }}>
           <div className="section-title">{group.name}</div>
           <p className="exam-lede">{group.desc}</p>
@@ -242,6 +251,8 @@ function PrivateList({ data, onLock }) {
           </div>
         </section>
       ))}
+        </div>
+      </section>
     </div>
   );
 }

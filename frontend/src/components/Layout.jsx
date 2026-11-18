@@ -1,4 +1,5 @@
 import { Suspense, useEffect, useState } from 'react';
+import SiteFooter from './SiteFooter';
 import { Link, Outlet, useLocation } from 'react-router-dom';
 import { warmUpBackend } from '../api';
 import { track } from '../track';
@@ -101,6 +102,7 @@ export default function Layout() {
           <Outlet />
         </Suspense>
       </main>
+      <SiteFooter />
 
       <PromotionAnnouncements />
       {!location.pathname.startsWith('/admin') && !location.pathname.startsWith('/private') && <RankWelcome />}

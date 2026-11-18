@@ -9,6 +9,8 @@ import './App.css';
 import './exam.css';
 
 const PromotionExamPage = lazy(() => import('./pages/PromotionExamPage'));
+const ChangelogPage = lazy(() => import('./pages/ChangelogPage'));
+const LegalPage = lazy(() => import('./pages/LegalPage'));
 const BugHuntPage = lazy(() => import('./pages/BugHuntPage'));
 const TechnicalInterviewPage = lazy(() => import('./pages/TechnicalInterviewPage'));
 const ExperiencePage = lazy(() => import('./pages/ExperiencePage'));
@@ -56,6 +58,12 @@ function App() {
           <Route path=":id" element={<PrivateChanungPage />} />
         </Route>
         <Route path="admin/cu" element={<Navigate to="/private/chanung/admin" replace />} />
+        {/* 리뉴얼 기간에도 패치노트 · 약관은 공개한다 */}
+        <Route element={<RenewalShell footer />}>
+          <Route path="changelog" element={<ChangelogPage />} />
+          <Route path="terms" element={<LegalPage kind="terms" />} />
+          <Route path="privacy" element={<LegalPage kind="privacy" />} />
+        </Route>
         <Route path="*" element={<RenewalNotice />} />
       </Routes>
     </BrowserRouter>
@@ -117,6 +125,9 @@ function App() {
           <Route path="search" element={<SearchPage />} />
           <Route path="weak" element={<WeakPage />} />
           <Route path="admin/cu" element={<Navigate to="/private/chanung/admin" replace />} />
+          <Route path="changelog" element={<ChangelogPage />} />
+          <Route path="terms" element={<LegalPage kind="terms" />} />
+          <Route path="privacy" element={<LegalPage kind="privacy" />} />
         </Route>
       </Routes>
     </BrowserRouter>

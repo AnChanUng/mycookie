@@ -1,14 +1,19 @@
 import { Suspense } from 'react';
-import { Outlet } from 'react-router-dom';
+import { Link, Outlet } from 'react-router-dom';
+import SiteFooter from './components/SiteFooter';
 
 // 안내 기간에도 열어 두는 화면(/private/chanung)의 바깥 틀. 다른 메뉴로 가는 링크를 두지 않는다
-export function RenewalShell() {
+// footer를 주면 공개 안내 페이지(패치노트 · 약관)처럼 사이트 푸터를 함께 보여 준다
+export function RenewalShell({ footer = false }) {
   return (
-    <main className="container" style={{ paddingTop: 24, paddingBottom: 48 }}>
-      <Suspense fallback={<div className="loading"><div className="loading-spinner" />불러오는 중...</div>}>
-        <Outlet />
-      </Suspense>
-    </main>
+    <>
+      <main className="container" style={{ paddingTop: 24, paddingBottom: 48 }}>
+        <Suspense fallback={<div className="loading"><div className="loading-spinner" />불러오는 중...</div>}>
+          <Outlet />
+        </Suspense>
+      </main>
+      {footer && <SiteFooter />}
+    </>
   );
 }
 
@@ -20,6 +25,7 @@ const NOTICE = {
   padding: '48px 16px', textAlign: 'center',
 };
 const TITLE = { fontSize: 'clamp(30px, 7vw, 60px)', fontWeight: 300, lineHeight: 1.2, margin: '0 0 30px', color: '#fff', wordBreak: 'keep-all' };
+const NAV = { color: 'rgba(255,255,255,0.7)', textDecoration: 'underline', textUnderlineOffset: 3 };
 const PARA = { fontSize: 'clamp(16px, 2.4vw, 21px)', lineHeight: 1.6, margin: '0 0 14px', color: '#fff', wordBreak: 'keep-all' };
 
 export function RenewalNotice() {
@@ -45,6 +51,11 @@ export function RenewalNotice() {
         <p style={{ ...PARA, marginTop: 28 }}>
           2026년 11월 18일<br />전산학 전공필기 준비 운영진
         </p>
+        <nav aria-label="안내" style={{ marginTop: 40, display: 'flex', gap: 20, justifyContent: 'center', flexWrap: 'wrap', fontSize: 14 }}>
+          <Link to="/changelog" style={NAV}>패치노트</Link>
+          <Link to="/terms" style={NAV}>서비스 이용약관</Link>
+          <Link to="/privacy" style={NAV}>개인정보 처리방침</Link>
+        </nav>
       </div>
     </main>
   );

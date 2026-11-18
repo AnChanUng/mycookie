@@ -38,7 +38,7 @@ export default function RagAssistant() {
   return (
     <div className="fade-in">
       <div className="page-header">
-        <Link to={BASE} className="back-link">← 비공개 문제집</Link>
+        <Link to={BASE} className="back-link">← 관리자 페이지</Link>
         <h1>RAG 학습 도우미</h1>
         <p>전공 학습 자료 109개에서 근거를 찾아 답합니다. 자료에 없는 내용은 답하지 않고, 답변 문장마다 근거가 있는지 다시 확인합니다.</p>
       </div>

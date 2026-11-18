@@ -1,0 +1,88 @@
+/* 토스 스타일 푸터: 어두운 그라데이션 위에 큰 문구 · 링크 묶음 · 흐린 대형 브랜드 글자 */
+.site-footer {
+  position: relative;
+  overflow: hidden;
+  margin-top: 64px;
+  color: rgba(255, 255, 255, 0.92);
+  background:
+    radial-gradient(60% 80% at 30% 20%, rgba(176, 150, 170, 0.55), transparent 70%),
+    radial-gradient(70% 90% at 85% 90%, rgba(36, 64, 110, 0.85), transparent 70%),
+    linear-gradient(160deg, #7f7f9c 0%, #8d7f93 35%, #4a5a80 70%, #2b3f66 100%);
+}
+.site-footer-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 72px 24px 28px;
+  box-sizing: border-box;
+}
+.site-footer-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 40px;
+  flex-wrap: wrap;
+}
+.site-footer-tagline {
+  margin: 0;
+  font-size: clamp(22px, 3vw, 30px);
+  font-weight: 700;
+  line-height: 1.45;
+  letter-spacing: -0.02em;
+  color: #fff;
+}
+.site-footer-links {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(150px, auto));
+  gap: 32px 56px;
+}
+.site-footer-links h2 {
+  margin: 0 0 16px;
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.6);
+}
+.site-footer-links ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+}
+.site-footer-links a {
+  color: rgba(255, 255, 255, 0.88);
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: none;
+}
+.site-footer-links a:hover,
+.site-footer-links a:focus-visible {
+  color: #fff;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.site-footer-legal {
+  margin: 48px 0 0;
+  max-width: 720px;
+  font-size: 13px;
+  line-height: 1.7;
+  color: rgba(255, 255, 255, 0.62);
+  word-break: keep-all;
+}
+.site-footer-brand {
+  margin: 28px 0 0;
+  font-size: clamp(64px, 16vw, 210px);
+  font-weight: 800;
+  line-height: 0.9;
+  letter-spacing: -0.04em;
+  color: rgba(255, 255, 255, 0.13);
+  user-select: none;
+  white-space: nowrap;
+}
+.site-footer-copy {
+  margin: 20px 0 0;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.6);
+}
+@media (max-width: 640px) {
+  .site-footer-inner { padding: 48px 16px 24px; }
+  .site-footer-links { grid-template-columns: 1fr 1fr; gap: 28px 24px; }
+}

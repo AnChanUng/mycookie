@@ -40,5 +40,6 @@ app:
     final-k: 5
     # 재정렬 점수가 이보다 낮으면 근거가 없다고 보고 답하지 않는다. 평가셋에서 0.03~0.057이 같은 결과(오거부 1/88, 무근거 응답 0/25)여서 여유 있게 0.05로 둔다
     min-rerank-score: 0.05
-    # 출처 검증: 답변 문장이 근거 조각과 이 점수 이상 맞아야 근거가 있다고 본다. GroundingCalibrationTest로 정한다
-    min-support-score: 0.05
+    # 출처 검증: 답변 문장이 근거 조각과 이 점수 이상 맞아야 근거가 있다고 본다.
+    # GroundingCalibrationTest(30쌍)에서 0.3일 때 근거 있는 문장 오판 0 · 근거 없는 문장 통과 0. 실제 LLM 답변으로 다시 보정할 것
+    min-support-score: 0.3
