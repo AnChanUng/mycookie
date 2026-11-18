@@ -28,7 +28,7 @@ Render 무료 백엔드(운영 · 스테이징)를 노트북 한 대로 옮깁�
 ## 1. Ubuntu Server 설치
 
 1. [Ubuntu Server 24.04 LTS](https://ubuntu.com/download/server) ISO를 받아 [Rufus](https://rufus.ie)로 USB에 굽습니다.
-2. 노트북을 껐다 켜며 부팅 메뉴 키(F12 · F9 · Esc 등 제조사마다 다름)로 USB 부팅합니다. 안 되면 BIOS에서 Secure Boot를 끕니다.
+2. 노트북을 껐다 켜며 부팅 메뉴 키로 USB 부팅합니다(LG 그램은 F10, BIOS는 F2. 다른 제조사는 F12 · F9 · Esc 등). 안 되면 BIOS에서 Secure Boot를 끕니다.
 3. 설치 화면에서
    - 네트워크: Wi-Fi를 골라 집 공유기에 연결합니다(유선 랜이 있으면 유선이 더 안정적).
    - 디스크: **Use an entire disk** (LVM 기본값 그대로).
@@ -61,6 +61,22 @@ echo 'ACTION=="add", SUBSYSTEM=="net", KERNEL=="wl*", RUN+="/usr/sbin/iw dev $na
 ```
 
 - **배터리**: 늘 충전기에 꽂아 두면 배터리가 부풉니다. BIOS나 제조사 기능(삼성 배터리 수명 연장, LG 배터리 케어, Lenovo Conservation Mode 등)에 **충전 상한 60~80%**가 있으면 켭니다. 배터리는 정전 때 UPS 역할을 하므로 빼지 않습니다.
+  LG 그램은 Ubuntu에서도 `lg-laptop` 드라이버로 80% 상한을 걸 수 있습니다.
+
+```bash
+# 80 또는 100만 받는다. 재부팅해도 유지되도록 systemd 서비스로 건다
+echo 80 | sudo tee /sys/class/power_supply/BAT*/charge_control_end_threshold
+sudo tee /etc/systemd/system/battery-limit.service >/dev/null <<'EOF'
+[Unit]
+Description=배터리 충전 상한 80%
+[Service]
+Type=oneshot
+ExecStart=/bin/sh -c 'echo 80 > /sys/class/power_supply/BAT*/charge_control_end_threshold'
+[Install]
+WantedBy=multi-user.target
+EOF
+sudo systemctl enable battery-limit.service
+```
 - **발열**: 덮개를 조금 열어 두거나 받침대에 올려 바닥 통풍구가 막히지 않게 둡니다.
 - **스왑**: RAM이 8GB라 빌드 중에 모자랄 수 있습니다. `swapon --show`로 확인하고 없거나 2GB 미만이면 늘립니다.
 
