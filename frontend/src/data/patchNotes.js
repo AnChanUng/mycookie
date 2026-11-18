@@ -3,6 +3,19 @@
 // status: 'released' 배포됨(master) | 'dev' 개발 브랜치에만 있음 | 'wip' 작업 중
 export const PATCH_NOTES = [
   {
+    version: '0.20.0',
+    date: '2026-11-18',
+    title: '새 메인 화면(벤토 그리드) · 소개 페이지 분리',
+    status: 'released',
+    summary: '첫 화면을 "오늘 무엇을 할지"가 바로 보이는 벤토 그리드 메인으로 바꾸고, 스크롤로 서비스를 소개하던 페이지는 /intro로 옮겼습니다.',
+    items: [
+      { type: 'feature', text: '메인(/): 날짜 · 인사, 등급 · 연속 학습 칩, 오늘의 CS 큰 카드, 실시간 대결 카드(도는 쿠키), 이어서 하기 · 내 학습 요약 · 다시 풀기, 코딩테스트 바로가기, CS·면접 목록, 실전 문제집, 소개 배너.' },
+      { type: 'improve', text: '소개 페이지를 /intro로 분리하고 푸터 · 메인 배너에서 연결.' },
+      { type: 'improve', text: '학습 기록 요약을 learningStats.js로 분리해 내 학습 · 메인이 같이 사용. 메인은 문제은행 데이터를 화면이 뜬 뒤 불러와 첫 화면을 가볍게 유지.' },
+      { type: 'improve', text: '데스크톱 · 375px · 다크 모드 확인, 움직임 줄이기 대응.' },
+    ],
+  },
+  {
     version: '0.19.0',
     date: '2026-11-18',
     title: 'AWS · 현대오토에버 면접 자료를 관리자 페이지로',
