@@ -3,6 +3,19 @@
 // status: 'released' 배포됨(master) | 'dev' 개발 브랜치에만 있음 | 'wip' 작업 중
 export const PATCH_NOTES = [
   {
+    version: '0.13.0',
+    date: '2026-11-18',
+    title: 'mycookie.dev 도메인 연결',
+    status: 'released',
+    summary: '사이트 주소를 mycookie.dev로 연결했습니다. 예전 vercel.app 주소도 계속 열립니다.',
+    items: [
+      { type: 'infra', text: '가비아에서 mycookie.dev 구매(1년). Vercel에 mycookie.dev(운영) · www.mycookie.dev(308 → 대표 주소) 추가, 가비아 DNS에 A · CNAME 입력, SSL 인증서 발급.' },
+      { type: 'security', text: '백엔드 CORS 허용 주소에 mycookie.dev · www 추가.' },
+      { type: 'improve', text: 'Slack 알림 링크(APP_BASE_URL)를 운영 mycookie.dev, 스테이징 dev 미리보기로 정리. README · 문서 링크 변경.' },
+      { type: 'docs', text: '인프라 일기: docs/infra-diary/2026-11-18-domain.md (단계별 캡처는 로컬 보관).' },
+    ],
+  },
+  {
     version: '0.12.0',
     date: '2026-11-18',
     title: '로그를 레벨별 파일로 저장',

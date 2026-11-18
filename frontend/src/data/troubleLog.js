@@ -3,6 +3,19 @@
 // 수치는 직접 측정한 값만 적는다(측정 환경은 각 항목의 env에 적는다).
 export const TROUBLES = [
   {
+    id: 'gabia-dev-dns',
+    date: '2026-11-18',
+    area: '인프라 · 도메인',
+    title: '가비아에서 .dev 도메인 DNS "설정" 버튼이 반응하지 않음 (mycookie.dev 연결 일기)',
+    status: 'solved',
+    symptom: 'mycookie.dev를 사서 Vercel에 연결하려고 가비아 DNS 관리 목록의 "설정" 버튼을 눌렀는데 아무 화면도 열리지 않았다.',
+    cause: '그 버튼은 포워딩 · 파킹 같은 부가서비스 설정이었다. 가비아는 .dev · .app처럼 HTTPS가 필수인 도메인에 부가서비스를 막아 두고 경고창만 띄우는데, 경고창이 보이지 않아 고장처럼 보였다. 또 Vercel은 도메인을 추가할 때 "apex → www 이동"이 기본으로 켜져 있어 그대로 두면 대표 주소가 www가 된다.',
+    fix: '도메인 체크박스를 고른 뒤 위쪽 "DNS 설정" 버튼으로 레코드 화면에 들어가 A(@ → 216.198.79.1) · CNAME(www → Vercel 주소)을 넣고 줄마다 확인 → 저장했다. Vercel에서는 apex → www 이동을 끄고, www를 308 영구 이동으로 mycookie.dev에 연결했다.',
+    result: '저장 직후 DNS가 조회되고 1~2분 뒤 SSL 인증서 발급. https://mycookie.dev 200, www는 308로 대표 주소 이동. 단계별 캡처 10장은 docs/infra-diary(로컬)에 보관.',
+    env: '가비아 DNS · Vercel Domains · Windows nslookup / curl',
+    lesson: '버튼이 반응하지 않으면 고장보다 막힌 기능일 수 있다. 페이지 스크립트에서 경고 문구를 찾아 원인을 확인했다. 클라우드의 "추천" 기본값(www 이동)도 그대로 따르지 말고 의도에 맞는지 본다.',
+  },
+  {
     id: 'logback-test-reinit',
     date: '2026-11-18',
     area: '테스트',
