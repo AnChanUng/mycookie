@@ -209,7 +209,9 @@ body {
   overflow-x: hidden;
 }
 
+/* 웹 스타일: 움직이는 배경 무늬 없이 단색 바탕 */
 body::before {
+  display: none;
   content: '';
   position: fixed;
   top: -50%;

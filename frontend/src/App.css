@@ -4360,3 +4360,10 @@ a.goal-exam:hover { border-color: var(--accent-blue); }
   .ct-site { padding: 14px; }
 }
 @media (prefers-reduced-motion: reduce) { .ct-panel { animation: none; } .ct-caret { transition: none; } }
+
+/* 웹 스타일 헤더(데스크톱): 로고 바로 옆에 메뉴, 오른쪽 끝에 모드 · 채팅 · 계정 */
+@media (min-width: 641px) {
+  .header-right { flex: 1; min-width: 0; }
+  .header-right .nav-links { margin-left: 28px; margin-right: auto; }
+  .nav-links a, .nav-links .ct-toggle { border-radius: 6px; }
+}

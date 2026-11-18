@@ -12,6 +12,8 @@
   --ds-surface-2: var(--bg-secondary);
   --ds-surface-3: var(--bg-tertiary);
   --ds-line: var(--border-color);
+  /* 웹 스타일: 그림자 대신 또렷한 얇은 테두리로 면을 나눈다 */
+  --ds-line-strong: color-mix(in srgb, var(--text-primary) 11%, transparent);
   --ds-text: var(--text-primary);
   --ds-text-2: var(--text-secondary);
   --ds-text-3: var(--text-tertiary);
@@ -44,10 +46,11 @@
 
   /* 간격 · 둥글기 · 그림자 */
   --ds-s1: 4px; --ds-s2: 8px; --ds-s3: 12px; --ds-s4: 16px; --ds-s5: 20px; --ds-s6: 24px; --ds-s8: 32px; --ds-s10: 40px;
-  --ds-r-sm: 12px; --ds-r-md: 16px; --ds-r-lg: 22px; --ds-r-xl: 28px; --ds-r-full: 999px;
-  --ds-shadow-sm: 0 1px 2px rgba(15, 23, 42, .04), 0 2px 8px rgba(15, 23, 42, .04);
-  --ds-shadow-md: 0 6px 20px rgba(15, 23, 42, .07);
-  --ds-shadow-lg: 0 18px 44px rgba(15, 23, 42, .12);
+  /* 웹사이트 느낌: 덜 둥글고, 그림자는 거의 쓰지 않는다 */
+  --ds-r-sm: 6px; --ds-r-md: 8px; --ds-r-lg: 10px; --ds-r-xl: 12px; --ds-r-full: 999px;
+  --ds-shadow-sm: none;
+  --ds-shadow-md: 0 1px 3px rgba(15, 23, 42, .06);
+  --ds-shadow-lg: 0 6px 16px rgba(15, 23, 42, .07);
 
   /* 움직임 */
   --ds-ease: cubic-bezier(.2, .7, .2, 1);
@@ -55,9 +58,9 @@
   --ds-base: .25s;
 }
 :root[data-mode='dark'] {
-  --ds-shadow-sm: 0 1px 2px rgba(0, 0, 0, .3);
-  --ds-shadow-md: 0 8px 24px rgba(0, 0, 0, .35);
-  --ds-shadow-lg: 0 20px 48px rgba(0, 0, 0, .45);
+  --ds-shadow-sm: none;
+  --ds-shadow-md: 0 1px 3px rgba(0, 0, 0, .3);
+  --ds-shadow-lg: 0 6px 16px rgba(0, 0, 0, .35);
 }
 
 /* ---------- 카드 ---------- */
@@ -70,15 +73,14 @@
   padding: var(--ds-s6);
   border-radius: var(--ds-r-xl);
   background: var(--ds-surface);
-  border: 1px solid var(--ds-line);
+  border: 1px solid var(--ds-line-strong);
   box-shadow: var(--ds-shadow-sm);
   color: var(--ds-text);
   text-decoration: none;
   overflow: hidden;
-  transition: transform var(--ds-base) var(--ds-ease), box-shadow var(--ds-base) ease, border-color var(--ds-base) ease;
+  transition: box-shadow var(--ds-fast) ease, border-color var(--ds-fast) ease, background var(--ds-fast) ease;
 }
-a.ds-card:hover, button.ds-card:hover { transform: translateY(-3px); box-shadow: var(--ds-shadow-lg); }
-a.ds-card:active, button.ds-card:active { transform: scale(.985); }
+a.ds-card:hover, button.ds-card:hover { border-color: color-mix(in srgb, var(--ds-brand) 55%, transparent); box-shadow: var(--ds-shadow-md); }
 .ds-card--flat { box-shadow: none; }
 .ds-card--brand { background: var(--ds-grad-brand); border-color: transparent; color: #fff; }
 .ds-card--night { background: var(--ds-grad-night); border-color: transparent; color: #fff; }
@@ -125,7 +127,7 @@ a.ds-card:active, button.ds-card:active { transform: scale(.985); }
   font-size: var(--ds-fs-small); font-weight: 700; color: var(--ds-text); text-decoration: none; white-space: nowrap;
   transition: transform var(--ds-fast) ease, box-shadow var(--ds-fast) ease;
 }
-a.ds-chip:hover { transform: translateY(-1px); box-shadow: var(--ds-shadow-md); }
+a.ds-chip:hover { border-color: var(--ds-brand); color: var(--ds-brand); }
 .ds-chip--soft { background: var(--ds-surface-2); border-color: transparent; }
 .ds-badge {
   display: inline-flex; align-items: center; gap: 4px; align-self: flex-start;
@@ -139,8 +141,8 @@ a.ds-chip:hover { transform: translateY(-1px); box-shadow: var(--ds-shadow-md); 
 @keyframes ds-pulse { 50% { opacity: .3; } }
 
 /* ---------- 아이콘 상자 ---------- */
-.ds-icon { display: grid; place-items: center; flex: none; width: 44px; height: 44px; border-radius: 14px; font-size: 20px; background: var(--ds-brand-soft); color: var(--ds-brand); }
-.ds-icon--sm { width: 36px; height: 36px; border-radius: 12px; font-size: 17px; }
+.ds-icon { display: grid; place-items: center; flex: none; width: 44px; height: 44px; border-radius: var(--ds-r-md); font-size: 20px; background: var(--ds-brand-soft); color: var(--ds-brand); }
+.ds-icon--sm { width: 36px; height: 36px; border-radius: var(--ds-r-md); font-size: 17px; }
 .ds-icon--cookie { background: var(--ds-cookie-soft); color: var(--ds-cookie); }
 .ds-icon--red { background: var(--ds-red-soft); color: var(--ds-red); }
 .ds-icon--green { background: var(--ds-green-soft); color: var(--ds-green); }
