@@ -3,10 +3,9 @@
 .mn { max-width: var(--page-max, 1280px); margin: 0 auto; padding: 0 0 96px; color: var(--ds-text); }
 
 /* 첫 줄 명언 */
-.mn-quote { display: flex; justify-content: center; align-items: baseline; flex-wrap: wrap; gap: 4px 10px; margin: 20px auto 24px; text-align: center; }
-.mn-quote blockquote { margin: 0; font-family: 'Nanum Myeongjo', 'Noto Serif KR', serif; font-size: 15px; font-weight: 400; letter-spacing: 0.04em; color: var(--ds-text-2); }
-.mn-quote figcaption { margin: 0; font-size: 12px; color: var(--ds-text-3); }
-.mn-quote figcaption::before { content: '— '; }
+.mn-quote { margin: 32px auto 28px; text-align: center; }
+.mn-quote blockquote { margin: 0; font-family: 'Nanum Myeongjo', 'Noto Serif KR', serif; font-size: clamp(18px, 2vw, 22px); font-weight: 400; letter-spacing: 0.04em; color: var(--ds-text-2); }
+.mn-quote figcaption { margin-top: 8px; font-size: 13px; color: var(--ds-text-3); }
 
 /* 인사 + 오늘 목표 */
 .mn-top { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; padding-bottom: 28px; border-bottom: 1px solid var(--ds-line-strong); }
