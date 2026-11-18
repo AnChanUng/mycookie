@@ -49,6 +49,9 @@ services:
       APP_BASE_URL: https://mycookie.dev
       DATABASE_URL: ${PROD_DATABASE_URL:?PROD_DATABASE_URL이 .env에 없습니다}
       ADMIN_KEY: ${PROD_ADMIN_KEY:?PROD_ADMIN_KEY가 .env에 없습니다}
+      # 오늘의 CS를 Mattermost 채널에 올린다(운영에만. 스테이징까지 넣으면 두 번 올라간다)
+      MATTERMOST_WEBHOOK_URL: ${MATTERMOST_WEBHOOK_URL:-}
+      MATTERMOST_CRON: ${MATTERMOST_CRON:-0 30 8 * * MON-FRI}
 
   backend-staging:
     <<: *backend

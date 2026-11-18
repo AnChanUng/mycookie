@@ -61,6 +61,10 @@ slack:
 app:
   # 메일 링크(비밀번호 재설정, 이메일 인증)가 가리키는 사이트 주소
   base-url: ${APP_BASE_URL:http://localhost:3000}
+  # Mattermost 채널에 오늘의 CS 질문 올리기. 웹훅 URL이 비면 꺼진다(스테이징에는 넣지 않는다)
+  mattermost:
+    webhook-url: ${MATTERMOST_WEBHOOK_URL:}
+    cron: ${MATTERMOST_CRON:0 30 8 * * MON-FRI}
   mail:
     from: ${MAIL_FROM:}
     # 메일 서버 없이 개발할 때만 true: 링크를 서버 로그에 찍는다
