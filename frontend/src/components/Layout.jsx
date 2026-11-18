@@ -1,4 +1,4 @@
-import { Suspense, useEffect, useState } from 'react';
+import { Suspense, useEffect, useRef, useState } from 'react';
 import SiteFooter from './SiteFooter';
 import { Link, Outlet, useLocation } from 'react-router-dom';
 import { warmUpBackend } from '../api';
@@ -36,10 +36,18 @@ function applyTheme(t) {
 // 주 메뉴 네 개. 하위 화면에 있어도 해당 메뉴가 켜져 보이게 경로 묶음으로 판단한다
 const startsWithAny = (p, list) => list.some(x => p === x || p.startsWith(x + '/'));
 const NAV = [
-  { to: '/algo', label: '코테', match: p => startsWithAny(p, ['/algo', '/bug-hunt']) },
+  { to: '/algo', label: '코테', menu: true, match: p => startsWithAny(p, ['/algo', '/bug-hunt']) },
   { to: '/cs', label: 'CS·면접', match: p => startsWithAny(p, ['/cs', '/technical-interview', '/notes', '/web-essentials', '/interview', '/category', '/question', '/search', '/web', '/tech-blogs']) },
   { to: '/exam', label: '실전', match: p => startsWithAny(p, ['/exam', '/duel', '/topics', '/calc', '/aptitude', '/ncs', '/major', '/major-exam', '/ssafy', '/promotion-exam']) },
   { to: '/stats', label: '내 학습', match: p => startsWithAny(p, ['/stats', '/weak', '/account', '/all']) },
+];
+
+// "코테"를 누르면 헤더 아래에 펼쳐지는 코딩테스트 사이트 바로가기(새 탭)
+const CODING_SITES = [
+  { name: '백준', desc: '단계별 · 알고리즘 분류별 문제', href: 'https://www.acmicpc.net/' },
+  { name: '프로그래머스', desc: '기업 코딩테스트 기출 · 연습 문제', href: 'https://school.programmers.co.kr/learn/challenges' },
+  { name: '코드트리', desc: '커리큘럼 따라 차근차근', href: 'https://www.codetree.ai/' },
+  { name: '리트코드', desc: '해외 기업 인터뷰 문제', href: 'https://leetcode.com/problemset/' },
 ];
 
 export default function Layout() {
@@ -47,6 +55,17 @@ export default function Layout() {
   // 화면 모드는 index.html에서 먼저 적용해 두고, 여기서는 바꿀 때만 반영하고 기억한다
   const [theme, setThemeState] = useState(() => (THEMES.some(t => t.key === document.documentElement.dataset.theme) ? document.documentElement.dataset.theme : 'light'));
   const [picking, setPicking] = useState(false);
+  const [codingOpen, setCodingOpen] = useState(false);
+  const codingRef = useRef(null);
+  // 다른 곳을 누르거나 Esc를 누르면 코테 메뉴를 닫는다
+  useEffect(() => {
+    if (!codingOpen) return undefined;
+    const onDown = (e) => { if (!codingRef.current?.contains(e.target) && !e.target.closest?.('.ct-toggle')) setCodingOpen(false); };
+    const onKey = (e) => { if (e.key === 'Escape') setCodingOpen(false); };
+    document.addEventListener('pointerdown', onDown);
+    document.addEventListener('keydown', onKey);
+    return () => { document.removeEventListener('pointerdown', onDown); document.removeEventListener('keydown', onKey); };
+  }, [codingOpen]);
   const current = THEMES.find(t => t.key === theme);
   const setTheme = (next) => {
     setThemeState(next.key);
@@ -69,7 +88,12 @@ export default function Layout() {
           </Link>
           <div className="header-right">
             <nav className="nav-links" aria-label="주 메뉴">
-              {NAV.map(n => (
+              {NAV.map(n => n.menu ? (
+                <button key={n.to} type="button" className={`ct-toggle${codingOpen || n.match(location.pathname) ? ' active' : ''}`}
+                  aria-expanded={codingOpen} aria-controls="ct-panel" onClick={() => setCodingOpen(o => !o)}>
+                  {n.label} <span aria-hidden="true" className="ct-caret">▾</span>
+                </button>
+              ) : (
                 <Link key={n.to} to={n.to} className={n.match(location.pathname) ? 'active' : ''}
                   aria-current={n.match(location.pathname) ? 'page' : undefined}>
                   {n.label}
@@ -95,6 +119,22 @@ export default function Layout() {
             <MemberMenu />
           </div>
         </div>
+        {codingOpen && (
+          <div id="ct-panel" className="ct-panel" ref={codingRef}>
+            <div className="container ct-inner">
+              <p className="ct-title">코딩테스트 연습 사이트</p>
+              <div className="ct-grid">
+                {CODING_SITES.map(site => (
+                  <a key={site.name} href={site.href} target="_blank" rel="noopener noreferrer" className="ct-site" onClick={() => setCodingOpen(false)}>
+                    <b>{site.name} <span aria-hidden="true">↗</span></b>
+                    <small>{site.desc}</small>
+                    <span className="sr-only">(새 탭에서 열림)</span>
+                  </a>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
       </header>
 
       <main className="container">
