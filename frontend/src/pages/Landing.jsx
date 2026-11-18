@@ -146,7 +146,7 @@ export default function Landing() {
       <section className="l-hero">
         <div className="l-hero-glow" aria-hidden="true" />
         <div className="l-wrap">
-          <p className="l-eyebrow" data-reveal>DevCookie</p>
+          <p className="l-eyebrow" data-reveal>나의쿠키</p>
           <h1 className="l-hero-title" data-reveal>개발자 취업 준비,<br />이제 쿠키 하나로.</h1>
           <p className="l-hero-sub" data-reveal>CS · 기술면접부터 코딩테스트, 실전 대결까지.<br />매일 조금씩 쌓아서 합격까지 이어지게.</p>
           <div className="l-cta" data-reveal>
