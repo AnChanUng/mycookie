@@ -102,14 +102,14 @@ class TierPurchaseTest {
         postJson("/api/v1/payments/tier/confirm", Map.of("paymentKey", "pk", "orderId", orderId, "amount", 100), token)
                 .andExpect(status().isBadRequest());
         // 남의 주문은 찾을 수 없다
-        postJson("/api/v1/payments/tier/confirm", Map.of("paymentKey", "pk", "orderId", orderId, "amount", 39_000), other)
+        postJson("/api/v1/payments/tier/confirm", Map.of("paymentKey", "pk", "orderId", orderId, "amount", 49_900), other)
                 .andExpect(status().isNotFound());
         verify(toss, never()).confirm(anyString(), anyString(), anyLong());
 
         // 토스가 거절하면 등급은 그대로
-        when(toss.confirm(anyString(), eq(orderId), eq(39_000L)))
+        when(toss.confirm(anyString(), eq(orderId), eq(49_900L)))
                 .thenThrow(new ResponseStatusException(HttpStatus.BAD_REQUEST, "카드 한도 초과"));
-        postJson("/api/v1/payments/tier/confirm", Map.of("paymentKey", "pk", "orderId", orderId, "amount", 39_000), token)
+        postJson("/api/v1/payments/tier/confirm", Map.of("paymentKey", "pk", "orderId", orderId, "amount", 49_900), token)
                 .andExpect(status().isBadRequest());
         mvc.perform(get("/api/v1/auth/me").header("Authorization", "Bearer " + token))
                 .andExpect(jsonPath("$.membership.tier").value("BRONZE"));

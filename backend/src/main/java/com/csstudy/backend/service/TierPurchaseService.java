@@ -24,7 +24,7 @@ public class TierPurchaseService {
 
     // 판매하는 등급과 기본 가격(원). 환경변수 PRICE_SILVER 같은 설정으로 바꿀 수 있다
     static final Map<UserTier, Long> DEFAULT_PRICES = new EnumMap<>(Map.of(
-            UserTier.SILVER, 3_900L, UserTier.GOLD, 9_900L, UserTier.DIAMOND, 19_900L, UserTier.RUBY, 39_000L));
+            UserTier.SILVER, 1_900L, UserTier.GOLD, 3_900L, UserTier.DIAMOND, 19_900L, UserTier.RUBY, 49_900L));
 
     public record Product(UserTier tier, String name, long price) {}
     public record Order(String orderId, long amount, String orderName, String customerKey) {}

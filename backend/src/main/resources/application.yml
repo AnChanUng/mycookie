@@ -84,12 +84,12 @@ app:
     toss:
       client-key: ${TOSS_CLIENT_KEY:}
       secret-key: ${TOSS_SECRET_KEY:}
-    # 등급별 가격(원). 비우면 TierPurchaseService의 기본값(은 3,900 · 금 9,900 · 다이아 19,900 · 루비 39,000)
+    # 등급별 가격(원). 비우면 TierPurchaseService의 기본값(은 1,900 · 금 3,900 · 다이아 19,900 · 루비 49,900)
     prices:
-      silver: ${PRICE_SILVER:3900}
-      gold: ${PRICE_GOLD:9900}
+      silver: ${PRICE_SILVER:1900}
+      gold: ${PRICE_GOLD:3900}
       diamond: ${PRICE_DIAMOND:19900}
-      ruby: ${PRICE_RUBY:39000}
+      ruby: ${PRICE_RUBY:49900}
   # 건의 · 버그 제보를 GitHub 이슈로 올린다. 토큰이 비어 있으면 DB에만 저장한다
   # 토큰: GitHub fine-grained token, 이 저장소만 · Issues: Read and write 권한만
   feedback:
