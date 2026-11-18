@@ -4,7 +4,7 @@
 | --- | --- | --- | --- | --- |
 | 로컬 | 작업 브랜치 | `npm run dev` (리뉴얼 안내 꺼짐) | 로컬 실행 | 로컬 PostgreSQL |
 | 스테이징 | `dev` | Vercel 미리보기 (`cs-study-platform-git-dev-anchanungs-projects.vercel.app`) | Render `cs-study-backend-staging` | Neon `staging` 브랜치 |
-| 운영 | `master` | Vercel 운영 (`cs-study-platform.vercel.app`) | Render `cs-study-backend` | Neon 운영(main) |
+| 운영 | `master` | Vercel 운영 (`mycookie.dev`, 예전 주소 `cs-study-platform.vercel.app`도 동작) | Render `cs-study-backend` | Neon 운영(main) |
 
 - 프론트엔드는 빌드한 곳으로 환경을 정합니다(`vite.config.js`의 `deployEnv`). Vercel 운영과 Render 정적 사이트는 `production`, Vercel 미리보기는 `preview`, 그 밖은 `local`입니다.
 - `preview` 빌드는 스테이징 백엔드를 호출하고, 리뉴얼 안내 없이 전체 화면을 보여 주며, 왼쪽 아래에 "스테이징 · 운영 데이터 아님" 표시가 붙습니다.

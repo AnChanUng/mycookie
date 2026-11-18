@@ -39,9 +39,9 @@ class SecurityProtectionTest {
                 .contentType("application/json").content("{}"))
                 .andExpect(status().isBadRequest());
         mvc.perform(post("/api/v1/auth/login").with(req->{req.setRemoteAddr("192.0.2.10");return req;})
-                .header("Origin","https://cs-study-platform.vercel.app").contentType("application/json").content("{}"))
+                .header("Origin","https://mycookie.dev").contentType("application/json").content("{}"))
                 .andExpect(status().isTooManyRequests()).andExpect(header().exists("Retry-After"))
-                .andExpect(header().string("Access-Control-Allow-Origin","https://cs-study-platform.vercel.app"));
+                .andExpect(header().string("Access-Control-Allow-Origin","https://mycookie.dev"));
         assertTrue(events.findAll().stream().anyMatch(e->e.getIp().equals("192.0.2.10") && e.getReason().equals("RATE_AUTH")));
     }
     @Test void crawlerAndProbeRecordsExcludeQueryAndAuthorization() throws Exception {
@@ -52,7 +52,7 @@ class SecurityProtectionTest {
         assertEquals("DECLARED_AUTOMATION",event.getReason());
         assertEquals("/api/v1/categories",event.getPath());
         mvc.perform(get("/.env")).andExpect(status().isForbidden());
-        mvc.perform(options("/api/v1/categories").header("Origin","https://cs-study-platform.vercel.app")
+        mvc.perform(options("/api/v1/categories").header("Origin","https://mycookie.dev")
                 .header("Access-Control-Request-Method","GET"))
                 .andExpect(status().isOk());
     }
