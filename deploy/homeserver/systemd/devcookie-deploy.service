@@ -1,0 +1,11 @@
+[Unit]
+Description=DevCookie 백엔드 배포 (master → 운영, dev → 스테이징)
+After=network-online.target docker.service
+Wants=network-online.target
+Requires=docker.service
+
+[Service]
+Type=oneshot
+User=devcookie
+ExecStart=/srv/devcookie/app/deploy/homeserver/deploy.sh
+TimeoutStartSec=30min

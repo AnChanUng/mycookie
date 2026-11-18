@@ -83,4 +83,4 @@ cd frontend && npm run build && npm run check:questions
 
 ## 개발 문서
 
-[대결 동시성](docs/duel-concurrency.md) · [커넥션 풀](docs/hikaricp-pool.md) · [RAG 학습 도우미](docs/rag-assistant.md) · [부하 테스트](load-tests/README.md) · [보안과 크롤링](docs/security.md) · [등급과 접근 권한](docs/membership.md) · [기술면접 준비](docs/technical-interview.md)
+[대결 동시성](docs/duel-concurrency.md) · [커넥션 풀](docs/hikaricp-pool.md) · [RAG 학습 도우미](docs/rag-assistant.md) · [부하 테스트](load-tests/README.md) · [보안과 크롤링](docs/security.md) · [등급과 접근 권한](docs/membership.md) · [기술면접 준비](docs/technical-interview.md) · [노트북 홈서버](docs/homeserver.md)
