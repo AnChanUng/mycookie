@@ -171,16 +171,17 @@ export default function Main() {
         </div>
       </Section>}
 
+      {/* 회원 순위: 첫 화면 맨 위(제목 · 이어서 풀기 바로 아래) */}
+      <Section id="mn-rank" title="회원 순위" note="푼 문제 수 기준" more={{ to: '/all', label: '전체 순위' }}>
+        <HomeRank />
+      </Section>
+
       <Section id="mn-cs" title="컴퓨터공학 · 면접" more={{ to: '/cs', label: '전체 보기' }}>
         <div className="mn-cards">{CS_STUDY.map(item => <Category key={item.to} {...item} />)}</div>
       </Section>
 
       <Section id="mn-dev" title="AI · 웹 개발">
         <div className="mn-cards">{DEV_STUDY.map(item => <Category key={item.to} {...item} />)}</div>
-      </Section>
-
-      <Section id="mn-rank" title="회원 순위" note="푼 문제 수 기준" more={{ to: '/all', label: '전체 순위' }}>
-        <HomeRank />
       </Section>
 
       {/* 학습 현황: 한 문제라도 푼 뒤에만 보여 준다(처음 온 사람에게 0만 늘어놓지 않는다) */}
