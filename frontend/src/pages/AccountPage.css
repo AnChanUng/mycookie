@@ -123,3 +123,5 @@
 .account-auth:has(> .auth-card) > form input { flex: 1; }
 .personal-badges h3 { font-size: var(--ds-fs-small); font-weight: 700; margin-bottom: var(--ds-s2); }
 .personal-badges p { font-size: var(--ds-fs-small); color: var(--ds-text-2); }
+.acc-tier-up { margin-left: auto; font-size: var(--ds-fs-small); font-weight: 600; }
+.membership-panel h2 { display: flex; align-items: center; gap: var(--ds-s2); }

@@ -185,7 +185,7 @@ function AccountDashboard({ user, openForgot }) {
       {user && message && <p role="alert">{message}</p>}
     </section>
     <section className="membership-panel">
-      <h2>내 등급 {tierStatus.membership && <TierBadge tier={tierStatus.membership.tier} division={tierStatus.membership.division} />}</h2>
+      <h2>내 등급 {tierStatus.membership && <TierBadge tier={tierStatus.membership.tier} division={tierStatus.membership.division} />}<Link to="/tiers" className="acc-tier-up">등급 올리기 →</Link></h2>
       {tierStatus.loading ? <p role="status">등급을 불러오는 중…</p> : tierStatus.error ? <p role="alert">등급을 불러오지 못했습니다. 새로고침해 주세요.</p> : <p>
         누적 {tierStatus.membership.solvedCount.toLocaleString()}문제
         {tierStatus.membership.nextTier ? ` · ${tierStatus.membership.nextTierName || TIER_NAMES[tierStatus.membership.nextTier]} 승급 기준: 누적 ${tierStatus.membership.nextThreshold.toLocaleString()}문제 이상 · 앞으로 ${tierStatus.membership.remaining.toLocaleString()}문제` : ' · 최고 등급입니다!'}
