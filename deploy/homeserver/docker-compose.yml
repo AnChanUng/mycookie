@@ -1,0 +1,58 @@
+# 노트북 홈서버: 운영 · 스테이징 백엔드와 Cloudflare Tunnel (docs/homeserver.md)
+#
+# 백엔드 포트는 호스트에 열지 않는다. 바깥 요청은 cloudflared를 거쳐서만 들어오므로
+# X-Forwarded-For의 마지막 값(Cloudflare가 붙인 실제 접속 IP)을 믿어도 된다(TRUST_FORWARDED_FOR).
+# 이미지는 deploy.sh가 브랜치별 작업 폴더에서 빌드한다(devcookie-backend:prod / :staging).
+name: devcookie
+
+x-backend: &backend
+  restart: unless-stopped
+  # RAM 8GB 노트북에서 두 서버가 함께 돌도록 컨테이너마다 메모리를 묶고, JVM 힙은 그 75%까지만 쓴다
+  mem_limit: 1g
+  environment: &backend-env
+    JAVA_TOOL_OPTIONS: "-Dfile.encoding=UTF-8 -XX:MaxRAMPercentage=75"
+    SLACK_ENABLED: "false"
+    TRUST_FORWARDED_FOR: "true"
+    SPRING_JPA_SHOW_SQL: "false"
+  healthcheck:
+    test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:8080/api/v1/categories"]
+    interval: 30s
+    timeout: 10s
+    start_period: 120s
+    retries: 3
+  logging:
+    driver: json-file
+    options:
+      max-size: "20m"
+      max-file: "5"
+
+services:
+  backend-prod:
+    <<: *backend
+    image: devcookie-backend:prod
+    environment:
+      <<: *backend-env
+      APP_BASE_URL: https://cs-study-platform.vercel.app
+      DATABASE_URL: ${PROD_DATABASE_URL:?PROD_DATABASE_URL이 .env에 없습니다}
+      ADMIN_KEY: ${PROD_ADMIN_KEY:?PROD_ADMIN_KEY가 .env에 없습니다}
+
+  backend-staging:
+    <<: *backend
+    image: devcookie-backend:staging
+    mem_limit: 768m
+    environment:
+      <<: *backend-env
+      APP_BASE_URL: https://cs-study-platform.vercel.app
+      DATABASE_URL: ${STAGING_DATABASE_URL:?STAGING_DATABASE_URL이 .env에 없습니다}
+      ADMIN_KEY: ${STAGING_ADMIN_KEY:?STAGING_ADMIN_KEY가 .env에 없습니다}
+
+  # 터널의 공개 호스트 이름(api.<도메인> → http://backend-prod:8080 등)은 Cloudflare 대시보드에서 정한다
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    restart: unless-stopped
+    command: tunnel --no-autoupdate run
+    environment:
+      TUNNEL_TOKEN: ${TUNNEL_TOKEN:?TUNNEL_TOKEN이 .env에 없습니다}
+    depends_on:
+      - backend-prod
+      - backend-staging

@@ -1,0 +1,9 @@
+[Unit]
+Description=5분마다 DevCookie 배포 확인
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=5min
+
+[Install]
+WantedBy=timers.target
