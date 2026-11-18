@@ -1,0 +1,31 @@
+/* CS · 면접 허브: 학습 메뉴 카드 */
+.cs-tracks { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 28px; }
+.cs-track {
+  display: grid; grid-template-columns: 48px minmax(0, 1fr) auto; gap: 16px; align-items: start;
+  padding: 22px; border-radius: 22px; text-decoration: none; color: inherit;
+  background: var(--bg-primary); border: 1px solid var(--border-color);
+  transition: transform .15s ease, background .2s ease, box-shadow .2s ease;
+}
+.cs-track:hover { background: var(--bg-secondary); box-shadow: 0 12px 30px rgba(15, 23, 42, .06); }
+.cs-track:active { transform: scale(.99); }
+.cs-track-icon { display: grid; place-items: center; width: 48px; height: 48px; border-radius: 14px; background: rgba(49, 130, 246, .1); font-size: 22px; }
+.cs-track-text { display: grid; gap: 6px; min-width: 0; }
+.cs-track-text b { font-size: 18px; letter-spacing: -0.02em; }
+.cs-track-text > span:not(.ml-bar) { font-size: 14px; line-height: 1.55; color: var(--text-secondary); word-break: keep-all; }
+.cs-track-meta { font-weight: 700; color: var(--text-primary) !important; }
+.cs-track-meta em { font-style: normal; font-weight: 400; color: var(--text-tertiary); }
+.cs-track .ml-bar { margin-top: 4px; }
+.cs-track .ml-go { align-self: center; }
+.cs-more h2 { margin-bottom: 10px; }
+.cs-links { display: flex; flex-wrap: wrap; gap: 8px 20px; }
+.cs-links a { font-size: 15px; font-weight: 700; color: #3182f6; text-decoration: none; }
+.cs-links a:hover { text-decoration: underline; }
+
+@media (max-width: 760px) {
+  .cs-tracks { grid-template-columns: 1fr; }
+}
+@media (max-width: 480px) {
+  .cs-track { grid-template-columns: 40px minmax(0, 1fr); padding: 18px; }
+  .cs-track-icon { width: 40px; height: 40px; font-size: 18px; }
+  .cs-track .ml-go { display: none; }
+}

@@ -24,6 +24,7 @@ const QuestionPage = lazy(() => import('./pages/QuestionPage'));
 const AccountPage = lazy(() => import('./pages/AccountPage'));
 const AccountRetryPage = lazy(() => import('./pages/AccountRetryPage'));
 const StatsPage = lazy(() => import('./pages/StatsPage'));
+const CsHubPage = lazy(() => import('./pages/CsHubPage'));
 const InterviewPracticePage = lazy(() => import('./pages/InterviewPracticePage'));
 const CsNotesPage = lazy(() => import('./pages/CsNotesPage'));
 const WebEssentialsPage = lazy(() => import('./pages/WebEssentialsPage'));
@@ -80,6 +81,7 @@ function App() {
           <Route path="account" element={<AccountPage />} />
           <Route path="account/retry" element={<AccountRetryPage />} />
           <Route path="stats" element={<StatsPage />} />
+          <Route path="cs" element={<CsHubPage />} />
           <Route path="interview" element={<InterviewPracticePage />} />
           <Route path="technical-interview" element={<TechnicalInterviewPage />} />
           <Route path="p/7b92e1c4-a6d8-4f03-9c51-26de8a740bf9/technical" element={<TechnicalInterviewPage />} />
