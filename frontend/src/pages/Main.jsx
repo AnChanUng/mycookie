@@ -123,11 +123,16 @@ export default function Main() {
           <p className="mn-sub">AI, 컴퓨터공학, 웹 개발 모든 공부를 한곳에서</p>
           <div className="mn-chips">
             {membership && <Link to="/account" className="ds-chip"><TierBadge tier={membership.tier} division={membership.division} />{TIER_NAMES[membership.tier]}</Link>}
-            <Link to="/stats" className="ds-chip">{learning ? `${learning.streak}일 연속 학습` : '연속 학습'}</Link>
+            {learning?.streak > 0 && <Link to="/stats" className="ds-chip">{learning.streak}일 연속 학습</Link>}
             {membership?.nextTier && <span className="ds-chip ds-chip--soft">승급까지 {membership.remaining.toLocaleString()}문제</span>}
           </div>
+          {/* 풀다 만 문제집이 있으면 시작 버튼이 곧 이어서 풀기가 된다(따로 한 줄을 차지하지 않게) */}
           <div className="mn-cta">
-            <Link to="/cs" className="ds-btn ds-btn--primary">공부 시작하기</Link>
+            {resume
+              ? <Link to={resume.to} className="ds-btn ds-btn--primary mn-cta-resume" title={`${resume.name} · ${resume.detail}`}>
+                <span>이어서 풀기</span><b>{resume.name}</b>
+              </Link>
+              : <Link to="/cs" className="ds-btn ds-btn--primary">공부 시작하기</Link>}
           </div>
         </div>
         {/* 실시간 순위: 첫 화면 맨 위 오른쪽(휴대폰에서는 인사 아래) */}
@@ -141,14 +146,6 @@ export default function Main() {
           <LineIcon name="chevron" size={18} className="mn-chev" />
         </Link>}
       </section>
-
-      {/* 풀다 만 문제집이 있을 때만 한 줄로 이어서 풀기를 보여 준다 */}
-      {resume && <Link to={resume.to} className="mn-resume">
-        <span className="mn-resume-tag">이어서 풀기</span>
-        <b className="mn-resume-name">{resume.name}</b>
-        <small>{resume.detail}</small>
-        <LineIcon name="chevron" size={16} className="mn-chev" />
-      </Link>}
 
       {/* 오늘의 학습: 쓰임새를 다시 정할 때까지 숨겨 둔다(SHOW_TODAY_STUDY) */}
       {SHOW_TODAY_STUDY && <Section id="mn-today" title="오늘의 학습">

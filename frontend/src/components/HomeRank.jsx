@@ -41,15 +41,16 @@ export default function HomeRank() {
   const myName = account()?.nickname;
   const mark = r => ({ ...r, me: r.me || (!!myName && r.nickname === myName) });
   const top = (rank?.top.slice(0, LIST) || []).map(mark);
-  const meInTop = top.some(r => r.me);
   const podium = PODIUM_ORDER.map(i => top[i]).filter(Boolean);
-  const rest = top.slice(3);
-  const me = !meInTop && rank?.me && rank.me.rank > LIST ? rank.me : null;
+  // 4~5위 줄은 빼고, 시상대 밖이면 내 순위 한 줄만 보여 준다(4~5위는 전체 보기에서)
+  const me = top.find(r => r.me) || (rank?.me ? { ...rank.me, me: true } : null);
+  const third = top[2];
+  const toPodium = me && me.rank > 3 && third ? Math.max(1, third.count - me.count + 1) : null;
 
   return <section className="hr" aria-labelledby="hr-title">
     <header className="hr-head">
       <h2 id="hr-title"><i className="hr-live" aria-hidden="true" />실시간 순위</h2>
-      {rank && <span className="hr-total">{(rank.totalSolvers || 0).toLocaleString()}명 참여</span>}
+      {rank && <span className="hr-total">{(rank.totalSolvers || 0).toLocaleString()}명 참여 · 함께 {(rank.totalSolved || 0).toLocaleString()}문제</span>}
       <Link to="/rank" className="hr-more">전체 보기</Link>
     </header>
 
@@ -62,20 +63,13 @@ export default function HomeRank() {
           <span className="hr-pcount">{Number(r.count).toLocaleString()}문제</span>
         </li>)}
       </ol>
-      {(rest.length > 0 || me) && <ol className="hr-list" start={4}>
-        {rest.map(r => <Row key={r.rank} r={r} />)}
-        {me && <Row r={{ ...me, me: true }} pinned />}
-      </ol>}
-      {!rank.me && !meInTop && <p className="hr-hint">문제를 풀면 내 순위가 여기 생겨요</p>}
+      {me && me.rank > 3 && <Link to="/rank" className="hr-mine">
+        <span className="hr-mine-rank">{me.rank}위</span>
+        <TierBadge tier={me.tier} division={me.division} />
+        <span className="hr-name">{me.nickname}<em>나</em></span>
+        <span className="hr-mine-gap">{Number(me.count).toLocaleString()}문제{toPodium && ` · 3위까지 ${toPodium.toLocaleString()}문제`}</span>
+      </Link>}
+      {!me && <p className="hr-hint">문제를 풀면 내 순위가 여기 생겨요</p>}
     </>}
   </section>;
-}
-
-function Row({ r, pinned }) {
-  return <li className={`hr-row${r.me ? ' me' : ''}${pinned ? ' pinned' : ''}`} value={r.rank}>
-    <span className="hr-rank">{r.rank}</span>
-    <TierBadge tier={r.tier} division={r.division} />
-    <span className="hr-name">{r.nickname}{r.me && <em>나</em>}</span>
-    <b className="hr-count">{Number(r.count).toLocaleString()}</b>
-  </li>;
 }
