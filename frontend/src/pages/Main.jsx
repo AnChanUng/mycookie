@@ -126,15 +126,23 @@ export default function Main() {
             {membership?.nextTier && <span className="ds-chip ds-chip--soft">승급까지 {membership.remaining.toLocaleString()}문제</span>}
           </div>
         </div>
-        <Link to="/cs" className="mn-goal">
+        {SHOW_TODAY_STUDY && <Link to="/cs" className="mn-goal">
           <Ring value={todayDone} max={TODAY_GOAL} />
           <span>
             <small>오늘의 목표</small>
             <b>{goalDone ? '오늘 목표를 달성했어요' : `오늘의 CS ${TODAY_GOAL - todayDone}문제 남았어요`}</b>
           </span>
           <LineIcon name="chevron" size={18} className="mn-chev" />
-        </Link>
+        </Link>}
       </section>
+
+      {/* 풀다 만 문제집이 있을 때만 한 줄로 이어서 풀기를 보여 준다 */}
+      {resume && <Link to={resume.to} className="mn-resume">
+        <span className="mn-resume-tag">이어서 풀기</span>
+        <b className="mn-resume-name">{resume.name}</b>
+        <small>{resume.detail}</small>
+        <LineIcon name="chevron" size={16} className="mn-chev" />
+      </Link>}
 
       {/* 오늘의 학습: 쓰임새를 다시 정할 때까지 숨겨 둔다(SHOW_TODAY_STUDY) */}
       {SHOW_TODAY_STUDY && <Section id="mn-today" title="오늘의 학습">

@@ -37,7 +37,6 @@ import { IBK_BIGDATA } from './ibkBigdata';
 import { IBKIT_SECTIONS, IBKIT_QUESTIONS, IBKIT_SETS } from './ibkItQuestions';
 import { HF_CPP_QUESTIONS } from './hfCppQuestions';
 import { NCS } from './ncsQuestions';
-import { DAOU_SECTIONS, DAOU_QUESTIONS, DAOU_SETS } from './daouQuestions';
 import { AI_SECTIONS, AI_QUESTIONS } from './aiQuestions';
 export { HF_CPP_QUESTIONS, CPP_GROUPS } from './hfCppQuestions';
 export { NCS };
@@ -364,23 +363,6 @@ export const COMPANIES = [
     sections: { obj: { name: "객관식", short: "DB", sub: "Servlet · JSP · SQL", count: 30 } },
     minutes: 40,
     lede: "Servlet 생명주기·매핑·Filter, JSP·세션, SQL·트랜잭션·서브쿼리, 정규화·인덱스와 forward/redirect·WHERE/HAVING 비교를 다룹니다. SQL은 MySQL 8.4 / InnoDB 기준입니다. 4지선다 30문제와 정답·해설을 제공합니다.",
-  },
-  {
-    key: "daou", category: "aptitude", abbr: "DAOU", name: "다우기술", meta: "언어 · 수리 · 추리 · 문제해결력 60문제 × 3회 · 60분 · 5지선다", ready: true,
-    source: { kind: "predicted", label: "응시 후기 구성 기반 예상문제", detail: "응시 후기로 전해진 시험 구성(60분 60문항, 영역 4개, 영역별 문제 유형)을 따라 새로 만든 예상문제입니다. 실제 기출의 복원이 아닙니다." },
-    questions: DAOU_QUESTIONS, sections: DAOU_SECTIONS, minutes: 60,
-    sets: DAOU_SETS,
-    // 인적성 화면 아래에 붙는 코딩 문제. 문제는 cosproQuestions.js에 있고 /aptitude/daou/cospro에서 푼다
-    coding: {
-      to: "/aptitude/daou/cospro", store: "cospro", count: 16, name: "COS Pro 1급 · Java 코딩",
-      desc: "COS Pro 1급 모의고사 10문제를 자바로 옮기고 같은 유형의 예제 3문제와 비트마스킹 3문제를 더했습니다. 코드를 직접 고치거나 작성해 제출하면 서버에서 컴파일하고 테스트 케이스로 채점합니다.",
-      parts: [
-        { name: "① 빈칸 채우기", sub: "스택으로 큐 · 지그재그 · UP & DOWN · 상속 급여 · 쿠폰 · 부분집합" },
-        { name: "② 한 줄 바꾸기", sub: "종이접기 · 보드게임 DP · 카드 섞기 · 연속 최대 합 · 권한 비트" },
-        { name: "③ 함수 작성", sub: "꽃 피우기 BFS · 숫자 뽑기 · 메모장 · 동시 접속자 · 비트 DP" },
-      ],
-    },
-    lede: "언어 15문제, 수리 15문제, 추리 15문제, 문제해결력 15문제. 총 60문제, 60분이라 한 문제에 1분꼴입니다. 같은 구성의 예상문제를 3회분(180문항) 담았습니다. 언어는 유의어·반의어·어휘 관계 같은 어휘 문제와 맞춤법, 짧은 독해가 나오고, 수리는 1분 안에 풀 수 있는 속력·농도·일률·원가·경우의 수·수열·자료 계산입니다. 추리는 명제·참거짓·배치·순서·문자와 기호 규칙, 문제해결력은 일정·요금 비교·규정 적용·선발 기준·장애 원인 파악·업무 배정을 다룹니다. 응시 후기로 전해진 구성만 따라 새로 만든 문제이며 실제 문항의 복원이 아닙니다.",
   },
   {
     key: "ai", category: "ai", abbr: "AI", name: "AI · 머신러닝", meta: "딥러닝 기초 · 머신러닝 · 빅데이터 AI 실무 · 4~5지선다", ready: true,

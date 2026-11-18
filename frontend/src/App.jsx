@@ -9,6 +9,8 @@ import { RenewalNotice, RenewalShell } from './Renewal';
 import { MAINTENANCE } from './maintenance';
 import './App.css';
 import './exam.css';
+// 안쪽 화면을 첫 화면과 같은 스타일로 덮어쓴다. 반드시 다른 CSS보다 뒤에 둔다
+import './styles/inner.css';
 
 const PromotionExamPage = lazy(() => import('./pages/PromotionExamPage'));
 const ChangelogPage = lazy(() => import('./pages/ChangelogPage'));
@@ -45,7 +47,6 @@ const NcsPage = lazy(() => import('./pages/NcsPage'));
 const WeakPage = lazy(() => import('./pages/WeakPage'));
 const SsafyPage = lazy(() => import('./pages/SsafyPage'));
 const AptitudePage = lazy(() => import('./pages/AptitudePage'));
-const CosProPage = lazy(() => import('./pages/CosProPage'));
 const AuthCallbackPage = lazy(() => import('./pages/AuthCallbackPage'));
 const VerifyEmailPage = lazy(() => import('./pages/AuthEmailPage').then(m => ({ default: m.VerifyEmailPage })));
 const ResetPasswordPage = lazy(() => import('./pages/AuthEmailPage').then(m => ({ default: m.ResetPasswordPage })));
@@ -128,8 +129,6 @@ function App() {
           <Route path="ssafy/:company" element={<ExamCompanyPage />} />
           <Route path="aptitude" element={<AptitudePage />} />
           <Route path="aptitude/:company" element={<ExamCompanyPage />} />
-          <Route path="aptitude/daou/cospro" element={<CosProPage />} />
-          <Route path="aptitude/daou/cospro/:pid" element={<CosProPage />} />
           <Route path="computer-general" element={<Navigate to="/private/chanung" replace />} />
           <Route path="private/chanung" element={<PrivateChanungPage />} />
           <Route path="private/chanung/:id" element={<PrivateChanungPage />} />

@@ -18,7 +18,7 @@ try {
   assert.equal(WEB_ESSENTIALS.items.length, 57);
   const { default: Aptitude } = await server.ssrLoadModule('/src/pages/AptitudePage.jsx');
   const aptitude = render(Aptitude);
-  for (const title of ['NCS/인적성', '다우기술', 'SKCT', '삼성 GSAT']) assert.ok(aptitude.includes(title), title);
+  for (const title of ['NCS/인적성', 'SKCT', '삼성 GSAT']) assert.ok(aptitude.includes(title), title);
   assert.ok(aptitude.includes('href="/ncs"'));
   const { COMPANIES, companyPath } = await server.ssrLoadModule('/src/data/examQuestions.js');
   const spring = COMPANIES.find(c => c.key === 'spring');

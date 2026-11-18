@@ -104,3 +104,25 @@ a:hover > .mn-chev { color: var(--ds-brand); transform: translateX(3px); }
 @media (prefers-reduced-motion: reduce) {
   .mn-tag--live::before { animation: none; }
 }
+
+/* 이어서 풀기: 큰 카드 대신 한 줄짜리 띠 */
+.mn-resume {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-s3);
+  margin-top: var(--ds-s4);
+  padding: var(--ds-s3) var(--ds-s4);
+  border: 1px solid var(--ds-line-strong);
+  border-radius: var(--ds-r-lg);
+  background: var(--ds-surface);
+  color: var(--ds-text);
+  text-decoration: none;
+  font-size: var(--ds-fs-small);
+  transition: border-color var(--ds-fast) var(--ds-ease);
+}
+.mn-resume:hover { border-color: var(--ds-brand); }
+.mn-resume-tag { flex: none; color: var(--ds-brand); font-weight: 700; }
+.mn-resume-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; }
+.mn-resume small { flex: none; color: var(--ds-text-3); }
+.mn-resume .mn-chev { margin-left: auto; flex: none; color: var(--ds-text-3); }
+@media (max-width: 520px) { .mn-resume small { display: none; } }

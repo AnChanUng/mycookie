@@ -32,9 +32,9 @@ try {
  const {default:Aptitude}=await server.ssrLoadModule('/src/pages/AptitudePage.jsx');
  await act(()=>{view=TestRenderer.create(React.createElement(MemoryRouter,null,React.createElement(Aptitude)));});
  const cards=view.root.findAllByType('a').filter(a=>(a.props.className||'').includes('ssafy-card'));
- assert.equal(cards[0].props.href,'https://cbt.linkareer.com/exam/detail/1231?tab=COMMUNITY');
- assert.equal(cards[0].props.target,'_blank');
- assert.ok(text(cards[1]).includes('다우'));
+ const skct=cards.find(c=>c.props.href==='https://cbt.linkareer.com/exam/detail/1231?tab=COMMUNITY');assert.ok(skct,'SKCT card');
+ assert.equal(skct.props.target,'_blank');
+ assert.ok(!view.root.findAllByType('a').some(a=>text(a).includes('다우')));
  assert.equal(errors.length,0,errors.join('\n'));
- console.log('PASS: Rank expand/collapse, full total, current-user row; SKCT link before Daou.');
+ console.log('PASS: Rank expand/collapse, full total, current-user row; SKCT external link, no Daou.');
 } finally {if(view)await act(()=>view.unmount());await server.close();console.error=oldError;}
