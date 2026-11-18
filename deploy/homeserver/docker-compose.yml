@@ -32,7 +32,7 @@ services:
     image: devcookie-backend:prod
     environment:
       <<: *backend-env
-      APP_BASE_URL: https://cs-study-platform.vercel.app
+      APP_BASE_URL: https://mycookie.dev
       DATABASE_URL: ${PROD_DATABASE_URL:?PROD_DATABASE_URL이 .env에 없습니다}
       ADMIN_KEY: ${PROD_ADMIN_KEY:?PROD_ADMIN_KEY가 .env에 없습니다}
 
@@ -42,7 +42,7 @@ services:
     mem_limit: 768m
     environment:
       <<: *backend-env
-      APP_BASE_URL: https://cs-study-platform.vercel.app
+      APP_BASE_URL: https://cs-study-platform-git-dev-anchanungs-projects.vercel.app
       DATABASE_URL: ${STAGING_DATABASE_URL:?STAGING_DATABASE_URL이 .env에 없습니다}
       ADMIN_KEY: ${STAGING_ADMIN_KEY:?STAGING_ADMIN_KEY가 .env에 없습니다}
 

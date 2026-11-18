@@ -17,6 +17,8 @@ public class CorsConfig {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowedOriginPatterns(List.of(
                 "http://localhost:*",
+                "https://mycookie.dev",
+                "https://www.mycookie.dev",
                 "https://cs-study-platform.vercel.app",
                 "https://cs-study-frontend.onrender.com",
                 "https://cs-study-frontend-dg8c.onrender.com",

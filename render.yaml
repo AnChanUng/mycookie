@@ -8,7 +8,7 @@ services:
       - key: SLACK_ENABLED
         value: "false"
       - key: APP_BASE_URL
-        value: https://cs-study-frontend-dg8c.onrender.com
+        value: https://mycookie.dev
       # Neon Postgres connection string (free tier, no expiry). Set in the Render
       # dashboard; Render's own free Postgres is deleted after 90 days.
       - key: DATABASE_URL
@@ -29,7 +29,7 @@ services:
       - key: SLACK_ENABLED
         value: "false"
       - key: APP_BASE_URL
-        value: https://cs-study-platform.vercel.app
+        value: https://cs-study-platform-git-dev-anchanungs-projects.vercel.app
       # Neon 스테이징 브랜치 연결 문자열. 운영 DATABASE_URL을 넣지 않는다
       - key: DATABASE_URL
         sync: false
