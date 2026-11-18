@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { account } from '../sync';
 import './Landing.css';
 
@@ -140,6 +140,13 @@ function Visual({ kind }) {
 
 export default function Landing() {
   const ref = useReveal();
+  // 메뉴의 "만든 이야기"(/intro#story)로 오면 그 이야기로 바로 내려간다
+  const { hash, key } = useLocation();
+  useEffect(() => {
+    if (hash !== "#story") return;
+    const id = requestAnimationFrame(() => document.getElementById("story")?.scrollIntoView({ block: "start" }));
+    return () => cancelAnimationFrame(id);
+  }, [hash, key]);
   const signedIn = !!account()?.token;
   return (
     <div className="landing" ref={ref}>
@@ -160,7 +167,7 @@ export default function Landing() {
       </section>
 
       {/* 만든 이야기: 어디까지 공부해야 할지 고민하던 취업 준비생이 이 사이트를 만든 이유 */}
-      <section className="l-story" aria-labelledby="l-story-title">
+      <section id="story" className="l-story" aria-labelledby="l-story-title">
         <div className="l-wrap l-story-wrap">
           <p className="l-eyebrow" data-reveal>나의쿠키를 만든 이유</p>
           <h2 id="l-story-title" data-reveal>어디까지 공부해야 할까,<br />매일 고민했어요</h2>

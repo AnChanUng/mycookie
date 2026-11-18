@@ -300,3 +300,4 @@
   .l-story-body p { font-size: 16px; }
   .l-story-points { grid-template-columns: 1fr; }
 }
+.l-story { scroll-margin-top: 72px; }
