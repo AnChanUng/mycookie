@@ -3,7 +3,7 @@
 .mn { max-width: var(--page-max, 1280px); margin: 0 auto; padding: 0 0 96px; color: var(--ds-text); }
 
 /* 첫 줄 명언 */
-.mn-quote { margin: 56px auto 48px; text-align: center; }
+.mn-quote { margin: 32px auto 28px; text-align: center; }
 .mn-quote blockquote { margin: 0; font-family: 'Nanum Myeongjo', 'Noto Serif KR', serif; font-size: clamp(18px, 2vw, 22px); font-weight: 400; letter-spacing: 0.04em; color: var(--ds-text-2); }
 .mn-quote figcaption { margin-top: 8px; font-size: 13px; color: var(--ds-text-3); }
 

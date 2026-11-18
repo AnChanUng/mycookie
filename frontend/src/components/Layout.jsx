@@ -43,7 +43,7 @@ const NAV = [
   { to: '/interview', label: '면접', match: p => startsWithAny(p, ['/interview', '/technical-interview']) },
   { to: '/exam', label: '전공필기', match: p => startsWithAny(p, ['/exam', '/duel', '/topics', '/calc', '/aptitude', '/ncs', '/major', '/major-exam', '/ssafy', '/promotion-exam']) },
   { to: '/algo', label: '코테', menu: true, match: p => startsWithAny(p, ['/algo', '/bug-hunt']) },
-  { to: '/stats', label: '내 학습', match: p => startsWithAny(p, ['/stats', '/weak', '/account', '/all']) },
+  { to: '/stats', label: '내 학습', match: p => startsWithAny(p, ['/stats', '/weak', '/account', '/all', '/rank']) },
 ];
 
 // "코테"를 누르면 헤더 아래에 펼쳐지는 코딩테스트 사이트 바로가기(새 탭)

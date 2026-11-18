@@ -35,6 +35,7 @@ const AiPage = lazy(() => import('./pages/AiPage'));
 const FeedbackPage = lazy(() => import('./pages/FeedbackPage'));
 const TierShopPage = lazy(() => import('./pages/TierShopPage'));
 const PaymentResultPage = lazy(() => import('./pages/PaymentResultPage'));
+const RankPage = lazy(() => import('./pages/RankPage'));
 const TechBlogsPage = lazy(() => import('./pages/TechBlogsPage'));
 const MajorPage = lazy(() => import('./pages/MajorPage'));
 const MajorExamPage = lazy(() => import('./pages/MajorExamPage'));
@@ -122,6 +123,7 @@ function App() {
           <Route path="web/:company" element={<ExamCompanyPage />} />
           <Route path="feedback" element={<FeedbackPage />} />
           <Route path="tiers" element={<TierShopPage />} />
+          <Route path="rank" element={<RankPage />} />
           <Route path="payments/success" element={<PaymentResultPage ok />} />
           <Route path="payments/fail" element={<PaymentResultPage ok={false} />} />
           <Route path="ai" element={<AiPage />} />

@@ -1,0 +1,22 @@
+/* 전체 순위: 첫 화면 순위 카드와 같은 줄 모양을 넓게 */
+.rk { max-width: 760px; margin: 0 auto; padding-bottom: var(--ds-s10); }
+.rk-summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--ds-s2); margin-bottom: var(--ds-s4); }
+.rk-summary div { display: grid; gap: 2px; padding: var(--ds-s3) var(--ds-s4); border: 1px solid var(--ds-line-strong); border-radius: var(--ds-r-lg); background: var(--ds-surface); }
+.rk-summary span { font-size: var(--ds-fs-caption); color: var(--ds-text-3); }
+.rk-summary b { font-size: var(--ds-fs-title); font-variant-numeric: tabular-nums; }
+.rk-search { width: 100%; height: 42px; margin-bottom: var(--ds-s3); padding: 0 var(--ds-s3); border: 1px solid var(--ds-line-strong); border-radius: var(--ds-r-md); background: var(--ds-surface); color: var(--ds-text); font-size: var(--ds-fs-small); }
+.rk-search:focus { outline: none; border-color: var(--ds-brand); box-shadow: 0 0 0 3px var(--ds-brand-soft); }
+.rk-list { border-top: 0; padding: 0; }
+.rk-row { grid-template-columns: 28px 26px minmax(0, 1fr) auto auto; padding: 10px var(--ds-s5); border-bottom: 1px solid var(--ds-line); }
+.rk-row:last-child { border-bottom: 0; }
+.rk-row .tier-badge { width: 26px; height: 26px; }
+.rk-row .hr-rank { font-size: var(--ds-fs-small); }
+.rk-row.t1 .hr-rank { color: #d9a227; }
+.rk-row.t2 .hr-rank { color: #8b98a8; }
+.rk-row.t3 .hr-rank { color: #b8733f; }
+.rk-tier { font-size: var(--ds-fs-caption); color: var(--ds-text-3); white-space: nowrap; }
+.rk-row .hr-count small { margin-left: 2px; font-size: var(--ds-fs-caption); font-weight: 500; color: var(--ds-text-3); }
+.rk-more { display: block; width: 100%; height: 42px; margin-top: var(--ds-s3); border: 1px solid var(--ds-line-strong); border-radius: var(--ds-r-md); background: var(--ds-surface); color: var(--ds-text-2); font-size: var(--ds-fs-small); cursor: pointer; }
+.rk-more:hover { border-color: var(--ds-brand); color: var(--ds-brand); }
+@media (max-width: 520px) { .rk-row { grid-template-columns: 24px 24px minmax(0, 1fr) auto; padding: 10px var(--ds-s4); } .rk-tier { display: none; } }
+.rk-loading { margin: 0; padding: 8px var(--ds-s5); border-bottom: 1px solid var(--ds-line); font-size: var(--ds-fs-caption); color: var(--ds-text-3); }

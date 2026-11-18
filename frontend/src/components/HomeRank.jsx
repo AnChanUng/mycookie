@@ -37,16 +37,20 @@ export default function HomeRank() {
     return () => controller.abort();
   }, []);
 
-  const top = rank?.top.slice(0, LIST) || [];
+  // 로그인한 계정은 순위에 계정 닉네임으로 나오므로, 서버가 '나'를 못 짚어도 닉네임으로 찾아 표시한다
+  const myName = account()?.nickname;
+  const mark = r => ({ ...r, me: r.me || (!!myName && r.nickname === myName) });
+  const top = (rank?.top.slice(0, LIST) || []).map(mark);
+  const meInTop = top.some(r => r.me);
   const podium = PODIUM_ORDER.map(i => top[i]).filter(Boolean);
   const rest = top.slice(3);
-  const me = rank?.me && rank.me.rank > LIST ? rank.me : null;
+  const me = !meInTop && rank?.me && rank.me.rank > LIST ? rank.me : null;
 
   return <section className="hr" aria-labelledby="hr-title">
     <header className="hr-head">
       <h2 id="hr-title"><i className="hr-live" aria-hidden="true" />실시간 순위</h2>
       {rank && <span className="hr-total">{(rank.totalSolvers || 0).toLocaleString()}명 참여</span>}
-      <Link to="/all" className="hr-more">전체 보기</Link>
+      <Link to="/rank" className="hr-more">전체 보기</Link>
     </header>
 
     {!rank ? <p className="hr-empty" role="status">{failed ? '순위를 불러오지 못했어요.' : '순위를 불러오는 중…'}</p> : <>
@@ -62,7 +66,7 @@ export default function HomeRank() {
         {rest.map(r => <Row key={r.rank} r={r} />)}
         {me && <Row r={{ ...me, me: true }} pinned />}
       </ol>}
-      {!rank.me && <p className="hr-hint">문제를 풀면 내 순위가 여기 생겨요</p>}
+      {!rank.me && !meInTop && <p className="hr-hint">문제를 풀면 내 순위가 여기 생겨요</p>}
     </>}
   </section>;
 }
