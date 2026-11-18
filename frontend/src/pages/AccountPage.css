@@ -27,6 +27,7 @@
 .social-btn { padding: 10px 16px; border-radius: 6px; border: 1px solid transparent; font-weight: 700; font-size: .85rem; cursor: pointer; }
 .social-btn:disabled { opacity: .6; cursor: default; }
 .social-btn.google { background: #fff; color: #1f1f1f; border-color: #747775; }
+.social-btn.naver { background: #03C75A; color: #fff; }
 .social-btn.kakao { background: #FEE500; color: rgba(0, 0, 0, .85); }
 .social-btn.github { background: #24292f; color: #fff; }
 .social-btn.linked { background: var(--bg-secondary); color: var(--text-secondary); border-color: var(--border-color); cursor: default; }

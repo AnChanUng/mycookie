@@ -83,7 +83,7 @@ public class OAuthService {
         if (code == null || code.isBlank()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "로그인이 취소되었습니다.");
         }
-        OAuthClient.Profile profile = client.fetch(provider, code, redirectUri);
+        OAuthClient.Profile profile = client.fetch(provider, code, redirectUri, state);
         if (profile.subject() == null || profile.subject().isBlank()) {
             throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "사용자 정보를 읽지 못했습니다.");
         }
@@ -124,7 +124,7 @@ public class OAuthService {
     }
 
     public static String label(String provider) {
-        return switch (provider) { case "google" -> "구글"; case "kakao" -> "카카오"; case "github" -> "깃허브"; default -> provider; };
+        return switch (provider) { case "google" -> "구글"; case "naver" -> "네이버"; case "kakao" -> "카카오"; case "github" -> "깃허브"; default -> provider; };
     }
 
     private void requireProvider(String provider) {

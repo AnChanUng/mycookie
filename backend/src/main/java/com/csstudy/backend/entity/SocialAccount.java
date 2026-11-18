@@ -25,7 +25,7 @@ public class SocialAccount {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // google · kakao · github
+    // google · naver · kakao · github
     @Column(nullable = false, length = 16)
     private String provider;
 

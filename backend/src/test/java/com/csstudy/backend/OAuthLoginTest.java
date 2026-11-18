@@ -54,7 +54,7 @@ class OAuthLoginTest {
                 .andExpect(status().isOk())).path("state").asText();
     }
     private JsonNode callback(String provider, String subject) throws Exception {
-        when(client.fetch(eq(provider), eq("code-" + subject), eq(REDIRECT)))
+        when(client.fetch(eq(provider), eq("code-" + subject), eq(REDIRECT), anyString()))
                 .thenReturn(new OAuthClient.Profile(provider, subject, subject + "@example.com", "깃허브-" + subject));
         return read(postJson("/api/v1/auth/oauth/" + provider + "/callback",
                 Map.of("code", "code-" + subject, "state", state(provider), "redirectUri", REDIRECT), null).andExpect(status().isOk()));
@@ -62,8 +62,8 @@ class OAuthLoginTest {
 
     @Test void onlyConfiguredProvidersAreOffered() throws Exception {
         mvc.perform(get("/api/v1/auth/oauth/providers")).andExpect(status().isOk())
-                .andExpect(jsonPath("$.providers[0]").value("google")).andExpect(jsonPath("$.providers[1]").value("github"))
-                .andExpect(jsonPath("$.providers.length()").value(2));
+                .andExpect(jsonPath("$.providers[0]").value("google")).andExpect(jsonPath("$.providers[1]").value("naver")).andExpect(jsonPath("$.providers[2]").value("github"))
+                .andExpect(jsonPath("$.providers.length()").value(3));
         mvc.perform(get("/api/v1/auth/oauth/kakao/authorize").param("redirectUri", REDIRECT)).andExpect(status().isNotFound());
     }
 
