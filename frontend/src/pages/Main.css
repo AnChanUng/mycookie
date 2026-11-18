@@ -1,124 +1,119 @@
-/* 나의쿠키 메인: 벤토 그리드 · 큰 숫자 · 둥근 카드(토스 스타일) */
-.mn { max-width: 1080px; margin: 0 auto; padding: 36px 0 88px; color: var(--text-primary); }
+/* 메인 화면 배치. 색 · 글자 · 카드 모양은 styles/ds.css(디자인 시스템)를 따른다 */
+.mn { max-width: 1080px; margin: 0 auto; padding: var(--ds-s8) 0 88px; color: var(--ds-text); }
 
-.mn-hello { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
-.mn-date { margin: 0 0 10px; font-size: 15px; font-weight: 700; color: #3182f6; }
-.mn-hello h1 { margin: 0; font-size: clamp(28px, 4.4vw, 40px); font-weight: 800; line-height: 1.25; letter-spacing: -0.035em; word-break: keep-all; }
-.mn-chips { display: flex; gap: 8px; flex-wrap: wrap; }
-.mn-chip {
-  display: inline-flex; align-items: center; gap: 6px; height: 40px; padding: 0 14px;
-  border-radius: 999px; background: var(--bg-primary); border: 1px solid var(--border-color);
-  font-size: 14px; font-weight: 700; color: var(--text-primary); text-decoration: none;
+/* 인사 + 오늘 목표 */
+.mn-top { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: var(--ds-s4); align-items: end; }
+.mn-hello { display: grid; gap: var(--ds-s3); }
+.mn-br { display: block; }
+.mn-chips { display: flex; flex-wrap: wrap; gap: var(--ds-s2); margin-top: var(--ds-s1); }
+.mn-chips .tier-badge { transform: scale(.82); margin: 0 -2px; }
+.mn-goal { flex-direction: row; align-items: center; gap: var(--ds-s4); padding: var(--ds-s5); }
+.mn-goal > div { display: grid; gap: 2px; min-width: 0; }
+.mn-goal .ds-title { font-size: 17px; }
+.mn-goal .ds-link { margin-top: 2px; }
+.mn-ring { width: 64px; height: 64px; flex: none; transform: rotate(-90deg); }
+.mn-ring circle { fill: none; stroke-width: 7; }
+.mn-ring-track { stroke: var(--ds-surface-3); }
+.mn-ring-fill { stroke: var(--ds-brand); stroke-linecap: round; transition: stroke-dashoffset .8s var(--ds-ease); }
+.mn-ring text { transform: rotate(90deg); transform-origin: 32px 32px; font-size: 14px; font-weight: 800; fill: var(--ds-text); }
+
+/* 그리드: 데스크톱 12칸 */
+.mn-grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: var(--ds-s4); margin-top: var(--ds-s6); }
+.mn-today { grid-column: span 7; min-height: 240px; }
+.mn-duel { grid-column: span 5; min-height: 240px; }
+.mn-small { grid-column: span 4; }
+.mn-half { grid-column: span 6; gap: var(--ds-s3); }
+.mn-wide { grid-column: span 12; }
+
+/* 강조 카드 공통 */
+.mn-today h2, .mn-duel h2 { margin-top: var(--ds-s2); }
+.mn-today .ds-h2 { max-width: 82%; }
+.mn-today p { margin: 0; max-width: 72%; font-size: 14px; line-height: 1.65; }
+.mn-go { margin-top: auto; padding-top: var(--ds-s3); font-size: var(--ds-fs-body); font-weight: 800; }
+.mn-go span { display: inline-block; transition: transform var(--ds-base) var(--ds-ease); }
+a.ds-card:hover .mn-go span { transform: translateX(4px); }
+.mn-cookie { position: absolute; right: -6px; bottom: -22px; font-size: 132px; line-height: 1; transform: rotate(-14deg); filter: drop-shadow(0 16px 26px rgba(0, 0, 0, .28)); transition: transform .45s var(--ds-ease); }
+.mn-today:hover .mn-cookie { transform: rotate(-4deg) scale(1.05); }
+.mn-players { display: flex; align-items: center; margin-top: var(--ds-s4); }
+.mn-players span, .mn-players i {
+  display: grid; place-items: center; width: 46px; height: 46px; margin-left: -10px; border-radius: 50%;
+  background: rgba(255, 255, 255, .12); border: 2px solid rgba(255, 255, 255, .18); font-size: 22px; font-style: normal;
+  animation: mn-bob 3.2s ease-in-out infinite;
 }
-.mn-chip .tier-badge { transform: scale(.85); }
-
-.mn-bento { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 14px; margin-top: 28px; }
-.mn-span-4 { grid-column: span 4; }
-.mn-span-5 { grid-column: span 5; }
-.mn-span-6 { grid-column: span 6; }
-.mn-span-7 { grid-column: span 7; }
-.mn-span-12 { grid-column: span 12; }
-
-.mn-card {
-  position: relative; overflow: hidden; display: flex; flex-direction: column; gap: 6px; min-width: 0;
-  padding: 24px; border-radius: 28px; text-decoration: none; color: inherit;
-  background: var(--bg-primary); border: 1px solid var(--border-color);
-  transition: transform .2s cubic-bezier(.2, .7, .2, 1), box-shadow .2s ease;
-  animation: mn-rise .6s cubic-bezier(.2, .7, .2, 1) both;
-  animation-delay: calc(var(--d, 0) * 50ms);
-}
-a.mn-card:hover { transform: translateY(-3px); box-shadow: 0 18px 40px rgba(15, 23, 42, .10); }
-a.mn-card:active { transform: scale(.985); }
-@keyframes mn-rise { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
-
-.mn-badge { align-self: flex-start; padding: 5px 11px; border-radius: 999px; font-size: 12px; font-weight: 800; background: rgba(255, 255, 255, .22); color: #fff; }
-.mn-badge.dark { background: rgba(255, 255, 255, .12); }
-.mn-cta { margin-top: auto; padding-top: 14px; font-size: 15px; font-weight: 800; }
-.mn-cta span { display: inline-block; transition: transform .2s ease; }
-a.mn-card:hover .mn-cta span { transform: translateX(4px); }
-
-/* 오늘의 CS: 파란 그라데이션 큰 카드 */
-.mn-today { min-height: 280px; color: #fff; border: 0; background: radial-gradient(120% 140% at 0% 0%, #4b8dff 0%, #3182f6 45%, #5b4dff 100%); }
-.mn-today h2 { margin: 10px 0 0; font-size: clamp(24px, 3vw, 32px); font-weight: 800; letter-spacing: -0.03em; line-height: 1.25; max-width: 80%; word-break: keep-all; }
-.mn-today p { margin: 8px 0 0; font-size: 14px; line-height: 1.65; color: rgba(255, 255, 255, .86); max-width: 78%;
-  display: -webkit-box; -webkit-line-clamp: 3; line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
-.mn-deco { position: absolute; right: -10px; bottom: -18px; font-size: 140px; line-height: 1; transform: rotate(-12deg); filter: drop-shadow(0 18px 30px rgba(0, 0, 0, .25)); transition: transform .4s ease; }
-.mn-today:hover .mn-deco { transform: rotate(-4deg) scale(1.04); }
-
-/* 실시간 대결: 어두운 카드 + 도는 쿠키 */
-.mn-duel { min-height: 280px; color: #fff; border: 0; background: radial-gradient(120% 120% at 100% 0%, #3a3f8f 0%, #1e2340 55%, #12152a 100%); }
-.mn-duel h2 { margin: 10px 0 0; font-size: clamp(22px, 2.6vw, 28px); font-weight: 800; letter-spacing: -0.03em; line-height: 1.3; }
-.mn-orbit { position: relative; width: 120px; height: 120px; margin: 14px auto 0; }
-.mn-orbit b { position: absolute; inset: 0; display: grid; place-items: center; font-size: 15px; font-weight: 900; letter-spacing: .08em; color: #ffcf5c; }
-.mn-orbit span { position: absolute; left: 50%; top: 50%; font-size: 30px; margin: -18px; animation: mn-orbit 6s linear infinite; }
-.mn-orbit span:nth-child(2) { animation-delay: -2s; }
-.mn-orbit span:nth-child(3) { animation-delay: -4s; }
-@keyframes mn-orbit { from { transform: rotate(0deg) translateX(48px) rotate(0deg); } to { transform: rotate(360deg) translateX(48px) rotate(-360deg); } }
+.mn-players span:first-child { margin-left: 0; }
+.mn-players span:nth-child(2) { animation-delay: -.6s; }
+.mn-players span:nth-child(3) { animation-delay: -1.2s; }
+.mn-players span:nth-child(4) { animation-delay: -1.8s; }
+.mn-players i { font-size: 18px; font-weight: 800; color: #ffd36e; animation: none; }
+@keyframes mn-bob { 50% { transform: translateY(-5px); } }
 
 /* 작은 카드 */
-.mn-icon { display: grid; place-items: center; width: 44px; height: 44px; margin-bottom: 8px; border-radius: 14px; background: rgba(49, 130, 246, .1); color: #3182f6; font-size: 18px; font-weight: 900; }
-.mn-icon.red { background: rgba(240, 68, 82, .1); color: #f04452; }
-.mn-card small { font-size: 13px; color: var(--text-secondary); }
-.mn-title { font-size: 19px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.35; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; }
-.mn-sub { font-size: 13px; color: var(--text-tertiary); }
-.mn-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 6px; }
-.mn-stats div { display: grid; gap: 2px; }
-.mn-stats b { font-size: 26px; font-weight: 800; letter-spacing: -0.03em; }
-.mn-stats em { font-style: normal; font-size: 14px; color: var(--text-secondary); }
-.mn-stats span { font-size: 12px; color: var(--text-tertiary); }
+.mn-small { gap: var(--ds-s1); padding: var(--ds-s5); }
+.mn-small .ds-icon { margin-bottom: var(--ds-s2); }
+.mn-small .ds-bar { margin-top: var(--ds-s2); }
+.mn-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--ds-s2); margin-top: var(--ds-s1); }
 
-/* 목록 카드 */
-.mn-static { gap: 12px; }
-.mn-head { display: flex; justify-content: space-between; align-items: baseline; }
-.mn-head h2 { margin: 0; font-size: 19px; font-weight: 800; letter-spacing: -0.02em; }
-.mn-head a { font-size: 14px; font-weight: 700; color: #3182f6; text-decoration: none; }
-.mn-sites { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
-.mn-site {
-  display: grid; justify-items: center; gap: 8px; padding: 16px 8px; border-radius: 18px;
-  background: var(--bg-secondary); color: var(--text-primary); text-decoration: none; font-size: 14px; font-weight: 700;
-  transition: transform .15s ease, background .2s ease;
-}
-.mn-site:hover { transform: translateY(-2px); }
-.mn-site > span:nth-child(2) { white-space: nowrap; word-break: keep-all; font-size: 13px; letter-spacing: -0.02em; }
-.mn-site-tag { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 14px; font-size: 13px; font-weight: 900; color: #fff; background: linear-gradient(135deg, #3182f6, #6b5cff); }
-.mn-site:nth-child(2) .mn-site-tag { background: linear-gradient(135deg, #1e2340, #3a3f8f); }
-.mn-site:nth-child(3) .mn-site-tag { background: linear-gradient(135deg, #00b386, #00d4a0); }
-.mn-site:nth-child(4) .mn-site-tag { background: linear-gradient(135deg, #ff9f1c, #ffbf47); }
-.mn-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
-.mn-list a { display: grid; grid-template-columns: 36px 1fr auto; align-items: center; gap: 10px; padding: 10px 8px; border-radius: 14px; text-decoration: none; color: inherit; }
-.mn-list a:hover { background: var(--bg-secondary); }
-.mn-list span { font-size: 22px; }
-.mn-list b { font-size: 15px; }
-.mn-pills { display: flex; flex-wrap: wrap; gap: 10px; }
-.mn-pill {
-  display: inline-flex; align-items: center; gap: 8px; padding: 12px 18px; border-radius: 999px;
-  background: var(--bg-secondary); color: var(--text-primary); text-decoration: none; font-size: 15px; font-weight: 700;
-  transition: transform .15s ease, box-shadow .2s ease;
-}
-.mn-pill:hover { transform: translateY(-2px); box-shadow: 0 8px 18px rgba(15, 23, 42, .08); }
+/* 코딩테스트 타일 */
+.mn-sites { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--ds-s2); }
+.mn-sites .ds-tile { font-size: 13px; letter-spacing: -0.02em; }
+.mn-site-tag { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 14px; font-size: 13px; font-weight: 900; color: #fff; }
+.tone-brand { background: var(--ds-grad-brand); }
+.tone-night { background: var(--ds-grad-night); }
+.tone-green { background: linear-gradient(135deg, #00b37a, #2bd4a0); }
+.tone-yellow { background: linear-gradient(135deg, #ff9f1c, #ffc04d); }
+
+/* 실전 문제집: 카드 없이 칩 줄 */
+.mn-practice { display: grid; gap: var(--ds-s3); padding: var(--ds-s2) var(--ds-s1) 0; }
+.mn-pills { display: flex; flex-wrap: wrap; gap: var(--ds-s2); }
+.mn-pill { height: 46px; padding: 0 var(--ds-s5); font-size: var(--ds-fs-body); }
 
 /* 소개 배너 */
-.mn-intro { flex-direction: row; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; background: linear-gradient(90deg, rgba(49, 130, 246, .08), rgba(107, 92, 255, .08)); }
-.mn-intro b { display: block; margin-top: 4px; font-size: 20px; font-weight: 800; letter-spacing: -0.02em; }
-.mn-intro .mn-cta { margin: 0; padding: 0; color: #3182f6; }
+.mn-intro { flex-direction: row; align-items: center; gap: var(--ds-s4); padding: var(--ds-s5) var(--ds-s6); }
+.mn-intro-art { font-size: 40px; line-height: 1; }
+.mn-intro-text { display: grid; gap: 2px; flex: 1; min-width: 0; }
 
-.mn a:focus-visible { outline: 3px solid #3182f6; outline-offset: 3px; }
-
-@media (max-width: 900px) {
-  .mn-span-4 { grid-column: span 6; }
-  .mn-span-5, .mn-span-7 { grid-column: span 12; }
-  .mn-span-4:nth-of-type(5) { grid-column: span 12; }
+/* 태블릿 */
+@media (max-width: 960px) {
+  .mn-top { grid-template-columns: 1fr; align-items: stretch; }
+  .mn-today, .mn-duel { grid-column: span 12; }
+  .mn-small { grid-column: span 4; }
+  .mn-half { grid-column: span 12; }
 }
+
+/* 휴대폰: 짧고 촘촘하게 */
 @media (max-width: 600px) {
-  .mn { padding-top: 24px; }
-  .mn-bento { gap: 12px; }
-  .mn-span-4, .mn-span-6 { grid-column: span 12; }
-  .mn-card { padding: 20px; border-radius: 24px; }
-  .mn-today, .mn-duel { min-height: 240px; }
-  .mn-today h2, .mn-today p { max-width: 100%; }
-  .mn-deco { font-size: 100px; opacity: .9; }
-  .mn-sites { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .mn { padding-top: var(--ds-s5); padding-bottom: 64px; }
+  .mn-br { display: inline; }
+  .mn-hello .ds-h1 { font-size: 24px; }
+  .mn-chips .ds-chip { height: 34px; padding: 0 12px; font-size: 12px; }
+  .mn-goal { padding: var(--ds-s4); }
+  .mn-ring { width: 54px; height: 54px; }
+  .mn-grid { gap: var(--ds-s3); margin-top: var(--ds-s4); grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .mn-today, .mn-duel, .mn-half, .mn-wide { grid-column: span 2; }
+  .mn-small { grid-column: span 1; padding: var(--ds-s4); }
+  .mn-continue { grid-column: span 2; }
+  .ds-card { padding: var(--ds-s5); border-radius: var(--ds-r-lg); }
+  .mn-today, .mn-duel { min-height: 0; }
+  .mn-today .ds-h2, .mn-duel .ds-h2 { font-size: 22px; }
+  .mn-today .ds-h2, .mn-today p { max-width: 74%; }
+  .mn-cookie { font-size: 92px; bottom: -14px; }
+  .mn-duel .ds-h2 br { display: none; }
+  .mn-players { margin-top: var(--ds-s3); }
+  .mn-players span, .mn-players i { width: 38px; height: 38px; font-size: 18px; }
+  .mn-stats .ds-stat b { font-size: 20px; }
+  .mn-small .ds-title { font-size: 16px; }
+  .mn-sites { gap: 6px; }
+  .mn-sites .ds-tile { padding: 12px 4px; font-size: 12px; }
+  .mn-site-tag { width: 38px; height: 38px; border-radius: 12px; font-size: 12px; }
+  /* 실전 문제집은 옆으로 넘기기 */
+  .mn-pills { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; margin: 0 -16px; padding: 0 16px 4px; scroll-snap-type: x mandatory; }
+  .mn-pills::-webkit-scrollbar { display: none; }
+  .mn-pill { flex: none; height: 42px; font-size: 14px; scroll-snap-align: start; }
+  .mn-intro { padding: var(--ds-s4); gap: var(--ds-s3); }
+  .mn-intro-art { font-size: 30px; }
+  .mn-intro .ds-btn { display: none; }
+  .mn-intro .ds-title { font-size: 15px; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .mn-card, .mn-orbit span { animation: none; }
+  .mn-players span { animation: none; }
 }

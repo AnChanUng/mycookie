@@ -1,0 +1,187 @@
+/* ============================================================
+   나의쿠키 디자인 시스템 (ds)
+   - 토큰: 색 · 글자 · 간격 · 둥글기 · 그림자 · 움직임
+   - 부품: ds-card · ds-btn · ds-chip · ds-badge · ds-list · ds-stat · ds-section · ds-icon · ds-tile
+   화면 모드(화이트 · 다크 · 크림 …)의 색 변수를 그대로 받아 쓰므로 어떤 테마에서도 맞는다.
+   새 화면은 이 파일의 클래스와 토큰만으로 만드는 것을 원칙으로 한다.
+   ============================================================ */
+:root {
+  /* 색: 바탕 · 선 · 글자는 테마 변수를 따른다 */
+  --ds-bg: var(--bg-secondary);
+  --ds-surface: var(--bg-primary);
+  --ds-surface-2: var(--bg-secondary);
+  --ds-surface-3: var(--bg-tertiary);
+  --ds-line: var(--border-color);
+  --ds-text: var(--text-primary);
+  --ds-text-2: var(--text-secondary);
+  --ds-text-3: var(--text-tertiary);
+  --ds-brand: var(--accent-blue);
+  --ds-brand-soft: color-mix(in srgb, var(--accent-blue) 12%, transparent);
+  /* 의미 색 */
+  --ds-cookie: #c9813f;
+  --ds-cookie-soft: color-mix(in srgb, #c9813f 14%, transparent);
+  --ds-red: #f04452;
+  --ds-red-soft: color-mix(in srgb, #f04452 12%, transparent);
+  --ds-green: #00b37a;
+  --ds-green-soft: color-mix(in srgb, #00b37a 12%, transparent);
+  --ds-yellow: #ffb547;
+  /* 강조 면(그라데이션) */
+  --ds-grad-brand: linear-gradient(135deg, #4f8cff 0%, #5b5cf6 55%, #8b5cf6 100%);
+  --ds-grad-night: linear-gradient(150deg, #262b52 0%, #171a33 60%, #0f1124 100%);
+  --ds-grad-cookie: linear-gradient(135deg, #ffd9a8 0%, #f3b072 100%);
+
+  /* 글자 */
+  --ds-font: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --ds-fs-caption: 12px;
+  --ds-fs-small: 13px;
+  --ds-fs-body: 15px;
+  --ds-fs-lead: 17px;
+  --ds-fs-title: 19px;
+  --ds-fs-h3: 22px;
+  --ds-fs-h2: clamp(24px, 2.6vw, 30px);
+  --ds-fs-h1: clamp(28px, 3.6vw, 40px);
+  --ds-tracking-tight: -0.03em;
+
+  /* 간격 · 둥글기 · 그림자 */
+  --ds-s1: 4px; --ds-s2: 8px; --ds-s3: 12px; --ds-s4: 16px; --ds-s5: 20px; --ds-s6: 24px; --ds-s8: 32px; --ds-s10: 40px;
+  --ds-r-sm: 12px; --ds-r-md: 16px; --ds-r-lg: 22px; --ds-r-xl: 28px; --ds-r-full: 999px;
+  --ds-shadow-sm: 0 1px 2px rgba(15, 23, 42, .04), 0 2px 8px rgba(15, 23, 42, .04);
+  --ds-shadow-md: 0 6px 20px rgba(15, 23, 42, .07);
+  --ds-shadow-lg: 0 18px 44px rgba(15, 23, 42, .12);
+
+  /* 움직임 */
+  --ds-ease: cubic-bezier(.2, .7, .2, 1);
+  --ds-fast: .15s;
+  --ds-base: .25s;
+}
+:root[data-mode='dark'] {
+  --ds-shadow-sm: 0 1px 2px rgba(0, 0, 0, .3);
+  --ds-shadow-md: 0 8px 24px rgba(0, 0, 0, .35);
+  --ds-shadow-lg: 0 20px 48px rgba(0, 0, 0, .45);
+}
+
+/* ---------- 카드 ---------- */
+.ds-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-s2);
+  min-width: 0;
+  padding: var(--ds-s6);
+  border-radius: var(--ds-r-xl);
+  background: var(--ds-surface);
+  border: 1px solid var(--ds-line);
+  box-shadow: var(--ds-shadow-sm);
+  color: var(--ds-text);
+  text-decoration: none;
+  overflow: hidden;
+  transition: transform var(--ds-base) var(--ds-ease), box-shadow var(--ds-base) ease, border-color var(--ds-base) ease;
+}
+a.ds-card:hover, button.ds-card:hover { transform: translateY(-3px); box-shadow: var(--ds-shadow-lg); }
+a.ds-card:active, button.ds-card:active { transform: scale(.985); }
+.ds-card--flat { box-shadow: none; }
+.ds-card--brand { background: var(--ds-grad-brand); border-color: transparent; color: #fff; }
+.ds-card--night { background: var(--ds-grad-night); border-color: transparent; color: #fff; }
+.ds-card--soft { background: var(--ds-surface-2); border-color: transparent; box-shadow: none; }
+.ds-card--brand .ds-text-2, .ds-card--night .ds-text-2 { color: rgba(255, 255, 255, .8); }
+
+/* ---------- 섹션 머리 ---------- */
+.ds-section-head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--ds-s3); }
+.ds-section-head h2, .ds-section-head h3 { margin: 0; font-size: var(--ds-fs-title); font-weight: 800; letter-spacing: -0.02em; }
+.ds-section-head a, .ds-link { font-size: var(--ds-fs-small); font-weight: 700; color: var(--ds-brand); text-decoration: none; }
+.ds-section-head a:hover, .ds-link:hover { text-decoration: underline; }
+
+/* ---------- 글자 ---------- */
+.ds-eyebrow { margin: 0; font-size: var(--ds-fs-small); font-weight: 700; color: var(--ds-brand); }
+.ds-h1 { margin: 0; font-size: var(--ds-fs-h1); font-weight: 800; line-height: 1.22; letter-spacing: var(--ds-tracking-tight); word-break: keep-all; }
+.ds-h2 { margin: 0; font-size: var(--ds-fs-h2); font-weight: 800; line-height: 1.28; letter-spacing: var(--ds-tracking-tight); word-break: keep-all; }
+.ds-title { margin: 0; font-size: var(--ds-fs-title); font-weight: 800; letter-spacing: -0.02em; line-height: 1.35; }
+.ds-text-2 { color: var(--ds-text-2); }
+.ds-text-3 { color: var(--ds-text-3); }
+.ds-caption { font-size: var(--ds-fs-small); color: var(--ds-text-2); }
+.ds-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.ds-clamp-3 { display: -webkit-box; -webkit-line-clamp: 3; line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+
+/* ---------- 버튼 ---------- */
+.ds-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--ds-s2);
+  min-height: 44px; padding: 0 var(--ds-s5);
+  border: 0; border-radius: var(--ds-r-md);
+  font: inherit; font-size: var(--ds-fs-body); font-weight: 700; text-decoration: none; cursor: pointer;
+  transition: transform var(--ds-fast) ease, filter var(--ds-fast) ease, background var(--ds-fast) ease;
+}
+.ds-btn:active { transform: scale(.97); }
+.ds-btn--primary { background: var(--ds-brand); color: #fff; }
+.ds-btn--primary:hover { filter: brightness(.94); }
+.ds-btn--secondary { background: var(--ds-brand-soft); color: var(--ds-brand); }
+.ds-btn--ghost { background: var(--ds-surface-2); color: var(--ds-text); }
+.ds-btn--white { background: #fff; color: #191f28; }
+.ds-btn--sm { min-height: 36px; padding: 0 var(--ds-s4); font-size: var(--ds-fs-small); border-radius: var(--ds-r-sm); }
+
+/* ---------- 칩 · 배지 ---------- */
+.ds-chip {
+  display: inline-flex; align-items: center; gap: 6px; height: 38px; padding: 0 var(--ds-s4);
+  border-radius: var(--ds-r-full); background: var(--ds-surface); border: 1px solid var(--ds-line);
+  font-size: var(--ds-fs-small); font-weight: 700; color: var(--ds-text); text-decoration: none; white-space: nowrap;
+  transition: transform var(--ds-fast) ease, box-shadow var(--ds-fast) ease;
+}
+a.ds-chip:hover { transform: translateY(-1px); box-shadow: var(--ds-shadow-md); }
+.ds-chip--soft { background: var(--ds-surface-2); border-color: transparent; }
+.ds-badge {
+  display: inline-flex; align-items: center; gap: 4px; align-self: flex-start;
+  padding: 4px 10px; border-radius: var(--ds-r-full);
+  font-size: var(--ds-fs-caption); font-weight: 800; background: var(--ds-brand-soft); color: var(--ds-brand);
+}
+.ds-badge--glass { background: rgba(255, 255, 255, .2); color: #fff; backdrop-filter: blur(6px); }
+.ds-badge--red { background: var(--ds-red-soft); color: var(--ds-red); }
+.ds-badge--green { background: var(--ds-green-soft); color: var(--ds-green); }
+.ds-badge--live::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: currentColor; animation: ds-pulse 1.4s ease-in-out infinite; }
+@keyframes ds-pulse { 50% { opacity: .3; } }
+
+/* ---------- 아이콘 상자 ---------- */
+.ds-icon { display: grid; place-items: center; flex: none; width: 44px; height: 44px; border-radius: 14px; font-size: 20px; background: var(--ds-brand-soft); color: var(--ds-brand); }
+.ds-icon--sm { width: 36px; height: 36px; border-radius: 12px; font-size: 17px; }
+.ds-icon--cookie { background: var(--ds-cookie-soft); color: var(--ds-cookie); }
+.ds-icon--red { background: var(--ds-red-soft); color: var(--ds-red); }
+.ds-icon--green { background: var(--ds-green-soft); color: var(--ds-green); }
+
+/* ---------- 목록 ---------- */
+.ds-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+.ds-list-item {
+  display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: var(--ds-s3);
+  padding: var(--ds-s3) var(--ds-s2); border-radius: var(--ds-r-md); color: var(--ds-text); text-decoration: none;
+  transition: background var(--ds-fast) ease;
+}
+a.ds-list-item:hover { background: var(--ds-surface-2); }
+.ds-list-item b { font-size: var(--ds-fs-body); font-weight: 700; }
+.ds-list-item small { font-size: var(--ds-fs-small); color: var(--ds-text-3); white-space: nowrap; }
+
+/* ---------- 숫자 ---------- */
+.ds-stat { display: grid; gap: 2px; }
+.ds-stat b { font-size: 26px; font-weight: 800; letter-spacing: var(--ds-tracking-tight); line-height: 1.1; font-variant-numeric: tabular-nums; }
+.ds-stat b em { font-style: normal; font-size: 14px; font-weight: 700; color: var(--ds-text-2); margin-left: 1px; }
+.ds-stat span { font-size: var(--ds-fs-caption); color: var(--ds-text-3); }
+
+/* ---------- 타일(아이콘 + 이름) ---------- */
+.ds-tile {
+  display: grid; justify-items: center; align-content: center; gap: var(--ds-s2);
+  padding: var(--ds-s4) var(--ds-s2); border-radius: var(--ds-r-lg); background: var(--ds-surface-2);
+  color: var(--ds-text); text-decoration: none; font-size: var(--ds-fs-small); font-weight: 700; white-space: nowrap;
+  transition: transform var(--ds-fast) ease, background var(--ds-fast) ease;
+}
+a.ds-tile:hover { transform: translateY(-2px); background: var(--ds-surface-3); }
+
+/* ---------- 진행 막대 · 원 ---------- */
+.ds-bar { display: block; height: 8px; border-radius: var(--ds-r-full); background: var(--ds-surface-3); overflow: hidden; }
+.ds-bar > i { display: block; height: 100%; border-radius: inherit; background: var(--ds-brand); transition: width .6s var(--ds-ease); }
+
+/* ---------- 접근성 · 공통 ---------- */
+.ds-card:focus-visible, .ds-btn:focus-visible, .ds-chip:focus-visible, .ds-tile:focus-visible, .ds-list-item:focus-visible, .ds-link:focus-visible {
+  outline: 3px solid var(--ds-brand); outline-offset: 3px;
+}
+.ds-rise { animation: ds-rise .55s var(--ds-ease) both; animation-delay: calc(var(--d, 0) * 45ms); }
+@keyframes ds-rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .ds-rise, .ds-badge--live::before { animation: none; }
+  .ds-card, .ds-btn, .ds-chip, .ds-tile { transition: none; }
+}
