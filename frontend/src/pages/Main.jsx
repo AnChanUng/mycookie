@@ -128,7 +128,6 @@ export default function Main() {
           </div>
           <div className="mn-cta">
             <Link to="/cs" className="ds-btn ds-btn--primary">공부 시작하기</Link>
-            <Link to="/tiers" className="ds-btn">등급 올리기</Link>
           </div>
         </div>
         {/* 실시간 순위: 첫 화면 맨 위 오른쪽(휴대폰에서는 인사 아래) */}

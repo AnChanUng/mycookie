@@ -35,7 +35,8 @@ public class TierPurchaseService {
     private final MembershipService memberships;
     private final Environment env;
 
-    public boolean enabled() { return toss.enabled(); }
+    // 키가 있어도 PAYMENT_OPEN=true 로 열기 전까지는 결제를 받지 않는다(사업자등록 전 테스트 키만 있는 동안 닫아 둔다)
+    public boolean enabled() { return toss.enabled() && env.getProperty("app.payment.open", Boolean.class, false); }
 
     public String clientKey() { return toss.clientKey(); }
 
