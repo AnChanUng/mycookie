@@ -5,6 +5,8 @@ import RagAssistant from './RagAssistant';
 import './CsNotesPage.css';
 
 const AdminPage = lazy(() => import('./AdminPage'));
+// AWS · 현대오토에버 면접 복기 자료(다른 사람이 본 면접). 공개 메뉴에서 빼고 여기서만 연다
+const OthersInterviews = lazy(() => import('./TechnicalInterviewPage'));
 
 // 비공개 문제집 입구. 비밀번호는 저장소에 원문으로 두지 않고 해시만 비교한다.
 // 화면 잠금일 뿐 서버 인증이 아니므로, 문제 데이터는 잠금을 푼 뒤에만 따로 불러와 공개 화면 번들과 분리한다.
@@ -32,20 +34,22 @@ export default function PrivateChanungPage() {
   const assistant = id === 'assistant';
   const patches = id === 'patch-notes';
   const admin = id === 'admin';
+  const interviews = id === 'interviews';
 
   useEffect(() => {
-    if (!unlocked || data || trouble || assistant || patches || admin) return;
+    if (!unlocked || data || trouble || assistant || patches || admin || interviews) return;
     let alive = true;
     import('../data/privateBanks')
       .then(m => { if (alive) setData(m); })
       .catch(() => { if (alive) setLoadError(true); });
     return () => { alive = false; };
-  }, [unlocked, data, trouble, assistant, patches, admin]);
+  }, [unlocked, data, trouble, assistant, patches, admin, interviews]);
 
   if (!unlocked) return <Gate onUnlock={() => setUnlocked(true)} />;
   if (trouble) return <TroubleLog />;
   if (assistant) return <RagAssistant />;
   if (patches) return <PatchNotes />;
+  if (interviews) return <Suspense fallback={<p role="status">면접 자료를 불러오는 중…</p>}><OthersInterviews back={{ to: BASE, label: '← 관리자 페이지' }} /></Suspense>;
   if (admin) return <Suspense fallback={<p role="status">관리자 화면을 불러오는 중…</p>}><AdminPage back={{ to: BASE, label: '← 관리자 페이지' }} /></Suspense>;
   if (loadError) return <div className="fade-in"><p role="alert">문제집을 불러오지 못했습니다. 새로고침해 주세요.</p></div>;
   if (!data) return <div className="fade-in"><p role="status">문제집을 불러오는 중…</p></div>;
@@ -261,6 +265,11 @@ function PrivateList({ data, onLock }) {
             <span className="exam-company-abbr">NOTE</span>
             <span className="exam-company-name">개발 패치노트</span>
             <span className="exam-company-meta">버전별 새 기능 · 개선 · 수정 · 보안 · 인프라 변경</span>
+          </Link>
+          <Link to={`${BASE}/interviews`} className="exam-company-card">
+            <span className="exam-company-abbr">면접</span>
+            <span className="exam-company-name">다른 사람 면접</span>
+            <span className="exam-company-meta">AWS · 현대오토에버 면접 복기 질문과 예시 답변 · 꼬리질문</span>
           </Link>
           <Link to={`${BASE}/assistant`} className="exam-company-card">
             <span className="exam-company-abbr">RAG</span>

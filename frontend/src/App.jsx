@@ -13,7 +13,6 @@ const PromotionExamPage = lazy(() => import('./pages/PromotionExamPage'));
 const ChangelogPage = lazy(() => import('./pages/ChangelogPage'));
 const LegalPage = lazy(() => import('./pages/LegalPage'));
 const BugHuntPage = lazy(() => import('./pages/BugHuntPage'));
-const TechnicalInterviewPage = lazy(() => import('./pages/TechnicalInterviewPage'));
 const ExperiencePage = lazy(() => import('./pages/ExperiencePage'));
 const CompanyPrepPage = lazy(() => import('./pages/CompanyPrepPage'));
 const DeloitteAiFocusPage = lazy(() => import('./pages/DeloitteAiFocusPage'));
@@ -83,8 +82,9 @@ function App() {
           <Route path="stats" element={<StatsPage />} />
           <Route path="cs" element={<CsHubPage />} />
           <Route path="interview" element={<InterviewPracticePage />} />
-          <Route path="technical-interview" element={<TechnicalInterviewPage />} />
-          <Route path="p/7b92e1c4-a6d8-4f03-9c51-26de8a740bf9/technical" element={<TechnicalInterviewPage />} />
+          {/* AWS · 현대오토에버 면접 자료는 관리자 페이지(다른 사람 면접)로 옮김 */}
+          <Route path="technical-interview" element={<Navigate to="/cs" replace />} />
+          <Route path="p/7b92e1c4-a6d8-4f03-9c51-26de8a740bf9/technical" element={<Navigate to="/private/chanung/interviews" replace />} />
           <Route path="chanung" element={<PracticeEntry suffix="/companies" />} />
           <Route path="p/7b92e1c4-a6d8-4f03-9c51-26de8a740bf9/companies" element={<CompanyPrepPage />} />
           <Route path="p/7b92e1c4-a6d8-4f03-9c51-26de8a740bf9/ai-focus" element={<DeloitteAiFocusPage />} />

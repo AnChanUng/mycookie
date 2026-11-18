@@ -4,7 +4,6 @@ import { account, onAccountChange } from '../sync';
 import { useMembership, TIER_NAMES } from '../membership';
 import { ACCOUNT_BANKS } from '../accountRecords';
 import { allQuestions } from '../data/examQuestions';
-import { TECHNICAL_INTERVIEW } from '../data/technicalInterview';
 import { CS_NOTES } from '../data/csNotes';
 import TierBadge from '../components/TierBadge';
 import TodayCs from '../components/TodayCs';
@@ -60,8 +59,6 @@ function collect(user) {
     .sort((x, y) => x.rate - y.rate)
     .slice(0, 4);
 
-  const ivKey = `technical-interview:v1:${user ? `user:${user.id || user.nickname}` : 'guest'}`;
-  const interviewDone = (readJson(ivKey, []) || []).length;
   const notes = user ? readJson(`cs-notes:v1:${user.nickname}`, {}) : {};
   const notesDone = Object.values(notes || {}).filter(v => v?.done).length;
 
@@ -69,7 +66,7 @@ function collect(user) {
   return {
     attempts, correct, solved, wrongOpen, week, streak,
     rate: attempts ? Math.round(correct / attempts * 100) : null,
-    weak, recent: recent.slice(0, 5), interviewDone, notesDone,
+    weak, recent: recent.slice(0, 5), notesDone,
   };
 }
 
@@ -89,7 +86,6 @@ export default function StatsPage() {
   const user = account();
   const data = useMemo(() => collect(user), [user]);
   const { membership, error: tierError } = useMembership();
-  const interviewTotal = TECHNICAL_INTERVIEW.length;
   const notesTotal = CS_NOTES.reduce((n, s) => n + (s.items?.length || 0), 0);
 
   return (
@@ -127,9 +123,9 @@ export default function StatsPage() {
             <span><b>틀린 문제 다시 풀기</b><small>{data.wrongOpen ? `아직 못 맞힌 문제 ${data.wrongOpen}개` : '남은 오답이 없어요'}</small></span>
             <span className="ml-go" aria-hidden="true">→</span>
           </Link>
-          <Link to="/technical-interview" className="ml-task">
-            <span className="ml-task-icon" aria-hidden="true">💬</span>
-            <span><b>기술면접 질문 하나 말해 보기</b><small>{interviewTotal - data.interviewDone}개 남음</small></span>
+          <Link to="/notes" className="ml-task">
+            <span className="ml-task-icon" aria-hidden="true">📚</span>
+            <span><b>전공노트 개념 하나 복습하기</b><small>{notesTotal - data.notesDone}개 남음</small></span>
             <span className="ml-go" aria-hidden="true">→</span>
           </Link>
         </div>
@@ -149,7 +145,6 @@ export default function StatsPage() {
 
         <section className="ml-section ml-panel" aria-labelledby="ml-progress">
           <div className="ml-panel-head"><h2 id="ml-progress">진도</h2></div>
-          <Progress label="기술면접 질문" done={data.interviewDone} total={interviewTotal} to="/technical-interview" />
           <Progress label="전공노트" done={data.notesDone} total={notesTotal} to="/notes" hint={user ? null : '로그인하면 기록돼요'} />
           {membership?.nextTier && (
             <Progress label={`${membership.nextTierName || TIER_NAMES[membership.nextTier]} 승급`} done={membership.solvedCount} total={membership.nextThreshold} to="/account" />
