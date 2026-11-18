@@ -29,6 +29,7 @@ const InterviewPracticePage = lazy(() => import('./pages/InterviewPracticePage')
 const CsNotesPage = lazy(() => import('./pages/CsNotesPage'));
 const WebEssentialsPage = lazy(() => import('./pages/WebEssentialsPage'));
 const WebPage = lazy(() => import('./pages/WebPage'));
+const AiPage = lazy(() => import('./pages/AiPage'));
 const TechBlogsPage = lazy(() => import('./pages/TechBlogsPage'));
 const MajorPage = lazy(() => import('./pages/MajorPage'));
 const MajorExamPage = lazy(() => import('./pages/MajorExamPage'));
@@ -115,6 +116,8 @@ function App() {
           <Route path="web" element={<WebPage />} />
           <Route path="tech-blogs" element={<TechBlogsPage />} />
           <Route path="web/:company" element={<ExamCompanyPage />} />
+          <Route path="ai" element={<AiPage />} />
+          <Route path="ai/:company" element={<ExamCompanyPage />} />
           <Route path="major" element={<MajorPage />} />
           <Route path="major/:company" element={<ExamCompanyPage />} />
           <Route path="major-exam" element={<MajorExamPage />} />

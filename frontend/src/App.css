@@ -4367,3 +4367,7 @@ a.goal-exam:hover { border-color: var(--accent-blue); }
   .header-right .nav-links { margin-left: 28px; margin-right: auto; }
   .nav-links a, .nav-links .ct-toggle { border-radius: 6px; }
 }
+
+/* 웹 개발 화면: 분야(백엔드 · 웹 기본기)별 묶음 */
+.web-group { margin-top: 28px; }
+.web-group-title { font-size: 1.05rem; font-weight: 700; margin: 0 0 12px; color: var(--text-primary); }

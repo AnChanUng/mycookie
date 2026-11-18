@@ -21,11 +21,18 @@ const CODING_SITES = [
 ];
 const CS_STUDY = [
   { to: '/notes', icon: 'book', name: '전공노트', sub: '운영체제 · 네트워크 · 데이터베이스' },
-  { to: '/web-essentials', icon: 'globe', name: '웹 필수지식', sub: '57문답 · 모범답안' },
+  { to: '/search', icon: 'puzzle', name: '질문 검색', sub: '면접 질문 · 개념 찾기' },
   { to: '/interview', icon: 'video', name: '면접 공통질문 연습', sub: '카메라로 실전처럼' },
 ];
+const DEV_STUDY = [
+  { to: '/ai', icon: 'brain', name: 'AI', sub: '딥러닝 · 머신러닝 · 빅데이터 AI' },
+  { to: '/web', icon: 'code', name: '백엔드', sub: 'Spring · JPA · DB · Servlet' },
+  { to: '/web-essentials', icon: 'globe', name: '웹 필수지식', sub: 'HTTP · 쿠키와 세션 · CORS' },
+];
+// 오늘의 CS · 대결 · 이어서 하기 카드 묶음. 쓰임새를 다시 정할 때까지 숨긴다
+const SHOW_TODAY_STUDY = false;
 const PRACTICE = [
-  { to: '/exam', icon: 'building', name: '기업별 전공필기', sub: '기업 기출 유형' },
+  { to: '/exam', icon: 'building', name: '기업별 전공필기', sub: '금융공기업 · 공기업 전산직' },
   { to: '/topics', icon: 'puzzle', name: '주제별 통합 문제집', sub: '과목별로 모아 풀기' },
   { to: '/aptitude', icon: 'brain', name: 'NCS · 인적성', sub: '언어 · 수리 · 추리' },
   { to: '/calc', icon: 'calc', name: '계산 문제 무한 연습', sub: '서브넷 · 페이지 · 진법' },
@@ -112,7 +119,7 @@ export default function Main() {
         <div className="mn-hello">
           <p className="ds-eyebrow">{dateLabel}</p>
           <h1 className="mn-h1">{user?.nickname ? `${user.nickname}님, 오늘 할 공부예요` : '개발자 취업 준비, 오늘은 여기서 시작해요'}</h1>
-          <p className="mn-sub">컴퓨터공학 전공 공부부터 웹개발, 백엔드 공부, 기술면접까지 한곳에서</p>
+          <p className="mn-sub">AI, 컴퓨터공학, 웹 개발 모든 공부를 한곳에서</p>
           <div className="mn-chips">
             {membership && <Link to="/account" className="ds-chip"><TierBadge tier={membership.tier} division={membership.division} />{TIER_NAMES[membership.tier]}</Link>}
             <Link to="/stats" className="ds-chip">{learning ? `${learning.streak}일 연속 학습` : '연속 학습'}</Link>
@@ -129,8 +136,8 @@ export default function Main() {
         </Link>
       </section>
 
-      {/* 오늘의 학습 */}
-      <Section id="mn-today" title="오늘의 학습">
+      {/* 오늘의 학습: 쓰임새를 다시 정할 때까지 숨겨 둔다(SHOW_TODAY_STUDY) */}
+      {SHOW_TODAY_STUDY && <Section id="mn-today" title="오늘의 학습">
         <div className="mn-cards">
           <Link to="/cs" className="ds-card mn-feature mn-feature--brand">
             <span className="mn-tag">오늘의 CS</span>
@@ -153,7 +160,7 @@ export default function Main() {
             <span className="mn-more">{resume ? '이어서 풀기' : '문제집 고르기'} <LineIcon name="chevron" size={16} /></span>
           </Link>
         </div>
-      </Section>
+      </Section>}
 
       {/* 학습 현황: 한 줄 요약 */}
       <Section id="mn-stats" title="내 학습 현황" more={{ to: '/stats', label: '자세히 보기' }}>
@@ -173,7 +180,11 @@ export default function Main() {
         <div className="mn-cards">{CS_STUDY.map(item => <Category key={item.to} {...item} />)}</div>
       </Section>
 
-      <Section id="mn-practice" title="실전 문제집" more={{ to: '/exam', label: '전체 보기' }}>
+      <Section id="mn-dev" title="AI · 웹 개발">
+        <div className="mn-cards">{DEV_STUDY.map(item => <Category key={item.to} {...item} />)}</div>
+      </Section>
+
+      <Section id="mn-practice" title="전공필기" more={{ to: '/exam', label: '전체 보기' }}>
         <div className="mn-cards">{PRACTICE.map(item => <Category key={item.to} {...item} />)}</div>
       </Section>
 

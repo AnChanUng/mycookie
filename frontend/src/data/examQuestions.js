@@ -38,6 +38,7 @@ import { IBKIT_SECTIONS, IBKIT_QUESTIONS, IBKIT_SETS } from './ibkItQuestions';
 import { HF_CPP_QUESTIONS } from './hfCppQuestions';
 import { NCS } from './ncsQuestions';
 import { DAOU_SECTIONS, DAOU_QUESTIONS, DAOU_SETS } from './daouQuestions';
+import { AI_SECTIONS, AI_QUESTIONS } from './aiQuestions';
 export { HF_CPP_QUESTIONS, CPP_GROUPS } from './hfCppQuestions';
 export { NCS };
 
@@ -141,7 +142,8 @@ export const EXAM_CATEGORIES = [
   // 기업 문제집이 아닌 기술 과목 문제집. 기업별 기출이 아니라 필기이론 화면(/major)에 모아 보여 준다
   { key: "stack", name: "개발 스택", desc: "Spring · JPA 기술 면접 · 필기 대비", unit: "과목", hub: "web" },
   // hub가 있는 분류는 기업별 기출이 아니라 그 이름의 상단 메뉴(/ssafy)에 모아 보여 준다
-  { key: "major", name: "전공필기", desc: "SSAFY 과목평가 · 객관식 · 단답형 · 서술형", unit: "과목", hub: "ssafy" },
+  { key: "major", name: "SSAFY 과목평가", desc: "SSAFY 과목평가 · 객관식 · 단답형 · 서술형", unit: "과목", hub: "ssafy" },
+  { key: "ai", name: "AI", desc: "딥러닝 · 머신러닝 · 빅데이터 AI", unit: "과목", hub: "ai" },
   { key: "monthly", name: "월말평가", desc: "SSAFY 월말평가 서술형 (구현 문제 제외)", unit: "과목", hub: "ssafy" },
   { key: "aptitude", name: "인적성검사", desc: "기업별 인적성검사 · 언어 · 수리 · 추리 · 문제해결", hub: "aptitude" },
 ];
@@ -379,6 +381,12 @@ export const COMPANIES = [
       ],
     },
     lede: "언어 15문제, 수리 15문제, 추리 15문제, 문제해결력 15문제. 총 60문제, 60분이라 한 문제에 1분꼴입니다. 같은 구성의 예상문제를 3회분(180문항) 담았습니다. 언어는 유의어·반의어·어휘 관계 같은 어휘 문제와 맞춤법, 짧은 독해가 나오고, 수리는 1분 안에 풀 수 있는 속력·농도·일률·원가·경우의 수·수열·자료 계산입니다. 추리는 명제·참거짓·배치·순서·문자와 기호 규칙, 문제해결력은 일정·요금 비교·규정 적용·선발 기준·장애 원인 파악·업무 배정을 다룹니다. 응시 후기로 전해진 구성만 따라 새로 만든 문제이며 실제 문항의 복원이 아닙니다.",
+  },
+  {
+    key: "ai", category: "ai", abbr: "AI", name: "AI · 머신러닝", meta: "딥러닝 기초 · 머신러닝 · 빅데이터 AI 실무 · 4~5지선다", ready: true,
+    source: { kind: "predicted", label: "자체 제작 문제", detail: "기업 전공필기 대비용으로 만든 문제집에서 AI · 머신러닝 문항만 모아 과목별로 다시 나눴습니다." },
+    questions: AI_QUESTIONS, sections: AI_SECTIONS, minutes: 60,
+    lede: "딥러닝 기초(역전파 · 활성화 함수 · 최적화 · 트랜스포머), 머신러닝 · 모델링(회귀 · 분류 · 군집 · 앙상블 · 평가 지표), 빅데이터 · AI 실무(전처리 · 모델 평가 · 생성형 AI)를 다룹니다. 모든 문제에 정답과 해설이 있습니다.",
   },
 ];
 
