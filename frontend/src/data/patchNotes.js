@@ -3,6 +3,20 @@
 // status: 'released' 배포됨(master) | 'dev' 개발 브랜치에만 있음 | 'wip' 작업 중
 export const PATCH_NOTES = [
   {
+    version: '0.10.0',
+    date: '2026-11-18',
+    title: '개발(스테이징) · 운영 환경 분리',
+    status: 'released',
+    summary: 'dev 브랜치를 미리보기 사이트 · 스테이징 백엔드 · 스테이징 DB에서 확인한 뒤 운영으로 내보낼 수 있게 환경을 나눴습니다.',
+    items: [
+      { type: 'infra', text: '프론트엔드가 빌드한 곳(Vercel 운영 · 미리보기, Render)으로 배포 환경을 판단. 미리보기는 스테이징 백엔드를 호출하고 리뉴얼 안내 없이 전체 화면을 보여 준다.' },
+      { type: 'feature', text: '스테이징 화면 왼쪽 아래에 "스테이징 · 운영 데이터 아님" 표시.' },
+      { type: 'infra', text: 'Render 블루프린트에 dev 브랜치용 스테이징 백엔드 추가(Neon 스테이징 브랜치 DB 사용).' },
+      { type: 'fix', text: '운영 백엔드 깨우기를 한국 시간 08:00~02:00으로 줄여, Render 무료 사용 시간(월 750시간) 안에서 운영 · 스테이징이 함께 돌게 함.' },
+      { type: 'docs', text: 'docs/staging.md: 환경 구성, 작업 흐름(기능 → dev → master), 대시보드 설정 방법.' },
+    ],
+  },
+  {
     version: '0.9.0',
     date: '2026-11-18',
     title: '공개 패치노트 · 약관 · 토스 스타일 푸터',
