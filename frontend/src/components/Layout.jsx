@@ -37,7 +37,7 @@ function applyTheme(t) {
 const startsWithAny = (p, list) => list.some(x => p === x || p.startsWith(x + '/'));
 const NAV = [
   { to: '/algo', label: '코테', match: p => startsWithAny(p, ['/algo', '/bug-hunt']) },
-  { to: '/technical-interview', label: 'CS·면접', match: p => startsWithAny(p, ['/technical-interview', '/notes', '/web-essentials', '/interview', '/category', '/question', '/search', '/web', '/tech-blogs']) },
+  { to: '/cs', label: 'CS·면접', match: p => startsWithAny(p, ['/cs', '/technical-interview', '/notes', '/web-essentials', '/interview', '/category', '/question', '/search', '/web', '/tech-blogs']) },
   { to: '/exam', label: '실전', match: p => startsWithAny(p, ['/exam', '/duel', '/topics', '/calc', '/aptitude', '/ncs', '/major', '/major-exam', '/ssafy', '/promotion-exam']) },
   { to: '/stats', label: '내 학습', match: p => startsWithAny(p, ['/stats', '/weak', '/account', '/all']) },
 ];
