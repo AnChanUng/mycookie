@@ -65,7 +65,7 @@ export default function Layout() {
         <div className="container header-inner">
           <Link to="/" className="logo">
             <span className="logo-dot" />
-            <span className="logo-title">DevCookie</span>
+            <span className="logo-title">나의쿠키</span>
           </Link>
           <div className="header-right">
             <nav className="nav-links" aria-label="주 메뉴">

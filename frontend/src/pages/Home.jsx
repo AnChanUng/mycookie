@@ -23,7 +23,7 @@ export default function Home() {
       {/* 왼쪽은 소개와 시험 일정, 오른쪽은 문제 많이 푼 사람 순위 */}
       <div className="home-top">
         <div className="hero">
-          <h1>전산학 전공필기 준비</h1>
+          <h1>나의쿠키 · 모든 학습 메뉴</h1>
           <p>기출 기반 모의고사로 풀고, 틀린 문제는 다시 풉니다.</p>
           <div className="home-cta">
             <Link to="/notes" className="home-cta-btn primary">전공노트 →</Link>

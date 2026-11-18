@@ -183,7 +183,7 @@ public class SlackService {
                 "type", "context",
                 "elements", List.of(
                         Map.of("type", "mrkdwn",
-                                "text", "🔗 <" + baseUrl + "|CS Study Platform 바로가기>  |  꾸준한 학습이 합격의 지름길입니다!")
+                                "text", "🔗 <" + baseUrl + "|나의쿠키 바로가기>  |  꾸준한 학습이 합격의 지름길입니다!")
                 )
         ));
 
@@ -267,7 +267,7 @@ public class SlackService {
                 "type", "context",
                 "elements", List.of(
                         Map.of("type", "mrkdwn",
-                                "text", "🔗 <" + baseUrl + "|CS Study Platform 바로가기>  |  이번 주도 수고하셨습니다! 다음 주도 파이팅! 🎯")
+                                "text", "🔗 <" + baseUrl + "|나의쿠키 바로가기>  |  이번 주도 수고하셨습니다! 다음 주도 파이팅! 🎯")
                 )
         ));
 
