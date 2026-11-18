@@ -1,2 +1,15 @@
+# 공개 학습 화면은 검색에 열고, 계정 · 개인 페이지 · 메일 링크는 막는다
 User-agent: *
-Disallow: /
+Allow: /
+Disallow: /account
+Disallow: /auth/
+Disallow: /newsletter/
+Disallow: /private/
+Disallow: /p/
+Disallow: /admin/
+Disallow: /chanung
+Disallow: /search
+Disallow: /weak
+Disallow: /stats
+
+Sitemap: https://mycookie.dev/sitemap.xml

@@ -1,4 +1,5 @@
 import { Suspense, useEffect, useRef, useState } from 'react';
+import { applySeo } from '../seo';
 import SiteFooter from './SiteFooter';
 import { Link, Outlet, useLocation } from 'react-router-dom';
 import { warmUpBackend } from '../api';
@@ -77,7 +78,7 @@ export default function Layout() {
   // 첫 화면이 뜨는 동안 잠들어 있던 서버를 깨워 두면 이후 요청이 바로 온다
   useEffect(() => { warmUpBackend(); }, []);
 
-  useEffect(() => { track('view', location.pathname); }, [location.pathname]);
+  useEffect(() => { track('view', location.pathname); applySeo(location.pathname); }, [location.pathname]);
 
   return (
     <>
