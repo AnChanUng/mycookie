@@ -3,6 +3,19 @@
 // 수치는 직접 측정한 값만 적는다(측정 환경은 각 항목의 env에 적는다).
 export const TROUBLES = [
   {
+    id: 'two-cloud-accounts',
+    date: '2026-11-18',
+    area: '인프라 · 클라우드 계정',
+    title: 'Render · Neon 계정이 두 개씩이라 운영 서버를 엉뚱한 곳에서 찾음',
+    status: 'solved',
+    symptom: '운영 APP_BASE_URL을 바꾸러 Render에 들어갔더니 cs-study-backend가 "실패" 상태였고 주소도 사이트가 쓰는 i0ln이 아니었다. Neon에서는 프로젝트가 0개였다.',
+    cause: '이전에 만든 계정이 각각 두 개 있었다. 첫 Render 계정에는 옛 커밋으로 떠 있다가 DB 연결 실패로 계속 죽는 서비스와, render.yaml 블루프린트가 자동으로 만든 중복 서비스들만 있었다. 코드의 스테이징 기본 주소도 그 버려진 계정의 서비스를 가리켰다.',
+    fix: '서비스 주소를 하나씩 열어 i0ln이 없음을 확인하고 다른 계정으로 로그인해 운영 서비스를 찾았다(APP_BASE_URL은 블루프린트로 이미 반영됨). 스테이징 주소를 실제 서비스(zq0t)로 고치고 CSP에 추가했다. Neon 운영 계정에서 스키마만 복사한 staging 브랜치를 만들되, 자동 삭제 기본값(1일)을 Never로 바꿨다.',
+    result: '운영 · 스테이징 서비스의 실제 위치와 주소를 확정. DB는 홈서버(PostgreSQL)로 옮기기로 해 클라우드 스테이징 연결은 보류. 운영 데이터는 건드리지 않음.',
+    env: 'Render Dashboard · Neon Console · curl',
+    lesson: '대시보드 이름이 같아도 주소(서비스 ID · 접미사)로 확인한다. 클라우드 계정 · 서비스 목록을 문서로 남겨 두지 않으면 나중에 운영을 엉뚱한 곳에서 고치게 된다. 비밀번호가 든 연결 문자열은 직접 입력하지 않는다.',
+  },
+  {
     id: 'vercel-redirect-root',
     date: '2026-11-18',
     area: '인프라 · 도메인',
