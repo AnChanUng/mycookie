@@ -3,6 +3,17 @@
 // status: 'released' 배포됨(master) | 'dev' 개발 브랜치에만 있음 | 'wip' 작업 중
 export const PATCH_NOTES = [
   {
+    version: '0.18.0',
+    date: '2026-11-18',
+    title: '헤더 코테 메뉴: 코딩테스트 사이트 바로가기',
+    status: 'released',
+    summary: '헤더의 "코테"를 누르면 아래로 펼쳐지는 메뉴에서 백준 · 프로그래머스 · 코드트리 · 리트코드로 바로 이동합니다.',
+    items: [
+      { type: 'feature', text: '코테 펼침 메뉴: 헤더 바로 아래 전체 폭 패널에 사이트 4곳(새 탭). 데스크톱 4열 · 모바일 2열.' },
+      { type: 'improve', text: '바깥을 누르거나 Esc를 누르면 닫힘, aria-expanded · 새 탭 안내(스크린리더) · 움직임 줄이기 대응.' },
+    ],
+  },
+  {
     version: '0.17.0',
     date: '2026-11-18',
     title: '새 주소에서만 새 사이트 열기',
