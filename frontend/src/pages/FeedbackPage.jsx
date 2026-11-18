@@ -63,7 +63,7 @@ export default function FeedbackPage() {
           onChange={e => setForm({ ...form, content: e.target.value })} />
         <small className="fb-count">{form.content.length} / 2000</small>
       </label>
-      <p className="fb-note">이 내용은 공개된 GitHub 저장소의 이슈로 올라가요. 이름, 연락처 같은 개인정보는 적지 말아 주세요.{from && <> 보던 화면 주소(<code>{from}</code>)가 함께 전달돼요.</>}</p>
+      <p className="fb-note">이 내용은 운영자의 GitHub 저장소에 이슈로 등록돼요. 이름, 연락처 같은 개인정보는 적지 말아 주세요.{from && <> 보던 화면 주소(<code>{from}</code>)가 함께 전달돼요.</>}</p>
       {state.error && <p className="fb-error" role="alert">{state.error}</p>}
       <button className="fb-submit" disabled={state.busy || !form.title.trim() || !form.content.trim()}>{state.busy ? '보내는 중…' : '보내기'}</button>
     </form>}
