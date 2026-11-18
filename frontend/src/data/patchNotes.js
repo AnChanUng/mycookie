@@ -3,6 +3,18 @@
 // status: 'released' 배포됨(master) | 'dev' 개발 브랜치에만 있음 | 'wip' 작업 중
 export const PATCH_NOTES = [
   {
+    version: '0.17.0',
+    date: '2026-11-18',
+    title: '새 주소에서만 새 사이트 열기',
+    status: 'released',
+    summary: '운영 사이트에서 접속 주소로 화면을 나눴습니다. mycookie.dev로 들어오면 새 사이트 전체가, 예전 주소로 들어오면 리뉴얼 안내가 나옵니다.',
+    items: [
+      { type: 'feature', text: '리뉴얼 안내(MAINTENANCE)를 접속 주소로 판단: mycookie.dev · www · dev는 전체 화면, 그 밖의 운영 주소(cs-study-platform.vercel.app 등)는 안내 화면.' },
+      { type: 'infra', text: '예전 주소 → mycookie.dev 308 이동 규칙 제거(예전 주소는 안내 화면을 보여 주도록).' },
+      { type: 'security', text: '예전 주소에서 보이는 안내 · 푸터 · 이용약관 · 공개 패치노트에서 mycookie.dev 주소 문구를 뺌(새 주소는 공개 전까지 운영자만 사용).' },
+    ],
+  },
+  {
     version: '0.16.0',
     date: '2026-11-18',
     title: '내 학습 대시보드 · CS·면접 허브',
