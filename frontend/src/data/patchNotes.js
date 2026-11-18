@@ -3,6 +3,19 @@
 // status: 'released' 배포됨(master) | 'dev' 개발 브랜치에만 있음 | 'wip' 작업 중
 export const PATCH_NOTES = [
   {
+    version: '0.12.0',
+    date: '2026-11-18',
+    title: '로그를 레벨별 파일로 저장',
+    status: 'released',
+    summary: '홈서버에서 에러만 빠르게 찾아볼 수 있게 file-log 프로필을 켜면 로그를 레벨별 파일로 나눠 저장합니다.',
+    items: [
+      { type: 'infra', text: 'logback-spring.xml 추가. 콘솔은 그대로, file-log 프로필에서 error · warn · info · debug 파일과 전체 app.log로 나눠 저장.' },
+      { type: 'infra', text: '날짜 · 크기별로 나눠 gzip 보관, 보관 기간(에러 90일, 나머지 30일, debug 7일)과 전체 용량 상한. info · debug · 전체 파일은 비동기로 기록.' },
+      { type: 'improve', text: '레벨마다 해당 파일에만 들어가는지 확인하는 테스트 추가.' },
+      { type: 'docs', text: 'docs/logging.md: 켜는 법, 파일 · 환경변수, 자주 쓰는 명령.' },
+    ],
+  },
+  {
     version: '0.11.0',
     date: '2026-11-18',
     title: '토스 스타일 홈 · 내비게이션 리뉴얼',
