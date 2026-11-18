@@ -3,7 +3,7 @@
 | 구분 | 브랜치 | 프론트엔드 | 백엔드 | DB |
 | --- | --- | --- | --- | --- |
 | 로컬 | 작업 브랜치 | `npm run dev` (리뉴얼 안내 꺼짐) | 로컬 실행 | 로컬 PostgreSQL |
-| 스테이징 | `dev` | Vercel 미리보기 (`cs-study-platform-git-dev-anchanungs-projects.vercel.app`) | Render `cs-study-backend-staging` (`cs-study-backend-staging-zq0t.onrender.com`) | Neon `staging` 브랜치 |
+| 스테이징 | `dev` | Vercel 미리보기 (**`dev.mycookie.dev`**, Vercel 로그인 필요) | Render `cs-study-backend-staging` (`cs-study-backend-staging-zq0t.onrender.com`) | Neon `staging` 브랜치 |
 | 운영 | `master` | Vercel 운영 (`mycookie.dev`, 예전 주소 `cs-study-platform.vercel.app`도 동작) | Render `cs-study-backend` | Neon 운영(main) |
 
 - 프론트엔드는 빌드한 곳으로 환경을 정합니다(`vite.config.js`의 `deployEnv`). Vercel 운영과 Render 정적 사이트는 `production`, Vercel 미리보기는 `preview`, 그 밖은 `local`입니다.
