@@ -8,12 +8,12 @@ import './TechnicalInterviewPage.css';
 const identity = () => account()?.token || '';
 const knownIds = new Set(TECHNICAL_INTERVIEW.map(q => q.id));
 const randomQuestion = questions => questions[Math.floor(Math.random() * questions.length)];
-export default function TechnicalInterviewPage() {
+export default function TechnicalInterviewPage({ back = { to: '/chanung', label: '← 기업별 면접 준비' } }) {
   const token = useSyncExternalStore(onAccountChange, identity, () => '');
-  return <InterviewWorkspace key={token} />;
+  return <InterviewWorkspace key={token} back={back} />;
 }
-function InterviewWorkspace() {
-  const { hash, search } = useLocation();
+function InterviewWorkspace({ back }) {
+  const { hash, search, pathname } = useLocation();
   const requestedTrack = new URLSearchParams(search).get('track');
   const navigate = useNavigate();
   const selected = TECHNICAL_INTERVIEW.find(q => q.id === hash.slice(1));
@@ -43,7 +43,7 @@ function InterviewWorkspace() {
     catch { setStorageError(true); }
   };
   const choose = id => {
-    navigate(`/p/7b92e1c4-a6d8-4f03-9c51-26de8a740bf9/technical?track=${track}#${id}`, { replace: true });
+    navigate(`${pathname}?track=${track}#${id}`, { replace: true });
     document.getElementById(id)?.scrollIntoView({ block: 'start' });
   };
   useEffect(() => {
@@ -51,7 +51,7 @@ function InterviewWorkspace() {
   }, [hash]);
   const chooseTrack = id => {
     setTrack(id); setCategory(''); setQuery('');
-    navigate(`/p/7b92e1c4-a6d8-4f03-9c51-26de8a740bf9/technical?track=${id}`, { replace: true });
+    navigate(`${pathname}?track=${id}`, { replace: true });
   };
   const chooseRandom = () => {
     if (!visible.length) return;
@@ -60,7 +60,7 @@ function InterviewWorkspace() {
   };
   return <div className="cs-notes technical-interview-notes">
     <header className="notes-heading">
-      <div><Link to="/chanung">← 기업별 면접 준비</Link><h1>{source.name}</h1><p>{INTERVIEW_TRACKS.length}개 자료 / 총 {TECHNICAL_INTERVIEW.length}개 질문</p></div>
+      <div><Link to={back.to}>{back.label}</Link><h1>{source.name}</h1><p>{INTERVIEW_TRACKS.length}개 자료 / 총 {TECHNICAL_INTERVIEW.length}개 질문</p></div>
       <div className="notes-progress"><strong>학습 완료 {completed.length} / {TECHNICAL_INTERVIEW.length}</strong><progress value={completed.length} max={TECHNICAL_INTERVIEW.length} aria-label="기술면접 학습 완료" /></div>
       <Link to="/account">내 계정 →</Link>
     </header>

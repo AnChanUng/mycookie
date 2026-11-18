@@ -1,7 +1,6 @@
 import { useSyncExternalStore } from 'react';
 import { Link } from 'react-router-dom';
 import { account, onAccountChange } from '../sync';
-import { TECHNICAL_INTERVIEW } from '../data/technicalInterview';
 import { CS_NOTES } from '../data/csNotes';
 import { WEB_ESSENTIALS } from '../data/webEssentials';
 import TodayCs from '../components/TodayCs';
@@ -19,16 +18,10 @@ const tokenSnapshot = () => account()?.token || '';
 export default function CsHubPage() {
   useSyncExternalStore(onAccountChange, tokenSnapshot, () => '');
   const user = account();
-  const interviewDone = (readJson(`technical-interview:v1:${user ? `user:${user.id || user.nickname}` : 'guest'}`, []) || []).length;
   const notesDone = user ? Object.values(readJson(`cs-notes:v1:${user.nickname}`, {}) || {}).filter(v => v?.done).length : null;
   const notesTotal = CS_NOTES.reduce((n, s) => n + (s.items?.length || 0), 0);
 
   const tracks = [
-    {
-      to: '/technical-interview', icon: '💬', title: '기술면접 질문',
-      body: '먼저 내 말로 설명해 보고 예시 답변과 꼬리질문으로 빈틈을 채워요.',
-      done: interviewDone, total: TECHNICAL_INTERVIEW.length, unit: '질문',
-    },
     {
       to: '/notes', icon: '📚', title: '전공노트',
       body: '운영체제 · 네트워크 · 데이터베이스 · 자료구조를 주제별로 정리했어요.',
@@ -38,6 +31,10 @@ export default function CsHubPage() {
       to: '/web-essentials', icon: '🌐', title: '웹 필수지식',
       body: 'HTTP · 쿠키 · 세션 · JWT · CORS처럼 백엔드 면접 단골 질문을 문답으로.',
       total: WEB_ESSENTIALS.items.length, unit: '문답',
+    },
+    {
+      to: '/topics', icon: '🧩', title: '주제별 통합 문제집',
+      body: '과목별로 모은 문제를 풀며 개념을 확인하고, 틀린 문제는 다시 풀어요.',
     },
     {
       to: '/interview', icon: '🎥', title: '면접 공통질문 연습',
@@ -84,7 +81,6 @@ export default function CsHubPage() {
       <section className="ml-section ml-panel cs-more" aria-labelledby="cs-more">
         <h2 id="cs-more">더 둘러보기</h2>
         <div className="cs-links">
-          <Link to="/topics">주제별 통합 문제집 →</Link>
           <Link to="/tech-blogs">기업 기술 블로그 →</Link>
           <Link to="/search">질문 검색 →</Link>
         </div>

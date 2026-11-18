@@ -55,9 +55,9 @@ function CountUp({ to, suffix = '' }) {
 const FEATURES = [
   {
     key: 'interview',
-    eyebrow: 'CS · 기술면접',
+    eyebrow: 'CS · 면접',
     title: ['면접 질문, 먼저 말해 보고', '답을 펼쳐 보세요'],
-    body: '기술면접 질문 152개와 전공노트를 주제별로 정리했어요. 직접 설명해 본 뒤 예시 답변과 꼬리질문으로 빈틈을 채워요.',
+    body: '전공노트와 웹 필수지식을 주제별로 정리했어요. 직접 설명해 본 뒤 정리된 답으로 빈틈을 채워요.',
     to: '/cs',
     cta: 'CS · 면접 준비하기',
     visual: 'interview',
@@ -152,7 +152,7 @@ export default function Landing() {
           <div className="l-cta" data-reveal>
             {signedIn
               ? <Link to="/stats" className="l-btn primary">내 학습 이어가기</Link>
-              : <Link to="/technical-interview" className="l-btn primary">지금 시작하기</Link>}
+              : <Link to="/cs" className="l-btn primary">지금 시작하기</Link>}
             <Link to="/duel" className="l-btn ghost">실전 대결 해보기</Link>
           </div>
         </div>
@@ -196,7 +196,7 @@ export default function Landing() {
         <div className="l-wrap">
           <h2 data-reveal>지금 준비할 수 있는 것들</h2>
           <div className="l-number-grid">
-            {[[152, '개', '기술면접 질문'], [57, '개', '웹 필수지식 문답'], [109, '개', '전공 학습 문서'], [1393, '문제', '대결 문제']].map(([n, unit, label]) => (
+            {[[169, '개', '전공 개념 정리'], [57, '개', '웹 필수지식 문답'], [109, '개', '전공 학습 문서'], [1393, '문제', '대결 문제']].map(([n, unit, label]) => (
               <div key={label} className="l-number" data-reveal>
                 <b><CountUp to={n} /></b><span>{unit}</span>
                 <p>{label}</p>
@@ -209,7 +209,7 @@ export default function Landing() {
       <section className="l-final">
         <div className="l-wrap" data-reveal>
           <h2>오늘의 한 문제부터<br />시작해 볼까요?</h2>
-          <Link to={signedIn ? '/stats' : '/technical-interview'} className="l-btn light">{signedIn ? '내 학습 이어가기' : '무료로 시작하기'}</Link>
+          <Link to={signedIn ? '/stats' : '/cs'} className="l-btn light">{signedIn ? '내 학습 이어가기' : '무료로 시작하기'}</Link>
           <p className="l-all"><Link to="/all">모든 학습 메뉴 보기 →</Link></p>
         </div>
       </section>
