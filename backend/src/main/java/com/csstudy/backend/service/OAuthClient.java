@@ -20,7 +20,10 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class OAuthClient {
 
-    public record Profile(String provider, String subject, String email, String name) {}
+    // ageRange: 네이버 연령대(예: "20-29"). 동의한 경우에만 오고, 다른 제공자는 비어 있다
+    public record Profile(String provider, String subject, String email, String name, String ageRange) {
+        public Profile(String provider, String subject, String email, String name) { this(provider, subject, email, name, null); }
+    }
 
     record Spec(String authorizeUrl, String tokenUrl, String userUrl, String scope) {}
 
@@ -88,7 +91,7 @@ public class OAuthClient {
                 case "naver" -> {
                     JsonNode r = user.path("response");
                     String name = text(r, "nickname");
-                    yield new Profile(provider, r.path("id").asText(""), text(r, "email"), name != null ? name : text(r, "name"));
+                    yield new Profile(provider, r.path("id").asText(""), text(r, "email"), name != null ? name : text(r, "name"), ageRange(text(r, "age")));
                 }
                 default -> new Profile(provider, user.path("id").asText(), text(user, "email"),
                         text(user, "login"));
@@ -96,6 +99,11 @@ public class OAuthClient {
         } catch (RestClientException e) {
             throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "로그인 제공자와 연결하지 못했습니다. 잠시 후 다시 시도해 주세요.");
         }
+    }
+
+    // 네이버 연령대 값은 "20-29" 같은 모양만 받는다(이상한 값은 저장하지 않는다)
+    static String ageRange(String age) {
+        return age != null && age.matches("\\d{1,3}-(\\d{1,3})?") ? age : null;
     }
 
     private static String text(JsonNode node, String field) {

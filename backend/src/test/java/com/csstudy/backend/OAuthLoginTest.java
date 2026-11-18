@@ -136,6 +136,23 @@ class OAuthLoginTest {
         postJson("/api/v1/auth/login", Map.of("nickname", "새회원", "password", "my-pass"), null).andExpect(status().isOk());
     }
 
+    // 네이버 연령대는 가입할 때 저장되고, 다음 로그인에서 바뀌면 새 값으로 바뀐다
+    @Test void naverAgeRangeIsSavedAndRefreshed() throws Exception {
+        when(client.fetch(eq("naver"), eq("code-n-1"), eq(REDIRECT), anyString()))
+                .thenReturn(new OAuthClient.Profile("naver", "n-1", null, "쿠키", "20-29"));
+        JsonNode first = read(postJson("/api/v1/auth/oauth/naver/callback",
+                Map.of("code", "code-n-1", "state", state("naver"), "redirectUri", REDIRECT), null).andExpect(status().isOk()));
+        postJson("/api/v1/auth/oauth/signup", Map.of("ticket", first.path("ticket").asText(), "nickname", "네이버회원"), null)
+                .andExpect(status().isOk());
+        assertEquals("20-29", socials.findByProviderAndProviderUserId("naver", "n-1").orElseThrow().getAgeRange());
+
+        when(client.fetch(eq("naver"), eq("code-n-2"), eq(REDIRECT), anyString()))
+                .thenReturn(new OAuthClient.Profile("naver", "n-1", null, "쿠키", "30-39"));
+        postJson("/api/v1/auth/oauth/naver/callback", Map.of("code", "code-n-2", "state", state("naver"), "redirectUri", REDIRECT), null)
+                .andExpect(status().isOk());
+        assertEquals("30-39", socials.findByProviderAndProviderUserId("naver", "n-1").orElseThrow().getAgeRange());
+    }
+
     @Test void plainLoginStillWorks() throws Exception {
         register("일반회원");
         postJson("/api/v1/auth/login", Map.of("nickname", "일반회원", "password", "pw-1234"), null).andExpect(status().isOk());

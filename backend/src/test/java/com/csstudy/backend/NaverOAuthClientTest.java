@@ -40,11 +40,11 @@ class NaverOAuthClientTest {
         server.expect(requestTo("https://openapi.naver.com/v1/nid/me"))
                 .andExpect(header("Authorization", "Bearer at-1"))
                 .andRespond(withSuccess("{\"resultcode\":\"00\",\"message\":\"success\",\"response\":"
-                        + "{\"id\":\"naver-123\",\"email\":\"a@naver.com\",\"nickname\":\"쿠키\"}}", MediaType.APPLICATION_JSON));
+                        + "{\"id\":\"naver-123\",\"email\":\"a@naver.com\",\"nickname\":\"쿠키\",\"age\":\"20-29\"}}", MediaType.APPLICATION_JSON));
 
         OAuthClient.Profile profile = client.fetch("naver", "c-1", REDIRECT, "st-1");
 
-        assertThat(profile).isEqualTo(new OAuthClient.Profile("naver", "naver-123", "a@naver.com", "쿠키"));
+        assertThat(profile).isEqualTo(new OAuthClient.Profile("naver", "naver-123", "a@naver.com", "쿠키", "20-29"));
         server.verify();
     }
 }
