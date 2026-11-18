@@ -1,28 +1,4 @@
 {
-  "redirects": [
-    {
-      "source": "/",
-      "has": [
-        {
-          "type": "host",
-          "value": "cs-study-platform.vercel.app"
-        }
-      ],
-      "destination": "https://mycookie.dev/",
-      "permanent": true
-    },
-    {
-      "source": "/:path+",
-      "has": [
-        {
-          "type": "host",
-          "value": "cs-study-platform.vercel.app"
-        }
-      ],
-      "destination": "https://mycookie.dev/",
-      "permanent": true
-    }
-  ],
   "rewrites": [
     {
       "source": "/(.*)",
