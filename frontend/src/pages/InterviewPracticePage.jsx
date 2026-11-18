@@ -146,7 +146,7 @@ export default function InterviewPracticePage() {
       <div className="interview-header">
         <h1 className="interview-title">면접 공통질문 연습</h1>
         <p className="interview-subtitle">카메라와 마이크를 켜고 실전처럼 연습하세요</p>
-        <Link className="exam-btn" to="/technical-interview">오토에버 / AWS 기술면접 준비 →</Link>
+        <Link className="exam-btn" to="/notes">전공노트로 개념 복습 →</Link>
       </div>
 
       <div className="interview-categories">
