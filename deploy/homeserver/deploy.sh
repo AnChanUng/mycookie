@@ -4,7 +4,7 @@
 set -euo pipefail
 
 ROOT=/srv/devcookie
-REPO=https://github.com/AnChanUng/DevCookie.git
+REPO=https://github.com/AnChanUng/mycookie.git
 COMPOSE=(docker compose --project-directory "$ROOT" -f "$ROOT/app/deploy/homeserver/docker-compose.yml" --env-file "$ROOT/.env")
 FORCE=${1:-}
 

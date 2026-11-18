@@ -118,7 +118,7 @@ sudo systemctl enable --now docker
 ```bash
 sudo useradd -m -s /bin/bash -G docker devcookie
 sudo mkdir -p /srv/devcookie && sudo chown devcookie: /srv/devcookie
-sudo -u devcookie git clone --branch master https://github.com/AnChanUng/DevCookie.git /srv/devcookie/app
+sudo -u devcookie git clone --branch master https://github.com/AnChanUng/mycookie.git /srv/devcookie/app
 
 sudo -u devcookie cp /srv/devcookie/app/deploy/homeserver/.env.example /srv/devcookie/.env
 sudo chmod 600 /srv/devcookie/.env

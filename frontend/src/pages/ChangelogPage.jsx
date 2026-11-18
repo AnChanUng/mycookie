@@ -8,7 +8,7 @@ export default function ChangelogPage() {
       <header className="info-hero">
         <p className="info-eyebrow">Patch Notes</p>
         <h1>패치노트</h1>
-        <p>DevCookie가 언제 무엇을 바꿨는지 모았어요.</p>
+        <p>나의쿠키가 언제 무엇을 바꿨는지 모았어요.</p>
       </header>
       {CHANGELOG.map(y => (
         <section key={y.year} className="changelog-year" aria-labelledby={`year-${y.year}`}>

@@ -1,6 +1,6 @@
 <div align="center">
 
-# DevCookie
+# 나의쿠키 (mycookie.dev)
 
 ### 신입 개발자 취업 준비를 한 곳에서
 

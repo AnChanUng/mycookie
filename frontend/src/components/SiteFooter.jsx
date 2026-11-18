@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import './SiteFooter.css';
 
-const GITHUB = 'https://github.com/AnChanUng/DevCookie';
+const GITHUB = 'https://github.com/AnChanUng/mycookie';
 
 // 사이트 맨 아래 푸터. 필수 안내(패치노트 · 이용약관 · 개인정보 처리방침)만 둔다
 export default function SiteFooter() {
@@ -29,10 +29,10 @@ export default function SiteFooter() {
           </nav>
         </div>
         <p className="site-footer-legal">
-          DevCookie는 개인이 운영하는 비영리 학습 서비스입니다. 문제와 해설은 학습용으로 새로 작성한 것이며 실제 시험이나 기업의 공식 자료가 아닙니다.
+          나의쿠키는 개인이 운영하는 비영리 학습 서비스입니다. 문제와 해설은 학습용으로 새로 작성한 것이며 실제 시험이나 기업의 공식 자료가 아닙니다.
         </p>
-        <p className="site-footer-brand" aria-hidden="true">DevCookie</p>
-        <p className="site-footer-copy">© 2026 DevCookie. All rights reserved.</p>
+        <p className="site-footer-brand" aria-hidden="true">나의쿠키</p>
+        <p className="site-footer-copy">© 2026 나의쿠키 (mycookie.dev). All rights reserved.</p>
       </div>
     </footer>
   );
