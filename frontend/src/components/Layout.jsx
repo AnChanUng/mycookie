@@ -1,4 +1,4 @@
-import { Suspense, useEffect, useRef, useState } from 'react';
+import { Suspense, useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { applySeo } from '../seo';
 import SiteFooter from './SiteFooter';
 import { Link, Outlet, useLocation } from 'react-router-dom';
@@ -9,6 +9,7 @@ import StudyAmbience from './StudyAmbience';
 import StudyCount from './StudyCount';
 import RankWelcome from './RankWelcome';
 import MemberMenu from './MemberMenu';
+import { account, onAccountChange } from '../sync';
 import PromotionAnnouncements from './PromotionAnnouncements';
 
 // 카오스 고양이 챗봇은 잠시 숨겨 둔다. true로 바꾸면 다시 나온다
@@ -71,7 +72,11 @@ const CODING_SITES = [
   { name: '리트코드', desc: '해외 기업 인터뷰 문제', href: 'https://leetcode.com/problemset/' },
 ];
 
+const tokenSnapshot = () => account()?.token || '';
+
 export default function Layout() {
+  // 로그인하지 않았을 때만 머리말에 로그인 버튼을 보여 준다
+  const signedIn = !!useSyncExternalStore(onAccountChange, tokenSnapshot, () => '');
   const location = useLocation();
   // 화면 모드는 index.html에서 먼저 적용해 두고, 여기서는 바꿀 때만 반영하고 기억한다
   const [theme, setThemeState] = useState(() => (THEMES.some(t => t.key === document.documentElement.dataset.theme) ? document.documentElement.dataset.theme : 'light'));
@@ -122,6 +127,7 @@ export default function Layout() {
                 </Link>
               ))}
             </nav>
+            {!signedIn && <Link to="/account#settings" className="header-login">로그인</Link>}
             {/* 지금 모드의 아이콘을 보여 주고, 누르면 색 견본이 펼쳐진다 */}
             <div className="theme-pick">
               <button type="button" className="theme-toggle" onClick={() => setPicking(!picking)} title="화면 모드 고르기" aria-label="화면 모드 고르기" aria-expanded={picking}>

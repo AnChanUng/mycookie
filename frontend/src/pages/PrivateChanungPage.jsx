@@ -1,5 +1,6 @@
 import { lazy, Suspense, useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
+import { decodePrivateId, privatePath } from '../privatePath';
 import { CompanyExam } from './ExamCompanyPage';
 import RagAssistant from './RagAssistant';
 import './CsNotesPage.css';
@@ -13,7 +14,8 @@ const OthersInterviews = lazy(() => import('./TechnicalInterviewPage'));
 const SALT = 'cs-study:private-chanung:';
 const HASH = 'f213708a8ac885488c9d63259093a953f3820b9fed68fd452c10758ce8a285a4';
 const STORE = 'private-chanung-unlocked';
-const BASE = '/private/chanung';
+// 화면 안 링크는 알아보기 어려운 주소로 만든다(privatePath.js)
+const BASE = privatePath();
 
 async function sha256(text) {
   const bytes = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
@@ -25,7 +27,9 @@ function readUnlocked() {
 }
 
 export default function PrivateChanungPage() {
-  const { id } = useParams();
+  // 주소에는 메뉴 이름을 base64url로 바꿔 둔다(/x/…/YWRtaW4 → admin)
+  const { code } = useParams();
+  const id = code ? decodePrivateId(code) : undefined;
   const [unlocked, setUnlocked] = useState(readUnlocked);
   const [data, setData] = useState(null);
   const [loadError, setLoadError] = useState(false);
@@ -251,27 +255,27 @@ function PrivateList({ data, onLock }) {
       <section style={{ marginTop: 24 }}>
         <div className="section-title">개발 기록</div>
         <div className="exam-company-grid">
-          <Link to={`${BASE}/trouble`} className="exam-company-card">
+          <Link to={privatePath("trouble")} className="exam-company-card">
             <span className="exam-company-abbr">LOG</span>
             <span className="exam-company-name">트러블슈팅 기록</span>
             <span className="exam-company-meta">개발하면서 겪은 기술 문제 · 원인 · 해결 · 측정 결과</span>
           </Link>
-          <Link to={`${BASE}/admin`} className="exam-company-card">
+          <Link to={privatePath("admin")} className="exam-company-card">
             <span className="exam-company-abbr">ADMIN</span>
             <span className="exam-company-name">관리자 모니터링</span>
             <span className="exam-company-meta">이용 현황 · 풀이 · 방문자 · 보안 · 제보 · 채팅 · 계정 · 시스템</span>
           </Link>
-          <Link to={`${BASE}/patch-notes`} className="exam-company-card">
+          <Link to={privatePath("patch-notes")} className="exam-company-card">
             <span className="exam-company-abbr">NOTE</span>
             <span className="exam-company-name">개발 패치노트</span>
             <span className="exam-company-meta">버전별 새 기능 · 개선 · 수정 · 보안 · 인프라 변경</span>
           </Link>
-          <Link to={`${BASE}/interviews`} className="exam-company-card">
+          <Link to={privatePath("interviews")} className="exam-company-card">
             <span className="exam-company-abbr">면접</span>
             <span className="exam-company-name">다른 사람 면접</span>
             <span className="exam-company-meta">AWS · 현대오토에버 면접 복기 질문과 예시 답변 · 꼬리질문</span>
           </Link>
-          <Link to={`${BASE}/assistant`} className="exam-company-card">
+          <Link to={privatePath("assistant")} className="exam-company-card">
             <span className="exam-company-abbr">RAG</span>
             <span className="exam-company-name">RAG 학습 도우미</span>
             <span className="exam-company-meta">학습 자료 근거로만 답하고, 근거 없는 질문은 거부</span>
@@ -291,7 +295,7 @@ function PrivateList({ data, onLock }) {
           <p className="exam-lede">{group.desc}</p>
           <div className="exam-company-grid">
             {group.banks.map(bank => (
-              <Link key={data.privateBankId(group, bank)} to={`${BASE}/${data.privateBankId(group, bank)}`} className="exam-company-card">
+              <Link key={data.privateBankId(group, bank)} to={privatePath(data.privateBankId(group, bank))} className="exam-company-card">
                 <span className="exam-company-abbr">{bank.abbr}</span>
                 <span className="exam-company-name">{bank.name}</span>
                 {bank.source?.label && <span className="exam-company-source">{bank.source.label}</span>}

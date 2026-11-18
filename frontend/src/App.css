@@ -4371,3 +4371,8 @@ a.goal-exam:hover { border-color: var(--accent-blue); }
 /* 웹 개발 화면: 분야(백엔드 · 웹 기본기)별 묶음 */
 .web-group { margin-top: 28px; }
 .web-group-title { font-size: 1.05rem; font-weight: 700; margin: 0 0 12px; color: var(--text-primary); }
+
+/* 머리말 로그인 버튼(로그인하지 않았을 때만, 화면 모드 아이콘 왼쪽) */
+.header-login { display: inline-flex; align-items: center; height: 34px; padding: 0 14px; border-radius: 8px; background: var(--accent-blue); color: #fff; font-size: .82rem; font-weight: 700; text-decoration: none; white-space: nowrap; }
+.header-login:hover { filter: brightness(1.06); color: #fff; }
+@media (max-width: 640px) { .header-login { height: 30px; padding: 0 10px; font-size: .76rem; } }

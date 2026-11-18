@@ -42,6 +42,7 @@ const MajorExamPage = lazy(() => import('./pages/MajorExamPage'));
 const ExamListPage = lazy(() => import('./pages/ExamListPage'));
 const ExamCompanyPage = lazy(() => import('./pages/ExamCompanyPage'));
 const PrivateChanungPage = lazy(() => import('./pages/PrivateChanungPage'));
+const PrivateRedirect = lazy(() => import('./pages/PrivateRedirect'));
 const TopicPage = lazy(() => import('./pages/TopicPage'));
 const AlgoPage = lazy(() => import('./pages/AlgoPage'));
 const DuelPage = lazy(() => import('./pages/DuelPage'));
@@ -66,10 +67,12 @@ function App() {
   if (MAINTENANCE) return (
     <BrowserRouter>
       <Routes>
-        <Route path="private/chanung" element={<RenewalShell />}>
+        <Route path="x/c7e19b4f2d" element={<RenewalShell />}>
           <Route index element={<PrivateChanungPage />} />
-          <Route path=":id" element={<PrivateChanungPage />} />
+          <Route path=":code" element={<PrivateChanungPage />} />
         </Route>
+        <Route path="private/chanung" element={<PrivateRedirect />} />
+        <Route path="private/chanung/:id" element={<PrivateRedirect />} />
         <Route path="admin/cu" element={<Navigate to="/private/chanung/admin" replace />} />
         {/* 리뉴얼 기간에도 패치노트 · 약관은 공개한다 */}
         <Route element={<RenewalShell footer />}>
@@ -139,8 +142,11 @@ function App() {
           <Route path="aptitude" element={<AptitudePage />} />
           <Route path="aptitude/:company" element={<ExamCompanyPage />} />
           <Route path="computer-general" element={<Navigate to="/private/chanung" replace />} />
-          <Route path="private/chanung" element={<PrivateChanungPage />} />
-          <Route path="private/chanung/:id" element={<PrivateChanungPage />} />
+          {/* 관리자: 들어오는 주소는 /private/chanung, 화면 안에서는 메뉴 이름이 안 보이는 주소(privatePath.js) */}
+          <Route path="x/c7e19b4f2d" element={<PrivateChanungPage />} />
+          <Route path="x/c7e19b4f2d/:code" element={<PrivateChanungPage />} />
+          <Route path="private/chanung" element={<PrivateRedirect />} />
+          <Route path="private/chanung/:id" element={<PrivateRedirect />} />
           <Route path="topics" element={<TopicPage />} />
           <Route path="algo" element={<AlgoPage />} />
           <Route path="calc" element={<CalcPage />} />

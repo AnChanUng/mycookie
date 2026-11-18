@@ -4,6 +4,7 @@ Allow: /
 Disallow: /auth/
 Disallow: /newsletter/
 Disallow: /private/
+Disallow: /x/
 Disallow: /p/
 Disallow: /admin/
 Disallow: /chanung

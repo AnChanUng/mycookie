@@ -61,7 +61,7 @@
       ]
     },
     {
-      "source": "/:dir(auth|newsletter|private|p|admin|chanung)/:path*",
+      "source": "/:dir(auth|newsletter|private|p|admin|chanung|x)/:path*",
       "headers": [
         {
           "key": "X-Robots-Tag",
