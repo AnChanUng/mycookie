@@ -3,6 +3,19 @@
 // 수치는 직접 측정한 값만 적는다(측정 환경은 각 항목의 env에 적는다).
 export const TROUBLES = [
   {
+    id: 'vercel-redirect-root',
+    date: '2026-11-18',
+    area: '인프라 · 도메인',
+    title: '예전 주소 이동 규칙이 첫 화면(/)에만 적용되지 않음',
+    status: 'solved',
+    symptom: 'vercel.json에 호스트가 cs-study-platform.vercel.app이면 mycookie.dev/:path*로 308 이동하는 규칙을 넣었다. /changelog는 이동했는데 첫 화면(/)만 200으로 그대로 열렸다.',
+    cause: '/:path* 패턴이 빈 경로인 루트(/)와 맞지 않았다. 루트 응답은 정적 index.html로 처리되고 엣지 캐시(X-Vercel-Cache: HIT)에서 나와 고쳐지지 않은 것처럼 보였다.',
+    fix: '규칙을 두 개로 나눴다: "/" → https://mycookie.dev/, "/:path+" → https://mycookie.dev/:path+. 둘 다 같은 호스트 조건(has: host)을 건다.',
+    result: '예전 주소의 / · /terms · /changelog?x=1 모두 308로 mycookie.dev의 같은 경로로 이동. dev 미리보기 주소는 호스트가 달라 영향 없음(그대로 Vercel 로그인 보호).',
+    env: 'Vercel redirects(vercel.json) · curl -I',
+    lesson: '이동 규칙은 루트 · 하위 경로 · 쿼리를 각각 curl -I로 확인한다. 와일드카드가 빈 경로까지 맞는다고 가정하지 않는다.',
+  },
+  {
     id: 'gabia-dev-dns',
     date: '2026-11-18',
     area: '인프라 · 도메인',

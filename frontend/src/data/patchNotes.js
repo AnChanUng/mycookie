@@ -3,6 +3,17 @@
 // status: 'released' 배포됨(master) | 'dev' 개발 브랜치에만 있음 | 'wip' 작업 중
 export const PATCH_NOTES = [
   {
+    version: '0.15.0',
+    date: '2026-11-18',
+    title: '예전 주소를 mycookie.dev로 이동',
+    status: 'released',
+    summary: 'cs-study-platform.vercel.app으로 들어오면 mycookie.dev의 같은 경로로 영구 이동합니다.',
+    items: [
+      { type: 'infra', text: 'vercel.json에 호스트 조건 308 이동 추가: / → mycookie.dev/, /<경로> → mycookie.dev/<경로>(쿼리 유지). 미리보기 주소는 그대로.' },
+      { type: 'fix', text: '첫 번째 규칙(/:path*)이 루트에 맞지 않던 문제를 / 와 /:path+ 두 규칙으로 나눠 해결.' },
+    ],
+  },
+  {
     version: '0.14.0',
     date: '2026-11-18',
     title: '서비스 이름을 나의쿠키로 변경',
