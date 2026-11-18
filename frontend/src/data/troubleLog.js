@@ -3,6 +3,19 @@
 // 수치는 직접 측정한 값만 적는다(측정 환경은 각 항목의 env에 적는다).
 export const TROUBLES = [
   {
+    id: 'logback-test-reinit',
+    date: '2026-11-18',
+    area: '테스트',
+    title: '테스트에서 file-log 프로필을 켜도 로그 파일이 생기지 않음',
+    status: 'solved',
+    symptom: '레벨별 로그 파일 테스트를 @ActiveProfiles("test", "file-log")로 돌렸는데, 로그에 두 프로필이 켜졌다고 나오면서도 로그 폴더가 아예 만들어지지 않았다.',
+    cause: '스프링 부트는 같은 JVM에서 로그 시스템을 한 번 초기화하면 다음 테스트 컨텍스트에서는 다시 읽지 않는다(테스트 속도를 위한 동작). 앞서 실행된 다른 테스트의 설정(file-log 없음)이 그대로 남아 있었다.',
+    fix: '이 테스트만 스프링 컨텍스트 없이 LoggingSystem을 직접 cleanUp → initialize해서 file-log 환경으로 다시 읽고, 끝나면 원래 설정으로 되돌렸다.',
+    result: '테스트가 다른 테스트 순서와 상관없이 통과하고, DB를 띄우지 않아 1초 안에 끝난다. 전체 96개 중 기존 실패 1개(승급 문구) 외 모두 통과.',
+    env: '로컬 JDK 21 · Spring Boot 3.5.16 · Logback',
+    lesson: '로그 설정처럼 JVM 전체에 한 번만 적용되는 것은 스프링 테스트 컨텍스트 캐시와 따로 움직인다. 프로필로 바뀌는 설정은 직접 다시 초기화해서 확인한다.',
+  },
+  {
     id: 'stale-menu-check',
     date: '2026-11-18',
     area: '테스트',
