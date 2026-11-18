@@ -14,6 +14,7 @@ export default function SiteFooter() {
             <div>
               <h2>소식</h2>
               <ul>
+                <li><Link to="/intro">서비스 소개</Link></li>
                 <li><Link to="/changelog">패치노트</Link></li>
                 <li><a href={GITHUB} target="_blank" rel="noreferrer">GitHub</a></li>
               </ul>
