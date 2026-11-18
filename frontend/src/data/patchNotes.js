@@ -3,6 +3,18 @@
 // status: 'released' 배포됨(master) | 'dev' 개발 브랜치에만 있음 | 'wip' 작업 중
 export const PATCH_NOTES = [
   {
+    version: '0.21.0',
+    date: '2026-11-18',
+    title: '웹 디자인 시스템 · 메인 다시 다듬기',
+    status: 'released',
+    summary: '색 · 글자 · 간격 · 카드 · 버튼 등을 공통 부품으로 정리한 디자인 시스템(styles/ds.css)을 만들고, 메인 화면을 이 부품으로 다시 구성했습니다.',
+    items: [
+      { type: 'feature', text: '디자인 시스템: 토큰(색 · 글자 · 간격 · 둥글기 · 그림자 · 움직임)과 부품(ds-card · btn · chip · badge · icon · list · stat · tile · bar · rise). 테마 변수를 따라 다크 · 크림 등 모든 모드에서 동작. 문서 docs/design-system.md.' },
+      { type: 'feature', text: '메인: 인사 + "오늘의 목표" 진행 링(오늘의 CS n/5), 오늘의 CS · 실시간 대결(LIVE 배지 · 참가자 아바타), 이어서 하기(진행 막대) · 내 학습 · 다시 풀기, 코딩테스트 타일, CS·면접 목록, 실전 문제집 칩, 소개 배너.' },
+      { type: 'improve', text: '휴대폰: 2칸 타일 · 실전 문제집 옆으로 넘기기 · 인사 한 줄로 페이지 길이 3,257px → 2,509px. 데스크톱 · 375px · 다크 확인.' },
+    ],
+  },
+  {
     version: '0.20.1',
     date: '2026-11-18',
     title: 'GitHub 저장소 비공개 전환',
