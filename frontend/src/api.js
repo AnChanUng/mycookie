@@ -2,7 +2,7 @@ import axios from 'axios';
 
 const BACKEND = 'https://cs-study-backend-i0ln.onrender.com/api/v1';
 // 스테이징 백엔드(dev 브랜치). Render에서 정해진 주소는 Vercel 미리보기 환경변수 VITE_STAGING_API_URL로 넣는다
-const STAGING = import.meta.env.VITE_STAGING_API_URL || 'https://cs-study-backend-staging.onrender.com/api/v1';
+const STAGING = import.meta.env.VITE_STAGING_API_URL || 'https://cs-study-backend-staging-zq0t.onrender.com/api/v1';
 
 export const DEPLOY_ENV = import.meta.env.VITE_DEPLOY_ENV || 'local';
 
