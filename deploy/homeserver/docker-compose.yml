@@ -14,6 +14,14 @@ x-backend: &backend
     SLACK_ENABLED: "false"
     TRUST_FORWARDED_FOR: "true"
     SPRING_JPA_SHOW_SQL: "false"
+    # 소셜 · 깃허브 로그인 키. 비어 있으면 그 로그인 버튼만 숨겨진다
+    OAUTH_STATE_SECRET: ${OAUTH_STATE_SECRET:-}
+    OAUTH_GOOGLE_CLIENT_ID: ${OAUTH_GOOGLE_CLIENT_ID:-}
+    OAUTH_GOOGLE_CLIENT_SECRET: ${OAUTH_GOOGLE_CLIENT_SECRET:-}
+    OAUTH_KAKAO_CLIENT_ID: ${OAUTH_KAKAO_CLIENT_ID:-}
+    OAUTH_KAKAO_CLIENT_SECRET: ${OAUTH_KAKAO_CLIENT_SECRET:-}
+    OAUTH_GITHUB_CLIENT_ID: ${OAUTH_GITHUB_CLIENT_ID:-}
+    OAUTH_GITHUB_CLIENT_SECRET: ${OAUTH_GITHUB_CLIENT_SECRET:-}
   healthcheck:
     test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:8080/api/v1/categories"]
     interval: 30s

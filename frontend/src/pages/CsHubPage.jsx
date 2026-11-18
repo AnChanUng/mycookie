@@ -45,7 +45,7 @@ export default function CsHubPage() {
   return (
     <div className="ml cs-hub fade-in">
       <header className="ml-head">
-        <p className="ml-eyebrow">CS · 면접</p>
+        <p className="ml-eyebrow">컴퓨터공학</p>
         <h1>면접에서 막힘없이<br />설명할 수 있게</h1>
         <p className="ml-sub">개념을 읽고, 내 말로 말해 보고, 꼬리질문까지. 오늘 할 것을 골라 보세요.</p>
       </header>

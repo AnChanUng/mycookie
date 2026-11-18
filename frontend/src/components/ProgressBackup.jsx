@@ -1,5 +1,4 @@
 import { useRef, useState, useSyncExternalStore } from 'react';
-import { Link } from 'react-router-dom';
 import { BANKS, PRIVATE_BANK_KEYS } from '../data/examQuestions';
 import { mergeProgress, syncAllProgress } from '../hooks/useExamProgress';
 import { account, onAccountChange, signIn, signOut } from '../sync';
@@ -72,7 +71,6 @@ function ProgressSync() {
           <input type="password" placeholder="비밀번호" autoComplete="current-password" maxLength={72} value={form.password} onChange={e => setForm(f => ({ ...f, password: e.target.value }))} />
           <button type="submit" className="exam-btn sm primary" disabled={busy || !form.nickname.trim() || !form.password}>로그인</button>
           <button type="button" className="exam-btn sm" disabled={busy || !form.nickname.trim() || !form.password} onClick={() => enter('register')}>새 계정 만들기</button>
-          <Link className="exam-btn sm" to="/account?reset=1#settings">비밀번호 재설정</Link>
         </form>
       )}
       {msg && <div className="exam-backup-msg">{msg}</div>}

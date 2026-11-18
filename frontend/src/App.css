@@ -3220,46 +3220,7 @@ a.goal-exam:hover { border-color: var(--accent-blue); }
   }
 }
 
-/* ===== 분위기 요소: 비 · 눈, 응원 문구, 지금 공부 중인 사람 수 ===== */
-.ambience-sky {
-  position: fixed;
-  inset: 0;
-  overflow: hidden;
-  pointer-events: none;
-  z-index: 5;
-}
-
-.ambience-sky i {
-  position: absolute;
-  top: -12vh;
-  display: block;
-  animation: ambience-fall linear infinite;
-}
-
-.ambience-sky.rain i {
-  width: 1px;
-  height: 56px;
-  background: linear-gradient(to bottom, transparent, rgba(99, 132, 241, 0.45));
-}
-
-.ambience-sky.snow i {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: #fff;
-  box-shadow: 0 0 6px rgba(140, 160, 220, 0.7);
-  animation-name: ambience-drift;
-}
-
-@keyframes ambience-fall {
-  to { transform: translateY(125vh); }
-}
-
-@keyframes ambience-drift {
-  50% { transform: translate(22px, 60vh); }
-  100% { transform: translate(-12px, 125vh); }
-}
-
+/* ===== 분위기 요소: 응원 문구, 지금 공부 중인 사람 수 ===== */
 .ambience-notes {
   position: fixed;
   left: 50%;
@@ -3296,7 +3257,6 @@ a.goal-exam:hover { border-color: var(--accent-blue); }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .ambience-sky { display: none; }
   .ambience-note.toast { animation: none; }
 }
 
@@ -4278,7 +4238,6 @@ a.goal-exam:hover { border-color: var(--accent-blue); }
 .account-nav-link { white-space: nowrap; font-size: .8rem; font-weight: 700; color: var(--text-primary); text-decoration: none; padding: 8px; border: 1px solid var(--border-color); border-radius: 8px; }
 .account-nav-link.active { color: var(--accent-blue); background: var(--accent-blue-light); }
 .member-menu-actions { display: flex; align-items: center; gap: 6px; flex: none; }
-.password-reset-link:hover, .password-reset-link:focus-visible { color: var(--accent-blue); background: var(--accent-blue-light); }
 
 .lounge-participants { max-height: 150px; overflow-y: auto; padding: 10px 14px; border-bottom: 1px solid var(--border-color); font-size: .78rem; }
 .lounge-participants > strong { display: block; margin-bottom: 6px; }
@@ -4321,9 +4280,6 @@ a.goal-exam:hover { border-color: var(--accent-blue); }
 @media (max-width: 640px) {
   .member-menu-actions { position: absolute; top: 8px; right: 16px; }
   .member-menu { max-width: 150px; }
-  .password-reset-link { padding: 6px; }
-  .password-reset-link + .member-menu { max-width: 112px; }
-  .header-inner:has(.password-reset-link) .logo { max-width: calc(100% - 202px); }
   .logo { min-width: 0; max-width: calc(100% - 155px); min-height: 30px; }
   .logo-title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .header-right { width: 100%; }

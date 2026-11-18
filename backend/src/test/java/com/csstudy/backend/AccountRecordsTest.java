@@ -55,20 +55,27 @@ class AccountRecordsTest {
                 .andExpect(status().isBadRequest());
     }
 
+    private org.springframework.test.web.servlet.ResultActions changePassword(String token, String current, String next) throws Exception {
+        var request = post("/api/v1/auth/change-password").contentType(MediaType.APPLICATION_JSON)
+                .content(json.writeValueAsString(Map.of("currentPassword", current, "newPassword", next)));
+        return mvc.perform(token == null ? request : request.header("Authorization", bearer(token)));
+    }
+
     @Test
-    void nicknameCanResetAnExistingAccountAndRevokeItsSessions() throws Exception {
+    void passwordChangeNeedsLoginAndCurrentPasswordThenRevokesOtherSessions() throws Exception {
         JsonNode existing = auth("register", "reset-existing", "old-password");
         String secondToken = auth("login", "reset-existing", "old-password").get("token").asText();
         String otherToken = auth("register", "reset-other", "other-password").get("token").asText();
 
-        auth("reset-password", "reset-existing", "new-password");
+        String fresh = json.readTree(changePassword(existing.get("token").asText(), "old-password", "new-password")
+                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString()).get("token").asText();
 
         for (String token : new String[]{existing.get("token").asText(), secondToken}) {
             mvc.perform(get("/api/v1/auth/me").header("Authorization", bearer(token)))
                     .andExpect(status().isUnauthorized());
         }
-        mvc.perform(get("/api/v1/auth/me").header("Authorization", bearer(otherToken)))
-                .andExpect(status().isOk());
+        mvc.perform(get("/api/v1/auth/me").header("Authorization", bearer(fresh))).andExpect(status().isOk());
+        mvc.perform(get("/api/v1/auth/me").header("Authorization", bearer(otherToken))).andExpect(status().isOk());
         mvc.perform(post("/api/v1/auth/login").contentType(MediaType.APPLICATION_JSON)
                         .content(json.writeValueAsString(Map.of("nickname", "reset-existing", "password", "old-password"))))
                 .andExpect(status().isBadRequest());
@@ -76,15 +83,28 @@ class AccountRecordsTest {
     }
 
     @Test
-    void resetRejectsUnknownAccountsAndInvalidPasswords() throws Exception {
-        auth("register", "reset-invalid", "original-password");
+    void nobodyCanChangeAnotherAccountsPassword() throws Exception {
+        auth("register", "reset-victim", "victim-password");
+        String attacker = auth("register", "reset-attacker", "attacker-password").get("token").asText();
+
+        // 옛 재설정 주소는 없어졌고, 로그인 없이 바꿀 수도 없다
         mvc.perform(post("/api/v1/auth/reset-password").contentType(MediaType.APPLICATION_JSON)
-                        .content(json.writeValueAsString(Map.of("nickname", "reset-missing", "password", "new-password"))))
-                .andExpect(status().isBadRequest());
+                        .content(json.writeValueAsString(Map.of("nickname", "reset-victim", "password", "hacked"))))
+                .andExpect(result -> assertThat(result.getResponse().getStatus()).isGreaterThanOrEqualTo(400));
+        changePassword(null, "victim-password", "hacked").andExpect(status().isUnauthorized());
+        // 본인 토큰이어도 현재 비밀번호가 틀리거나 비어 있으면 거절
+        changePassword(attacker, "wrong", "hacked").andExpect(status().isBadRequest());
+        changePassword(attacker, "", "hacked").andExpect(status().isBadRequest());
+
+        auth("login", "reset-victim", "victim-password");
+        auth("login", "reset-attacker", "attacker-password");
+    }
+
+    @Test
+    void passwordChangeRejectsInvalidNewPasswords() throws Exception {
+        String token = auth("register", "reset-invalid", "original-password").get("token").asText();
         for (String password : new String[]{" ", "가".repeat(25)}) {
-            mvc.perform(post("/api/v1/auth/reset-password").contentType(MediaType.APPLICATION_JSON)
-                            .content(json.writeValueAsString(Map.of("nickname", "reset-invalid", "password", password))))
-                    .andExpect(status().isBadRequest());
+            changePassword(token, "original-password", password).andExpect(status().isBadRequest());
         }
         auth("login", "reset-invalid", "original-password");
     }

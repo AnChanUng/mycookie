@@ -19,3 +19,16 @@
 
 .personal-badges { margin-top: 1rem; }
 .cohort-badge { display: inline-block; padding: .35rem .65rem; border: 1px solid var(--border); border-radius: .5rem; font-weight: 600; }
+
+/* 간편 로그인(구글 · 카카오 · 깃허브). 제공자 안내에 맞춘 고정 색이라 화면 모드와 상관없이 같다 */
+.social-login { margin: 16px 0; padding-top: 16px; border-top: 1px solid var(--border-color); }
+.social-login-title { font-size: .85rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 10px; }
+.social-login-buttons { display: flex; gap: 8px; flex-wrap: wrap; }
+.social-btn { padding: 10px 16px; border-radius: 6px; border: 1px solid transparent; font-weight: 700; font-size: .85rem; cursor: pointer; }
+.social-btn:disabled { opacity: .6; cursor: default; }
+.social-btn.google { background: #fff; color: #1f1f1f; border-color: #747775; }
+.social-btn.kakao { background: #FEE500; color: rgba(0, 0, 0, .85); }
+.social-btn.github { background: #24292f; color: #fff; }
+.social-btn.linked { background: var(--bg-secondary); color: var(--text-secondary); border-color: var(--border-color); cursor: default; }
+.social-login-hint { margin-top: 8px; font-size: .8rem; color: var(--text-secondary); }
+@media(max-width: 640px) { .social-btn { flex: 1 1 140px; } }

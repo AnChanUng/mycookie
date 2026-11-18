@@ -33,11 +33,12 @@ function applyTheme(t) {
   try { localStorage.setItem('theme', t.key); } catch { /* storage unavailable */ }
 }
 
-// 주 메뉴 네 개. 하위 화면에 있어도 해당 메뉴가 켜져 보이게 경로 묶음으로 판단한다
+// 주 메뉴. 하위 화면에 있어도 해당 메뉴가 켜져 보이게 경로 묶음으로 판단한다
 const startsWithAny = (p, list) => list.some(x => p === x || p.startsWith(x + '/'));
 const NAV = [
   { to: '/algo', label: '코테', menu: true, match: p => startsWithAny(p, ['/algo', '/bug-hunt']) },
-  { to: '/cs', label: 'CS·면접', match: p => startsWithAny(p, ['/cs', '/technical-interview', '/notes', '/web-essentials', '/interview', '/category', '/question', '/search', '/web', '/tech-blogs']) },
+  { to: '/cs', label: '컴퓨터공학', match: p => startsWithAny(p, ['/cs', '/notes', '/web-essentials', '/category', '/question', '/search', '/web', '/tech-blogs']) },
+  { to: '/interview', label: '면접', match: p => startsWithAny(p, ['/interview', '/technical-interview']) },
   { to: '/exam', label: '실전', match: p => startsWithAny(p, ['/exam', '/duel', '/topics', '/calc', '/aptitude', '/ncs', '/major', '/major-exam', '/ssafy', '/promotion-exam']) },
   { to: '/stats', label: '내 학습', match: p => startsWithAny(p, ['/stats', '/weak', '/account', '/all']) },
 ];

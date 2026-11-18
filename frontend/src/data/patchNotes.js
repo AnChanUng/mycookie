@@ -3,6 +3,19 @@
 // status: 'released' 배포됨(master) | 'dev' 개발 브랜치에만 있음 | 'wip' 작업 중
 export const PATCH_NOTES = [
   {
+    version: '0.22.0',
+    date: '2026-11-18',
+    title: '소셜 로그인 · 메뉴 분리',
+    status: 'dev',
+    summary: '구글, 카카오, 깃허브 로그인을 추가하고 상단 메뉴를 나눴습니다.',
+    items: [
+      { type: 'feature', text: '소셜 로그인(구글, 카카오, 깃허브). 처음 로그인할 때 기존 닉네임 계정에 연결하거나 새 계정을 만듦.' },
+      { type: 'feature', text: '상단 메뉴: 코테 | 컴퓨터공학 | 면접 | 실전 | 내 학습.' },
+      { type: 'security', text: '비밀번호 변경은 로그인 후 현재 비밀번호 확인이 필요. 닉네임만으로 재설정하던 기능 삭제.' },
+      { type: 'improve', text: '비, 눈 날씨 효과 삭제.' },
+    ],
+  },
+  {
     version: '0.21.0',
     date: '2026-11-18',
     title: '웹 디자인 시스템 · 메인 다시 다듬기',

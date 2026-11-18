@@ -51,6 +51,21 @@ app:
   security:
     rate-limit-enabled: true
     trust-forwarded-for: ${TRUST_FORWARDED_FOR:${RENDER:false}}
+  # 소셜 · 깃허브 로그인. 클라이언트 ID가 비어 있는 제공자는 버튼을 숨긴다
+  # 각 제공자 콘솔에 등록할 리디렉션 주소: <사이트 주소>/auth/callback (예: https://mycookie.dev/auth/callback)
+  oauth:
+    # 여러 대로 띄우거나 재시작 중에도 로그인을 이어 가려면 32자 이상 무작위 값을 넣는다
+    state-secret: ${OAUTH_STATE_SECRET:}
+    allowed-origins: ${OAUTH_ALLOWED_ORIGINS:http://localhost:3000,http://localhost:5173,https://mycookie.dev,https://www.mycookie.dev}
+    google:
+      client-id: ${OAUTH_GOOGLE_CLIENT_ID:}
+      client-secret: ${OAUTH_GOOGLE_CLIENT_SECRET:}
+    kakao:
+      client-id: ${OAUTH_KAKAO_CLIENT_ID:}
+      client-secret: ${OAUTH_KAKAO_CLIENT_SECRET:}
+    github:
+      client-id: ${OAUTH_GITHUB_CLIENT_ID:}
+      client-secret: ${OAUTH_GITHUB_CLIENT_SECRET:}
 
 gemini:
   api-key: ${GEMINI_API_KEY:}
