@@ -4330,3 +4330,10 @@ a.goal-exam:hover { border-color: var(--accent-blue); }
   .header-right .nav-links { flex: 1; }
   .header-right .study-count { position: static; }
 }
+
+/* 리뉴얼 헤더: 주 메뉴가 네 개라 좁은 화면에서도 넘기지 않고 한 줄에 다 보이게 한다 */
+@media (max-width: 640px) {
+  .nav-links { -webkit-mask-image: none; mask-image: none; padding-right: 0; flex: 0 1 auto; }
+  .nav-links a { padding: 7px 9px; }
+  .header-right { justify-content: space-between; }
+}
