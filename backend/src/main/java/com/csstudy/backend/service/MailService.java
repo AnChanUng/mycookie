@@ -3,8 +3,9 @@ package com.csstudy.backend.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.SimpleMailMessage;
+import jakarta.mail.internet.MimeMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
 import java.util.concurrent.ExecutorService;
@@ -42,20 +43,30 @@ public class MailService {
     }
 
     public void send(String to, String subject, String body) {
+        send(to, subject, body, null, null);
+    }
+
+    // html이 있으면 글자 본문과 함께 보낸다(메일 앱이 고른다). unsubscribeUrl은 메일 앱의 "수신 거부" 버튼이 쓴다
+    public void send(String to, String subject, String text, String html, String unsubscribeUrl) {
         JavaMailSender mail = configured() ? sender.getIfAvailable() : null;
         if (mail == null) {
             // 메일 서버가 없는 개발 환경: 링크를 로그로 확인한다(운영에서는 MAIL_LOG_LINKS를 켜지 않는다)
-            if (logLinks) log.info("[메일 미설정] to={} subject={}\n{}", to, subject, body);
+            if (logLinks) log.info("[메일 미설정] to={} subject={}\n{}", to, subject, text);
             else log.warn("메일 서버(MAIL_HOST)가 설정되지 않아 '{}' 메일을 보내지 못했습니다", subject);
             return;
         }
         worker.execute(() -> {
             try {
-                SimpleMailMessage message = new SimpleMailMessage();
-                if (!from.isBlank()) message.setFrom(from);
-                message.setTo(to);
-                message.setSubject(subject);
-                message.setText(body);
+                MimeMessage message = mail.createMimeMessage();
+                MimeMessageHelper helper = new MimeMessageHelper(message, html != null, "UTF-8");
+                if (!from.isBlank()) helper.setFrom(from);
+                helper.setTo(to);
+                helper.setSubject(subject);
+                if (html != null) helper.setText(text, html);
+                else helper.setText(text);
+                if (unsubscribeUrl != null) {
+                    message.setHeader("List-Unsubscribe", "<" + unsubscribeUrl + ">");
+                }
                 mail.send(message);
             } catch (Exception e) {
                 log.warn("메일 발송 실패: subject={} reason={}", subject, e.getMessage());

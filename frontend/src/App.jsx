@@ -48,6 +48,8 @@ const CosProPage = lazy(() => import('./pages/CosProPage'));
 const AuthCallbackPage = lazy(() => import('./pages/AuthCallbackPage'));
 const VerifyEmailPage = lazy(() => import('./pages/AuthEmailPage').then(m => ({ default: m.VerifyEmailPage })));
 const ResetPasswordPage = lazy(() => import('./pages/AuthEmailPage').then(m => ({ default: m.ResetPasswordPage })));
+const NewsletterConfirmPage = lazy(() => import('./pages/AuthEmailPage').then(m => ({ default: m.NewsletterConfirmPage })));
+const NewsletterUnsubscribePage = lazy(() => import('./pages/AuthEmailPage').then(m => ({ default: m.NewsletterUnsubscribePage })));
 
 function WebEssentialsRedirect() {
   const { hash, search } = useLocation();
@@ -87,6 +89,8 @@ function App() {
           <Route path="auth/callback" element={<AuthCallbackPage />} />
           <Route path="auth/verify-email" element={<VerifyEmailPage />} />
           <Route path="auth/reset-password" element={<ResetPasswordPage />} />
+          <Route path="newsletter/confirm" element={<NewsletterConfirmPage />} />
+          <Route path="newsletter/unsubscribe" element={<NewsletterUnsubscribePage />} />
           <Route path="stats" element={<StatsPage />} />
           <Route path="cs" element={<CsHubPage />} />
           <Route path="interview" element={<InterviewPracticePage />} />

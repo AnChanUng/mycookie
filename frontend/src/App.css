@@ -1,6 +1,11 @@
 /* ===== Layout ===== */
+/* 화면 폭: 헤더와 본문이 같은 폭으로 넓게 꽉 차도록 한 값으로 맞춘다(본문 1280px + 좌우 여백) */
+:root { --page-max: 1280px; }
+
 .container {
-  max-width: 760px;
+  max-width: calc(var(--page-max) + 48px);
+  width: 100%;
+  box-sizing: border-box;
   margin: 0 auto;
   padding: 0 24px;
 }
@@ -74,7 +79,7 @@
 }
 
 .header-inner {
-  max-width: 1128px;
+  max-width: calc(var(--page-max) + 48px);
   display: flex;
   align-items: center;
   justify-content: space-between;

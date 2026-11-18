@@ -7,8 +7,8 @@ import './AccountPage.css';
 const errorText = (error, fallback) => error?.response?.data?.error || fallback;
 
 // 메일 링크로 들어오는 화면. 토큰은 읽자마자 주소창에서 지워 기록이나 다른 사이트로 새지 않게 한다
-function useLinkToken() {
-  const [token] = useState(() => new URLSearchParams(window.location.search).get('token') || '');
+function useLinkToken(name = 'token') {
+  const [token] = useState(() => new URLSearchParams(window.location.search).get(name) || '');
   useEffect(() => {
     if (token) window.history.replaceState(window.history.state, '', window.location.pathname);
   }, [token]);
@@ -74,4 +74,43 @@ export function ResetPasswordPage() {
       <Link className="exam-btn sm" to="/account#settings">로그인 화면으로</Link>
     </section>
   </div>;
+}
+
+const newsletterCalls = new Map();
+function NewsletterLinkPage({ param, path, title, loading, done, fallback }) {
+  const token = useLinkToken(param);
+  const [phase, setPhase] = useState(token ? { kind: 'loading' } : { kind: 'error', message: '링크가 올바르지 않습니다.' });
+  useEffect(() => {
+    if (!token) return undefined;
+    let stale = false;
+    const key = `${path}:${token}`;
+    if (!newsletterCalls.has(key)) newsletterCalls.set(key, api.post(path, { [param]: token }, { timeout: 90000 }));
+    newsletterCalls.get(key)
+      .then(() => { if (!stale) setPhase({ kind: 'done' }); })
+      .catch(error => { if (!stale) setPhase({ kind: 'error', message: errorText(error, fallback) }); });
+    return () => { stale = true; };
+  }, [token, path, param, fallback]);
+  return <div className="account-page fade-in">
+    <header className="page-header"><h1>{title}</h1></header>
+    <section className="account-auth">
+      {phase.kind === 'loading' && <p role="status">{loading}</p>}
+      {phase.kind === 'done' && <p role="status">{done}</p>}
+      {phase.kind === 'error' && <p role="alert">{phase.message}</p>}
+      <Link className="exam-btn sm" to="/">홈으로</Link>
+    </section>
+  </div>;
+}
+
+// /newsletter/confirm?token=...
+export function NewsletterConfirmPage() {
+  return <NewsletterLinkPage param="token" path="/newsletter/confirm" title="학습 메일 구독" loading="구독을 확인하는 중…"
+    done="구독이 완료되었어요. 첫 학습 메일을 지금 보냈으니 메일함을 확인해 주세요. 이후에는 평일 아침 8시 30분에 도착합니다."
+    fallback="구독을 확인하지 못했습니다." />;
+}
+
+// /newsletter/unsubscribe?key=...
+export function NewsletterUnsubscribePage() {
+  return <NewsletterLinkPage param="key" path="/newsletter/unsubscribe" title="수신 거부" loading="처리하는 중…"
+    done="수신 거부했어요. 앞으로 학습 메일을 보내지 않습니다. 언제든 사이트 아래에서 다시 구독할 수 있어요."
+    fallback="수신 거부를 처리하지 못했습니다." />;
 }

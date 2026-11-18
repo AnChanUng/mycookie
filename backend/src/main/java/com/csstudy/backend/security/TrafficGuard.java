@@ -23,7 +23,7 @@ public class TrafficGuard {
         if (now - window.start >= 60_000) { window = new Window(now); clients.put(ip, window); }
         while (clients.size() > 20_000) clients.remove(clients.keySet().iterator().next());
         window.total = Math.min(window.total + 1, 1_000_000);
-        String group = path.startsWith("/api/v1/auth/") && "POST".equals(method) ? "auth"
+        String group = (path.startsWith("/api/v1/auth/") || path.startsWith("/api/v1/newsletter/")) && "POST".equals(method) ? "auth"
                 : path.equals("/api/v1/code/java") ? "code"
                 : path.startsWith("/api/v1/questions") && Set.of("GET","HEAD").contains(method) ? "content"
                 : path.equals("/api/v1/chat") && "POST".equals(method) ? "chat" : "general";

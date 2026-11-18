@@ -1,7 +1,11 @@
 /* 메인 화면 배치. 색 · 글자 · 카드 모양은 styles/ds.css(디자인 시스템)를 따른다 */
-.mn { max-width: 1080px; margin: 0 auto; padding: var(--ds-s8) 0 88px; color: var(--ds-text); }
+.mn { max-width: var(--page-max, 1280px); margin: 0 auto; padding: var(--ds-s8) 0 88px; color: var(--ds-text); }
 
 /* 인사 + 오늘 목표 */
+/* 첫 줄 명언: 가운데 정렬, 가늘고 넓은 자간의 한 줄 */
+.mn-quote { margin: var(--ds-s6) auto var(--ds-s8); text-align: center; }
+.mn-quote blockquote { margin: 0; font-family: 'Nanum Myeongjo', 'Noto Serif KR', serif; font-size: clamp(18px, 2.2vw, 24px); font-weight: 400; letter-spacing: 0.04em; color: var(--ds-text-2, var(--ds-text)); }
+.mn-quote figcaption { margin-top: 8px; font-size: 13px; color: var(--ds-text-3, var(--ds-text)); opacity: 0.75; }
 .mn-top { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: var(--ds-s4); align-items: end; }
 .mn-hello { display: grid; gap: var(--ds-s3); }
 .mn-br { display: block; }

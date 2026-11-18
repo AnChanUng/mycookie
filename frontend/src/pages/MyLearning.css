@@ -1,5 +1,5 @@
 /* 내 학습 대시보드(토스 스타일): 큰 숫자 카드, 넉넉한 여백, 둥근 패널 */
-.ml { max-width: 960px; margin: 0 auto; padding: 32px 0 80px; color: var(--text-primary); }
+.ml { max-width: var(--page-max, 1280px); margin: 0 auto; padding: 32px 0 80px; color: var(--text-primary); }
 .ml-eyebrow { margin: 0 0 8px; font-size: 15px; font-weight: 700; color: #3182f6; }
 .ml-head h1 { margin: 0; font-size: clamp(26px, 4vw, 34px); font-weight: 800; letter-spacing: -0.03em; word-break: keep-all; }
 .ml-sub { margin: 10px 0 0; font-size: 15px; color: var(--text-secondary); word-break: keep-all; }

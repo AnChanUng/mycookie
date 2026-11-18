@@ -5,6 +5,7 @@ import { visitorId } from '../track';
 import { useMembership, TIER_NAMES } from '../membership';
 import { factForDay, koreanDay } from '../data/todayCs';
 import TierBadge from '../components/TierBadge';
+import { quoteForDay } from '../data/quotes';
 import './Main.css';
 
 // 나의쿠키 메인. 디자인 시스템(styles/ds.css) 부품만으로 만든 벤토 그리드.
@@ -78,6 +79,7 @@ export default function Main() {
   const [resume] = useState(readContinue);
   const day = koreanDay();
   const today = factForDay(day);
+  const quote = quoteForDay(day);
   const [todayDone] = useState(() => readTodayDone(day));
   const now = new Date();
   const dateLabel = `${now.getMonth() + 1}월 ${now.getDate()}일 ${WEEKDAYS[now.getDay()]}요일`;
@@ -94,6 +96,10 @@ export default function Main() {
 
   return (
     <div className="mn">
+      <figure className="mn-quote ds-rise">
+        <blockquote>“{quote.text}”</blockquote>
+        <figcaption>{quote.by}</figcaption>
+      </figure>
       {/* 인사 + 오늘 목표 */}
       <section className="mn-top">
         <div className="mn-hello ds-rise">
