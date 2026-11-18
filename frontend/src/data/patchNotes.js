@@ -7,10 +7,11 @@ export const PATCH_NOTES = [
     date: '2026-11-18',
     title: '예전 주소를 mycookie.dev로 이동',
     status: 'released',
-    summary: 'cs-study-platform.vercel.app으로 들어오면 mycookie.dev의 같은 경로로 영구 이동합니다.',
+    summary: 'cs-study-platform.vercel.app으로 들어오면 경로와 상관없이 mycookie.dev 첫 화면으로 영구 이동합니다.',
     items: [
       { type: 'infra', text: 'vercel.json에 호스트 조건 308 이동 추가: / → mycookie.dev/, /<경로> → mycookie.dev/<경로>(쿼리 유지). 미리보기 주소는 그대로.' },
       { type: 'fix', text: '첫 번째 규칙(/:path*)이 루트에 맞지 않던 문제를 / 와 /:path+ 두 규칙으로 나눠 해결.' },
+      { type: 'improve', text: '예전 주소의 하위 경로도 같은 경로가 아니라 mycookie.dev 첫 화면(/)으로 보내도록 변경.' },
     ],
   },
   {

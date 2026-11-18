@@ -19,7 +19,7 @@
           "value": "cs-study-platform.vercel.app"
         }
       ],
-      "destination": "https://mycookie.dev/:path+",
+      "destination": "https://mycookie.dev/",
       "permanent": true
     }
   ],
