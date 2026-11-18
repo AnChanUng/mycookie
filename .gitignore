@@ -31,3 +31,6 @@ SSAFY A형 기출/
 전공필기/
 backend/src/main/resources/private-notes/
 frontend/public/notes/
+
+# 레벨별 로그 파일(file-log 프로필)
+logs/
