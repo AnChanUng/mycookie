@@ -126,7 +126,13 @@ export default function Main() {
             <Link to="/stats" className="ds-chip">{learning ? `${learning.streak}일 연속 학습` : '연속 학습'}</Link>
             {membership?.nextTier && <span className="ds-chip ds-chip--soft">승급까지 {membership.remaining.toLocaleString()}문제</span>}
           </div>
+          <div className="mn-cta">
+            <Link to="/cs" className="ds-btn ds-btn--primary">공부 시작하기</Link>
+            <Link to="/tiers" className="ds-btn">등급 올리기</Link>
+          </div>
         </div>
+        {/* 실시간 순위: 첫 화면 맨 위 오른쪽(휴대폰에서는 인사 아래) */}
+        <HomeRank />
         {SHOW_TODAY_STUDY && <Link to="/cs" className="mn-goal">
           <Ring value={todayDone} max={TODAY_GOAL} />
           <span>
@@ -170,11 +176,6 @@ export default function Main() {
           </Link>
         </div>
       </Section>}
-
-      {/* 회원 순위: 첫 화면 맨 위(제목 · 이어서 풀기 바로 아래) */}
-      <Section id="mn-rank" title="회원 순위" note="푼 문제 수 기준" more={{ to: '/all', label: '전체 순위' }}>
-        <HomeRank />
-      </Section>
 
       <Section id="mn-cs" title="컴퓨터공학 · 면접" more={{ to: '/cs', label: '전체 보기' }}>
         <div className="mn-cards">{CS_STUDY.map(item => <Category key={item.to} {...item} />)}</div>

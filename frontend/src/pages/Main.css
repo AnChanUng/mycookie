@@ -126,3 +126,11 @@ a:hover > .mn-chev { color: var(--ds-brand); transform: translateX(3px); }
 .mn-resume small { flex: none; color: var(--ds-text-3); }
 .mn-resume .mn-chev { margin-left: auto; flex: none; color: var(--ds-text-3); }
 @media (max-width: 520px) { .mn-resume small { display: none; } }
+
+/* 첫 화면 맨 위: 왼쪽 인사 + 시작 버튼, 오른쪽 실시간 순위 카드 */
+.mn-top { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(320px, 1fr); align-items: center; gap: 40px; }
+.mn-top > .mn-goal { display: none; }
+.mn-cta { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+@media (max-width: 860px) {
+  .mn-top { grid-template-columns: 1fr; gap: 24px; }
+}
