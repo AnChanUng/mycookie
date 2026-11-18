@@ -1,4 +1,5 @@
 {
+  "cleanUrls": true,
   "rewrites": [
     {
       "source": "/(.*)",
@@ -60,7 +61,7 @@
       ]
     },
     {
-      "source": "/:dir(account|auth|newsletter|private|p|admin|chanung|search|weak|stats)/:path*",
+      "source": "/:dir(auth|newsletter|private|p|admin|chanung)/:path*",
       "headers": [
         {
           "key": "X-Robots-Tag",
@@ -69,7 +70,7 @@
       ]
     },
     {
-      "source": "/:dir(account|chanung|search|weak|stats)",
+      "source": "/chanung",
       "headers": [
         {
           "key": "X-Robots-Tag",

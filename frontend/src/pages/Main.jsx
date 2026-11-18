@@ -112,6 +112,7 @@ export default function Main() {
         <div className="mn-hello">
           <p className="ds-eyebrow">{dateLabel}</p>
           <h1 className="mn-h1">{user?.nickname ? `${user.nickname}님, 오늘 할 공부예요` : '개발자 취업 준비, 오늘은 여기서 시작해요'}</h1>
+          <p className="mn-sub">컴퓨터공학 전공 공부부터 웹개발, 백엔드 공부, 기술면접까지 한곳에서</p>
           <div className="mn-chips">
             {membership && <Link to="/account" className="ds-chip"><TierBadge tier={membership.tier} division={membership.division} />{TIER_NAMES[membership.tier]}</Link>}
             <Link to="/stats" className="ds-chip">{learning ? `${learning.streak}일 연속 학습` : '연속 학습'}</Link>

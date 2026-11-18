@@ -7,7 +7,7 @@
     "check:interview-audio": "node scripts/check-interview-audio.mjs",
     "check:chanung": "node scripts/check-chanung.mjs",
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build && node --import ./scripts/extensionless-loader.mjs scripts/prerender-seo.mjs",
     "lint": "eslint .",
     "check:questions": "node --import ./scripts/extensionless-loader.mjs scripts/check-questions.mjs",
     "preview": "vite preview",
