@@ -3,6 +3,19 @@
 // status: 'released' 배포됨(master) | 'dev' 개발 브랜치에만 있음 | 'wip' 작업 중
 export const PATCH_NOTES = [
   {
+    version: '0.14.0',
+    date: '2026-11-18',
+    title: '서비스 이름을 나의쿠키로 변경',
+    status: 'released',
+    summary: '도메인 mycookie.dev에 맞춰 서비스 이름을 DevCookie에서 나의쿠키로 통일했습니다.',
+    items: [
+      { type: 'improve', text: '헤더 로고 · 새 홈 · 푸터 · 브라우저 탭 제목(나의쿠키 · 개발자 취업 준비)과 설명 문구 변경. 문서 언어를 ko로 지정.' },
+      { type: 'improve', text: '이용약관 · 공개 패치노트 문구, 리뉴얼 안내 서명을 나의쿠키로 변경.' },
+      { type: 'improve', text: 'Slack 알림의 바로가기 문구를 "나의쿠키 바로가기"로 변경.' },
+      { type: 'docs', text: '저장소 이름 변경(AnChanUng/mycookie)에 맞춰 GitHub 링크 · 홈서버 배포 스크립트 주소 수정. README 제목 변경.' },
+    ],
+  },
+  {
     version: '0.13.0',
     date: '2026-11-18',
     title: 'mycookie.dev 도메인 연결',
