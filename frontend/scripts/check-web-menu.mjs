@@ -15,7 +15,7 @@ try {
   assert.ok(web.includes('웹 필수지식'));
   assert.ok(web.includes('href="/web-essentials"'));
   const { WEB_ESSENTIALS } = await server.ssrLoadModule('/src/data/webEssentials.js');
-  assert.equal(WEB_ESSENTIALS.items.length, 52);
+  assert.equal(WEB_ESSENTIALS.items.length, 57);
   const { default: Aptitude } = await server.ssrLoadModule('/src/pages/AptitudePage.jsx');
   const aptitude = render(Aptitude);
   for (const title of ['NCS/인적성', '다우기술', 'SKCT', '삼성 GSAT']) assert.ok(aptitude.includes(title), title);
@@ -26,6 +26,6 @@ try {
   assert.equal(spring.questions.length, 60);
   const home = await readFile(new URL('../src/pages/Home.jsx', import.meta.url), 'utf8');
   const destinations = [...home.matchAll(/\{ to: '([^']+)'/g)].map(m => m[1]);
-  assert.deepEqual(destinations, ['/exam', '/aptitude', '/web']);
-  console.log('PASS: merged NCS/aptitude, third web menu, Spring 60 questions, 52 web answers available');
+  assert.deepEqual(destinations, ['/exam', '/aptitude', '/web', '/tech-blogs']);
+  console.log('PASS: merged NCS/aptitude, third web menu, Spring 60 questions, 57 web answers available');
 } finally { await server.close(); }

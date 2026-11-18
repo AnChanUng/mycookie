@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-route
 import PracticeEntry from './components/PracticeEntry';
 import Layout from './components/Layout';
 import Home from './pages/Home';
+import Landing from './pages/Landing';
 import { RenewalNotice, RenewalShell } from './Renewal';
 import { MAINTENANCE } from './maintenance';
 import './App.css';
@@ -72,7 +73,8 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Layout />}>
-          <Route index element={<Home />} />
+          <Route index element={<Landing />} />
+          <Route path="all" element={<Home />} />
           <Route path="category/:slug" element={<CategoryPage />} />
           <Route path="question/:id" element={<QuestionPage />} />
           <Route path="account" element={<AccountPage />} />

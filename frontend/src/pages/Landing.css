@@ -1,0 +1,284 @@
+/* 리뉴얼 홈(토스 스타일): 큰 글씨, 넉넉한 여백, 스크롤하면 떠오르는 구역 */
+.landing {
+  /* 레이아웃의 가운데 정렬 상자를 벗어나 화면 전체 너비를 쓴다 */
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  overflow-x: clip;
+  color: var(--text-primary);
+}
+.l-wrap {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 0 24px;
+  box-sizing: border-box;
+}
+.l-eyebrow {
+  margin: 0 0 14px;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--accent-blue);
+  letter-spacing: -0.01em;
+}
+
+/* 떠오르기 */
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(32px);
+  transition: opacity 0.8s cubic-bezier(0.2, 0.7, 0.2, 1), transform 0.8s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+[data-reveal].is-visible { opacity: 1; transform: none; }
+.l-hero [data-reveal]:nth-child(2) { transition-delay: 0.08s; }
+.l-hero [data-reveal]:nth-child(3) { transition-delay: 0.16s; }
+.l-hero [data-reveal]:nth-child(4) { transition-delay: 0.24s; }
+.l-feature-visual[data-reveal] { transition-delay: 0.12s; }
+
+/* 히어로 */
+.l-hero {
+  position: relative;
+  min-height: calc(100vh - 64px);
+  min-height: calc(100svh - 64px);
+  display: flex;
+  align-items: center;
+  padding: 80px 0 120px;
+  box-sizing: border-box;
+}
+.l-hero-glow {
+  position: absolute;
+  inset: -10% -10% 0;
+  background:
+    radial-gradient(40% 45% at 20% 30%, rgba(99, 102, 241, 0.22), transparent 70%),
+    radial-gradient(35% 40% at 80% 25%, rgba(168, 85, 247, 0.18), transparent 70%),
+    radial-gradient(45% 50% at 60% 85%, rgba(59, 130, 246, 0.16), transparent 70%);
+  filter: blur(10px);
+  animation: l-float 18s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+@keyframes l-float { to { transform: translate3d(0, -24px, 0) scale(1.04); } }
+.l-hero-title {
+  margin: 0;
+  font-size: clamp(40px, 8vw, 84px);
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.045em;
+  word-break: keep-all;
+}
+.l-hero-sub {
+  margin: 28px 0 0;
+  font-size: clamp(17px, 2.2vw, 22px);
+  line-height: 1.6;
+  color: var(--text-secondary);
+  word-break: keep-all;
+}
+.l-cta { margin-top: 40px; display: flex; gap: 12px; flex-wrap: wrap; }
+.l-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 56px;
+  padding: 0 28px;
+  border-radius: 16px;
+  font-size: 17px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: transform 0.15s ease, background 0.2s ease, box-shadow 0.2s ease;
+}
+.l-btn:active { transform: scale(0.97); }
+.l-btn.primary { background: #3182f6; color: #fff; box-shadow: 0 8px 24px rgba(49, 130, 246, 0.32); }
+.l-btn.primary:hover { background: #1b64da; }
+.l-btn.ghost { background: var(--glass-bg); color: var(--text-primary); border: 1px solid var(--glass-border); }
+.l-btn.light { background: #fff; color: #191f28; }
+.l-btn:focus-visible, .l-link:focus-visible { outline: 3px solid #3182f6; outline-offset: 3px; }
+.l-scroll {
+  position: absolute;
+  left: 50%;
+  bottom: 32px;
+  width: 26px;
+  height: 42px;
+  margin-left: -13px;
+  border: 2px solid var(--text-tertiary);
+  border-radius: 14px;
+}
+.l-scroll span {
+  position: absolute;
+  left: 50%;
+  top: 8px;
+  width: 4px;
+  height: 8px;
+  margin-left: -2px;
+  border-radius: 2px;
+  background: var(--text-tertiary);
+  animation: l-wheel 1.6s ease-in-out infinite;
+}
+@keyframes l-wheel { 0% { opacity: 0; transform: translateY(0); } 40% { opacity: 1; } 100% { opacity: 0; transform: translateY(14px); } }
+
+/* 기능 소개 */
+.l-feature { padding: 120px 0; }
+.l-feature-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 64px;
+  align-items: center;
+}
+.l-feature.flip .l-feature-text { order: 2; }
+.l-feature-text h2 {
+  margin: 0;
+  font-size: clamp(30px, 4.6vw, 48px);
+  font-weight: 800;
+  line-height: 1.25;
+  letter-spacing: -0.04em;
+  word-break: keep-all;
+}
+.l-feature-text p:not(.l-eyebrow) {
+  margin: 24px 0 0;
+  font-size: 18px;
+  line-height: 1.7;
+  color: var(--text-secondary);
+  word-break: keep-all;
+}
+.l-link {
+  display: inline-block;
+  margin-top: 28px;
+  font-size: 17px;
+  font-weight: 700;
+  color: #3182f6;
+  text-decoration: none;
+}
+.l-link span { display: inline-block; transition: transform 0.2s ease; }
+.l-link:hover span { transform: translateX(4px); }
+.l-soon {
+  margin-left: 6px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-size: 12px;
+  background: rgba(49, 130, 246, 0.12);
+  color: #3182f6;
+  vertical-align: 2px;
+}
+
+/* 기능 그림(실제 화면을 단순화한 모형) */
+.l-feature-visual { display: flex; justify-content: center; }
+.lv-card, .lv-panel, .lv-chat {
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 24px;
+  box-shadow: 0 20px 60px rgba(15, 23, 42, 0.10);
+}
+.lv-stack { position: relative; width: min(100%, 420px); height: 300px; }
+.lv-card {
+  position: absolute;
+  left: 0;
+  right: 0;
+  padding: 22px 24px;
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+.lv-card-back { top: 0; transform: scale(0.88); opacity: 0.55; }
+.lv-card-mid { top: 34px; transform: scale(0.94); opacity: 0.8; }
+.lv-card-front { top: 74px; display: grid; gap: 12px; color: var(--text-primary); }
+.lv-card-front strong { font-size: 18px; line-height: 1.45; letter-spacing: -0.02em; word-break: keep-all; }
+.lv-chip {
+  justify-self: start;
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #3182f6;
+  background: rgba(49, 130, 246, 0.1);
+}
+.lv-line { height: 10px; border-radius: 6px; background: var(--bg-tertiary); }
+.lv-line.short { width: 62%; }
+.lv-btn {
+  justify-self: start;
+  margin-top: 4px;
+  padding: 10px 16px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+  background: #3182f6;
+}
+.lv-panel { width: min(100%, 440px); padding: 22px; box-sizing: border-box; }
+.lv-panel-head { display: flex; justify-content: space-between; margin-bottom: 14px; font-size: 14px; font-weight: 700; }
+.lv-live { padding: 2px 8px; border-radius: 6px; font-size: 11px; color: #fff; background: #f04452; }
+.lv-row {
+  display: grid;
+  grid-template-columns: 22px 64px 1fr 44px 38px;
+  gap: 10px;
+  align-items: center;
+  padding: 12px 8px;
+  border-radius: 14px;
+  font-size: 14px;
+}
+.lv-row.me { background: rgba(49, 130, 246, 0.08); font-weight: 700; }
+.lv-rank { font-weight: 800; color: var(--text-tertiary); }
+.lv-bar { height: 8px; border-radius: 6px; background: var(--bg-tertiary); overflow: hidden; }
+.lv-bar i { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #3182f6, #6366f1); }
+.lv-score { font-weight: 700; text-align: right; }
+.lv-time { font-size: 12px; color: var(--text-tertiary); text-align: right; }
+.lv-chips { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; max-width: 440px; }
+.lv-pill {
+  padding: 14px 20px;
+  border-radius: 999px;
+  font-size: 16px;
+  font-weight: 700;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+  animation: l-bob 4s ease-in-out infinite;
+  animation-delay: calc(var(--i) * -0.5s);
+}
+@keyframes l-bob { 50% { transform: translateY(-6px); } }
+.lv-dash-top { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 18px; }
+.lv-dash-top div { padding: 14px; border-radius: 16px; background: var(--bg-secondary); }
+.lv-dash-top small, .lv-dash-label { display: block; font-size: 12px; color: var(--text-tertiary); }
+.lv-dash-top b { display: block; margin-top: 4px; font-size: 18px; letter-spacing: -0.02em; }
+.lv-dash-label { margin-bottom: 6px; }
+.lv-meter { display: grid; grid-template-columns: 84px 1fr 40px; gap: 10px; align-items: center; padding: 8px 0; font-size: 14px; }
+.lv-meter b { text-align: right; font-size: 13px; }
+.lv-chat { width: min(100%, 420px); padding: 22px; display: grid; gap: 12px; box-sizing: border-box; }
+.lv-q, .lv-a { margin: 0; padding: 14px 16px; border-radius: 18px; font-size: 15px; line-height: 1.6; word-break: keep-all; }
+.lv-q { justify-self: end; background: #3182f6; color: #fff; border-bottom-right-radius: 6px; }
+.lv-a { background: var(--bg-secondary); border-bottom-left-radius: 6px; }
+.lv-ok { display: inline-block; margin-left: 8px; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; color: #0b8a5f; background: rgba(16, 185, 129, 0.14); }
+.lv-src { margin: 0; font-size: 12px; color: var(--text-tertiary); }
+
+/* 숫자 */
+.l-numbers { padding: 120px 0; background: var(--bg-secondary); }
+.l-numbers h2 { margin: 0 0 48px; font-size: clamp(28px, 4vw, 40px); font-weight: 800; letter-spacing: -0.04em; text-align: center; }
+.l-number-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+.l-number { padding: 28px 20px; border-radius: 24px; background: var(--bg-primary); text-align: center; }
+.l-number b { font-size: clamp(34px, 5vw, 52px); font-weight: 800; letter-spacing: -0.04em; color: #3182f6; }
+.l-number span { margin-left: 2px; font-size: 18px; font-weight: 700; color: var(--text-secondary); }
+.l-number p { margin: 8px 0 0; font-size: 15px; color: var(--text-secondary); }
+
+/* 마지막 시작 버튼 */
+.l-final {
+  padding: 140px 0;
+  text-align: center;
+  color: #fff;
+  background: radial-gradient(60% 80% at 50% 0%, #3b5bdb 0%, #1b2559 60%, #0f1530 100%);
+}
+.l-final h2 { margin: 0 0 36px; font-size: clamp(30px, 5vw, 52px); font-weight: 800; line-height: 1.25; letter-spacing: -0.04em; word-break: keep-all; }
+
+@media (max-width: 860px) {
+  .l-feature { padding: 88px 0; }
+  .l-feature-grid { grid-template-columns: 1fr; gap: 40px; }
+  .l-feature.flip .l-feature-text { order: 0; }
+  .l-number-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 480px) {
+  .l-wrap { padding: 0 16px; }
+  .l-hero { padding: 56px 0 96px; }
+  .l-cta .l-btn { flex: 1 1 100%; }
+  .lv-row { grid-template-columns: 18px 56px 1fr 40px; }
+  .lv-time { display: none; }
+  .lv-dash-top b { font-size: 15px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .l-hero-glow, .lv-pill, .l-scroll span { animation: none; }
+  [data-reveal] { transition: none; opacity: 1; transform: none; }
+}
+.l-all { margin: 28px 0 0; }
+.l-all a { color: rgba(255, 255, 255, 0.78); font-size: 15px; font-weight: 600; text-decoration: none; }
+.l-all a:hover { color: #fff; text-decoration: underline; }

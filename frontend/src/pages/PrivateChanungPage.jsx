@@ -2,6 +2,7 @@ import { lazy, Suspense, useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { CompanyExam } from './ExamCompanyPage';
 import RagAssistant from './RagAssistant';
+import './CsNotesPage.css';
 
 const AdminPage = lazy(() => import('./AdminPage'));
 
@@ -102,10 +103,15 @@ function PatchNotes() {
   );
 }
 
-// 개발하면서 겪은 기술 문제 기록. 데이터는 잠금을 푼 뒤에만 불러온다
+// 개발하면서 겪은 기술 문제 기록. 데이터는 잠금을 푼 뒤에만 불러온다.
+// 기술면접 노트처럼 왼쪽에 분야별 목록, 오른쪽에 분야별 본문을 둔다
+const troubleGroup = area => area.split(' · ')[0];
+
 function TroubleLog() {
   const [items, setItems] = useState(null);
-  const [area, setArea] = useState('all');
+  const [group, setGroup] = useState('');
+  const [query, setQuery] = useState('');
+  const [selected, setSelected] = useState('');
   const [failed, setFailed] = useState(false);
   useEffect(() => {
     let alive = true;
@@ -114,43 +120,78 @@ function TroubleLog() {
   }, []);
   if (failed) return <div className="fade-in"><p role="alert">기록을 불러오지 못했습니다. 새로고침해 주세요.</p></div>;
   if (!items) return <div className="fade-in"><p role="status">기록을 불러오는 중…</p></div>;
-  const areas = [...new Set(items.map(t => t.area))];
-  const shown = items.filter(t => area === 'all' || t.area === area);
+  const groups = [...new Set(items.map(t => troubleGroup(t.area)))];
+  const q = query.trim().toLowerCase();
+  const visible = items.filter(t => (!group || troubleGroup(t.area) === group)
+    && (!q || [t.title, t.area, t.symptom, t.cause, t.fix, t.result, t.lesson].some(v => v?.toLowerCase().includes(q))));
   const open = items.filter(t => t.status === 'open').length;
+  const choose = id => {
+    setSelected(id);
+    document.getElementById(`trouble-${id}`)?.scrollIntoView({ behavior: window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
+  };
   return (
-    <div className="fade-in">
-      <div className="page-header">
-        <Link to={BASE} className="back-link">← 관리자 페이지</Link>
-        <h1>트러블슈팅 기록</h1>
-        <p>개발하면서 실제로 겪은 기술 문제와 원인, 해결, 측정 결과입니다. 전체 {items.length}건 · 해결 {items.length - open}건 · 진행 중 {open}건</p>
-      </div>
-      <div className="exam-filters" role="group" aria-label="분야">
-        {['all', ...areas].map(a => (
-          <button key={a} type="button" className={`exam-btn${area === a ? ' primary' : ''}`} aria-pressed={area === a} onClick={() => setArea(a)}>
-            {a === 'all' ? '전체' : a}
-          </button>
-        ))}
-      </div>
-      {shown.map(t => (
-        <article key={t.id} style={{ marginTop: 16, padding: '16px 18px', background: 'var(--glass-bg)', border: '1px solid var(--glass-border)', borderRadius: 'var(--radius-lg)' }}>
-          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center', fontSize: 13, opacity: 0.8 }}>
-            <time dateTime={t.date}>{t.date}</time>
-            <span>· {t.area}</span>
-            <span className={`exam-tag${t.status === 'open' ? ' soon' : ''}`}>{STATUS[t.status] || t.status}</span>
+    <div className="cs-notes fade-in">
+      <header className="notes-heading">
+        <div>
+          <Link to={BASE}>← 관리자 페이지</Link>
+          <h1>트러블슈팅 기록</h1>
+          <p>개발하면서 실제로 겪은 기술 문제와 원인, 해결, 측정 결과 · 전체 {items.length}건 · 해결 {items.length - open}건 · 진행 중 {open}건</p>
+        </div>
+      </header>
+      <div className="notes-layout">
+        <aside className="notes-index">
+          <div className="notes-filters">
+            <input type="search" aria-label="기록 검색" value={query} onChange={e => setQuery(e.target.value)} placeholder="기록 검색…" />
+            <select aria-label="분야" value={group} onChange={e => setGroup(e.target.value)}>
+              <option value="">전체 분야</option>
+              {groups.map(g => <option key={g} value={g}>{g}</option>)}
+            </select>
           </div>
-          <h2 style={{ fontSize: 18, margin: '8px 0 10px' }}>{t.title}</h2>
-          <dl style={{ margin: 0, display: 'grid', gap: 8, lineHeight: 1.6 }}>
-            {[['증상', t.symptom], ['원인', t.cause], ['해결', t.fix], ['결과', t.result], ['측정 환경', t.env], ['배운 점', t.lesson]]
-              .filter(([, v]) => v)
-              .map(([k, v]) => (
-                <div key={k}>
-                  <dt style={{ fontWeight: 700, fontSize: 13 }}>{k}</dt>
-                  <dd style={{ margin: 0, wordBreak: 'keep-all' }}>{v}</dd>
-                </div>
+          <nav className="notes-questions" aria-label="트러블슈팅 목록">
+            {groups.map(g => {
+              const list = visible.filter(t => troubleGroup(t.area) === g);
+              if (!list.length) return null;
+              return <section key={g}><h2>{g}<small>{list.length}건</small></h2><ul>{list.map(t => (
+                <li key={t.id} className={selected === t.id ? 'is-selected' : ''}>
+                  <button type="button" aria-current={selected === t.id ? 'true' : undefined} onClick={() => choose(t.id)}>
+                    {t.status === 'open' && <span className="exam-tag soon" style={{ marginRight: 6 }}>진행 중</span>}{t.title}
+                  </button>
+                </li>
+              ))}</ul></section>;
+            })}
+            {!visible.length && <p className="notes-empty">조건에 맞는 기록이 없습니다.</p>}
+          </nav>
+        </aside>
+        <div className="notes-content">
+          {groups.map(g => {
+            const list = visible.filter(t => troubleGroup(t.area) === g);
+            if (!list.length) return null;
+            return <section className="notes-subject" key={g} aria-labelledby={`trouble-group-${g}`}>
+              <h2 id={`trouble-group-${g}`} className="notes-subject-title">{g}<small>{list.length}건</small></h2>
+              {list.map(t => (
+                <article key={t.id} id={`trouble-${t.id}`} className="notes-detail-card" aria-label={t.title}>
+                  <div className="notes-detail-top">
+                    <span><time dateTime={t.date}>{t.date}</time> · {t.area}</span>
+                    <span className={`exam-tag${t.status === 'open' ? ' soon' : ''}`}>{STATUS[t.status] || t.status}</span>
+                  </div>
+                  <h3 className="notes-question">{t.title}</h3>
+                  <dl style={{ margin: 0, display: 'grid', gap: 10, lineHeight: 1.65 }}>
+                    {[['증상', t.symptom], ['원인', t.cause], ['해결', t.fix], ['결과', t.result], ['측정 환경', t.env], ['배운 점', t.lesson]]
+                      .filter(([, v]) => v)
+                      .map(([k, v]) => (
+                        <div key={k}>
+                          <dt style={{ fontWeight: 700, fontSize: 13, color: 'var(--accent-blue)' }}>{k}</dt>
+                          <dd style={{ margin: 0, wordBreak: 'keep-all' }}>{v}</dd>
+                        </div>
+                      ))}
+                  </dl>
+                </article>
               ))}
-          </dl>
-        </article>
-      ))}
+            </section>;
+          })}
+          {!visible.length && <div className="notes-empty"><h2>표시할 기록이 없습니다.</h2><p>검색어나 분야를 바꿔 보세요.</p></div>}
+        </div>
+      </div>
     </div>
   );
 }

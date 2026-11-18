@@ -33,6 +33,15 @@ function applyTheme(t) {
   try { localStorage.setItem('theme', t.key); } catch { /* storage unavailable */ }
 }
 
+// 주 메뉴 네 개. 하위 화면에 있어도 해당 메뉴가 켜져 보이게 경로 묶음으로 판단한다
+const startsWithAny = (p, list) => list.some(x => p === x || p.startsWith(x + '/'));
+const NAV = [
+  { to: '/algo', label: '코테', match: p => startsWithAny(p, ['/algo', '/bug-hunt']) },
+  { to: '/technical-interview', label: 'CS·면접', match: p => startsWithAny(p, ['/technical-interview', '/notes', '/web-essentials', '/interview', '/category', '/question', '/search', '/web', '/tech-blogs']) },
+  { to: '/exam', label: '실전', match: p => startsWithAny(p, ['/exam', '/duel', '/topics', '/calc', '/aptitude', '/ncs', '/major', '/major-exam', '/ssafy', '/promotion-exam']) },
+  { to: '/stats', label: '내 학습', match: p => startsWithAny(p, ['/stats', '/weak', '/account', '/all']) },
+];
+
 export default function Layout() {
   const location = useLocation();
   // 화면 모드는 index.html에서 먼저 적용해 두고, 여기서는 바꿀 때만 반영하고 기억한다
@@ -56,25 +65,16 @@ export default function Layout() {
         <div className="container header-inner">
           <Link to="/" className="logo">
             <span className="logo-dot" />
-            <span className="logo-title">전산학 전공필기 준비</span>
+            <span className="logo-title">DevCookie</span>
           </Link>
           <div className="header-right">
-            <nav className="nav-links">
-              <Link to="/" className={location.pathname === '/' ? 'active' : ''}>
-                홈
-              </Link>
-              <Link to="/notes" className={location.pathname === '/notes' ? 'active' : ''}>
-                전공노트
-              </Link>
-              <a href="https://gitseon.github.io/study-space/" target="_blank" rel="noopener noreferrer" aria-label="gs study (새 탭에서 열림)">
-                gs study <span aria-hidden="true">↗</span>
-              </a>
-              <Link to="/exam" className={location.pathname.startsWith('/exam') || location.pathname === '/topics' || location.pathname === '/calc' ? 'active' : ''}>
-                기업별 기출
-              </Link>
-              <Link to="/aptitude" className={location.pathname.startsWith('/aptitude') || location.pathname === '/ncs' ? 'active' : ''}>
-                NCS/인적성
-              </Link>
+            <nav className="nav-links" aria-label="주 메뉴">
+              {NAV.map(n => (
+                <Link key={n.to} to={n.to} className={n.match(location.pathname) ? 'active' : ''}
+                  aria-current={n.match(location.pathname) ? 'page' : undefined}>
+                  {n.label}
+                </Link>
+              ))}
             </nav>
             {/* 지금 모드의 아이콘을 보여 주고, 누르면 색 견본이 펼쳐진다 */}
             <div className="theme-pick">
