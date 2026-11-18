@@ -17,6 +17,25 @@ services:
       - key: ADMIN_KEY
         sync: false
 
+  # 스테이징 백엔드: dev 브랜치를 배포한다. DB는 운영과 분리된 Neon 스테이징 브랜치를 쓴다(docs/staging.md).
+  # 깨우지 않으므로 15분 동안 요청이 없으면 잠든다(무료 사용 시간 절약).
+  - type: web
+    name: cs-study-backend-staging
+    runtime: docker
+    rootDir: backend
+    branch: dev
+    plan: free
+    envVars:
+      - key: SLACK_ENABLED
+        value: "false"
+      - key: APP_BASE_URL
+        value: https://cs-study-platform.vercel.app
+      # Neon 스테이징 브랜치 연결 문자열. 운영 DATABASE_URL을 넣지 않는다
+      - key: DATABASE_URL
+        sync: false
+      - key: ADMIN_KEY
+        sync: false
+
   - type: web
     name: cs-study-frontend
     runtime: static

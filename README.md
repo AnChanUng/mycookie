@@ -52,9 +52,11 @@ CS·기술면접, 코딩테스트, 실전 대결, 학습 기록을 하나로 잇
 ## 개발 흐름
 
 1. 작업마다 GitHub 이슈를 한글로 등록합니다.
-2. `dev`에서 기능 브랜치를 만들어 작업하고, 이슈를 연결한 PR을 올립니다.
-3. 검토 후 `master`에 병합하면 Vercel · Render에 자동 배포됩니다.
-4. 바뀐 내용은 [패치노트](https://cs-study-platform.vercel.app/changelog)에 기록합니다.
+2. 기능 브랜치에서 작업하고, 이슈를 연결한 PR을 `dev`로 올립니다.
+3. `dev`에 병합되면 스테이징(Vercel 미리보기 → 스테이징 백엔드 → 스테이징 DB)에서 확인합니다.
+4. `dev` → `master` PR로 운영에 배포하고, 바뀐 내용은 [패치노트](https://cs-study-platform.vercel.app/changelog)와 GitHub Release에 기록합니다.
+
+환경 구성과 설정 방법은 [docs/staging.md](docs/staging.md)를 참고하세요.
 
 ## 로컬에서 실행하기
 
