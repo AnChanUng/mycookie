@@ -32,7 +32,7 @@ export default function SiteFooter() {
           나의쿠키는 개인이 운영하는 비영리 학습 서비스입니다. 문제와 해설은 학습용으로 새로 작성한 것이며 실제 시험이나 기업의 공식 자료가 아닙니다.
         </p>
         <p className="site-footer-brand" aria-hidden="true">나의쿠키</p>
-        <p className="site-footer-copy">© 2026 나의쿠키 (mycookie.dev). All rights reserved.</p>
+        <p className="site-footer-copy">© 2026 나의쿠키. All rights reserved.</p>
       </div>
     </footer>
   );
