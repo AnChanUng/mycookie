@@ -38,7 +38,7 @@ export function RenewalNotice() {
           전산학 전공필기 준비 사이트입니다.<br />그동안 사이트를 이용해 주신 모든 분께 감사드립니다.
         </p>
         <p style={PARA}>
-          전산학 전공필기 사이트는 개발자 취업 준비 사이트 <strong>나의쿠키(mycookie.dev)</strong>로 새롭게 리뉴얼할 예정입니다.<br />
+          전산학 전공필기 사이트는 개발자 취업 준비 사이트 <strong>나의쿠키</strong>로 새롭게 리뉴얼할 예정입니다.<br />
           전공필기를 넘어 개발자 취업 준비 전반을 도울 수 있도록 준비하고 있습니다.
         </p>
         <p style={PARA}>
