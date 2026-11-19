@@ -298,7 +298,7 @@ git push origin v0.24.0`}</pre>
 
       <Section id="docs" no="13" title="더 읽을 문서">
         <div className="ob-links">
-          {[['docs/homeserver.md', '홈서버 구축, 배포, 백업과 복구'], ['docs/design-system.md', '디자인 시스템'], ['docs/security.md', '보안 설계'],
+          {[['docs/homeserver.md', '홈서버 구축, 배포, 백업과 복구'], ['docs/monitoring.md', '로그 보기 (Grafana)'], ['docs/design-system.md', '디자인 시스템'], ['docs/security.md', '보안 설계'],
             ['docs/seo.md', '검색 노출'], ['docs/staging.md', '스테이징과 운영 환경'], ['docs/membership.md', '등급과 승급']]
             .map(([path, label]) => <a key={path} href={doc(path)}><b>{label}</b><small>{path}</small></a>)}
         </div>

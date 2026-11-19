@@ -159,6 +159,8 @@ services:
       # 오늘의 CS를 Mattermost 채널에 올린다(운영에만. 스테이징까지 넣으면 두 번 올라간다)
       MATTERMOST_WEBHOOK_URL: ${MATTERMOST_WEBHOOK_URL:-}
       MATTERMOST_CRON: ${MATTERMOST_CRON:-0 30 8 * * MON-FRI}
+      # 긴급 알림에 붙일 Grafana 로그 링크(docs/monitoring.md)
+      GRAFANA_URL: ${GRAFANA_URL:-}
 
   backend-staging:
     <<: *backend

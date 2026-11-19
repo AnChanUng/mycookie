@@ -221,3 +221,7 @@ sudo -u devcookie /srv/devcookie/app/deploy/homeserver/backup.sh   # 백업이 �
 - DB도 노트북에 있으므로 **외장 디스크 백업이 유일한 안전장치**입니다. 한 달에 한 번 `restore.sh`로 스테이징에 되살려 백업이 정말 쓸 수 있는지 확인합니다.
 - 정전 · 공유기 재부팅 · 노트북 고장 동안은 사이트가 멈춥니다. 집 인터넷 업로드 속도와 통신사 약관(가정용 회선의 서버 운영 제한)도 한 번 확인해 두세요.
 - RAG 스택(ChromaDB · 임베딩 · 재정렬 모델)은 RAM 8GB에서 백엔드 두 개와 함께 돌리기 어려워 넣지 않았습니다.
+
+## 로그 보기
+
+운영, 스테이징 로그는 Grafana에서 봅니다. 띄우는 법과 접속, 계정은 [monitoring.md](monitoring.md)를 참고하세요.

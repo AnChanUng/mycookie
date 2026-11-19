@@ -1,0 +1,73 @@
+# 로그 모니터링(Grafana + Loki + Alloy). 서비스(devcookie)와 따로 띄우고 따로 내린다.
+#   - Alloy: devcookie 컨테이너의 로그를 Docker에서 읽어 environment(prod, staging, shared), service 라벨을 붙이고
+#            이메일, IP, 토큰 같은 값을 가린 뒤 Loki로 보낸다
+#   - Loki: 로그 저장, 14일 보관(/srv/mycookie-monitoring/loki)
+#   - Grafana: 브라우저에서 로그 조회. 홈서버 안(127.0.0.1:3000)에서만 열고, 팀원은 Tailscale로 접속한다
+# 띄우기: deploy/monitoring/up.sh (문서 docs/monitoring.md)
+name: mycookie-monitoring
+
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+services:
+  loki:
+    image: grafana/loki:3.5.1
+    restart: unless-stopped
+    mem_limit: 384m
+    user: "10001"
+    command: ["-config.file=/etc/loki/loki.yaml"]
+    volumes:
+      - ./loki.yaml:/etc/loki/loki.yaml:ro
+      - ${MONITORING_DATA:-/srv/mycookie-monitoring}/loki:/loki
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:3100/ready || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 20
+    logging: *logging
+
+  alloy:
+    image: grafana/alloy:v1.9.1
+    restart: unless-stopped
+    mem_limit: 192m
+    command: ["run", "--storage.path=/var/lib/alloy/data", "/etc/alloy/config.alloy"]
+    volumes:
+      - ./config.alloy:/etc/alloy/config.alloy:ro
+      # 컨테이너 목록과 로그를 읽기 위해 Docker 소켓이 필요하다(읽기 전용으로 붙이지만 강한 권한이므로 이 컨테이너만 쓴다)
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ${MONITORING_DATA:-/srv/mycookie-monitoring}/alloy:/var/lib/alloy/data
+    depends_on:
+      loki:
+        condition: service_healthy
+    logging: *logging
+
+  grafana:
+    image: grafana/grafana-oss:12.0.2
+    restart: unless-stopped
+    mem_limit: 256m
+    user: "472"
+    # 홈서버 안에서만 연다. 바깥(인터넷)에는 열지 않고 Tailscale로 접속한다
+    ports: ["127.0.0.1:3000:3000"]
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:?GRAFANA_ADMIN_PASSWORD가 .env에 없습니다}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_AUTH_ANONYMOUS_ENABLED: "false"
+      GF_USERS_DEFAULT_THEME: light
+      GF_DEFAULT_LOCALE: ko-KR
+      GF_ANALYTICS_REPORTING_ENABLED: "false"
+      GF_ANALYTICS_CHECK_FOR_UPDATES: "false"
+      GF_NEWS_NEWS_FEED_ENABLED: "false"
+      GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH: /var/lib/grafana/dashboards/mycookie-logs.json
+      GF_SERVER_ROOT_URL: ${GRAFANA_ROOT_URL:-http://localhost:3000}
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - ${MONITORING_DATA:-/srv/mycookie-monitoring}/grafana:/var/lib/grafana
+    depends_on:
+      loki:
+        condition: service_healthy
+    logging: *logging

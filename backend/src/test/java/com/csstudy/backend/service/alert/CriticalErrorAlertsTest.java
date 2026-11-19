@@ -31,7 +31,7 @@ class CriticalErrorAlertsTest {
     void setUp() {
         when(mattermost.enabled()).thenReturn(true);
         when(gemini.summarize(anyString())).thenReturn(Optional.of("- 무슨 일: DB 연결 실패"));
-        alerts = new CriticalErrorAlerts(mattermost, gemini, redis, false, "test:", true, 10, 30);
+        alerts = new CriticalErrorAlerts(mattermost, gemini, redis, false, "test:", true, 10, 30, "");
         alerts.useClock(Clock.fixed(now, ZoneOffset.UTC));
     }
 
@@ -105,7 +105,7 @@ class CriticalErrorAlertsTest {
 
     @Test
     void capturesRealErrorLogsWithRootCauseAndAppFrame() {
-        var live = new CriticalErrorAlerts(mattermost, gemini, redis, false, "test:", true, 10, 30);
+        var live = new CriticalErrorAlerts(mattermost, gemini, redis, false, "test:", true, 10, 30, "");
         live.attach();
         try {
             LoggerFactory.getLogger("com.csstudy.backend.SomeController").error("결과 저장 실패",
@@ -115,6 +115,15 @@ class CriticalErrorAlertsTest {
         } finally {
             live.detach();
         }
+    }
+
+    @Test
+    void addsGrafanaLinkWhenConfigured() {
+        var linked = new CriticalErrorAlerts(mattermost, gemini, redis, false, "test:", true, 10, 30, "http://homeserver:3000/");
+        linked.useClock(Clock.fixed(now, ZoneOffset.UTC));
+        linked.record(new CriticalErrorAlerts.Event(now.minusSeconds(10), "OutOfMemoryError@x", "OutOfMemoryError", "m", "x", true));
+        linked.check();
+        verify(mattermost).postNotice(contains("http://homeserver:3000/d/mycookie-logs?var-environment=prod"));
     }
 
     @Test

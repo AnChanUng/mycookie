@@ -1,0 +1,99 @@
+// devcookie 컨테이너의 로그만 모아 Loki로 보낸다.
+// 라벨: environment(prod, staging, shared), service(backend, frontend, postgres, redis, kafka, cloudflared), level
+// 운영과 스테이징은 이렇게 나뉜다: 백엔드, 화면은 컨테이너가 따로, PostgreSQL(DB와 계정 분리), Redis(키 앞머리), Kafka(토픽, 그룹)는 공유
+
+discovery.docker "devcookie" {
+  host = "unix:///var/run/docker.sock"
+  filter {
+    name   = "label"
+    values = ["com.docker.compose.project=devcookie"]
+  }
+}
+
+discovery.relabel "devcookie" {
+  targets = []
+
+  // 서비스 이름: backend-prod → service=backend, environment=prod
+  rule {
+    source_labels = ["__meta_docker_container_label_com_docker_compose_service"]
+    regex         = "(backend|frontend)-(prod|staging)"
+    target_label  = "service"
+    replacement   = "$1"
+  }
+  rule {
+    source_labels = ["__meta_docker_container_label_com_docker_compose_service"]
+    regex         = "(backend|frontend)-(prod|staging)"
+    target_label  = "environment"
+    replacement   = "$2"
+  }
+  // 공유 인프라: postgres, redis, kafka, cloudflared → environment=shared
+  rule {
+    source_labels = ["__meta_docker_container_label_com_docker_compose_service"]
+    regex         = "(postgres|redis|kafka|cloudflared)"
+    target_label  = "service"
+    replacement   = "$1"
+  }
+  rule {
+    source_labels = ["__meta_docker_container_label_com_docker_compose_service"]
+    regex         = "(postgres|redis|kafka|cloudflared)"
+    target_label  = "environment"
+    replacement   = "shared"
+  }
+  rule {
+    source_labels = ["__meta_docker_container_name"]
+    regex         = "/(.*)"
+    target_label  = "container"
+  }
+}
+
+loki.source.docker "devcookie" {
+  host             = "unix:///var/run/docker.sock"
+  targets          = discovery.docker.devcookie.targets
+  relabel_rules    = discovery.relabel.devcookie.rules
+  refresh_interval = "30s"
+  forward_to       = [loki.process.devcookie.receiver]
+}
+
+loki.process "devcookie" {
+  // 개인정보와 비밀값을 Loki에 남기기 전에 가린다(백엔드 긴급 알림의 LogMasking과 같은 규칙)
+  stage.replace {
+    expression = "(?i)bearer\\s+([A-Za-z0-9._~+/=-]{8,})"
+    replace    = "[토큰]"
+  }
+  stage.replace {
+    expression = "(?i)(?:password|passwd|secret|token|api[_-]?key|authorization)[\"'\\s:=]+([^\\s\"',&]+)"
+    replace    = "[가림]"
+  }
+  stage.replace {
+    expression = "(eyJ[A-Za-z0-9_-]{8,}\\.[A-Za-z0-9_-]{8,}\\.[A-Za-z0-9_-]{8,})"
+    replace    = "[JWT]"
+  }
+  stage.replace {
+    expression = "([A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,})"
+    replace    = "[이메일]"
+  }
+  stage.replace {
+    expression = "\\b((?:\\d{1,3}\\.){3}\\d{1,3})\\b"
+    replace    = "[IP]"
+  }
+  stage.replace {
+    expression = "(?i)postgres(?:ql)?://[^:\\s/]+:([^@\\s]+)@"
+    replace    = "[가림]"
+  }
+
+  // 스프링 로그의 레벨(ERROR, WARN, INFO ...)을 라벨로 꺼내 화면에서 고를 수 있게 한다
+  stage.regex {
+    expression = "\\s(?P<level>TRACE|DEBUG|INFO|WARN|ERROR)\\s"
+  }
+  stage.labels {
+    values = { level = "" }
+  }
+
+  forward_to = [loki.write.local.receiver]
+}
+
+loki.write "local" {
+  endpoint {
+    url = "http://loki:3100/loki/api/v1/push"
+  }
+}
