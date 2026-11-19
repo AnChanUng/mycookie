@@ -37,6 +37,20 @@ class BlogFeedServiceTest {
     }
 
     @Test
+    void showsOnlyProjectPostsByTitleCategoryOrTag() throws Exception {
+        String rss = """
+            <rss version="2.0"><channel>
+              <item><title>홈서버 구축하기</title><link>https://cookie.tistory.com/258</link><category>DevOps</category></item>
+              <item><title>[MST] 섬 연결하기 (Java)</title><link>https://cookie.tistory.com/200</link><category>Problem Solving/java</category></item>
+              <item><title>CI 도입기</title><link>https://cookie.tistory.com/260</link><category>DevOps</category><category>나의쿠키</category></item>
+            </channel></rss>""";
+        var posts = BlogFeedService.parse(BlogFeedService.utf8(rss), BlogFeedService.splitKeywords("나의쿠키, 홈서버"));
+        assertThat(posts).extracting(BlogFeedService.Post::title).containsExactly("홈서버 구축하기", "CI 도입기");
+        assertThat(posts.get(1).category()).isEqualTo("DevOps");
+        assertThat(BlogFeedService.parse(BlogFeedService.utf8(rss), BlogFeedService.splitKeywords(""))).hasSize(3);
+    }
+
+    @Test
     void rejectsDoctypeEntities() {
         String evil = "<?xml version=\"1.0\"?><!DOCTYPE r [<!ENTITY x SYSTEM \"file:///etc/passwd\">]><rss><channel><item><title>&x;</title><link>https://a</link></item></channel></rss>";
         org.assertj.core.api.Assertions.assertThatThrownBy(() -> BlogFeedService.parse(BlogFeedService.utf8(evil))).isInstanceOf(Exception.class);
@@ -52,7 +66,7 @@ class BlogFeedServiceTest {
             public Instant instant() { return now.get(); }
         };
         when(http.getForObject(anyString(), eq(byte[].class))).thenReturn(BlogFeedService.utf8(RSS));
-        var svc = new BlogFeedService("https://cookie.tistory.com/rss", http, clock);
+        var svc = new BlogFeedService("https://cookie.tistory.com/rss", "", http, clock);
         assertThat(svc.posts()).hasSize(2);
         assertThat(svc.posts()).hasSize(2);
         verify(http, times(1)).getForObject(anyString(), eq(byte[].class));   // 30분 안에는 다시 읽지 않는다
@@ -60,6 +74,6 @@ class BlogFeedServiceTest {
         now.set(now.get().plus(BlogFeedService.TTL).plusSeconds(1));
         when(http.getForObject(anyString(), eq(byte[].class))).thenThrow(new RestClientException("down"));
         assertThat(svc.posts()).hasSize(2);   // 실패해도 마지막 목록 유지
-        assertThat(new BlogFeedService("", http, clock).posts()).isEmpty();
+        assertThat(new BlogFeedService("", "", http, clock).posts()).isEmpty();
     }
 }

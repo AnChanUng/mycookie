@@ -232,7 +232,7 @@ git push origin v0.24.0`}</pre>
       </Section>
 
       <Section id="blog" no="12" title="기술 블로그">
-        <p>나의쿠키를 만들면서 겪은 일(홈서버 구축, AI 워크플로우 등)을 기술 블로그에 정리합니다. 새 글을 올리면 이 목록에 자동으로 나타납니다.</p>
+        <p>나의쿠키를 만들면서 겪은 일(홈서버 구축, AI 워크플로우 등)을 기술 블로그에 정리합니다. 나의쿠키 관련 글(태그 "나의쿠키")을 올리면 이 목록에 자동으로 나타납니다.</p>
         <BlogPosts />
       </Section>
 
@@ -276,7 +276,6 @@ function BlogPosts() {
           <small>{[post.category, post.publishedAt].filter(Boolean).join(', ') || '기술 블로그'}</small></a>
       </li>)}
     </ul>
-    <p><a href={BLOG_HOME} target="_blank" rel="noopener noreferrer">블로그 전체 보기 →</a></p>
   </>;
 }
 

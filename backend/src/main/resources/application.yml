@@ -62,6 +62,7 @@ app:
   # 신규 개발자 안내 페이지에 보여 줄 기술 블로그 RSS(티스토리). 비우면 목록을 보여 주지 않는다
   blog:
     rss-url: ${BLOG_RSS_URL:https://cookie.tistory.com/rss}
+    keywords: ${BLOG_KEYWORDS:나의쿠키,홈서버}
   # 메일 링크(비밀번호 재설정, 이메일 인증)가 가리키는 사이트 주소
   base-url: ${APP_BASE_URL:http://localhost:3000}
   # Mattermost 채널에 오늘의 CS 질문 올리기. 웹훅 URL이 비면 꺼진다(스테이징에는 넣지 않는다)
