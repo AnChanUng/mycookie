@@ -51,7 +51,7 @@ export default function OnboardingPage() {
         <p>노트북 한 대(홈서버)에서 화면, 백엔드, DB를 Docker Compose로 돌립니다. 바깥 요청은 Cloudflare 터널로만 들어오고, 공유기 포트는 하나도 열지 않습니다.</p>
         <figure className="ob-figure">
           <a className="ob-diagram-wrap" href={archImg} target="_blank" rel="noopener noreferrer">
-            <img className="ob-diagram" src={archImg} width="1680" height="1265" loading="lazy"
+            <img className="ob-diagram" src={archImg} width="1680" height="1185" loading="lazy"
               alt="사용자 요청이 Cloudflare와 cloudflared를 거쳐 홈서버의 nginx, Spring Boot, PostgreSQL, Redis, Kafka로 이어지고, 자동 배포와 암호화 백업이 Google Drive로 이어지는 구조" />
           </a>
           <figcaption>그림 1. 전체 구조. 회색은 사용자 요청, 보라는 외부 연동, 파란 점선은 배포, 초록은 백업 흐름입니다. 그림을 누르면 크게 볼 수 있어요(원본: <code>docs/architecture/build.py</code>)</figcaption>

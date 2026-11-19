@@ -12,7 +12,7 @@ from pathlib import Path
 
 ICONS = Path(sys.argv[1]) if len(sys.argv) > 1 else Path("package/icons")
 OUT = Path(__file__).with_name("architecture.svg")
-W, H = 1680, 1265
+W, H = 1680, 1185
 
 BRAND = {  # simple-icons 이름: 색
     "cloudflare": "F38020", "nginx": "009639", "springboot": "6DB33F", "postgresql": "4169E1",
@@ -103,43 +103,41 @@ def arrow(points, label=None, at=None, color="64748B", dash=False, both=False, l
 
 # ── 그룹 ─────────────────────────────────────────────
 group(250, 110, 230, 380, "Cloudflare", "F38020", "cloudflare", fill="#FFF7ED")
-group(250, 760, 230, 390, "GitHub", "24292F", "github", fill="#F8FAFC")
-group(520, 50, 790, 1140, "홈서버 (노트북 한 대, 메모리 8GB)", "475569", "laptop", fill="#F8FAFC")
-group(540, 100, 750, 1070, "Windows + WSL2 Ubuntu 24.04", "E95420", "ubuntu", dash=True)
+group(250, 760, 230, 350, "GitHub", "24292F", "github", fill="#F8FAFC")
+group(520, 50, 790, 1060, "홈서버", "475569", "laptop", fill="#F8FAFC")
+group(540, 100, 750, 990, "Windows + WSL2 Ubuntu 24.04", "E95420", "ubuntu", dash=True)
 group(560, 150, 710, 690, "Docker Compose", "2496ED", "docker", fill="#F0F7FF")
 group(700, 195, 380, 210, "운영  mycookie.dev", "16A34A", dash=True, fill="#fff")
 group(700, 430, 380, 210, "스테이징  staging.mycookie.dev", "CA8A04", dash=True, fill="#fff")
-group(560, 875, 710, 270, "호스트 (systemd)", "64748B", "clock", fill="#fff")
-group(1350, 110, 290, 1040, "외부 서비스", "7C3AED", dash=True, fill="#FAF5FF")
+group(560, 875, 710, 190, "호스트 (systemd)", "64748B", "clock", fill="#fff")
+group(1350, 110, 290, 960, "외부 서비스", "7C3AED", dash=True, fill="#FAF5FF")
 
 # ── 아이콘 ───────────────────────────────────────────
-tile("browser", 130, 250, "사용자", "웹 브라우저")
-tile("person", 130, 940, "개발자", "PR, SSH")
+tile("browser", 130, 250, "사용자")
+tile("person", 130, 940, "개발자")
 
-tile("cloudflare", 365, 190, "DNS, HTTPS", "도메인, 인증서, 방화벽")
-tile("cloudflare", 365, 375, "Tunnel", "포트 개방 없이 연결")
+tile("cloudflare", 365, 190, "DNS, HTTPS")
+tile("cloudflare", 365, 375, "Tunnel")
 
-tile("github", 365, 845, "저장소", "dev, master 브랜치")
-tile("githubactions", 365, 1030, "GitHub Actions", "PR마다 테스트, 빌드")
+tile("github", 365, 845, "저장소")
+tile("githubactions", 365, 1030, "GitHub Actions")
 
-tile("cloudflare", 630, 410, "cloudflared", "주소별로 전달")
-tile("nginx", 790, 285, "nginx", "React 화면, /api 프록시")
-tile("springboot", 980, 285, "Spring Boot", "backend-prod")
-tile("nginx", 790, 520, "nginx", "React 화면, /api 프록시")
-tile("springboot", 980, 520, "Spring Boot", "backend-staging")
-tile("postgresql", 1185, 405, "PostgreSQL 18", "운영 DB\n스테이징 DB")
-tile("redis", 840, 735, "Redis", "접속자 수, 요청 제한")
-tile("apachekafka", 1030, 735, "Kafka", "제보 이벤트 처리")
+tile("cloudflare", 630, 410, "cloudflared")
+tile("nginx", 790, 285, "nginx")
+tile("springboot", 980, 285, "Spring Boot")
+tile("nginx", 790, 520, "nginx")
+tile("springboot", 980, 520, "Spring Boot")
+tile("postgresql", 1185, 405, "PostgreSQL 18")
+tile("redis", 840, 735, "Redis")
+tile("apachekafka", 1030, 735, "Kafka")
 
-tile("clock", 735, 980, "자동 배포", "5분마다 git pull\n바뀐 쪽만 다시 빌드")
-tile("tailscale", 880, 980, "Tailscale", "원격 SSH")
-tile("archive", 1015, 980, "백업", "매일 04:00 pg_dump")
-tile("lock", 1185, 980, "암호화", "gpg AES-256")
+tile("clock", 735, 980, "자동 배포")
+tile("tailscale", 880, 980, "Tailscale")
+tile("archive", 1015, 980, "백업")
+tile("lock", 1185, 980, "암호화")
 
-tile("mattermost", 1495, 205, "Mattermost", "CS 알림, 제보 알림")
-tile(None, 1495, 400, "소셜 로그인", "OAuth 2.0", icons=["google", "kakaotalk", "naver"])
-tile("tistory", 1495, 595, "기술 블로그", "RSS로 글 목록")
-tile("googledrive", 1495, 980, "Google Drive", "암호화 백업 보관\n(3-2-1 원칙)")
+tile("mattermost", 1495, 205, "Mattermost")
+tile("googledrive", 1495, 980, "Google Drive")
 
 # ── 흐름 ─────────────────────────────────────────────
 arrow([(166, 250), (329, 200)], "HTTPS", (245, 210))
@@ -156,23 +154,21 @@ arrow([(840, 642), (840, 699)])
 arrow([(1030, 642), (1030, 699)])
 
 # 백엔드 → 외부 서비스
-arrow([(980, 249), (980, 128), (1330, 128), (1330, 205), (1459, 205)], "웹훅, API", (1180, 128), color="7C3AED")
-arrow([(1330, 205), (1330, 400), (1450, 400)], color="7C3AED")
-arrow([(1330, 400), (1330, 595), (1459, 595)], color="7C3AED")
+arrow([(980, 249), (980, 128), (1330, 128), (1330, 205), (1459, 205)], "웹훅", (1180, 128), color="7C3AED")
 
 # 개발 흐름
 arrow([(166, 930), (329, 855)], "push, PR", (245, 882))
 arrow([(365, 933), (365, 994)], "CI", (392, 962))
 arrow([(401, 845), (500, 845), (500, 980), (699, 980)], "git pull", (600, 968), color="2496ED", dash=True)
 arrow([(735, 944), (735, 843)], "빌드, 재시작", (735, 862), color="2496ED", dash=True)
-arrow([(130, 1028), (130, 1215), (880, 1215), (880, 1062)], "SSH", (500, 1215), color="475569", dash=True)
+arrow([(130, 1008), (130, 1135), (880, 1135), (880, 1046)], "SSH", (500, 1135), color="475569", dash=True)
 
 # 백업 흐름
 arrow([(1221, 405), (1250, 405), (1250, 860), (1015, 860), (1015, 944)], "pg_dump", (1110, 860), color="16A34A")
 arrow([(1051, 980), (1149, 980)])
 arrow([(1221, 980), (1459, 980)], "rclone", (1340, 968), color="16A34A")
 
-legend_y = 1252
+legend_y = 1172
 for i, (c, dash, s) in enumerate([("64748B", False, "사용자 요청"), ("7C3AED", False, "외부 연동"),
                                    ("2496ED", True, "배포"), ("16A34A", False, "백업")]):
     x = 560 + i * 170
