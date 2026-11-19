@@ -87,6 +87,8 @@ const flowQuestions = INTERVIEW_STAGES.flatMap(stage => stage.ids.map(id => ques
   };
   const random = () => {
     const pool = visible.filter(q => q.id !== selected?.id);
+    // 버튼을 눌렀을 때만 실행되는 함수라 렌더 중 무작위 값이 아니다
+    // eslint-disable-next-line react-hooks/purity
     if (pool.length) select(pool[Math.floor(Math.random() * pool.length)].id);
   };
   return <>
