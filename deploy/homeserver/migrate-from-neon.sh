@@ -7,6 +7,8 @@ set -euo pipefail
 WHICH=${1:?prod 또는 staging}
 case "$WHICH" in prod|staging) ;; *) echo "prod 또는 staging"; exit 1;; esac
 ROOT=/srv/devcookie
+# 어느 폴더에서 실행해도 되게 작업 폴더를 옮긴다(다른 계정의 집 폴더에서 sudo -u로 실행하면 docker compose가 실패한다)
+cd "$ROOT"
 COMPOSE=(docker compose --project-directory "$ROOT" -f "$ROOT/app/deploy/homeserver/docker-compose.yml" --env-file "$ROOT/.env")
 KEY=NEON_$(echo "$WHICH" | tr a-z A-Z)_URL
 SRC=$(grep -E "^$KEY=" "$ROOT/.env" | cut -d= -f2- || true)

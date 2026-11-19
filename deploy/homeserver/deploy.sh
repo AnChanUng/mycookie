@@ -4,6 +4,8 @@
 set -euo pipefail
 
 ROOT=/srv/devcookie
+# 어느 폴더에서 실행해도 되게 작업 폴더를 옮긴다(다른 계정의 집 폴더에서 sudo -u로 실행하면 docker compose가 실패한다)
+cd "$ROOT"
 # 저장소가 비공개라 그램 전용 읽기 키(GitHub Deploy key, ~devcookie/.ssh/id_ed25519)로 SSH로 받는다
 REPO=git@github.com:AnChanUng/mycookie.git
 # 배포할 브랜치. 바꾸려면 .env에 PROD_BRANCH · STAGING_BRANCH를 넣는다(처음 시험할 때 등)

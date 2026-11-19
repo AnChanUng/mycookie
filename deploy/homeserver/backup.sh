@@ -6,6 +6,8 @@
 set -euo pipefail
 
 ROOT=/srv/devcookie
+# 어느 폴더에서 실행해도 되게 작업 폴더를 옮긴다(다른 계정의 집 폴더에서 sudo -u로 실행하면 docker compose가 실패한다)
+cd "$ROOT"
 COMPOSE=(docker compose --project-directory "$ROOT" -f "$ROOT/app/deploy/homeserver/docker-compose.yml" --env-file "$ROOT/.env")
 KEEP_DAYS=${KEEP_DAYS:-14}
 COPY_DIR=$(grep -E '^BACKUP_COPY_DIR=' "$ROOT/.env" | cut -d= -f2- || true)
