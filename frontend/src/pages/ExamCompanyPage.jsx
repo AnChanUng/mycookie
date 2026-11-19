@@ -52,9 +52,9 @@ const modeLabel = (sections, mode, sec, sets) =>
 
 // 한 회사 화면에 복기 기반 문제와 예상문제가 함께 있으면 시작 카드마다 어느 쪽인지 표시한다
 const KINDS = {
-  recall: '📕 복기문제',
-  predicted: '📝 예상문제',
-  mixed: '🔀 복기 + 예상 혼합',
+  recall: '복기문제',
+  predicted: '예상문제',
+  mixed: '복기 + 예상 혼합',
 };
 const Kind = ({ kind }) => (KINDS[kind] ? <span className={`exam-kind ${kind}`}>{KINDS[kind]}</span> : null);
 

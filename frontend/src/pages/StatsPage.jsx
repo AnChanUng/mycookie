@@ -1,4 +1,5 @@
 import { useMemo, useSyncExternalStore } from 'react';
+import LineIcon from '../components/LineIcon';
 import { Link } from 'react-router-dom';
 import { account, onAccountChange } from '../sync';
 import { useMembership, TIER_NAMES } from '../membership';
@@ -60,12 +61,12 @@ export default function StatsPage() {
           <TodayCs />
           <ContinueCard />
           <Link to="/weak" className={`ml-task${data.wrongOpen ? '' : ' done'}`}>
-            <span className="ml-task-icon" aria-hidden="true">↺</span>
+            <span className="ml-task-icon" aria-hidden="true"><LineIcon name="retry" size={20} /></span>
             <span><b>틀린 문제 다시 풀기</b><small>{data.wrongOpen ? `아직 못 맞힌 문제 ${data.wrongOpen}개` : '남은 오답이 없어요'}</small></span>
             <span className="ml-go" aria-hidden="true">→</span>
           </Link>
           <Link to="/notes" className="ml-task">
-            <span className="ml-task-icon" aria-hidden="true">📚</span>
+            <span className="ml-task-icon" aria-hidden="true"><LineIcon name="book" size={20} /></span>
             <span><b>전공노트 개념 하나 복습하기</b><small>{notesTotal - data.notesDone}개 남음</small></span>
             <span className="ml-go" aria-hidden="true">→</span>
           </Link>
