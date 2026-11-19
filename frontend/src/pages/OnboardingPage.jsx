@@ -164,6 +164,18 @@ cd frontend && npm run lint && npm run build`}</pre>
           다른 저장소의 <code>main</code> 브랜치가 우리 저장소에서는 <b><code>master</code></b>입니다. 이름만 다르고 역할(운영에 나가는 기준 브랜치)은 같습니다.
           <code>master</code>에 직접 커밋하지 않고, 항상 PR로 합칩니다.
         </Note>
+        <h3>배포는 어떻게 일어나나</h3>
+        <p>배포 버튼은 없습니다. <b>브랜치에 합치는 것이 곧 배포</b>입니다. 홈서버가 5분마다 GitHub을 확인해서 새 커밋이 있는 쪽만 다시 띄웁니다.</p>
+        <ol className="ob-steps">
+          <li><b>작업 브랜치 → <code>dev</code> PR 병합:</b> 5분 안에 스테이징(staging.mycookie.dev)이 바뀝니다. 여기서 직접 눌러 보며 확인합니다.</li>
+          <li><b><code>dev</code> → <code>master</code> PR 병합:</b> 5분 안에 운영(mycookie.dev)이 바뀝니다. 스테이징에서 확인한 것만 올립니다.</li>
+          <li><b>바뀐 쪽만 다시 빌드:</b> 화면 파일만 바뀌면 화면만, <code>backend/</code>가 바뀌면 백엔드만 다시 만듭니다. 백엔드가 다시 뜨는 1~2분 동안은 API가 잠깐 멈출 수 있습니다.</li>
+        </ol>
+        <Note>
+          <b>헷갈리기 쉬운 두 가지</b><br />
+          1. <code>master</code>에 바로 들어간 변경(핫픽스 등)은 <code>dev</code>에 없습니다. 그대로 두면 다음 배포 때 스테이징이 예전 코드로 돌아가니, <b><code>master</code> → <code>dev</code> PR</b>로 바로 맞춰 둡니다.<br />
+          2. 홈서버 <code>.env</code>의 <code>PROD_BRANCH</code>, <code>STAGING_BRANCH</code>로 어느 브랜치를 띄울지 잠깐 바꿀 수 있습니다(큰 작업을 바로 확인할 때). <b>평소에는 비워 둡니다.</b> 비어 있으면 운영은 <code>master</code>, 스테이징은 <code>dev</code>를 띄웁니다.
+        </Note>
         <h3>브랜치 이름</h3>
         <table className="ob-table">
           <thead><tr><th>이름</th><th>언제</th></tr></thead>
