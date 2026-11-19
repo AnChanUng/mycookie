@@ -1,16 +1,13 @@
-/* 토스 스타일 푸터: 어두운 그라데이션 위에 큰 문구 · 링크 묶음 · 흐린 대형 브랜드 글자 */
+/* 푸터: 어두운 단색 위에 큰 문구, 링크 묶음, 흐린 대형 브랜드 글자 */
 .site-footer {
   position: relative;
   overflow: hidden;
   margin-top: 64px;
   color: rgba(255, 255, 255, 0.92);
-  background:
-    radial-gradient(60% 80% at 30% 20%, rgba(176, 150, 170, 0.55), transparent 70%),
-    radial-gradient(70% 90% at 85% 90%, rgba(36, 64, 110, 0.85), transparent 70%),
-    linear-gradient(160deg, #7f7f9c 0%, #8d7f93 35%, #4a5a80 70%, #2b3f66 100%);
+  background: #1b1f2a;
 }
 .site-footer-inner {
-  max-width: 1200px;
+  max-width: calc(var(--page-max, 1280px) + 48px);
   margin: 0 auto;
   padding: 72px 24px 28px;
   box-sizing: border-box;
@@ -77,8 +74,31 @@
   user-select: none;
   white-space: nowrap;
 }
+.site-footer-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 20px;
+}
+.site-footer-social {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  color: rgba(255, 255, 255, 0.75);
+  background: rgba(255, 255, 255, 0.1);
+  transition: color .15s, background .15s;
+}
+.site-footer-social:hover,
+.site-footer-social:focus-visible {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.2);
+}
 .site-footer-copy {
-  margin: 20px 0 0;
+  margin: 0;
   font-size: 12px;
   color: rgba(255, 255, 255, 0.6);
 }
@@ -86,3 +106,13 @@
   .site-footer-inner { padding: 48px 16px 24px; }
   .site-footer-links { grid-template-columns: 1fr 1fr; gap: 28px 24px; }
 }
+
+/* 학습 메일 구독 */
+.newsletter-subscribe { margin: 0 0 40px; padding: 24px; border-radius: 16px; background: rgba(255, 255, 255, 0.1); }
+.newsletter-subscribe h2 { margin: 0 0 6px; font-size: 18px; color: #fff; }
+.newsletter-subscribe p { margin: 0 0 14px; font-size: 14px; line-height: 1.6; }
+.newsletter-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.newsletter-row input { flex: 1 1 220px; min-width: 0; padding: 11px 14px; border: none; border-radius: 10px; font-size: 15px; }
+.newsletter-row button { padding: 11px 20px; border: none; border-radius: 10px; font-weight: 700; color: #fff; background: #6366f1; cursor: pointer; }
+.newsletter-row button:disabled { opacity: 0.55; cursor: not-allowed; }
+.newsletter-agree { display: flex; gap: 8px; align-items: flex-start; margin-top: 10px; font-size: 13px; line-height: 1.5; }

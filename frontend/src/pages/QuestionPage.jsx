@@ -90,7 +90,7 @@ export default function QuestionPage() {
 
       {/* Grading Section */}
       <div className="grading-section">
-        <h2>✏️ 답변 작성</h2>
+        <h2>답변 작성</h2>
         <textarea
           className="answer-input"
           placeholder="여기에 답변을 작성하세요..."
@@ -117,7 +117,7 @@ export default function QuestionPage() {
 
             {gradeResult.matchedKeywords?.length > 0 && (
               <div className="keywords-section">
-                <div className="keywords-label">✅ 포함된 키워드</div>
+                <div className="keywords-label">포함된 키워드</div>
                 <div className="keywords">
                   {gradeResult.matchedKeywords.map((k, i) => (
                     <span key={i} className="keyword-matched">{k}</span>
@@ -127,7 +127,7 @@ export default function QuestionPage() {
             )}
             {gradeResult.missedKeywords?.length > 0 && (
               <div className="keywords-section" style={{ marginTop: 14 }}>
-                <div className="keywords-label">❌ 누락된 키워드</div>
+                <div className="keywords-label">누락된 키워드</div>
                 <div className="keywords">
                   {gradeResult.missedKeywords.map((k, i) => (
                     <span key={i} className="keyword-missed">{k}</span>
@@ -141,7 +141,7 @@ export default function QuestionPage() {
 
       {/* Model Answer Section */}
       <div className="answer-section">
-        <h2>📖 모범답안</h2>
+        <h2>모범답안</h2>
         <button className="toggle-btn" onClick={() => setShowAnswer(!showAnswer)}>
           {showAnswer ? '모범답안 숨기기' : '모범답안 보기'}
         </button>

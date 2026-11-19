@@ -44,8 +44,6 @@ function progress(bank) {
 }
 
 export default function AptitudePage() {
-  const total = BANKS.reduce((n, b) => n + allQuestions(b).length, 0);
-
   return (
     <div className="fade-in ssafy apt">
       <Link to="/" className="back-link">← 홈으로</Link>
@@ -57,10 +55,10 @@ export default function AptitudePage() {
           <p>기업별 문제를 풀고 영역별 정답률로 약한 곳을 확인하세요. 사이트 내 문제집은 시간 제한 없이 풀 수 있으며, SKCT와 삼성 GSAT는 외부 CBT로 연결됩니다.</p>
         </div>
         <div className="ssafy-hero-stats">
-          <div className="ssafy-stat big"><b>{total}</b><span>인적성 문항</span></div>
-          <div className="ssafy-stat"><b>{BANKS.length}</b><span>기업</span></div>
-          <div className="ssafy-stat"><b>{AREAS.length}</b><span>영역</span></div>
-          <div className="ssafy-stat"><b>5지</b><span>선다</span></div>
+          <div className="ssafy-stat big"><b>{2 + BANKS.length + EXTERNAL.length}</b><span>연습할 수 있는 시험</span></div>
+          <div className="ssafy-stat"><b>NCS</b><span>직업기초</span></div>
+          <div className="ssafy-stat"><b>SKCT</b><span>SK</span></div>
+          <div className="ssafy-stat"><b>GSAT</b><span>삼성</span></div>
         </div>
       </section>
 

@@ -4,12 +4,13 @@ import org.springframework.stereotype.Component;
 import java.time.Clock;
 import java.util.*;
 
+// IP별 1분 요청 제한(이 백엔드의 메모리). Redis를 켜면 RedisTrafficGuard가 대신 쓰이고, Redis 장애 때 이것으로 돌아온다
 @Component
 public class TrafficGuard {
     private final Clock clock;
     private final LinkedHashMap<String, Window> clients = new LinkedHashMap<>(128, .75f, true);
     public TrafficGuard() { this(Clock.systemUTC()); }
-    TrafficGuard(Clock clock) { this.clock = clock; }
+    protected TrafficGuard(Clock clock) { this.clock = clock; }
     private static class Window {
         long start;
         int total;
@@ -23,13 +24,23 @@ public class TrafficGuard {
         if (now - window.start >= 60_000) { window = new Window(now); clients.put(ip, window); }
         while (clients.size() > 20_000) clients.remove(clients.keySet().iterator().next());
         window.total = Math.min(window.total + 1, 1_000_000);
-        String group = path.startsWith("/api/v1/auth/") && "POST".equals(method) ? "auth"
+        String group = group(method, path);
+        int count = window.groups.merge(group, 1, (a, b) -> Math.min(a + b, 1_000_000));
+        int retry = (int)Math.max(1, (60_000 - (now - window.start) + 999) / 1000);
+        return new Decision(window.total <= TOTAL_LIMIT && count <= limit(group), window.total, retry, "RATE_" + group.toUpperCase(Locale.ROOT));
+    }
+
+    // 1분 동안 한 IP가 보낼 수 있는 전체 요청 수와 묶음별 한도. RedisTrafficGuard도 같은 기준을 쓴다
+    static final int TOTAL_LIMIT = 3000;
+
+    static String group(String method, String path) {
+        return (path.startsWith("/api/v1/auth/") || path.startsWith("/api/v1/newsletter/")) && "POST".equals(method) ? "auth"
                 : path.equals("/api/v1/code/java") ? "code"
                 : path.startsWith("/api/v1/questions") && Set.of("GET","HEAD").contains(method) ? "content"
                 : path.equals("/api/v1/chat") && "POST".equals(method) ? "chat" : "general";
-        int count = window.groups.merge(group, 1, (a, b) -> Math.min(a + b, 1_000_000));
-        int limit = switch (group) { case "auth" -> 60; case "code" -> 15; case "content" -> 180; case "chat" -> 60; default -> 3000; };
-        int retry = (int)Math.max(1, (60_000 - (now - window.start) + 999) / 1000);
-        return new Decision(window.total <= 3000 && count <= limit, window.total, retry, "RATE_" + group.toUpperCase(Locale.ROOT));
+    }
+
+    static int limit(String group) {
+        return switch (group) { case "auth" -> 60; case "code" -> 15; case "content" -> 180; case "chat" -> 60; default -> TOTAL_LIMIT; };
     }
 }

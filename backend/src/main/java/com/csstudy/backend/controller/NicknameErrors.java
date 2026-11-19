@@ -4,7 +4,7 @@ import org.springframework.web.server.ResponseStatusException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.dao.DataIntegrityViolationException;
 import java.util.Map;
-@RestControllerAdvice(assignableTypes={AuthController.class,RankController.class,LoungeController.class})
+@RestControllerAdvice(assignableTypes={AuthController.class,OAuthController.class,RankController.class,LoungeController.class})
 public class NicknameErrors {
     @ExceptionHandler(ResponseStatusException.class)
     public ResponseEntity<?> status(ResponseStatusException e) {

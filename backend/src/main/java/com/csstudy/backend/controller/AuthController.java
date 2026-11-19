@@ -4,19 +4,23 @@ import com.csstudy.backend.dto.UserResponse;
 import com.csstudy.backend.entity.User;
 import com.csstudy.backend.repository.UserRepository;
 import com.csstudy.backend.service.AuthService;
+import com.csstudy.backend.service.CredentialService;
+import com.csstudy.backend.service.EmailAccountService;
+import com.csstudy.backend.service.MailService;
 import com.csstudy.backend.service.MembershipService;
 import com.csstudy.backend.service.NicknameService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -27,6 +31,9 @@ public class AuthController {
     private final AuthService authService;
     private final MembershipService membershipService;
     private final NicknameService nicknames;
+    private final CredentialService credentials;
+    private final EmailAccountService emailAccounts;
+    private final MailService mail;
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     @PostMapping("/register")
@@ -48,56 +55,74 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    @Transactional
     public ResponseEntity<?> login(@RequestBody Map<String, String> body) {
-        final String nickname = body.getOrDefault("nickname", "").trim();
-        final String password = body.getOrDefault("password", "").trim();
-
-        if (nickname.isEmpty() || password.isEmpty()) {
-            return ResponseEntity.badRequest().body(Map.of("error", "닉네임과 비밀번호를 입력해주세요."));
-        }
-
-        Optional<User> userOpt = userRepository.findByNicknameForUpdate(nickname);
-        if (userOpt.isEmpty()) {
-            return ResponseEntity.badRequest().body(Map.of("error", "존재하지 않는 닉네임입니다."));
-        }
-
-        User user = userOpt.get();
-        if (isHashed(user.getPassword())) {
-            if (!passwordEncoder.matches(password, user.getPassword())) {
-                return ResponseEntity.badRequest().body(Map.of("error", "비밀번호가 틀렸습니다."));
-            }
-        } else {
-            // 암호화 도입 전에 가입한 계정: 평문 비교 후 해시로 교체
-            if (!user.getPassword().equals(password)) {
-                return ResponseEntity.badRequest().body(Map.of("error", "비밀번호가 틀렸습니다."));
-            }
-            user.setPassword(passwordEncoder.encode(password));
-            userRepository.save(user);
-        }
-
+        User user = credentials.authenticate(body.getOrDefault("nickname", "").trim(), body.getOrDefault("password", "").trim());
         return ResponseEntity.ok(UserResponse.from(user, authService.issueToken(user), membershipService.membership(user)));
     }
 
-    @PostMapping("/reset-password")
+    // 비밀번호 변경: 로그인한 본인만, 현재 비밀번호를 확인한 뒤에 바꾼다.
+    // 소셜 가입 계정은 처음 한 번만 현재 비밀번호 없이 정할 수 있다(사용자가 모르는 임의 비밀번호라서)
+    @PostMapping("/change-password")
     @Transactional
-    public ResponseEntity<?> resetPassword(@RequestBody Map<String, String> body) {
-        String nickname = Objects.toString(body.get("nickname"), "").trim();
-        String password = Objects.toString(body.get("password"), "").trim();
-        if (nickname.isEmpty() || password.isEmpty()) {
-            return ResponseEntity.badRequest().body(Map.of("error", "닉네임과 새 비밀번호를 입력해주세요."));
+    public ResponseEntity<?> changePassword(@RequestBody Map<String, String> body, HttpServletRequest request) {
+        User session = authService.requireUser(request);
+        String current = Objects.toString(body.get("currentPassword"), "").trim();
+        String password = Objects.toString(body.get("newPassword"), "").trim();
+        if (password.isEmpty()) {
+            return ResponseEntity.badRequest().body(Map.of("error", "새 비밀번호를 입력해주세요."));
         }
         if (password.getBytes(StandardCharsets.UTF_8).length > 72) {
             return ResponseEntity.badRequest().body(Map.of("error", "새 비밀번호는 UTF-8 기준 72바이트 이하여야 합니다."));
         }
-
-        Optional<User> user = userRepository.findByNicknameForUpdate(nickname);
-        if (user.isEmpty()) {
-            return ResponseEntity.badRequest().body(Map.of("error", "존재하지 않는 닉네임입니다."));
+        User user = userRepository.findByNicknameForUpdate(session.getNickname())
+                .filter(found -> found.getId().equals(session.getId()))
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "로그인이 필요합니다."));
+        if (user.hasOwnPassword()) {
+            if (current.isEmpty()) {
+                return ResponseEntity.badRequest().body(Map.of("error", "현재 비밀번호를 입력해주세요."));
+            }
+            credentials.authenticate(user.getNickname(), current);
         }
-        user.get().setPassword(passwordEncoder.encode(password));
-        authService.revokeAll(user.get());
-        return ResponseEntity.ok(Map.of("ok", true));
+        user.setPassword(passwordEncoder.encode(password));
+        user.setPasswordSet(true);
+        authService.revokeAll(user);
+        return ResponseEntity.ok(UserResponse.from(user, authService.issueToken(user), membershipService.membership(user)));
+    }
+
+    @GetMapping("/password")
+    public Map<String, Object> passwordStatus(HttpServletRequest request) {
+        return Map.of("hasPassword", authService.requireUser(request).hasOwnPassword());
+    }
+
+    // 이메일: 등록(현재 비밀번호 확인 → 인증 메일) → 링크로 인증. 인증된 이메일로만 비밀번호를 재설정할 수 있다
+    @GetMapping("/email")
+    public Map<String, Object> email(HttpServletRequest request) {
+        User user = authService.requireUser(request);
+        return Map.of("email", Objects.toString(user.getEmail(), ""), "mailEnabled", mail.configured());
+    }
+
+    @PostMapping("/email")
+    public Map<String, Object> requestEmail(@RequestBody Map<String, String> body, HttpServletRequest request) {
+        emailAccounts.requestVerification(authService.requireUser(request), body.get("email"), body.get("currentPassword"));
+        return Map.of("ok", true);
+    }
+
+    @PostMapping("/email/verify")
+    public Map<String, Object> verifyEmail(@RequestBody Map<String, String> body) {
+        return Map.of("email", emailAccounts.verify(body.get("token")));
+    }
+
+    // 가입 여부를 알려 주지 않도록 주소 형식만 맞으면 항상 같은 응답
+    @PostMapping("/password/forgot")
+    public Map<String, Object> forgotPassword(@RequestBody Map<String, String> body) {
+        emailAccounts.requestReset(body.get("email"));
+        return Map.of("ok", true);
+    }
+
+    @PostMapping("/password/reset")
+    public Map<String, Object> resetPassword(@RequestBody Map<String, String> body) {
+        emailAccounts.reset(body.get("token"), body.get("password"));
+        return Map.of("ok", true);
     }
 
     @GetMapping("/me")
@@ -117,9 +142,5 @@ public class AuthController {
     public ResponseEntity<?> logout(HttpServletRequest request) {
         authService.revoke(request);
         return ResponseEntity.ok(Map.of("ok", true));
-    }
-
-    private static boolean isHashed(String stored) {
-        return stored != null && stored.matches("^\\$2[aby]\\$\\d{2}\\$.{53}$");
     }
 }

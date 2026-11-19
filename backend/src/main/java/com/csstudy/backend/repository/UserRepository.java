@@ -28,6 +28,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     boolean existsByNickname(String nickname);
 
+    Optional<User> findByEmail(String email);
+
+    boolean existsByEmail(String email);
+
     List<User> findByOrderByIdDesc(Pageable pageable);
 
     long countByCreatedAtGreaterThanEqual(LocalDateTime since);

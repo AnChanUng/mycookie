@@ -1,0 +1,174 @@
+/* ============================================================
+   안쪽 화면(문제집 허브 · 목록)을 첫 화면(Main)과 같은 웹 스타일로 맞춘다.
+   - 그라데이션 배너, 색 띠, 큰 그림자, 둥근 알약 버튼을 걷어 내고
+     첫 화면처럼 흰 면 + 얇은 테두리 + 파란 강조 한 가지로 통일한다.
+   - 화면별 CSS를 고치지 않고 이 파일이 마지막에 덮어쓴다(App.jsx에서 가장 뒤에 불러온다).
+   ============================================================ */
+
+/* ---------- 화면 제목 ---------- */
+.page-header { padding: var(--ds-s8) 0 var(--ds-s6); }
+.page-header h1 {
+  font-size: var(--ds-fs-h2);
+  font-weight: 800;
+  letter-spacing: var(--ds-tracking-tight);
+  margin-bottom: var(--ds-s2);
+}
+.page-header p { color: var(--ds-text-2); font-size: var(--ds-fs-body); line-height: 1.6; }
+.back-link { font-size: var(--ds-fs-small); color: var(--ds-text-3); }
+
+/* ---------- 허브 배너(SSAFY · NCS/인적성): 그라데이션 → 흰 면 ---------- */
+.ssafy-hero,
+.apt .ssafy-hero {
+  background: var(--ds-surface);
+  color: var(--ds-text);
+  border: 1px solid var(--ds-line-strong);
+  border-radius: var(--ds-r-xl);
+  box-shadow: none;
+  padding: var(--ds-s8);
+  gap: var(--ds-s8);
+}
+.ssafy-hero::after { display: none; }
+.ssafy-eyebrow {
+  padding: 0;
+  background: none;
+  border-radius: 0;
+  color: var(--ds-brand);
+  font-size: var(--ds-fs-small);
+  font-weight: 700;
+  letter-spacing: 0;
+  margin-bottom: var(--ds-s2);
+}
+.ssafy-hero h1 {
+  color: var(--ds-text);
+  font-size: var(--ds-fs-h2);
+  letter-spacing: var(--ds-tracking-tight);
+}
+.ssafy-hero p { color: var(--ds-text-2); font-size: var(--ds-fs-body); }
+.ssafy-stat {
+  background: var(--ds-surface-2);
+  border: 1px solid var(--ds-line);
+  border-radius: var(--ds-r-lg);
+  padding: var(--ds-s4) var(--ds-s3);
+}
+.ssafy-stat b { color: var(--ds-text); font-size: 1.35rem; }
+.ssafy-stat.big b { font-size: 1.9rem; color: var(--ds-brand); }
+.ssafy-stat span { color: var(--ds-text-2); font-size: var(--ds-fs-caption); }
+
+/* ---------- 허브 카드: 색 띠 · 떠오르는 효과 → 테두리만 바뀜 ---------- */
+.ssafy-card,
+.ssafy-card.monthly,
+.ssafy-card.apt-ext,
+.ssafy.apt .ssafy-card {
+  --tone: var(--ds-brand);
+  --tone-light: var(--ds-brand-soft);
+  border: 1px solid var(--ds-line-strong);
+  border-radius: var(--ds-r-xl);
+  box-shadow: none;
+  padding: var(--ds-s6);
+  gap: var(--ds-s3);
+  transition: border-color var(--ds-fast) var(--ds-ease);
+}
+.ssafy-card::before { display: none; }
+.ssafy-card:hover { transform: none; box-shadow: none; border-color: var(--ds-brand); }
+.ssafy-card h2 { font-size: var(--ds-fs-title); font-weight: 700; letter-spacing: -0.02em; }
+.ssafy-desc { margin: 0; color: var(--ds-text-2); font-size: var(--ds-fs-small); line-height: 1.6; }
+.ssafy-tag {
+  padding: 3px 8px;
+  border-radius: var(--ds-r-sm);
+  font-size: var(--ds-fs-caption);
+  font-weight: 700;
+}
+.ssafy-time { color: var(--ds-text-3); font-size: var(--ds-fs-caption); }
+.ssafy-sec { background: var(--ds-surface-2); border: 1px solid var(--ds-line); border-radius: var(--ds-r-md); }
+.ssafy-sec b { color: var(--ds-text); font-size: 1.15rem; }
+.ssafy-topics span { border-radius: var(--ds-r-sm); }
+.ssafy-go {
+  background: none;
+  color: var(--ds-brand);
+  padding: 0;
+  border-radius: 0;
+  font-size: var(--ds-fs-small);
+}
+.ssafy-bar i { background: var(--ds-brand); }
+
+/* NCS · 인적성 영역 소개 칸 */
+.apt-area { border: 1px solid var(--ds-line-strong); border-radius: var(--ds-r-lg); box-shadow: none; }
+.ssafy.apt .apt-area-icon { background: var(--ds-surface-2); color: var(--ds-text-2); border-radius: var(--ds-r-md); }
+
+/* ---------- 주요 버튼: 알약 · 그라데이션 · 그림자 → 단색 ---------- */
+.home-cta-btn { border-radius: var(--ds-r-md); padding: 10px 18px; font-size: var(--ds-fs-small); font-weight: 700; }
+.home-cta-btn.primary,
+.home-cta-btn.primary:hover {
+  background: var(--ds-brand);
+  box-shadow: none;
+  transform: none;
+}
+.home-cta-btn.primary:hover { filter: brightness(1.06); }
+
+/* ---------- 문제집 · 과목 칸(웹 개발 · AI · 기업별 화면) ---------- */
+.exam-sections { gap: var(--ds-s3); grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
+.exam-section {
+  border: 1px solid var(--ds-line-strong);
+  border-radius: var(--ds-r-xl);
+  padding: var(--ds-s5);
+  gap: var(--ds-s1);
+  text-decoration: none;
+}
+.exam-section:hover { border-color: var(--ds-brand); }
+.exam-section .t { font-weight: 700; font-size: var(--ds-fs-body); }
+.exam-section .d { color: var(--ds-text-2); font-size: var(--ds-fs-small); line-height: 1.55; }
+.exam-section .d:last-child { color: var(--ds-brand); font-weight: 600; margin-top: var(--ds-s2); }
+.exam-section.coding { border-left-width: 1px; }
+
+/* ============================================================
+   전체 화면 웹 스타일 마무리(나머지 화면)
+   - 마우스를 올려도 카드가 위로 들리지 않는다. 테두리 색만 바뀐다
+   - 버튼은 알약 대신 8px 모서리(태그, 칩, 배지는 알약 그대로)
+   - 반투명 유리 카드 → 흰 면 + 얇은 테두리
+   - 빈 화면의 큰 이모지는 숨긴다
+   ============================================================ */
+:root { --glass-bg: var(--bg-primary); --glass-border: var(--ds-line-strong); }
+
+/* 들리는 효과 제거 */
+body .stats-summary-card:hover, body .category-card:hover, body .submit-btn:hover, body .stat-card:hover,
+body .difficulty-card:hover, body .grade-card:hover, body .home-menu-item:hover, body button.today-cs:hover,
+body .home-continue:hover, body .home-cta-btn.primary:hover, body .login-btn:hover, body .interview-record-btn.start:hover,
+body .exam-company-card:hover, body .exam-book:hover:not(:disabled), body .exam-mode:hover:not(:disabled),
+body .ssafy-card:hover, body .exam-company-grid.compact .exam-company-card:hover, body .cos-item:hover,
+body .mental-sos:hover, body .mental-pick button:hover, body .mental-coach-open:hover {
+  transform: none;
+  box-shadow: var(--card-shadow-hover);
+}
+body .category-card:hover, body .stat-card:hover, body .exam-company-card:hover, body .exam-book:hover:not(:disabled),
+body .exam-mode:hover:not(:disabled), body .ssafy-card:hover, body .cos-item:hover, body .home-menu-item:hover {
+  border-color: color-mix(in srgb, var(--accent-blue) 55%, transparent);
+}
+
+/* 버튼: 알약 → 8px */
+body .login-btn, body .logout-btn, body .action-btn, body .submit-btn, body .interview-cat-btn, body .interview-camera-btn,
+body .home-cta-btn, body .exam-report-open, body .lounge-join, body .ssafy-go, body .mental-coach-open, body .goal-edit,
+body .exam-btn {
+  border-radius: 8px;
+}
+
+/* 카드 그림자 정리 */
+body .today-cs, body .exam-mode, body .ssafy-card, body .home-menu-item, body .notes-detail-card { box-shadow: none; }
+
+/* 아이콘 상자: 선 아이콘 + 브랜드 색 */
+body .cs-track-icon, body .ml-task-icon {
+  border-radius: 8px;
+  background: var(--ds-surface-2);
+  color: var(--ds-brand);
+}
+
+/* 빈 화면의 큰 이모지 숨김(문구만 남긴다) */
+body .empty-icon { display: none; }
+
+/* 면접 연습 제목: 색 강조 대신 기본 제목 */
+body .interview-title { background: none; -webkit-text-fill-color: currentColor; color: var(--ds-text); }
+
+/* 정의되지 않았던 --bg-card(기본값 흰색)를 테마 바탕색에 맞춘다: 다크 모드에서 흰 상자가 튀던 문제 */
+:root { --bg-card: var(--bg-primary); }
+/* 대결 결과의 옅은 파랑, 빨강 그라데이션은 다크 모드에서 바탕만 쓴다 */
+:root[data-mode='dark'] .duel-result,
+:root[data-mode='dark'] .duel-result.loss { background: var(--bg-primary) !important; border-color: var(--border-color) !important; }

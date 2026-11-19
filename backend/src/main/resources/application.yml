@@ -19,6 +19,39 @@ spring:
   cache:
     type: simple
 
+  # 홈서버에서만 켠다(REDIS_ENABLED, KAFKA_ENABLED). 꺼져 있으면 접속 시도도 하지 않는다
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      timeout: 2s
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    producer:
+      acks: all
+      properties:
+        # Kafka가 내려가 있어도 요청이 오래 멈추지 않게 짧게 기다린다(실패하면 바로 처리로 넘어간다)
+        max.block.ms: 3000
+        request.timeout.ms: 5000
+        delivery.timeout.ms: 10000
+    consumer:
+      group-id: ${KAFKA_GROUP_ID:cookie-local}
+      auto-offset-reset: earliest
+
+  # 비밀번호 재설정 · 이메일 인증 메일을 보낼 SMTP 서버. MAIL_HOST가 비어 있으면 메일을 보내지 않는다
+  # 온프레미스: 사내 메일 서버나 Postfix 릴레이 주소를 넣는다(예: MAIL_HOST=mail.internal, MAIL_PORT=587)
+  mail:
+    host: ${MAIL_HOST:}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail.smtp.auth: ${MAIL_SMTP_AUTH:true}
+      mail.smtp.starttls.enable: ${MAIL_STARTTLS:true}
+      mail.smtp.connectiontimeout: 5000
+      mail.smtp.timeout: 10000
+      mail.smtp.writetimeout: 10000
+
   servlet:
     multipart:
       max-file-size: 10MB
@@ -45,12 +78,75 @@ slack:
   weekly-cron: "0 0 9 * * MON"
 
 app:
+  # 신규 개발자 안내 페이지에 보여 줄 기술 블로그 RSS(티스토리). 비우면 목록을 보여 주지 않는다
+  blog:
+    rss-url: ${BLOG_RSS_URL:https://cookie.tistory.com/rss}
+    keywords: ${BLOG_KEYWORDS:나의쿠키,홈서버}
+  # 메일 링크(비밀번호 재설정, 이메일 인증)가 가리키는 사이트 주소
   base-url: ${APP_BASE_URL:http://localhost:3000}
+  # Mattermost 채널에 오늘의 CS 질문 올리기. 웹훅 URL이 비면 꺼진다(스테이징에는 넣지 않는다)
+  mattermost:
+    webhook-url: ${MATTERMOST_WEBHOOK_URL:}
+    cron: ${MATTERMOST_CRON:0 30 8 * * MON-FRI}
+  # 학습 메일 구독(웹 필수지식). 메일 서버(MAIL_HOST)가 있어야 켜진다
+  newsletter:
+    cron: ${NEWSLETTER_CRON:0 30 8 * * MON-FRI}
+    # 무료 SMTP 하루 한도보다 낮게(비밀번호 재설정 메일 몫을 남긴다). 못 보낸 사람은 다음 발송 때 먼저 보낸다
+    daily-limit: ${NEWSLETTER_DAILY_LIMIT:400}
+  mail:
+    from: ${MAIL_FROM:}
+    # 메일 서버 없이 개발할 때만 true: 링크를 서버 로그에 찍는다
+    log-links: ${MAIL_LOG_LINKS:false}
   # No fallback key: unset ADMIN_KEY closes administrator APIs.
   admin-key: ${ADMIN_KEY:}
   security:
     rate-limit-enabled: true
     trust-forwarded-for: ${TRUST_FORWARDED_FOR:${RENDER:false}}
+  # 등급 구매(토스페이먼츠). 두 키가 모두 있어야 결제가 켜진다. 개발 중에는 test_ck_ · test_sk_ 테스트 키를 쓴다
+  payment:
+    # 결제 열기. 키가 있어도 false면 등급 구매 화면은 "준비 중"이고 주문을 받지 않는다
+    open: ${PAYMENT_OPEN:false}
+    toss:
+      client-key: ${TOSS_CLIENT_KEY:}
+      secret-key: ${TOSS_SECRET_KEY:}
+    # 등급별 가격(원). 비우면 TierPurchaseService의 기본값(은 1,900 · 금 3,900 · 다이아 19,900 · 루비 49,900)
+    prices:
+      silver: ${PRICE_SILVER:1900}
+      gold: ${PRICE_GOLD:3900}
+      diamond: ${PRICE_DIAMOND:19900}
+      ruby: ${PRICE_RUBY:49900}
+  # 건의 · 버그 제보를 GitHub 이슈로 올린다. 토큰이 비어 있으면 DB에만 저장한다
+  # 토큰: GitHub fine-grained token, 이 저장소만 · Issues: Read and write 권한만
+  feedback:
+    github:
+      token: ${FEEDBACK_GITHUB_TOKEN:}
+      repo: ${FEEDBACK_GITHUB_REPO:AnChanUng/mycookie}
+  # 접속자 수, 채팅 참여자, 요청 제한을 Redis에 둔다. 운영과 스테이징은 키 앞머리로 나눈다
+  redis:
+    enabled: ${REDIS_ENABLED:false}
+    key-prefix: ${REDIS_KEY_PREFIX:local:}
+  # 제보가 들어오면 이벤트를 Kafka에 넣고, 받는 쪽에서 GitHub 이슈와 Mattermost 알림을 처리한다
+  kafka:
+    enabled: ${KAFKA_ENABLED:false}
+    topic-prefix: ${KAFKA_TOPIC_PREFIX:local}
+  # 소셜 · 깃허브 로그인. 클라이언트 ID가 비어 있는 제공자는 버튼을 숨긴다
+  # 각 제공자 콘솔에 등록할 리디렉션 주소: <사이트 주소>/auth/callback (예: https://mycookie.dev/auth/callback)
+  oauth:
+    # 여러 대로 띄우거나 재시작 중에도 로그인을 이어 가려면 32자 이상 무작위 값을 넣는다
+    state-secret: ${OAUTH_STATE_SECRET:}
+    allowed-origins: ${OAUTH_ALLOWED_ORIGINS:http://localhost:3000,http://localhost:5173,https://mycookie.dev,https://www.mycookie.dev}
+    google:
+      client-id: ${OAUTH_GOOGLE_CLIENT_ID:}
+      client-secret: ${OAUTH_GOOGLE_CLIENT_SECRET:}
+    naver:
+      client-id: ${OAUTH_NAVER_CLIENT_ID:}
+      client-secret: ${OAUTH_NAVER_CLIENT_SECRET:}
+    kakao:
+      client-id: ${OAUTH_KAKAO_CLIENT_ID:}
+      client-secret: ${OAUTH_KAKAO_CLIENT_SECRET:}
+    github:
+      client-id: ${OAUTH_GITHUB_CLIENT_ID:}
+      client-secret: ${OAUTH_GITHUB_CLIENT_SECRET:}
 
 gemini:
   api-key: ${GEMINI_API_KEY:}
@@ -64,6 +160,10 @@ management:
   endpoint:
     health:
       show-details: never
+  health:
+    # Redis를 끈 환경에서 상태 검사가 DOWN이 되지 않게 한다
+    redis:
+      enabled: ${REDIS_ENABLED:false}
 
 # RAG 학습 도우미는 rag 프로필에서만 켠다. 기본값으로는 Spring AI 모델 · 벡터 저장소 자동 설정을 모두 끈다
 # (키도 Chroma도 없는 운영 서버가 시작하다 멈추지 않게)

@@ -19,3 +19,109 @@
 
 .personal-badges { margin-top: 1rem; }
 .cohort-badge { display: inline-block; padding: .35rem .65rem; border: 1px solid var(--border); border-radius: .5rem; font-weight: 600; }
+
+/* ============================================================
+   로그인 · 가입 · 비밀번호 찾기 · 본인 설정: 첫 화면과 같은 웹 스타일
+   ============================================================ */
+.account-auth { border: 1px solid var(--ds-line-strong); border-radius: var(--ds-r-xl); padding: var(--ds-s6); background: var(--ds-surface); }
+.account-auth:has(> .auth-card) { border: 0; background: none; padding: var(--ds-s2) 0 var(--ds-s6); }
+
+/* 로그아웃 상태: 가운데 놓인 로그인 카드 */
+.auth-card {
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto var(--ds-s6);
+  padding: var(--ds-s8) var(--ds-s6);
+  border: 1px solid var(--ds-line-strong);
+  border-radius: var(--ds-r-xl);
+  background: var(--ds-surface);
+}
+.auth-title { font-size: var(--ds-fs-h3); font-weight: 800; letter-spacing: var(--ds-tracking-tight); margin: 0 0 var(--ds-s1); text-align: center; }
+.account-page .auth-title { margin-bottom: var(--ds-s1); font-size: var(--ds-fs-h3); }
+.auth-sub { margin: 0 0 var(--ds-s6); text-align: center; color: var(--ds-text-2); font-size: var(--ds-fs-small); }
+.auth-form { display: grid; gap: var(--ds-s3); }
+.auth-field { display: grid; gap: 6px; font-size: var(--ds-fs-small); font-weight: 600; color: var(--ds-text-2); }
+.auth-field input {
+  height: 44px;
+  padding: 0 var(--ds-s3);
+  border: 1px solid var(--ds-line-strong);
+  border-radius: var(--ds-r-md);
+  background: var(--ds-surface);
+  color: var(--ds-text);
+  font-size: var(--ds-fs-body);
+  transition: border-color var(--ds-fast) var(--ds-ease), box-shadow var(--ds-fast) var(--ds-ease);
+}
+.auth-field input:focus { outline: none; border-color: var(--ds-brand); box-shadow: 0 0 0 3px var(--ds-brand-soft); }
+.auth-submit {
+  height: 46px;
+  margin-top: var(--ds-s2);
+  border: 0;
+  border-radius: var(--ds-r-md);
+  background: var(--ds-brand);
+  color: #fff;
+  font-size: var(--ds-fs-body);
+  font-weight: 700;
+  cursor: pointer;
+  transition: filter var(--ds-fast) var(--ds-ease);
+}
+.auth-submit:hover:not(:disabled) { filter: brightness(1.06); }
+.auth-submit:disabled { opacity: .45; cursor: default; }
+.auth-links { display: flex; justify-content: center; align-items: center; gap: var(--ds-s2); margin-top: var(--ds-s5); font-size: var(--ds-fs-small); color: var(--ds-text-3); }
+.auth-links button { border: 0; background: none; padding: 4px; color: var(--ds-text-2); font: inherit; cursor: pointer; }
+.auth-links button:hover { color: var(--ds-brand); }
+.auth-note { margin: var(--ds-s4) 0 0; font-size: var(--ds-fs-caption); line-height: 1.6; color: var(--ds-text-3); text-align: center; }
+.auth-message { margin: var(--ds-s4) 0 0; padding: var(--ds-s3); border-radius: var(--ds-r-md); background: var(--ds-surface-2); font-size: var(--ds-fs-small); color: var(--ds-text-2); line-height: 1.55; }
+.auth-divider { display: flex; align-items: center; gap: var(--ds-s3); margin: var(--ds-s5) 0; font-size: var(--ds-fs-caption); color: var(--ds-text-3); }
+.auth-divider::before, .auth-divider::after { content: ''; flex: 1; height: 1px; background: var(--ds-line-strong); }
+
+/* 간편 로그인 버튼. 제공자 안내 색이라 화면 모드와 상관없이 같다 */
+.social-login-buttons { display: flex; gap: var(--ds-s2); flex-wrap: wrap; }
+.social-login--stack .social-login-buttons { flex-direction: column; }
+.social-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--ds-s2);
+  height: 40px;
+  padding: 0 var(--ds-s4);
+  border: 1px solid transparent;
+  border-radius: var(--ds-r-md);
+  font-size: var(--ds-fs-small);
+  font-weight: 600;
+  cursor: pointer;
+  transition: filter var(--ds-fast) var(--ds-ease);
+}
+.social-login--stack .social-btn { width: 100%; height: 46px; font-size: var(--ds-fs-body); }
+.social-login--stack .social-mark { position: absolute; left: var(--ds-s4); }
+.social-btn:hover:not(:disabled) { filter: brightness(.97); }
+.social-btn:disabled { opacity: .6; cursor: default; }
+.social-mark { font-style: normal; font-weight: 800; font-size: 13px; min-width: 20px; text-align: center; }
+.social-btn.google { background: #fff; color: #1f1f1f; border-color: #dadce0; }
+.social-btn.google .social-mark { color: #4285f4; }
+.social-btn.naver { background: #03c75a; color: #fff; }
+.social-btn.kakao { background: #fee500; color: rgba(0, 0, 0, .85); }
+.social-btn.github { background: #24292f; color: #fff; }
+.social-btn.linked { background: var(--ds-surface-2); color: var(--ds-text-2); border-color: var(--ds-line); cursor: default; }
+
+/* 로그인 상태: 본인 설정 */
+.account-actions { padding-bottom: var(--ds-s4); border-bottom: 1px solid var(--ds-line); }
+.account-actions strong { font-size: var(--ds-fs-lead); margin-right: auto; }
+.acc-avatar { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; background: var(--ds-brand-soft); color: var(--ds-brand); font-weight: 800; }
+.acc-label { margin: var(--ds-s6) 0 var(--ds-s2); font-size: var(--ds-fs-small); font-weight: 700; color: var(--ds-text); }
+.account-auth input { height: 40px; padding: 0 var(--ds-s3); border-color: var(--ds-line-strong); border-radius: var(--ds-r-md); font-size: var(--ds-fs-small); }
+.account-auth input:focus { outline: none; border-color: var(--ds-brand); box-shadow: 0 0 0 3px var(--ds-brand-soft); }
+.account-auth .exam-btn.sm { height: 40px; padding: 0 var(--ds-s4); border-radius: var(--ds-r-md); font-weight: 600; }
+.account-hint { margin: 0 0 var(--ds-s2); font-size: var(--ds-fs-small); color: var(--ds-text-2); }
+@media (max-width: 480px) { .auth-card { padding: var(--ds-s6) var(--ds-s4); } }
+/* 예전 가로 배치(.account-auth form)보다 앞서도록 구체적으로 지정한다 */
+.account-auth .auth-form { display: grid; gap: var(--ds-s3); align-items: stretch; }
+.account-auth .auth-field input { width: 100%; height: 44px; font-size: var(--ds-fs-body); flex: none; }
+/* 로그아웃 상태에서 카드 아래 방문자 닉네임 · 배지는 카드 폭에 맞춰 가운데 둔다 */
+.account-auth:has(> .auth-card) > form,
+.account-auth:has(> .auth-card) > .personal-badges { max-width: 400px; margin-left: auto; margin-right: auto; }
+.account-auth:has(> .auth-card) > form input { flex: 1; }
+.personal-badges h3 { font-size: var(--ds-fs-small); font-weight: 700; margin-bottom: var(--ds-s2); }
+.personal-badges p { font-size: var(--ds-fs-small); color: var(--ds-text-2); }
+.acc-tier-up { margin-left: auto; font-size: var(--ds-fs-small); font-weight: 600; }
+.membership-panel h2 { display: flex; align-items: center; gap: var(--ds-s2); }

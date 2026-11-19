@@ -29,7 +29,7 @@ export default function SearchPage() {
     <div className="fade-in">
       <div className="page-header">
         <Link to="/" className="back-link">← 홈으로</Link>
-        <h1>🔎 문제 검색</h1>
+        <h1>문제 검색</h1>
         <p>모든 문제은행 {INDEX.length}문항의 문제 · 보기 · 해설에서 찾습니다. 단어를 띄어 쓰면 모두 들어 있는 문제만 나옵니다.</p>
       </div>
 

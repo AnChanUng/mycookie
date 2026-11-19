@@ -5,7 +5,7 @@ export default function MajorPage() {
     <div className="fade-in">
       <div className="page-header">
         <Link to="/" className="back-link">← 홈으로</Link>
-        <h1>📝 필기이론</h1>
+        <h1>필기이론</h1>
         <p>자료 공개 범위를 확인하는 동안 요약노트 제공을 일시 중단합니다.</p>
       </div>
 

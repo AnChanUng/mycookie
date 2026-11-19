@@ -1,4 +1,5 @@
 import { useSyncExternalStore } from 'react';
+import LineIcon from '../components/LineIcon';
 import { Link } from 'react-router-dom';
 import { account, onAccountChange } from '../sync';
 import { CS_NOTES } from '../data/csNotes';
@@ -23,21 +24,21 @@ export default function CsHubPage() {
 
   const tracks = [
     {
-      to: '/notes', icon: '📚', title: '전공노트',
+      to: '/notes', icon: 'book', title: '전공노트',
       body: '운영체제 · 네트워크 · 데이터베이스 · 자료구조를 주제별로 정리했어요.',
       done: notesDone, total: notesTotal, unit: '개념', hint: user ? null : '로그인하면 완료 표시가 저장돼요',
     },
     {
-      to: '/web-essentials', icon: '🌐', title: '웹 필수지식',
+      to: '/web-essentials', icon: 'globe', title: '웹 필수지식',
       body: 'HTTP · 쿠키 · 세션 · JWT · CORS처럼 백엔드 면접 단골 질문을 문답으로.',
       total: WEB_ESSENTIALS.items.length, unit: '문답',
     },
     {
-      to: '/topics', icon: '🧩', title: '주제별 통합 문제집',
+      to: '/topics', icon: 'puzzle', title: '주제별 통합 문제집',
       body: '과목별로 모은 문제를 풀며 개념을 확인하고, 틀린 문제는 다시 풀어요.',
     },
     {
-      to: '/interview', icon: '🎥', title: '면접 공통질문 연습',
+      to: '/interview', icon: 'video', title: '면접 공통질문 연습',
       body: '카메라를 켜고 자기소개 · 지원동기 같은 공통질문에 실제처럼 답해 봐요.',
     },
   ];
@@ -45,7 +46,7 @@ export default function CsHubPage() {
   return (
     <div className="ml cs-hub fade-in">
       <header className="ml-head">
-        <p className="ml-eyebrow">CS · 면접</p>
+        <p className="ml-eyebrow">컴퓨터공학</p>
         <h1>면접에서 막힘없이<br />설명할 수 있게</h1>
         <p className="ml-sub">개념을 읽고, 내 말로 말해 보고, 꼬리질문까지. 오늘 할 것을 골라 보세요.</p>
       </header>
@@ -55,7 +56,7 @@ export default function CsHubPage() {
           const pct = t.total && Number.isFinite(t.done) ? Math.min(100, Math.round(t.done / t.total * 100)) : null;
           return (
             <Link key={t.to} to={t.to} className="cs-track">
-              <span className="cs-track-icon" aria-hidden="true">{t.icon}</span>
+              <span className="cs-track-icon" aria-hidden="true"><LineIcon name={t.icon} /></span>
               <span className="cs-track-text">
                 <b>{t.title}</b>
                 <span>{t.body}</span>

@@ -1,10 +1,11 @@
 import { useEffect, useState, useSyncExternalStore } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { account, changeNickname, onAccountChange, signIn, signOut } from '../sync';
+import { account, changeNickname, changePassword, emailStatus, onAccountChange, passwordStatus, requestEmailVerification, requestPasswordReset, signIn, signOut } from '../sync';
 import { loadAccountRecords, summarizeAccount } from '../accountRecords';
 import { CS_NOTES, migrateNotesCompletion } from '../data/csNotes';
 import { WEB_ESSENTIALS } from '../data/webEssentials';
 import QuestionExplanation from '../components/QuestionExplanation';
+import SocialLogin from '../components/SocialLogin';
 import { buildAccountRetry } from '../accountRetry';
 import './AccountPage.css';
 import TierBadge from '../components/TierBadge';
@@ -23,13 +24,19 @@ export default function AccountPage() {
     settings?.scrollIntoView?.({ block: 'start' });
     settings?.focus?.({ preventScroll: true });
   }, [location.hash, location.key]);
-  const openReset = new URLSearchParams(location.search).get('reset') === '1';
-  return <AccountDashboard key={`${token}:${location.search}`} user={token ? account() : null} openReset={openReset} />;
+  // 비밀번호를 바꾸면 토큰만 새로 받으므로 계정이 같으면 화면 상태(안내 문구)를 유지한다
+  const openForgot = new URLSearchParams(location.search).get('forgot') === '1';
+  return <AccountDashboard key={`${token ? account()?.id : ''}:${openForgot}`} user={token ? account() : null} openForgot={openForgot} />;
 }
-function AccountDashboard({ user, openReset }) {
+function AccountDashboard({ user, openForgot }) {
   const [form, setForm] = useState({ nickname: '', password: '' });
-  const [resettingPassword, setResettingPassword] = useState(openReset);
+  const [passwords, setPasswords] = useState({ current: '', next: '' });
+  const [hasPassword, setHasPassword] = useState(true);
+  const [emailInfo, setEmailInfo] = useState({ email: '', mailEnabled: true });
+  const [emailForm, setEmailForm] = useState({ email: '', current: '' });
+  const [forgot, setForgot] = useState({ open: openForgot, email: '' });
   const [authBusy, setAuthBusy] = useState(false);
+  const [registering, setRegistering] = useState(false);
   const [nicknameDraft, setNicknameDraft] = useState(user?.nickname || savedNickname());
   const [message, setMessage] = useState('');
   const [result, setResult] = useState({ records: {}, failed: [] });
@@ -60,26 +67,28 @@ function AccountDashboard({ user, openReset }) {
     catch (error) { setMessage(error?.response?.data?.error || '로그인하지 못했습니다. 입력 내용과 서버 연결을 확인해 주세요.'); }
     finally { setAuthBusy(false); }
   }
-  function showPasswordReset(show) {
-    setResettingPassword(show);
-    setForm(current => ({ ...current, password: '' }));
-    setMessage('');
+  useEffect(() => {
+    if (!user) return;
+    let alive = true;
+    passwordStatus().then(value => { if (alive) setHasPassword(value); }).catch(() => {});
+    emailStatus().then(value => { if (alive) setEmailInfo(value); }).catch(() => {});
+    return () => { alive = false; };
+  }, [user?.token]); // eslint-disable-line react-hooks/exhaustive-deps
+  async function run(action, done) {
+    setAuthBusy(true); setMessage('');
+    try { await action(); setMessage(done); }
+    catch (error) { setMessage(error?.response?.data?.error || '요청을 처리하지 못했습니다. 잠시 후 다시 시도해 주세요.'); }
+    finally { setAuthBusy(false); }
   }
-  async function resetPassword() {
-    setAuthBusy(true);
-    setMessage('');
+  async function submitPassword() {
+    setAuthBusy(true); setMessage('');
     try {
-      await api.post('/auth/reset-password', {
-        nickname: form.nickname.trim(),
-        password: form.password,
-      }, { timeout: 90000 });
-      showPasswordReset(false);
-      setMessage('비밀번호를 변경했습니다. 새 비밀번호로 로그인해 주세요.');
+      await changePassword(passwords.current, passwords.next);
+      setPasswords({ current: '', next: '' });
+      setMessage('비밀번호를 변경했습니다. 다른 기기에서는 다시 로그인해 주세요.');
     } catch (error) {
-      setMessage(error?.response?.data?.error || '비밀번호를 재설정하지 못했습니다. 잠시 후 다시 시도해 주세요.');
-    } finally {
-      setAuthBusy(false);
-    }
+      setMessage(error?.response?.data?.error || '비밀번호를 변경하지 못했습니다. 잠시 후 다시 시도해 주세요.');
+    } finally { setAuthBusy(false); }
   }
   const { rows, attempts, correct, wrong } = summarizeAccount(result.records);
   const retryCount = buildAccountRetry(result.records).company.questions.length;
@@ -89,8 +98,9 @@ function AccountDashboard({ user, openReset }) {
   return <div className="account-page fade-in">
     <header className="page-header"><h1>내 계정</h1><p>{user ? `${user.nickname}님의 학습 기록` : '로그인하면 내 계정에 저장된 학습 기록을 볼 수 있습니다.'}</p></header>
     <section className="account-auth" id="settings" tabIndex={-1}>
-      <h2>본인 설정</h2>
-      {user ? <><div className="account-actions"><strong>{user.nickname}</strong><button className="exam-btn sm" disabled={authBusy} onClick={async () => { setAuthBusy(true); await signOut(); }}>로그아웃</button></div>
+      {user && <h2>본인 설정</h2>}
+      {user ? <><div className="account-actions"><span className="acc-avatar" aria-hidden="true">{user.nickname.slice(0, 1)}</span><strong>{user.nickname}</strong><button className="exam-btn sm" disabled={authBusy} onClick={async () => { setAuthBusy(true); await signOut(); }}>로그아웃</button></div>
+        <h3 className="acc-label">닉네임</h3>
         <form onSubmit={async e => {
           e.preventDefault(); setAuthBusy(true); setMessage('');
           try { await changeNickname(nicknameDraft.trim()); setMessage('닉네임을 변경했습니다. 다음 로그인부터 새 닉네임을 사용해 주세요.'); }
@@ -99,18 +109,63 @@ function AccountDashboard({ user, openReset }) {
         }}>
           <input aria-label="새 닉네임" maxLength={20} value={nicknameDraft} onChange={e => setNicknameDraft(e.target.value)} />
           <button className="exam-btn sm" disabled={authBusy || !nicknameDraft.trim() || nicknameDraft.trim() === user.nickname}>닉네임 변경</button>
-        </form></> : resettingPassword ? <form onSubmit={e => { e.preventDefault(); resetPassword(); }}>
-        <input aria-label="닉네임" placeholder="닉네임" autoComplete="username" maxLength={20} required disabled={authBusy} value={form.nickname} onChange={e => setForm({ ...form, nickname: e.target.value })} />
-        <input aria-label="새 비밀번호" type="password" placeholder="새 비밀번호" autoComplete="new-password" maxLength={72} required disabled={authBusy} value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} />
-        <button type="submit" className="exam-btn sm primary" disabled={authBusy || !form.nickname.trim() || !form.password.trim()}>새 비밀번호 저장</button>
-        <button type="button" className="exam-btn sm" disabled={authBusy} onClick={() => showPasswordReset(false)}>로그인으로 돌아가기</button>
-      </form> : <form onSubmit={e => { e.preventDefault(); authenticate('login'); }}>
-        <input aria-label="닉네임" placeholder="닉네임" autoComplete="username" maxLength={20} value={form.nickname} onChange={e => setForm({ ...form, nickname: e.target.value })} />
-        <input aria-label="비밀번호" type="password" placeholder="비밀번호" autoComplete="current-password" maxLength={72} value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} />
-        <button className="exam-btn sm primary" disabled={authBusy || !form.nickname.trim() || !form.password}>로그인</button>
-        <button type="button" className="exam-btn sm" disabled={authBusy || !form.nickname.trim() || !form.password} onClick={() => authenticate('register')}>새 계정 만들기</button>
-        <button type="button" className="exam-btn sm" disabled={authBusy} onClick={() => showPasswordReset(true)}>비밀번호 재설정</button>
-      </form>}
+        </form>
+        <h3 className="acc-label">비밀번호</h3>
+        <form onSubmit={e => { e.preventDefault(); submitPassword(); }}>
+          <input type="text" hidden readOnly autoComplete="username" value={user.nickname} />
+          {hasPassword && <input aria-label="현재 비밀번호" type="password" placeholder="현재 비밀번호" autoComplete="current-password" maxLength={72} disabled={authBusy} value={passwords.current} onChange={e => setPasswords({ ...passwords, current: e.target.value })} />}
+          <input aria-label="새 비밀번호" type="password" placeholder={hasPassword ? '새 비밀번호' : '로그인용 비밀번호 정하기'} autoComplete="new-password" maxLength={72} disabled={authBusy} value={passwords.next} onChange={e => setPasswords({ ...passwords, next: e.target.value })} />
+          <button className="exam-btn sm" disabled={authBusy || (hasPassword && !passwords.current) || !passwords.next.trim()}>비밀번호 변경</button>
+        </form>
+        <h3 className="acc-label">비밀번호 찾기 이메일</h3>
+        <p className="account-hint">{emailInfo.email ? `등록된 이메일: ${emailInfo.email}` : '이메일을 등록해 두면 비밀번호를 잊었을 때 재설정 메일을 받을 수 있어요.'}</p>
+        <form onSubmit={e => {
+          e.preventDefault();
+          const email = emailForm.email.trim();
+          run(async () => { await requestEmailVerification(email, emailForm.current); setEmailForm({ email: '', current: '' }); },
+            `${email}로 인증 메일을 보냈습니다. 메일의 링크를 눌러야 등록이 끝나요.`);
+        }}>
+          <input aria-label="이메일" type="email" placeholder={emailInfo.email ? '바꿀 이메일' : '이메일'} autoComplete="email" maxLength={254} disabled={authBusy} value={emailForm.email} onChange={e => setEmailForm({ ...emailForm, email: e.target.value })} />
+          {hasPassword && <input aria-label="이메일 등록용 현재 비밀번호" type="password" placeholder="현재 비밀번호" autoComplete="current-password" maxLength={72} disabled={authBusy} value={emailForm.current} onChange={e => setEmailForm({ ...emailForm, current: e.target.value })} />}
+          <button className="exam-btn sm" disabled={authBusy || !emailInfo.mailEnabled || !emailForm.email.trim() || (hasPassword && !emailForm.current)}>{emailInfo.email ? '이메일 변경' : '이메일 등록'}</button>
+        </form>
+        {!emailInfo.mailEnabled && <p className="account-hint">지금은 메일 서버가 준비되지 않아 이메일을 등록할 수 없어요.</p>}
+        <h3 className="acc-label">간편 로그인</h3>
+        <SocialLogin user={user} /></> : <div className="auth-card">
+        {forgot.open ? <>
+          <h2 className="auth-title">비밀번호 찾기</h2>
+          <p className="auth-sub">계정에 등록한 이메일로 재설정 링크를 보내 드려요.</p>
+          <form className="auth-form" onSubmit={e => {
+            e.preventDefault();
+            run(() => requestPasswordReset(forgot.email.trim()), '입력한 주소로 등록된 계정이 있으면 재설정 메일을 보냈습니다. 메일함을 확인해 주세요.');
+          }}>
+            <label className="auth-field"><span>이메일</span>
+              <input type="email" placeholder="you@example.com" autoComplete="email" maxLength={254} disabled={authBusy} value={forgot.email} onChange={e => setForgot({ ...forgot, email: e.target.value })} />
+            </label>
+            <button className="auth-submit" disabled={authBusy || !forgot.email.trim()}>{authBusy ? '보내는 중…' : '재설정 메일 받기'}</button>
+          </form>
+          <p className="auth-note">이메일을 등록하지 않았다면 연결해 둔 소셜 계정으로 로그인한 뒤 내 계정에서 비밀번호를 바꿀 수 있어요.</p>
+          <div className="auth-links"><button type="button" onClick={() => { setForgot({ open: false, email: '' }); setMessage(''); }}>← 로그인으로 돌아가기</button></div>
+        </> : <>
+          <h2 className="auth-title">{registering ? '계정 만들기' : '로그인'}</h2>
+          <p className="auth-sub">{registering ? '닉네임과 비밀번호만 정하면 바로 시작해요.' : '로그인하면 어느 기기에서든 학습 기록이 이어져요.'}</p>
+          {!registering && <SocialLogin user={null} />}
+          <form className="auth-form" onSubmit={e => { e.preventDefault(); authenticate(registering ? 'register' : 'login'); }}>
+            <label className="auth-field"><span>닉네임</span>
+              <input autoComplete="username" maxLength={20} value={form.nickname} onChange={e => setForm({ ...form, nickname: e.target.value })} />
+            </label>
+            <label className="auth-field"><span>비밀번호</span>
+              <input type="password" autoComplete={registering ? 'new-password' : 'current-password'} maxLength={72} value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} />
+            </label>
+            <button className="auth-submit" disabled={authBusy || !form.nickname.trim() || !form.password}>{authBusy ? '잠시만요…' : registering ? '가입하기' : '로그인'}</button>
+          </form>
+          <div className="auth-links">
+            <button type="button" onClick={() => { setRegistering(!registering); setMessage(''); }}>{registering ? '이미 계정이 있어요' : '새 계정 만들기'}</button>
+            {!registering && <><span aria-hidden="true">·</span><button type="button" onClick={() => { setForgot({ open: true, email: '' }); setMessage(''); }}>비밀번호 찾기</button></>}
+          </div>
+        </>}
+        {message && <p className="auth-message" role="alert">{message}</p>}
+      </div>}
       {!user && <form onSubmit={async e => {
         e.preventDefault(); setAuthBusy(true); setMessage('');
         try {
@@ -127,10 +182,10 @@ function AccountDashboard({ user, openReset }) {
         {badges.loading ? <p role="status">배지를 불러오는 중…</p> : badges.error ? <p role="alert">배지를 불러오지 못했습니다. 새로고침해 주세요.</p>
           : badges.values.length ? badges.values.map(badge => <span className="cohort-badge" key={badge.name}>🎖 {badge.name}</span>) : <p>부여된 교육생 배지가 없습니다.</p>}
       </div>
-      {message && <p role="alert">{message}</p>}
+      {user && message && <p role="alert">{message}</p>}
     </section>
     <section className="membership-panel">
-      <h2>내 등급 {tierStatus.membership && <TierBadge tier={tierStatus.membership.tier} division={tierStatus.membership.division} />}</h2>
+      <h2>내 등급 {tierStatus.membership && <TierBadge tier={tierStatus.membership.tier} division={tierStatus.membership.division} />}<Link to="/tiers" className="acc-tier-up">등급 올리기 →</Link></h2>
       {tierStatus.loading ? <p role="status">등급을 불러오는 중…</p> : tierStatus.error ? <p role="alert">등급을 불러오지 못했습니다. 새로고침해 주세요.</p> : <p>
         누적 {tierStatus.membership.solvedCount.toLocaleString()}문제
         {tierStatus.membership.nextTier ? ` · ${tierStatus.membership.nextTierName || TIER_NAMES[tierStatus.membership.nextTier]} 승급 기준: 누적 ${tierStatus.membership.nextThreshold.toLocaleString()}문제 이상 · 앞으로 ${tierStatus.membership.remaining.toLocaleString()}문제` : ' · 최고 등급입니다!'}

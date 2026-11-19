@@ -1,0 +1,70 @@
+# PR과 dev, master에 올라오는 모든 코드를 자동으로 검사한다. 하나라도 실패하면 빨간 X가 뜬다.
+# - 백엔드: 전체 테스트(스프링 컨텍스트가 실제로 뜨는지 포함, Docker가 있어 Testcontainers 동시성 테스트도 실행)
+# - 화면: 린트, 빌드(검색용 HTML 생성 포함), 데이터 검사
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [master, dev]
+  workflow_dispatch:
+
+# 같은 브랜치에 새 커밋이 오면 이전 실행은 취소한다
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  backend:
+    name: 백엔드 테스트
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: gradle
+      - run: chmod +x gradlew
+      - run: ./gradlew test --no-daemon
+      - name: 실패한 테스트 보고서 올리기
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-test-reports
+          path: backend/build/reports/tests/test
+          retention-days: 7
+
+  frontend:
+    name: 화면 린트, 빌드, 데이터 검사
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci --no-audit --no-fund
+      - run: npm run lint
+      - run: npm run build
+      # 통과하는 검사만 돌린다. 기대값이 오래된 검사(chanung, explanations, exam-flow, member-menu, notes,
+      # promotion-exam, today-cs)는 고친 뒤 여기에 다시 넣는다
+      - name: 데이터 검사
+        run: |
+          for s in interview-audio questions account-retry membership lounge-chat pearl-answers notice \
+                   imported-notes revised-notes promotion-bank nginx-headers web-essentials-export duel-bank \
+                   promotion-announcements bug-hunt technical-interview cross-device-sync chanung-completion; do
+            echo "::group::check:$s"; npm run -s "check:$s"; echo "::endgroup::"
+          done

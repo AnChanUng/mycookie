@@ -25,7 +25,7 @@ const Rich = ({ text }) => {
 };
 
 // 따로 상단 메뉴를 가진 분류(hub)에서 풀이 화면을 열었을 때 돌아갈 메뉴 이름
-const HUB_NAMES = { ssafy: 'SSAFY', aptitude: 'NCS/인적성', major: '필기이론', web: '웹' };
+const HUB_NAMES = { ssafy: 'SSAFY', aptitude: 'NCS/인적성', major: '필기이론', web: '웹', ai: 'AI' };
 
 const shuffle = (arr) => {
   const a = arr.slice();
@@ -52,9 +52,9 @@ const modeLabel = (sections, mode, sec, sets) =>
 
 // 한 회사 화면에 복기 기반 문제와 예상문제가 함께 있으면 시작 카드마다 어느 쪽인지 표시한다
 const KINDS = {
-  recall: '📕 복기문제',
-  predicted: '📝 예상문제',
-  mixed: '🔀 복기 + 예상 혼합',
+  recall: '복기문제',
+  predicted: '예상문제',
+  mixed: '복기 + 예상 혼합',
 };
 const Kind = ({ kind }) => (KINDS[kind] ? <span className={`exam-kind ${kind}`}>{KINDS[kind]}</span> : null);
 

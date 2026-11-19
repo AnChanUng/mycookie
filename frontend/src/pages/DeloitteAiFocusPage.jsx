@@ -7,6 +7,8 @@ import './CompanyPrep.css';
 const BASE='/p/7b92e1c4-a6d8-4f03-9c51-26de8a740bf9';
 const concepts=CHANUNG_QUESTIONS.filter(q=>q.id==='cu-rag'||q.id.endsWith('-concept')).map(q=>({...q,category:'AI 기초 · '+q.topic,cores:ANSWER_CORES[q.id]||[]}));
 const all=[...FOCUS_QUESTIONS,...concepts];
+// 검사 스크립트가 쓰는 함수라 화면 파일에서 함께 내보낸다
+// eslint-disable-next-line react-refresh/only-export-components
 export function selectFocus(category,query){const words=query.trim().toLowerCase().split(/\s+/).filter(Boolean);return all.filter(q=>(category==='전체'||q.category===category)&&words.every(w=>[q.question,q.answer,...q.cores].join(' ').toLowerCase().includes(w)));}
 function CoreText({text,cores}){const phrases=[...cores].sort((a,b)=>b.length-a.length);const parts=[];let at=0;while(at<text.length){let start=text.length,match='';for(const p of phrases){const i=text.indexOf(p,at);if(i>=0&&i<start){start=i;match=p;}}if(start>at)parts.push(text.slice(at,start));if(!match)break;parts.push(<span className="prep-core" key={at+match}>{match}</span>);at=start+match.length;}return parts;}
 export default function DeloitteAiFocusPage(){

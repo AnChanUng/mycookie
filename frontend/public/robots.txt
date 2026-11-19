@@ -1,2 +1,12 @@
+# 모든 공개 화면을 검색에 연다. 비밀번호로 보호하는 개인 페이지와 1회용 메일 링크만 막는다
 User-agent: *
-Disallow: /
+Allow: /
+Disallow: /auth/
+Disallow: /newsletter/
+Disallow: /private/
+Disallow: /x/
+Disallow: /p/
+Disallow: /admin/
+Disallow: /chanung
+
+Sitemap: https://mycookie.dev/sitemap.xml

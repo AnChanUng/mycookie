@@ -6,6 +6,8 @@ COPY build.gradle.kts .
 COPY settings.gradle.kts .
 COPY gradle.properties .
 RUN chmod +x gradlew
+# 라이브러리를 소스보다 먼저 받아 둔다. build.gradle.kts가 그대로면 이 층을 재사용해서 배포마다 수백 MB를 다시 받지 않는다
+RUN ./gradlew dependencies --no-daemon > /dev/null
 COPY src src
 RUN ./gradlew bootJar --no-daemon
 
