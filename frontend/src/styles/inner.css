@@ -166,3 +166,9 @@ body .empty-icon { display: none; }
 
 /* 면접 연습 제목: 색 강조 대신 기본 제목 */
 body .interview-title { background: none; -webkit-text-fill-color: currentColor; color: var(--ds-text); }
+
+/* 정의되지 않았던 --bg-card(기본값 흰색)를 테마 바탕색에 맞춘다: 다크 모드에서 흰 상자가 튀던 문제 */
+:root { --bg-card: var(--bg-primary); }
+/* 대결 결과의 옅은 파랑, 빨강 그라데이션은 다크 모드에서 바탕만 쓴다 */
+:root[data-mode='dark'] .duel-result,
+:root[data-mode='dark'] .duel-result.loss { background: var(--bg-primary) !important; border-color: var(--border-color) !important; }
