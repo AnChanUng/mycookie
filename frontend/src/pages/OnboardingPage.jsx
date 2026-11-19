@@ -204,10 +204,26 @@ cd frontend && npm run lint && npm run build`}</pre>
           <li><b>브랜치 만들기:</b> 최신 <code>dev</code>에서 <code>feature/...</code>나 <code>fix/...</code> 브랜치를 만듭니다.</li>
           <li><b>커밋:</b> 한 커밋에 한 가지 일만 담고, 메시지는 한글로 "무엇을 왜"를 첫 줄에 씁니다.</li>
           <li><b>PR 올리기:</b> <code>dev</code>로 PR을 엽니다. 양식(관련 이슈, 무엇을, 왜, 확인한 것)을 채우고 <code>closes #이슈번호</code>를 적으면 머지할 때 이슈가 자동으로 닫힙니다.</li>
-          <li><b>리뷰와 머지:</b> 리뷰를 받고 고칠 것을 반영한 뒤 머지합니다. 5분 안에 스테이징에 자동 배포됩니다.</li>
-          <li><b>운영 배포:</b> 스테이징에서 확인이 끝나면 <code>dev</code> → <code>master</code> PR을 열어 머지합니다. 5분 안에 운영에 반영됩니다.</li>
+          <li><b>위험도에 따라 머지:</b> PR을 올리면 바뀐 파일을 보고 위험도 라벨이 자동으로 붙습니다(아래 표). 조건을 채우면 머지되고, 5분 안에 스테이징에 자동 배포됩니다.</li>
+          <li><b>운영 배포:</b> 스테이징에서 확인이 끝나면 <code>dev</code> → <code>master</code> PR을 엽니다. <b>운영 머지는 관리자(찬웅님)만</b> 할 수 있습니다. 5분 안에 운영에 반영됩니다.</li>
           <li><b>기록:</b> 사용자가 체감하는 변화면 패치노트를 쓰고, 버전 태그와 릴리스를 붙입니다(다음 항목).</li>
         </ol>
+        <h3>PR 위험도와 머지 조건</h3>
+        <table className="ob-table">
+          <thead><tr><th>위험도</th><th>무엇이 바뀌면</th><th>머지 조건</th></tr></thead>
+          <tbody>
+            <tr><td>🟢 낮음</td><td>문서, 문제 데이터, 테스트만</td><td>CI 통과하면 <b>자동 머지</b></td></tr>
+            <tr><td>🟡 중간</td><td>그 외 백엔드, 화면 코드</td><td>CI 통과 + <b>찬웅님 승인</b>. 찬웅님이 올린 PR은 승인 없이 머지 가능</td></tr>
+            <tr><td>🔴 높음</td><td>로그인, 보안, 결제, DB 엔티티, 설정(<code>application.yml</code>), 배포, CI, 의존성</td><td>CI 통과 + <b>작성자가 아닌 사람 1명 승인</b>(필수)</td></tr>
+            <tr><td>운영</td><td><code>dev</code> → <code>master</code></td><td>CI 통과 + <b>관리자만 머지</b></td></tr>
+          </tbody>
+        </table>
+        <Note>
+          판정은 PR의 <b>위험도 검사</b>(GitHub Actions)가 하고, 이유는 검사 결과 요약에 적힙니다. 여러 파일이 섞이면 가장 높은 위험도를 따릅니다.
+          <code>master</code>에는 <code>dev</code>에서 오는 PR만 받습니다. 작업 브랜치에서 <code>master</code>로 바로 올리면 검사가 막습니다.<br />
+          새 PR과 이슈의 담당자(Assignees)에는 찬웅님이 자동으로 들어갑니다.
+        </Note>
+
         <h3>용어 정리</h3>
         <table className="ob-table">
           <thead><tr><th>용어</th><th>뜻</th><th>나의쿠키에서는</th></tr></thead>
@@ -222,7 +238,7 @@ cd frontend && npm run lint && npm run build`}</pre>
           </tbody>
         </table>
         <h3>급하게 운영을 고쳐야 할 때(핫픽스)</h3>
-        <p><code>master</code>에서 <code>fix/...</code> 브랜치를 따서 고치고 <code>master</code>로 PR을 올립니다. 머지한 뒤에는 <code>master</code>를 <code>dev</code>에도 합쳐서 두 브랜치가 어긋나지 않게 합니다.</p>
+        <p>평소처럼 <code>fix/...</code> → <code>dev</code> → <code>master</code>로 빠르게 올리는 것이 기본입니다. 그럴 시간도 없는 장애라면 관리자만 규칙을 건너뛰어 <code>master</code>를 바로 고칠 수 있고, 고친 뒤에는 <code>master</code> → <code>dev</code> PR로 두 브랜치를 맞춥니다.</p>
       </Section>
 
       <Section id="release" no="09" title="버전, 태그, 릴리스">
