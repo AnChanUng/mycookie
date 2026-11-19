@@ -140,11 +140,11 @@ function Visual({ kind }) {
 
 export default function Landing() {
   const ref = useReveal();
-  // 메뉴의 "만든 이야기"(/intro#story)로 오면 그 이야기로 바로 내려간다
+  // 메뉴의 "만든 이야기"(/intro#story), "만든 사람들"(/intro#team)로 오면 그 구역으로 바로 내려간다
   const { hash, key } = useLocation();
   useEffect(() => {
-    if (hash !== "#story") return;
-    const id = requestAnimationFrame(() => document.getElementById("story")?.scrollIntoView({ block: "start" }));
+    if (hash !== "#story" && hash !== "#team") return;
+    const id = requestAnimationFrame(() => document.getElementById(hash.slice(1))?.scrollIntoView({ block: "start" }));
     return () => cancelAnimationFrame(id);
   }, [hash, key]);
   const signedIn = !!account()?.token;
@@ -194,6 +194,29 @@ export default function Landing() {
             <li data-reveal><b>넓게 이해하기</b><span>컴퓨터공학 · 웹 개발 · AI · 인프라를 고루</span></li>
             <li data-reveal><b>하나는 깊게</b><span>내가 고른 분야는 면접에서 막히지 않을 만큼</span></li>
             <li data-reveal><b>매일 조금씩</b><span>하루 한 문제라도 꾸준히 쌓기</span></li>
+          </ul>
+        </div>
+      </section>
+
+      {/* 만든 사람들: SSAFY에서 시작해 개인 사이트에서 팀으로 */}
+      <section id="team" className="l-story l-team" aria-labelledby="l-team-title">
+        <div className="l-wrap l-story-wrap">
+          <p className="l-eyebrow" data-reveal>만든 사람들</p>
+          <h2 id="l-team-title" data-reveal>SSAFY에서<br />시작한 팀이에요</h2>
+          <div className="l-story-body">
+            <p data-reveal>
+              나의쿠키는 <b>삼성 청년 SW·AI 아카데미(SSAFY)</b>에서 시작했어요. 처음에는 <b>한 사람이 혼자 운영하던 개인 사이트</b>였어요.
+              취업 준비를 하며 직접 만든 문제집을 같은 반 친구들과 함께 풀면서 조금씩 기능이 늘어났어요.
+            </p>
+            <p data-reveal>
+              그러다 우리 반만이 아니라 <b>SSAFY 전 캠퍼스의 교육생</b>, 그리고 <b>다른 곳에서 개발자 취업을 준비하는 분들</b>에게도
+              도움이 되고 싶어졌어요. 그래서 지금은 팀이 되어 함께 만들고 있습니다.
+            </p>
+          </div>
+          <ul className="l-story-points">
+            <li data-reveal><b>개인 사이트로 시작</b><span>혼자 공부하려고 만든 문제집</span></li>
+            <li data-reveal><b>SSAFY 16기 대전 4반</b><span>같은 반 친구들과 함께 쓰며 다듬은 첫 사용자들</span></li>
+            <li data-reveal><b>이제는 팀으로</b><span>SSAFY 전 캠퍼스와 모든 개발자 취업 준비생을 위해</span></li>
           </ul>
         </div>
       </section>

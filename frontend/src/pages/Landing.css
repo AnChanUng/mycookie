@@ -301,3 +301,4 @@
   .l-story-points { grid-template-columns: 1fr; }
 }
 .l-story { scroll-margin-top: 72px; }
+.l-team { padding-top: 64px; }
