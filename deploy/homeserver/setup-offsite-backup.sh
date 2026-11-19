@@ -35,7 +35,9 @@ if sudo -u devcookie -H rclone listremotes 2>/dev/null | grep -qx "$REMOTE_NAME:
 else
   echo "    잠시 뒤 나오는 주소(http://127.0.0.1:53682/auth?...)를 Windows 브라우저에서 열고 구글 계정으로 허용하세요."
   # drive.file 범위: rclone이 만든 파일만 볼 수 있다(내 드라이브의 다른 파일은 못 본다)
-  sudo -u devcookie -H rclone config create "$REMOTE_NAME" drive scope=drive.file
+  # 완료 후 rclone이 토큰이 든 설정을 화면에 찍으므로 표준 출력은 버린다(로그인 주소는 표준 오류로 나온다)
+  sudo -u devcookie -H rclone config create "$REMOTE_NAME" drive scope=drive.file > /dev/null
+  echo "    연결했습니다."
 fi
 
 echo "4/5 .env에 RCLONE_REMOTE"
