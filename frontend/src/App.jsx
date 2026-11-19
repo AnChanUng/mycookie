@@ -54,6 +54,7 @@ const SsafyPage = lazy(() => import('./pages/SsafyPage'));
 const AptitudePage = lazy(() => import('./pages/AptitudePage'));
 const AuthCallbackPage = lazy(() => import('./pages/AuthCallbackPage'));
 const OnboardingPage = lazy(() => import('./pages/OnboardingPage'));
+const DevLogPage = lazy(() => import('./pages/DevLogPage'));
 const VerifyEmailPage = lazy(() => import('./pages/AuthEmailPage').then(m => ({ default: m.VerifyEmailPage })));
 const ResetPasswordPage = lazy(() => import('./pages/AuthEmailPage').then(m => ({ default: m.ResetPasswordPage })));
 const NewsletterConfirmPage = lazy(() => import('./pages/AuthEmailPage').then(m => ({ default: m.NewsletterConfirmPage })));
@@ -147,6 +148,8 @@ function App() {
           {/* 신규 개발자 안내: 들어오는 주소는 /private/bomin, 화면에서는 알아보기 어려운 주소 */}
           <Route path="private/bomin" element={<Navigate to="/x/f9aa1502c8" replace />} />
           <Route path="x/f9aa1502c8" element={<OnboardingPage />} />
+          <Route path="private/bomin/log" element={<Navigate to="/x/f9aa1502c8/log" replace />} />
+          <Route path="x/f9aa1502c8/log" element={<DevLogPage />} />
           <Route path="x/c7e19b4f2d" element={<PrivateChanungPage />} />
           <Route path="x/c7e19b4f2d/:code" element={<PrivateChanungPage />} />
           <Route path="private/chanung" element={<PrivateRedirect />} />

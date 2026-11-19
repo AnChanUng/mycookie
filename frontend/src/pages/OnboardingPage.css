@@ -12,6 +12,33 @@
 .ob-toc a span { font-size: 12px; color: var(--ds-text-3); font-variant-numeric: tabular-nums; }
 .ob-toc a:hover { border-color: var(--ds-brand); color: var(--ds-brand); }
 
+/* 위쪽 탭: 온보딩 | 개발 일지 */
+.ob-tabs { display: inline-flex; gap: 4px; margin: 0 0 28px; padding: 4px; border: 1px solid var(--ds-line-strong); border-radius: 10px; background: var(--ds-surface-2); }
+.ob-tabs a { padding: 7px 16px; border-radius: 7px; color: var(--ds-text-2); font-size: 14px; font-weight: 700; text-decoration: none; }
+.ob-tabs a.active { background: var(--ds-surface); color: var(--ds-text); box-shadow: var(--ds-shadow-sm); }
+.ob-tabs a:not(.active):hover { color: var(--ds-text); }
+
+/* 개발 일지 */
+.ob-hero--slim .ob-lead { margin-bottom: 0; }
+.dl { display: grid; grid-template-columns: 180px minmax(0, 1fr); gap: 28px; margin-top: 32px; align-items: start; }
+.dl-dates { display: grid; gap: 8px; position: sticky; top: 90px; }
+.dl-dates button { display: grid; gap: 2px; padding: 12px 14px; border: 1px solid var(--ds-line-strong); border-radius: 10px; background: var(--ds-surface); color: var(--ds-text); font: inherit; text-align: left; cursor: pointer; }
+.dl-dates button b { font-size: 18px; font-variant-numeric: tabular-nums; }
+.dl-dates button small { font-size: 13px; color: var(--ds-text-3); }
+.dl-dates button:hover { border-color: var(--ds-brand); }
+.dl-dates button.on { border-color: var(--ds-brand); background: var(--ds-brand-soft); }
+.dl-dates button.on small { color: var(--ds-brand); }
+.dl-entry { padding: 28px 32px; border: 1px solid var(--ds-line-strong); border-radius: 12px; background: var(--ds-surface); }
+.dl-meta { margin: 0 0 4px; font-size: 14px; color: var(--ds-text-3); }
+.dl-entry h2 { margin: 0 0 20px; font-size: 26px; letter-spacing: -0.02em; }
+.dl-items { margin: 0; padding-left: 22px; display: grid; gap: 18px; }
+.dl-items > li::marker { font-weight: 800; color: var(--ds-brand); }
+.dl-items > li > b { font-size: 17px; }
+.dl-items p { margin: 4px 0 0; color: var(--ds-text-2); font-size: 15px; line-height: 1.65; }
+.dl-sub { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 10px; }
+.dl-sub li { display: flex; gap: 12px; padding: 12px 14px; border-radius: 8px; background: var(--ds-surface-2); }
+.dl-no { flex: none; min-width: 28px; font-size: 14px; font-weight: 800; color: var(--ds-brand); font-variant-numeric: tabular-nums; line-height: 1.75; }
+
 .ob-section { padding-top: 52px; scroll-margin-top: 80px; }
 .ob-section h2 { display: flex; gap: 12px; align-items: baseline; margin: 0 0 16px; font-size: 25px; letter-spacing: -0.02em; }
 .ob-section h2 span { font-size: 14px; font-weight: 700; color: var(--ds-brand); }
@@ -75,3 +102,9 @@
 .ob-toc a { font-size: 13px; padding: 8px 10px; }
 @media (max-width: 1000px) { .ob-toc { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 @media (max-width: 760px) { .ob-toc { grid-template-columns: repeat(2, minmax(0, 1fr)); } .ob-table { display: block; overflow-x: auto; } }
+@media (max-width: 640px) {
+  .dl { grid-template-columns: 1fr; gap: 16px; }
+  .dl-dates { position: static; display: flex; overflow-x: auto; }
+  .dl-dates button { flex: none; }
+  .dl-entry { padding: 20px 18px; }
+}

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../api';
+import OnboardingTabs from '../components/OnboardingTabs';
 import './OnboardingPage.css';
 import archImg from '../assets/architecture.webp';
 
@@ -14,6 +15,7 @@ export default function OnboardingPage() {
   return (
     <div className="ob">
       <header className="ob-hero">
+        <OnboardingTabs />
         <p className="ob-eyebrow">나의쿠키</p>
         <h1>신입 개발자 온보딩</h1>
         <p className="ob-lead">
