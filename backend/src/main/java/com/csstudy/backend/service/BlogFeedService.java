@@ -1,6 +1,7 @@
 package com.csstudy.backend.service;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
@@ -39,6 +40,8 @@ public class BlogFeedService {
     private List<Post> cached = List.of();
     private Instant fetchedAt = Instant.EPOCH;
 
+    // 생성자가 둘이라 스프링이 쓸 것을 지정한다(없으면 백엔드가 켜지지 않는다)
+    @Autowired
     public BlogFeedService(@Value("${app.blog.rss-url:https://cookie.tistory.com/rss}") String feedUrl) {
         this(feedUrl, defaultHttp(), Clock.systemUTC());
     }
