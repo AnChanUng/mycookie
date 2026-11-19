@@ -196,6 +196,8 @@ sudo -u devcookie /srv/devcookie/app/deploy/homeserver/backup.sh   # 백업이 �
 ## 백업과 복구
 
 - `backup.sh`가 매일 새벽 4시 운영 · 스테이징 DB를 `/srv/devcookie/backups`에 덤프하고 14일치를 남깁니다. `BACKUP_COPY_DIR`이 있으면 같은 파일을 외장 디스크에도 복사합니다.
+- **집 밖 사본(구글 드라이브):** `sudo .../setup-offsite-backup.sh`를 한 번 실행하면, 매일 백업을 비밀번호로 암호화(gpg, AES-256)해서 구글 드라이브 `mycookie-backups` 폴더에 올리고 30일치만 남깁니다. 비밀번호는 `/srv/devcookie/.backup-passphrase`에 있고, **따로 적어 두지 않으면 그램이 고장 났을 때 클라우드 백업을 열 수 없습니다.**
+  - 클라우드에서 되살리기: `rclone copy gdrive:mycookie-backups/<파일>.gpg .` → `gpg -d <파일>.gpg > <파일>` (비밀번호 입력) → `restore.sh`
 - 되살리기: `restore.sh /srv/devcookie/backups/cookie_prod-<날짜>.dump cookie_prod` (그 백엔드를 잠깐 멈추고 덤프 내용으로 바꿉니다)
 - 노트북을 새로 설치할 때: 이 문서대로 다시 설치 → `deploy.sh`로 빈 DB를 만든 뒤 외장 디스크의 최신 덤프로 `restore.sh`.
 
