@@ -3,6 +3,17 @@
 // status: 'released' 배포됨(master) | 'dev' 개발 브랜치에만 있음 | 'wip' 작업 중
 export const PATCH_NOTES = [
   {
+    version: '0.24.0',
+    date: '2026-11-19',
+    title: '내 계정 메뉴, 인스타그램',
+    status: 'wip',
+    summary: '오른쪽 위 내 계정을 누르면 등급, 학습 현황, 바로가기, 로그아웃이 담긴 메뉴가 열립니다.',
+    items: [
+      { type: 'improve', text: '내 계정 메뉴: 등급과 다음 등급까지 남은 문제, 학습 현황(이번 주, 정답률, 누적, 오답), 내 학습, 오답노트, 계정 설정, 로그아웃. 메인의 "내 학습 현황" 칸은 이 메뉴로 옮김.' },
+      { type: 'feature', text: '사이트 맨 아래에 인스타그램(@mycookie.dev) 바로가기.' },
+    ],
+  },
+  {
     version: '0.23.0',
     date: '2026-11-19',
     title: '새 메뉴 · 실시간 순위 · 건의 제보',
