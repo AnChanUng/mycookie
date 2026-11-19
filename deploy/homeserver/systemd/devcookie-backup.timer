@@ -1,0 +1,9 @@
+[Unit]
+Description=매일 새벽 4시 DevCookie DB 백업
+
+[Timer]
+OnCalendar=*-*-* 04:00:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target

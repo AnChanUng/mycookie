@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# master → 운영, dev → 스테이징. 원격 브랜치에 새 커밋이 있을 때만 이미지를 다시 빌드하고 그 서버만 바꾼다.
+# master → 운영, dev → 스테이징. 원격 브랜치에 새 커밋이 있을 때만 백엔드 · 화면 이미지를 다시 빌드하고 그쪽만 바꾼다.
 # systemd 타이머(devcookie-deploy.timer)가 5분마다 실행한다. 강제로 다시 빌드하려면: deploy.sh --force
 set -euo pipefail
 
@@ -19,22 +19,28 @@ checkout() {
 }
 
 deploy() {
-  local dir=$1 branch=$2 tag=$3 service=$4
+  local dir=$1 branch=$2 tag=$3 env=$4
   checkout "$dir" "$branch"
   local current target
   current=$(git -C "$ROOT/$dir" rev-parse HEAD)
   target=$(git -C "$ROOT/$dir" rev-parse "origin/$branch")
-  if [ "$current" = "$target" ] && [ "$FORCE" != "--force" ] && docker image inspect "devcookie-backend:$tag" >/dev/null 2>&1; then
+  if [ "$current" = "$target" ] && [ "$FORCE" != "--force" ] \
+     && docker image inspect "devcookie-backend:$tag" "devcookie-frontend:$tag" >/dev/null 2>&1; then
     return
   fi
-  echo "[$(date '+%F %T')] $service: ${current:0:7} → ${target:0:7}"
+  echo "[$(date '+%F %T')] $tag: ${current:0:7} → ${target:0:7}"
   git -C "$ROOT/$dir" reset --quiet --hard "$target"
-  # 빌드가 실패하면 set -e로 여기서 멈추고, 돌던 컨테이너는 이전 이미지로 계속 돈다
+  # 빌드가 하나라도 실패하면 set -e로 여기서 멈추고, 돌던 컨테이너는 이전 이미지로 계속 돈다
   docker build --quiet -t "devcookie-backend:$tag" "$ROOT/$dir/backend"
-  "${COMPOSE[@]}" up -d --no-deps "$service"
+  docker build --quiet -t "devcookie-frontend:$tag" \
+    --build-arg VITE_DEPLOY_ENV="$env" --build-arg GIT_COMMIT="$target" "$ROOT/$dir/frontend"
+  "${COMPOSE[@]}" up -d --no-deps "backend-$tag" "frontend-$tag"
 }
 
-deploy app master prod backend-prod
-deploy staging dev staging backend-staging
+mkdir -p "$ROOT/pgdata" "$ROOT/backups"
+# DB가 먼저 떠 있어야 백엔드가 붙는다(처음 한 번은 postgres-init.sh가 운영 · 스테이징 DB를 만든다)
+"${COMPOSE[@]}" up -d postgres
+deploy app master prod production
+deploy staging dev staging preview
 "${COMPOSE[@]}" up -d cloudflared
 docker image prune -f >/dev/null

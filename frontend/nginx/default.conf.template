@@ -1,0 +1,58 @@
+# 그램 온프레미스 서버의 화면 서버. 화면 파일(dist)을 내보내고 /api/는 같은 주소로 백엔드에 넘긴다(CORS 불필요)
+# ${BACKEND_HOST} · ${ROBOTS_HEADER}는 컨테이너가 시작할 때 환경변수로 채워진다(nginx 공식 이미지의 templates 기능)
+server {
+    listen 80;
+    server_name _;
+    root /usr/share/nginx/html;
+    server_tokens off;
+    charset utf-8;
+
+    gzip on;
+    gzip_types text/css application/javascript application/json image/svg+xml application/xml text/plain;
+    gzip_min_length 1024;
+
+    # 백엔드가 늦게 떠도 nginx가 먼저 뜨도록 요청할 때 이름을 찾는다(도커 내부 DNS)
+    resolver 127.0.0.11 valid=30s ipv6=off;
+    set $backend http://${BACKEND_HOST}:8080;
+
+    include /etc/nginx/conf.d/security-headers.inc;
+
+    location /api/ {
+        proxy_pass $backend;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        # X-Forwarded-For를 덧붙이지 않는다: 마지막 값이 Cloudflare가 붙인 실제 접속 IP로 남아야 요청 제한이 사람별로 걸린다
+        proxy_set_header X-Forwarded-For $http_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto https;
+        proxy_set_header Connection "";
+        # 실시간 채팅 · 승급 알림(SSE)이 끊기지 않게 버퍼링을 끄고 오래 기다린다
+        proxy_buffering off;
+        proxy_read_timeout 3600s;
+        client_max_body_size 12m;
+    }
+
+    # 빌드 파일 이름에 해시가 붙어 있어 오래 캐시해도 된다
+    location /assets/ {
+        include /etc/nginx/conf.d/security-headers.inc;
+        add_header Cache-Control "public, max-age=31536000, immutable";
+        try_files $uri =404;
+    }
+
+    # 숨김 파일(.env, .git 등) 탐색 차단
+    location ~ /\.(?!well-known) { return 404; }
+
+    # 개인 페이지와 1회용 메일 링크는 검색에서 뺀다
+    location ~ ^/(auth|newsletter|private|p|admin|chanung)(/|$) {
+        include /etc/nginx/conf.d/security-headers.inc;
+        add_header X-Robots-Tag "noindex, nofollow" always;
+        # 마지막 인자를 파일로 두어 이 블록 안에서 바로 내보낸다(경로로 두면 location /로 넘어가 헤더가 바뀐다)
+        try_files /index.html =404;
+    }
+
+    # /notes → notes.html(검색용 본문이 든 화면), 그 밖의 경로는 앱(index.html)
+    location / {
+        add_header Cache-Control "no-cache";
+        include /etc/nginx/conf.d/security-headers.inc;
+        try_files $uri $uri.html $uri/ /index.html;
+    }
+}

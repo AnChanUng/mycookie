@@ -1,0 +1,9 @@
+[Unit]
+Description=DevCookie DB 백업 (운영 · 스테이징 pg_dump)
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=oneshot
+User=devcookie
+ExecStart=/srv/devcookie/app/deploy/homeserver/backup.sh
