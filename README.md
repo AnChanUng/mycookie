@@ -4,49 +4,88 @@
 
 ### 신입 개발자 취업 준비를 한 곳에서
 
-CS·기술면접, 코딩테스트, 실전 대결, 학습 기록을 하나로 잇는 학습 서비스입니다.<br>
-지금은 **개발자 취업 준비 사이트로 리뉴얼 중**이며, 11월 말 다시 열 예정입니다.
+CS 전공지식, 기술면접, 코딩테스트, 실전 대결, 학습 기록을 하나로 잇는 학습 서비스입니다.
 
-[사이트](https://cs-study-platform.vercel.app/) | [패치노트](https://cs-study-platform.vercel.app/changelog) | [개발 문서](#개발-문서)
+[사이트](https://mycookie.dev) | [패치노트](https://mycookie.dev/changelog) | [기술 블로그](https://cookie.tistory.com/258)
 
 ![React](https://img.shields.io/badge/React_19-20232A?logo=react&logoColor=61DAFB)
 ![Spring Boot](https://img.shields.io/badge/Spring_Boot_3.5-6DB33F?logo=springboot&logoColor=white)
-![Spring AI](https://img.shields.io/badge/Spring_AI_1.1-6DB33F)
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?logo=postgresql&logoColor=white)
-![ChromaDB](https://img.shields.io/badge/ChromaDB-FF6F00)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL_18-4169E1?logo=postgresql&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker_Compose-2496ED?logo=docker&logoColor=white)
+![Cloudflare](https://img.shields.io/badge/Cloudflare_Tunnel-F38020?logo=cloudflare&logoColor=white)
+![CI](https://github.com/AnChanUng/mycookie/actions/workflows/ci.yml/badge.svg)
 
 </div>
+
+## 프로젝트 배경
+
+신입 개발자 취업 준비는 흩어져 있습니다. CS 개념은 블로그에서, 면접 질문은 정리 노트에서, 코딩테스트는 또 다른 사이트에서 따로 공부하고, 무엇을 얼마나 했는지는 남지 않습니다.
+
+### Problem
+
+- 전공지식, 기술면접, 코딩테스트 자료가 여러 곳에 흩어져 있다.
+- 혼자 공부하면 꾸준히 이어 가기 어렵고, 실력이 늘었는지 확인하기 어렵다.
+- 틀린 문제와 약한 과목이 기록으로 남지 않는다.
+
+### Solution
+
+> 취업 준비에 필요한 공부를 한 사이트에서, 기록이 쌓이고 겨루면서 이어 가게 만들자.
+
+- **한 곳에서 공부:** 과목별 전공노트, 기술면접 질문과 꼬리질문, 웹 필수지식, 기업별 예상문제
+- **겨루면서 공부:** 같은 문제를 동시에 푸는 1:1 대결과 단체전
+- **기록으로 확인:** 오답노트, 북마크, 풀이 수에 따른 티어와 승급 시험, 기기 간 기록 동기화
 
 ## 주요 기능
 
 | 영역 | 내용 |
 | --- | --- |
-| CS · 기술면접 | 과목별 전공노트, 기술면접 질문 152개와 예시 답변 · 꼬리질문, 웹 필수지식 52문답 |
-| 실전 | 같은 문제를 풀고 겨루는 1:1 대결 · 단체전, 기업별 예상문제집, 주제별 통합 문제집 |
-| 학습 기록 | 오답노트 · 북마크, 계정 간 기록 동기화, 풀이 수에 따른 티어와 승급 시험, 오늘의 CS |
+| CS, 기술면접 | 과목별 전공노트, 기술면접 질문과 예시 답변, 꼬리질문, 웹 필수지식 문답 |
+| 실전 | 1:1 대결, 단체전, 기업별 예상문제집, 주제별 통합 문제집 |
+| 학습 기록 | 오답노트, 북마크, 계정 간 기록 동기화, 티어와 승급 시험, 오늘의 CS |
 | 커뮤니티 | 실시간 채팅, 친구 신청과 1:1 대화 |
-| AI 학습 도우미 (개발 중) | 학습 자료에 근거해서만 답하고, 근거가 없으면 답하지 않는 RAG |
+| 알림 | 매일 CS 문제를 Mattermost와 메일로 받기 |
 
-## 기술 구성
+## 기술 스택
 
 | 영역 | 구성 |
 | --- | --- |
 | 화면 | React 19, React Router 7, Vite |
-| API | Java 17, Spring Boot 3.5, Spring Data JPA, Spring AI 1.1 |
-| 데이터 | PostgreSQL(운영 Neon), 테스트 H2 · Testcontainers |
-| RAG | ChromaDB, bge-m3 임베딩, bge-reranker-v2-m3 재정렬(TEI), Gemini |
-| 실시간 | SSE(채팅 · 승급 알림) |
-| 배포 | Vercel(프론트엔드), Render(백엔드) |
-| 테스트 | JUnit 5, Testcontainers PostgreSQL, k6 |
+| API | Java 17, Spring Boot 3.5, Spring Data JPA, 소셜 로그인 OAuth 2.0(Google, Kakao, Naver, GitHub) |
+| 데이터 | PostgreSQL 18, 테스트 H2와 Testcontainers |
+| 실시간 | SSE(채팅, 승급 알림) |
+| 인프라 | 홈서버(WSL2 Ubuntu 24.04), Docker Compose, nginx, Cloudflare Tunnel, Tailscale |
+| 운영 | GitHub Actions CI, systemd 자동 배포, gpg와 rclone 암호화 백업 |
+| 테스트 | JUnit 5, Testcontainers, k6 부하 테스트 |
+
+## 인프라 구조도
+
+![나의쿠키 인프라 구조도](docs/architecture/architecture.png)
+
+- 노트북 한 대(**홈서버**, 메모리 8GB)에서 화면(nginx), 백엔드, PostgreSQL을 Docker Compose로 운영과 스테이징을 함께 돌립니다.
+- 공유기 포트를 열지 않고 **Cloudflare Tunnel**로 외부 요청을 받습니다. 도메인, HTTPS 인증서, 방화벽도 Cloudflare가 맡습니다.
+- 화면과 API를 같은 주소에서 nginx가 나눠 보내서 CORS가 필요 없습니다.
+- **자동 배포:** 5분마다 `master`, `dev`를 확인해 바뀐 쪽(화면 또는 백엔드)만 다시 빌드합니다.
+- **백업:** 매일 04:00 DB를 덤프해 홈서버에 보관하고, gpg(AES-256)로 암호화해 Google Drive에도 올립니다(3-2-1 원칙).
+
+구축 과정은 [홈서버 구축하기: 서버 구축부터 DB 마이그레이션까지](https://cookie.tistory.com/258)에 정리했습니다. 그림은 `docs/architecture/build.py`로 다시 만들 수 있습니다.
+
+## 핵심 기술 이야기
+
+| 주제 | 내용 |
+| --- | --- |
+| [클라우드에서 홈서버로](docs/homeserver.md) | Vercel, Render, Neon에서 노트북 홈서버로 옮긴 과정(DB 이전, 터널 전환, 백업) |
+| [대결 동시성](docs/duel-concurrency.md) | 두 사람이 동시에 답을 낼 때 점수가 꼬이지 않게 처리 |
+| [커넥션 풀](docs/hikaricp-pool.md) | 부하 테스트로 HikariCP 풀 크기 정하기 |
+| [보안 설계](docs/security.md) | 비밀번호 재설정 메일 인증, 요청 제한, 크롤링 대응, 보안 헤더 |
+| [검색 노출](docs/seo.md) | SPA를 미리 렌더링해 검색엔진에 노출 |
 
 ## 개발 흐름
 
-1. 작업마다 GitHub 이슈를 한글로 등록합니다.
-2. 기능 브랜치에서 작업하고, 이슈를 연결한 PR을 `dev`로 올립니다.
-3. `dev`에 병합되면 스테이징(Vercel 미리보기 → 스테이징 백엔드 → 스테이징 DB)에서 확인합니다.
-4. `dev` → `master` PR로 운영에 배포하고, 바뀐 내용은 [패치노트](https://cs-study-platform.vercel.app/changelog)와 GitHub Release에 기록합니다.
-
-환경 구성과 설정 방법은 [docs/staging.md](docs/staging.md)를 참고하세요.
+1. 작업마다 GitHub 이슈를 한글로 등록합니다(기능, 버그 템플릿).
+2. `feature/*`, `fix/*` 브랜치에서 작업하고, 이슈를 연결한 PR을 `dev`로 올립니다.
+3. PR마다 **GitHub Actions**가 백엔드 테스트, 화면 린트와 빌드, 데이터 검사를 실행합니다.
+4. `dev`에 병합되면 스테이징(staging.mycookie.dev)에 자동 배포되어 확인합니다.
+5. `dev` → `master` PR로 운영에 배포하고, 바뀐 내용은 [패치노트](https://mycookie.dev/changelog)와 GitHub Release(`vX.Y.Z` 태그)에 기록합니다.
 
 ## 로컬에서 실행하기
 
@@ -63,24 +102,17 @@ npm ci
 VITE_API_URL=http://localhost:8080/api/v1 npm run dev
 ```
 
-로컬 개발 서버에서는 리뉴얼 안내가 꺼져 있어 전체 화면으로 개발할 수 있습니다.
-
 | 환경변수 | 용도 |
 | --- | --- |
-| `JDBC_DATABASE_URL` · `SPRING_DATASOURCE_USERNAME` · `SPRING_DATASOURCE_PASSWORD` | PostgreSQL 연결 |
+| `JDBC_DATABASE_URL`, `SPRING_DATASOURCE_USERNAME`, `SPRING_DATASOURCE_PASSWORD` | PostgreSQL 연결 |
 | `ADMIN_KEY` | 32자 이상의 관리자 키. 없으면 관리자 API가 닫힙니다. |
-| `GEMINI_API_KEY` | 면접 AI · RAG 답변 생성(선택) |
-| `VITE_API_URL` | 개발 서버에서 쓸 API 주소. 배포 빌드는 운영 API를 씁니다. |
+| `VITE_API_URL` | 개발 서버에서 쓸 API 주소 |
 
-RAG 학습 도우미는 `rag` 프로필에서만 켜집니다. 실행 방법은 [rag-assistant](docs/rag-assistant.md)를 참고하세요.
+운영 환경변수 전체는 [deploy/homeserver/.env.example](deploy/homeserver/.env.example)에 있습니다.
 
 ## 검증하기
 
 ```bash
-cd backend && ./gradlew test        # Docker가 있으면 동시성 테스트(Testcontainers)도 실행
-cd frontend && npm run build && npm run check:questions
+cd backend && ./gradlew test                 # Docker가 있으면 Testcontainers 테스트도 실행
+cd frontend && npm run lint && npm run build
 ```
-
-## 개발 문서
-
-[대결 동시성](docs/duel-concurrency.md) · [커넥션 풀](docs/hikaricp-pool.md) · [RAG 학습 도우미](docs/rag-assistant.md) · [부하 테스트](load-tests/README.md) · [보안과 크롤링](docs/security.md) · [등급과 접근 권한](docs/membership.md) · [기술면접 준비](docs/technical-interview.md) · [노트북 홈서버](docs/homeserver.md)
