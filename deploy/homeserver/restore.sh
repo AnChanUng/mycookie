@@ -12,6 +12,12 @@ read -r -p "$DB의 데이터를 $FILE 내용으로 바꿉니다. 계속할까요
 [ "$ok" = "yes" ] || exit 1
 svc=backend-${DB#cookie_}
 "${COMPOSE[@]}" stop "$svc"
-"${COMPOSE[@]}" exec -T postgres pg_restore -U postgres -d "$DB" --clean --if-exists --no-owner --role="$DB" < "$FILE"
+# 복원 전에 DB를 통째로 비운다. 백엔드(JPA)가 먼저 만든 표가 남아 있으면 --clean이 identity 열에서 실패한다
+"${COMPOSE[@]}" exec -T postgres psql -v ON_ERROR_STOP=1 -U postgres -q <<SQL
+DROP DATABASE IF EXISTS $DB WITH (FORCE);
+CREATE DATABASE $DB OWNER $DB ENCODING 'UTF8' TEMPLATE template0;
+REVOKE ALL ON DATABASE $DB FROM PUBLIC;
+SQL
+"${COMPOSE[@]}" exec -T postgres pg_restore -U postgres -d "$DB" --no-owner --role="$DB" --exit-on-error < "$FILE"
 "${COMPOSE[@]}" start "$svc"
 echo "되살리기 완료: $DB"

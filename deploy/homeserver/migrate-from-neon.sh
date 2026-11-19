@@ -24,7 +24,13 @@ mv "$DUMP.part" "$DUMP"
 
 echo "2/3 backend-$WHICH 멈춤 후 $DB에 복원"
 "${COMPOSE[@]}" stop "backend-$WHICH" || true
-"${COMPOSE[@]}" exec -T postgres pg_restore -U postgres -d "$DB" --clean --if-exists --no-owner --role="$DB" < "$DUMP"
+# 복원 전에 DB를 통째로 비운다. 백엔드(JPA)가 먼저 만든 표가 남아 있으면 --clean이 identity 열에서 실패한다
+"${COMPOSE[@]}" exec -T postgres psql -v ON_ERROR_STOP=1 -U postgres -q <<SQL
+DROP DATABASE IF EXISTS $DB WITH (FORCE);
+CREATE DATABASE $DB OWNER $DB ENCODING 'UTF8' TEMPLATE template0;
+REVOKE ALL ON DATABASE $DB FROM PUBLIC;
+SQL
+"${COMPOSE[@]}" exec -T postgres pg_restore -U postgres -d "$DB" --no-owner --role="$DB" --exit-on-error < "$DUMP"
 
 echo "3/3 backend-$WHICH 다시 시작"
 "${COMPOSE[@]}" up -d "backend-$WHICH"
