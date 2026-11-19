@@ -42,7 +42,7 @@ server {
     location ~ /\.(?!well-known) { return 404; }
 
     # 개인 페이지와 1회용 메일 링크는 검색에서 뺀다
-    location ~ ^/(auth|newsletter|private|p|admin|chanung)(/|$) {
+    location ~ ^/(auth|newsletter|private|p|x|admin|chanung)(/|$) {
         include /etc/nginx/conf.d/security-headers.inc;
         add_header X-Robots-Tag "noindex, nofollow" always;
         # 마지막 인자를 파일로 두어 이 블록 안에서 바로 내보낸다(경로로 두면 location /로 넘어가 헤더가 바뀐다)
