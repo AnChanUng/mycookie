@@ -74,3 +74,14 @@
   /* 휴대폰: 그림을 읽을 수 있는 크기로 두고 옆으로 밀어서 본다 */
   .ob-diagram { width: 760px; max-width: none; padding: 8px; }
 }
+
+.ob-muted { color: var(--ds-text-3); font-size: 14px; }
+.ob-blog { list-style: none; margin: 8px 0 12px; padding: 0; display: grid; gap: 8px; }
+.ob-blog a { display: grid; gap: 2px; padding: 14px 16px; border: 1px solid var(--ds-line-strong); border-radius: 8px; text-decoration: none; background: var(--ds-surface); }
+.ob-blog a b { color: var(--ds-text); font-size: 15.5px; }
+.ob-blog a small { color: var(--ds-text-3); font-size: 13px; }
+.ob-blog a:hover { border-color: var(--ds-brand); }
+.ob-toc { grid-template-columns: repeat(7, minmax(0, 1fr)); }
+.ob-toc a { font-size: 13px; padding: 8px 10px; }
+@media (max-width: 1000px) { .ob-toc { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+@media (max-width: 760px) { .ob-toc { grid-template-columns: repeat(2, minmax(0, 1fr)); } .ob-table { display: block; overflow-x: auto; } }

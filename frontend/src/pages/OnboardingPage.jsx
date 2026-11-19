@@ -1,4 +1,6 @@
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import api from '../api';
 import './OnboardingPage.css';
 
 // 신규 개발자 안내 페이지. 들어오는 주소는 /private/bomin, 화면에서는 알아보기 어려운 주소(ONBOARDING_PATH)로 바꿔 보여 준다.
@@ -19,7 +21,8 @@ export default function OnboardingPage() {
         </p>
         <nav className="ob-toc" aria-label="목차">
           {[['about', '한눈에 보기'], ['arch', '아키텍처'], ['flow', '요청 흐름'], ['stack', '기술 스택'], ['repo', '저장소 구조'],
-            ['local', '로컬 실행'], ['deploy', '배포 흐름'], ['rules', '작업 규칙'], ['first', '첫 주 체크리스트'], ['faq', '자주 막히는 곳']]
+            ['local', '로컬 실행'], ['env', '환경과 브랜치'], ['github', 'GitHub 작업 순서'], ['release', '버전과 릴리스'], ['ai', 'AI와 함께 일하기'],
+            ['rules', '작업 규칙'], ['blog', '기술 블로그'], ['first', '첫 주 체크리스트'], ['faq', '자주 막히는 곳']]
             .map(([id, label], i) => <a key={id} href={`#${id}`}><span>{String(i + 1).padStart(2, '0')}</span>{label}</a>)}
         </nav>
       </header>
@@ -126,20 +129,97 @@ VITE_API_URL=http://localhost:8080/api/v1 npm run dev`}</pre>
 cd frontend && npm run lint && npm run build`}</pre>
       </Section>
 
-      <Section id="deploy" no="07" title="브랜치와 배포 흐름">
+      <Section id="env" no="07" title="환경과 브랜치">
+        <p>나의쿠키는 같은 코드를 세 곳에서 돌립니다. 어느 브랜치가 어디로 가는지만 기억하면 됩니다.</p>
+        <table className="ob-table">
+          <thead><tr><th>환경</th><th>브랜치</th><th>주소</th><th>DB</th><th>용도</th></tr></thead>
+          <tbody>
+            <tr><td>로컬</td><td>내 작업 브랜치</td><td><code>localhost:5173</code></td><td>내 PC의 PostgreSQL</td><td>개발하면서 바로 확인</td></tr>
+            <tr><td>스테이징(개발 서버)</td><td><code>dev</code></td><td><a href="https://staging.mycookie.dev">staging.mycookie.dev</a></td><td><code>cookie_staging</code></td><td>합친 기능을 실제와 같은 환경에서 시험</td></tr>
+            <tr><td>운영(실제 서비스)</td><td><code>master</code></td><td><a href="https://mycookie.dev">mycookie.dev</a></td><td><code>cookie_prod</code></td><td>사용자가 쓰는 진짜 사이트</td></tr>
+          </tbody>
+        </table>
+        <Note>
+          다른 저장소의 <code>main</code> 브랜치가 우리 저장소에서는 <b><code>master</code></b>입니다. 이름만 다르고 역할(운영에 나가는 기준 브랜치)은 같습니다.
+          <code>master</code>에 직접 커밋하지 않고, 항상 PR로 합칩니다.
+        </Note>
+        <h3>브랜치 이름</h3>
+        <table className="ob-table">
+          <thead><tr><th>이름</th><th>언제</th></tr></thead>
+          <tbody>
+            <tr><td><code>feature/기능-이름</code></td><td>새 기능, 개선 (예: <code>feature/naver-login</code>)</td></tr>
+            <tr><td><code>fix/고칠-것</code></td><td>버그 수정 (예: <code>fix/spa-fallback</code>)</td></tr>
+            <tr><td><code>codex/...</code>, <code>claude/...</code></td><td>AI 에이전트가 만든 작업 브랜치. 사람 브랜치와 똑같이 PR로 리뷰합니다</td></tr>
+          </tbody>
+        </table>
+      </Section>
+
+      <Section id="github" no="08" title="GitHub으로 일하는 순서">
         <ol className="ob-steps">
-          <li>작업마다 GitHub 이슈를 만들고, <b>기능 브랜치</b>에서 작업합니다.</li>
-          <li>이슈를 연결한 PR을 <code>dev</code>로 올립니다. 리뷰 후 병합하면 <b>스테이징</b>(<code>staging.mycookie.dev</code>)에 반영됩니다.</li>
-          <li>스테이징에서 확인이 끝나면 <code>dev</code> → <code>master</code> PR로 <b>운영</b>(<code>mycookie.dev</code>)에 배포합니다.</li>
-          <li>홈서버의 <code>deploy.sh</code>가 5분마다 새 커밋을 확인해서, 백엔드나 화면 코드가 바뀐 쪽만 다시 빌드합니다. 빌드가 실패하면 이전 버전이 계속 돕니다.</li>
+          <li><b>이슈 등록:</b> 할 일을 GitHub 이슈로 먼저 적습니다. <b>New issue</b>에서 양식(기능과 개선, 버그와 문제)을 고르면 제목 머리말과 라벨이 붙습니다.</li>
+          <li><b>브랜치 만들기:</b> 최신 <code>dev</code>에서 <code>feature/...</code>나 <code>fix/...</code> 브랜치를 만듭니다.</li>
+          <li><b>커밋:</b> 한 커밋에 한 가지 일만 담고, 메시지는 한글로 "무엇을 왜"를 첫 줄에 씁니다.</li>
+          <li><b>PR 올리기:</b> <code>dev</code>로 PR을 엽니다. 양식(관련 이슈, 무엇을, 왜, 확인한 것)을 채우고 <code>closes #이슈번호</code>를 적으면 머지할 때 이슈가 자동으로 닫힙니다.</li>
+          <li><b>리뷰와 머지:</b> 리뷰를 받고 고칠 것을 반영한 뒤 머지합니다. 5분 안에 스테이징에 자동 배포됩니다.</li>
+          <li><b>운영 배포:</b> 스테이징에서 확인이 끝나면 <code>dev</code> → <code>master</code> PR을 열어 머지합니다. 5분 안에 운영에 반영됩니다.</li>
+          <li><b>기록:</b> 사용자가 체감하는 변화면 패치노트를 쓰고, 버전 태그와 릴리스를 붙입니다(다음 항목).</li>
+        </ol>
+        <h3>용어 정리</h3>
+        <table className="ob-table">
+          <thead><tr><th>용어</th><th>뜻</th><th>나의쿠키에서는</th></tr></thead>
+          <tbody>
+            <tr><td>이슈(Issue)</td><td>할 일, 버그, 아이디어를 적는 게시글</td><td>제목 머리말 <code>[기능]</code> <code>[개선]</code> <code>[버그]</code> <code>[인프라]</code>, 같은 이름의 라벨</td></tr>
+            <tr><td>브랜치(Branch)</td><td>본 코드에서 갈라져 나온 작업 공간</td><td><code>dev</code>에서 따서 작업</td></tr>
+            <tr><td>커밋(Commit)</td><td>코드 변경을 저장한 한 단위</td><td>한글 메시지, 한 커밋 한 가지</td></tr>
+            <tr><td>PR(Pull Request)</td><td>"내 브랜치를 합쳐 주세요" 요청. 리뷰와 토론이 여기서 일어남</td><td>양식 채우기, <code>closes #번호</code></td></tr>
+            <tr><td>머지(Merge)</td><td>PR을 받아들여 브랜치를 합치는 것</td><td><code>dev</code> 머지 → 스테이징, <code>master</code> 머지 → 운영</td></tr>
+            <tr><td>태그(Tag)</td><td>특정 커밋에 붙이는 이름표(버전 번호)</td><td><code>v0.21.0</code>처럼 <code>v</code>로 시작</td></tr>
+            <tr><td>릴리스(Release)</td><td>태그에 설명(바뀐 점)을 붙여 공개한 기록</td><td>패치노트 내용을 그대로 옮김</td></tr>
+          </tbody>
+        </table>
+        <h3>급하게 운영을 고쳐야 할 때(핫픽스)</h3>
+        <p><code>master</code>에서 <code>fix/...</code> 브랜치를 따서 고치고 <code>master</code>로 PR을 올립니다. 머지한 뒤에는 <code>master</code>를 <code>dev</code>에도 합쳐서 두 브랜치가 어긋나지 않게 합니다.</p>
+      </Section>
+
+      <Section id="release" no="09" title="버전, 태그, 릴리스">
+        <p>버전은 <b>패치노트의 버전 번호</b>(<code>frontend/src/data/patchNotes.js</code>)를 기준으로 하고, 같은 번호로 태그와 릴리스를 만듭니다.</p>
+        <table className="ob-table">
+          <thead><tr><th>바뀐 것</th><th>번호 올리는 법</th><th>예</th></tr></thead>
+          <tbody>
+            <tr><td>새 기능이나 눈에 띄는 개선을 묶어 배포</td><td>가운데 숫자 +1, 끝은 0</td><td><code>0.23.0</code> → <code>0.24.0</code></td></tr>
+            <tr><td>버그 수정, 작은 고침만</td><td>끝 숫자 +1</td><td><code>0.24.0</code> → <code>0.24.1</code></td></tr>
+            <tr><td>정식 1.0 같은 큰 전환</td><td>앞 숫자 +1</td><td><code>0.x</code> → <code>1.0.0</code></td></tr>
+          </tbody>
+        </table>
+        <h3>릴리스 만드는 법</h3>
+        <ol className="ob-steps">
+          <li>패치노트 맨 위에 새 버전을 추가하고 <code>master</code>까지 배포합니다.</li>
+          <li>배포된 <code>master</code> 커밋에 태그를 붙입니다.
+            <pre className="ob-code">{`git checkout master && git pull
+git tag -a v0.24.0 -m "v0.24.0: 바뀐 점 한 줄"
+git push origin v0.24.0`}</pre>
+          </li>
+          <li>GitHub 저장소 → <b>Releases</b> → <b>Draft a new release</b> → 방금 태그 선택 → 제목은 버전, 본문은 패치노트 내용 → <b>Publish</b>.</li>
         </ol>
         <Note>
-          사용자가 체감하는 기능을 바꿨다면 패치노트(<code>frontend/src/data/patchNotes.js</code>, <code>changelog.js</code>)도 함께 고칩니다.
-          인프라, 문서, 리팩터링은 패치노트에 넣지 않습니다.
+          지금 상태: 태그와 릴리스는 <code>v0.9.0</code>부터 <code>v0.21.0</code>까지 있습니다. 패치노트의 <code>0.22.0</code>, <code>0.23.0</code>은 아직 태그가 없으니,
+          다음 릴리스 때 함께 정리합니다. 오래된 <code>v1.0</code>, <code>v2.0.260921</code>은 예전 프로젝트 시절 태그라 지금 번호 체계와 상관없습니다.
         </Note>
       </Section>
 
-      <Section id="rules" no="08" title="작업 규칙">
+      <Section id="ai" no="10" title="AI와 함께 일하기">
+        <p>나의쿠키는 AI 코딩 도구(Claude Code, Codex)를 적극적으로 씁니다. 사람과 AI가 같은 규칙으로 일하도록 정해 둔 것들입니다.</p>
+        <ul className="ob-list">
+          <li><b>규칙은 <code>CLAUDE.md</code>에:</b> AI는 작업 전에 이 파일을 읽습니다. 지켜야 할 규칙이 생기면 여기에 적습니다.</li>
+          <li><b>AI 작업도 PR로:</b> AI가 만든 브랜치(<code>claude/...</code>, <code>codex/...</code>)도 사람이 리뷰한 뒤 머지합니다. 테스트 결과와 확인한 화면을 PR에 남기게 합니다.</li>
+          <li><b>커밋 꼬리말:</b> AI가 만든 커밋에는 <code>Co-Authored-By</code> 줄이 붙습니다. 누가 만든 코드인지 기록으로 남깁니다.</li>
+          <li><b>비밀값은 AI에게도 주지 않기:</b> 토큰, 비밀번호, DB 주소는 대화창에 붙이지 않습니다. 서버의 <code>.env</code>에 직접 넣고, AI에게는 "넣었다"는 사실만 알려 줍니다.</li>
+          <li><b>결과는 직접 확인:</b> AI가 "됐다"고 해도 테스트, 빌드, 실제 화면으로 다시 확인합니다.</li>
+        </ul>
+        <p>AI 워크플로우를 실제로 어떻게 쓰는지는 아래 기술 블로그에 글로 정리해 나갑니다.</p>
+      </Section>
+
+      <Section id="rules" no="11" title="작업 규칙">
         <ul className="ob-list">
           <li><b>온프레미스 전제:</b> 특정 클라우드 전용 서비스에 묶이지 않습니다. PostgreSQL, SMTP처럼 직접 띄울 수 있는 것만 씁니다.</li>
           <li><b>메모리 8GB 예산:</b> 홈서버 한 대에서 모두 돌아야 합니다. 새 컨테이너를 넣을 때는 <code>mem_limit</code> 합계를 확인합니다.</li>
@@ -151,7 +231,12 @@ cd frontend && npm run lint && npm run build`}</pre>
         </ul>
       </Section>
 
-      <Section id="first" no="09" title="첫 주 체크리스트">
+      <Section id="blog" no="12" title="기술 블로그">
+        <p>나의쿠키를 만들면서 겪은 일(홈서버 구축, AI 워크플로우 등)을 기술 블로그에 정리합니다. 새 글을 올리면 이 목록에 자동으로 나타납니다.</p>
+        <BlogPosts />
+      </Section>
+
+      <Section id="first" no="13" title="첫 주 체크리스트">
         <ul className="ob-check">
           <li>GitHub 저장소 접근 권한 받기 (비공개 저장소)</li>
           <li><a href={doc('CLAUDE.md')}>CLAUDE.md</a>와 <a href={doc('README.md')}>README.md</a> 읽기</li>
@@ -168,7 +253,7 @@ cd frontend && npm run lint && npm run build`}</pre>
         </div>
       </Section>
 
-      <Section id="faq" no="10" title="자주 막히는 곳">
+      <Section id="faq" no="14" title="자주 막히는 곳">
         <dl className="ob-faq">
           <dt>Gradle이 실행되지 않아요</dt>
           <dd>JDK 25 이상이면 Gradle 8.7이 동작하지 않습니다. JDK 17이나 21로 바꿔 주세요.</dd>
@@ -189,6 +274,34 @@ cd frontend && npm run lint && npm run build`}</pre>
       </footer>
     </div>
   );
+}
+
+const BLOG_HOME = 'https://cookie.tistory.com';
+// 첫 글은 블로그 목록을 못 불러와도 항상 보이게 둔다
+const PINNED = [{ title: '홈서버 구축하기: 서버 구축부터 DB 마이그레이션까지', url: `${BLOG_HOME}/258`, category: '인프라', publishedAt: '' }];
+
+// 서버가 티스토리 RSS를 읽어 30분마다 갱신한다(/api/v1/blog/posts)
+function BlogPosts() {
+  const [state, setState] = useState({ loading: true, posts: [] });
+  useEffect(() => {
+    let alive = true;
+    api.get('/blog/posts', { timeout: 15000 })
+      .then(({ data }) => { if (alive) setState({ loading: false, posts: Array.isArray(data?.posts) ? data.posts : [] }); })
+      .catch(() => { if (alive) setState({ loading: false, posts: [] }); });
+    return () => { alive = false; };
+  }, []);
+  const posts = [...state.posts];
+  for (const pin of PINNED) if (!posts.some(p => p.url === pin.url)) posts.push(pin);
+  return <>
+    {state.loading && <p className="ob-muted" role="status">글 목록을 불러오는 중…</p>}
+    <ul className="ob-blog">
+      {posts.map(post => <li key={post.url}>
+        <a href={post.url} target="_blank" rel="noopener noreferrer"><b>{post.title}</b>
+          <small>{[post.category, post.publishedAt].filter(Boolean).join(', ') || '기술 블로그'}</small></a>
+      </li>)}
+    </ul>
+    <p><a href={BLOG_HOME} target="_blank" rel="noopener noreferrer">블로그 전체 보기 →</a></p>
+  </>;
 }
 
 function Section({ id, no, title, children }) {

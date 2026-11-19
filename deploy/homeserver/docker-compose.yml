@@ -44,6 +44,8 @@ x-backend: &backend
     MAIL_FROM: ${MAIL_FROM:-}
     NEWSLETTER_DAILY_LIMIT: ${NEWSLETTER_DAILY_LIMIT:-400}
     NEWSLETTER_CRON: ${NEWSLETTER_CRON:-0 30 8 * * MON-FRI}
+    # 신규 개발자 안내 페이지에 보여 줄 기술 블로그 RSS
+    BLOG_RSS_URL: ${BLOG_RSS_URL:-https://cookie.tistory.com/rss}
   healthcheck:
     test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:8080/api/v1/categories"]
     interval: 30s
