@@ -3,6 +3,7 @@ package com.csstudy.backend;
 import com.csstudy.backend.entity.Feedback;
 import com.csstudy.backend.repository.FeedbackRepository;
 import com.csstudy.backend.service.GitHubIssueClient;
+import com.csstudy.backend.service.MattermostService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -35,11 +36,12 @@ class FeedbackTest {
     @Autowired ObjectMapper json;
     @Autowired FeedbackRepository feedbacks;
     @MockitoBean GitHubIssueClient github;
+    @MockitoBean MattermostService mattermost;
 
     @BeforeEach
     void setUp() {
         feedbacks.deleteAll();
-        reset(github);
+        reset(github, mattermost);
     }
 
     private ResultActions send(Map<String, String> body) throws Exception {
@@ -67,6 +69,7 @@ class FeedbackTest {
 
         Feedback saved = feedbacks.findAll().get(0);
         assertThat(saved.getIssueNumber()).isEqualTo(42);
+        verify(mattermost, never()).postNotice(anyString());   // 웹훅이 꺼져 있으면 알리지 않는다
         assertThat(saved.getTitle()).isEqualTo("채점이 이상해요 @someone");
     }
 
@@ -83,6 +86,18 @@ class FeedbackTest {
                 .andExpect(status().isOk());
         verify(github).create(startsWith("[기능개발] "), anyString(), eq(List.of("기능개발")));
         assertThat(feedbacks.count()).isEqualTo(2);
+    }
+
+    @Test
+    void kafkaOffProcessesInRequestAndNotifiesMattermostWithoutMentions() throws Exception {
+        when(github.enabled()).thenReturn(false);
+        when(mattermost.enabled()).thenReturn(true);
+        send(Map.of("kind", "feature", "title", "알림 @channel", "content", "있으면 좋아요 @here", "visitorId", "v-5"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.queued").doesNotExist());
+        ArgumentCaptor<String> text = ArgumentCaptor.forClass(String.class);
+        verify(mattermost).postNotice(text.capture());
+        assertThat(text.getValue()).contains("새 기능 요청").doesNotContain("@channel").doesNotContain("@here");
+        assertThat(feedbacks.findAll().get(0).getNotifiedAt()).isNotNull();
     }
 
     @Test

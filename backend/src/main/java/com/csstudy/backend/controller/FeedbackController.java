@@ -4,7 +4,8 @@ import com.csstudy.backend.entity.Feedback;
 import com.csstudy.backend.entity.User;
 import com.csstudy.backend.repository.FeedbackRepository;
 import com.csstudy.backend.service.AuthService;
-import com.csstudy.backend.service.GitHubIssueClient;
+import com.csstudy.backend.service.FeedbackEvents;
+import com.csstudy.backend.service.FeedbackProcessor;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,10 +16,10 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
-// 건의사항 · 버그 제보. 저장한 뒤 GitHub 이슈로 올려 운영자가 바로 개발 · 수정할 수 있게 한다.
+// 건의사항 · 버그 제보. 저장한 뒤 GitHub 이슈로 올리고 Mattermost로 알려 운영자가 바로 개발 · 수정할 수 있게 한다.
+// Kafka를 켜면 이벤트만 넣고 바로 답하며, 이슈와 알림은 소비자가 처리한다(FeedbackEvents, FeedbackProcessor).
 // 제목 앞에 [기능개발] · [버그]를 붙이고 같은 이름의 라벨을 단다
 @Slf4j
 @RestController
@@ -27,12 +28,13 @@ import java.util.Map;
 public class FeedbackController {
 
     private static final ZoneId KST = ZoneId.of("Asia/Seoul");
-    private static final Map<String, String> KINDS = Map.of("feature", "기능개발", "bug", "버그");
+    private static final Map<String, String> KINDS = FeedbackProcessor.KINDS;
     static final int PER_VISITOR_PER_DAY = 5;
     static final int SITE_PER_DAY = 100;
 
     private final FeedbackRepository feedbacks;
-    private final GitHubIssueClient github;
+    private final FeedbackEvents events;
+    private final FeedbackProcessor processor;
     private final AuthService authService;
 
     @PostMapping
@@ -63,39 +65,18 @@ public class FeedbackController {
 
         Map<String, Object> out = new LinkedHashMap<>();
         out.put("ok", true);
-        if (github.enabled()) {
+        if (events.publish(saved.getId())) {
+            out.put("queued", true);
+        } else {
             try {
-                String label = KINDS.get(kind);
-                GitHubIssueClient.Issue issue = github.create("[" + label + "] " + neutralize(title), issueBody(saved), List.of(label));
-                saved.setIssueNumber(issue.number());
-                saved.setIssueUrl(issue.url());
-                feedbacks.save(saved);
-                out.put("issue", issue.number());
+                Feedback done = processor.process(saved.getId());
+                if (done != null && done.getIssueNumber() != null) out.put("issue", done.getIssueNumber());
             } catch (Exception e) {
-                // 이슈 생성이 실패해도 제보는 DB에 남아 있으므로 사용자에게는 성공으로 알린다
-                log.warn("제보 #{} GitHub 이슈 생성 실패: {}", saved.getId(), e.getMessage());
+                // 이슈 생성이나 알림이 실패해도 제보는 DB에 남아 있으므로 사용자에게는 성공으로 알린다
+                log.warn("제보 #{} 처리 실패: {}", saved.getId(), e.getMessage());
             }
         }
         return ResponseEntity.ok(out);
-    }
-
-    // 공개 저장소에 올라가므로 사용자가 쓴 글은 인용으로 감싸고, @멘션 · 이슈 참조가 실제로 걸리지 않게 막는다.
-    // 닉네임 · 방문자 ID 같은 개인 정보는 넣지 않는다
-    static String issueBody(Feedback f) {
-        StringBuilder b = new StringBuilder();
-        b.append("> ").append(neutralize(f.getContent()).replace("\n", "\n> ")).append("\n\n");
-        b.append("| 항목 | 값 |\n|---|---|\n");
-        b.append("| 화면 | ").append(f.getPath() == null ? "-" : "`" + f.getPath().replace("`", "") + "`").append(" |\n");
-        b.append("| 브라우저 | ").append(f.getUserAgent() == null ? "-" : neutralize(f.getUserAgent()).replace("|", "/")).append(" |\n");
-        b.append("| 로그인 | ").append(f.getNickname() == null ? "아니요" : "예").append(" |\n");
-        b.append("| 접수 번호 | ").append(f.getId()).append(" |\n\n");
-        b.append("_나의쿠키 사이트의 건의 · 제보 양식으로 접수된 이슈입니다._");
-        return b.toString();
-    }
-
-    private static String neutralize(String s) {
-        // 보이지 않는 문자를 끼워 @사용자 · #번호 링크가 걸리지 않게 한다
-        return s.replace("@", "@​").replace("#", "#​");
     }
 
     private static String oneLine(String s) {

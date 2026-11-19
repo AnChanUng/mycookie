@@ -53,6 +53,10 @@ public class Feedback {
     @Column(name = "issue_url", length = 300)
     private String issueUrl;
 
+    // Mattermost로 알린 시각(다시 처리할 때 두 번 알리지 않는다)
+    @Column(name = "notified_at")
+    private Instant notifiedAt;
+
     @Column(name = "feedback_day", nullable = false)
     private LocalDate day;
 

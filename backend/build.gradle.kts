@@ -41,6 +41,10 @@ dependencies {
     implementation("org.springframework.security:spring-security-crypto")
     // 비밀번호 재설정 · 이메일 인증 메일. 온프레미스 SMTP 서버를 그대로 쓴다
     implementation("org.springframework.boot:spring-boot-starter-mail")
+    // 홈서버: 접속자 수, 요청 제한 같은 짧게 사는 상태는 Redis에, 제보 처리 같은 비동기 작업은 Kafka 이벤트로
+    // (REDIS_ENABLED, KAFKA_ENABLED가 꺼져 있으면 지금처럼 메모리와 바로 처리로 동작한다)
+    implementation("org.springframework.boot:spring-boot-starter-data-redis")
+    implementation("org.springframework.kafka:spring-kafka")
 
     // RAG 학습 도우미: ChromaDB 벡터 저장소, OpenAI 호환 임베딩(로컬 TEI의 bge-m3), Gemini 답변 생성, RAG 어드바이저
     implementation("org.springframework.ai:spring-ai-starter-vector-store-chroma")
@@ -58,6 +62,7 @@ dependencies {
     // 동시성 검증은 운영과 같은 PostgreSQL에서 한다. Docker가 없으면 해당 테스트는 건너뛴다
     testImplementation("org.testcontainers:junit-jupiter")
     testImplementation("org.testcontainers:postgresql")
+    testImplementation("org.testcontainers:kafka")
 }
 
 tasks.withType<Test> {

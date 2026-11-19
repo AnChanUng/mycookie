@@ -11,6 +11,8 @@ CS 전공지식, 기술면접, 코딩테스트, 실전 대결, 학습 기록을 
 ![React](https://img.shields.io/badge/React_19-20232A?logo=react&logoColor=61DAFB)
 ![Spring Boot](https://img.shields.io/badge/Spring_Boot_3.5-6DB33F?logo=springboot&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL_18-4169E1?logo=postgresql&logoColor=white)
+![Redis](https://img.shields.io/badge/Redis_7.4-FF4438?logo=redis&logoColor=white)
+![Kafka](https://img.shields.io/badge/Kafka_3.9-231F20?logo=apachekafka&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker_Compose-2496ED?logo=docker&logoColor=white)
 ![Cloudflare](https://img.shields.io/badge/Cloudflare_Tunnel-F38020?logo=cloudflare&logoColor=white)
 ![CI](https://github.com/AnChanUng/mycookie/actions/workflows/ci.yml/badge.svg)
@@ -43,7 +45,7 @@ CS 전공지식, 기술면접, 코딩테스트, 실전 대결, 학습 기록을 
 | 실전 | 1:1 대결, 단체전, 기업별 예상문제집, 주제별 통합 문제집 |
 | 학습 기록 | 오답노트, 북마크, 계정 간 기록 동기화, 티어와 승급 시험, 오늘의 CS |
 | 커뮤니티 | 실시간 채팅, 친구 신청과 1:1 대화 |
-| 알림 | 매일 CS 문제를 Mattermost와 메일로 받기 |
+| 알림 | 매일 CS 문제를 Mattermost와 메일로 받기, 건의와 버그 제보는 GitHub 이슈와 Mattermost 알림으로 |
 
 ## 기술 스택
 
@@ -51,19 +53,22 @@ CS 전공지식, 기술면접, 코딩테스트, 실전 대결, 학습 기록을 
 | --- | --- |
 | 화면 | React 19, React Router 7, Vite |
 | API | Java 17, Spring Boot 3.5, Spring Data JPA, 소셜 로그인 OAuth 2.0(Google, Kakao, Naver, GitHub) |
-| 데이터 | PostgreSQL 18, 테스트 H2와 Testcontainers |
-| 실시간 | SSE(채팅, 승급 알림) |
+| 데이터 | PostgreSQL 18, Redis 7.4(접속자 수, 요청 제한), 테스트 H2와 Testcontainers |
+| 메시징, 실시간 | Kafka 3.9(제보 이벤트, 재시도와 DLT), SSE(채팅, 승급 알림) |
 | 인프라 | 홈서버(WSL2 Ubuntu 24.04), Docker Compose, nginx, Cloudflare Tunnel, Tailscale |
 | 운영 | GitHub Actions CI, systemd 자동 배포, gpg와 rclone 암호화 백업 |
-| 테스트 | JUnit 5, Testcontainers, k6 부하 테스트 |
+| 테스트 | JUnit 5, Testcontainers(PostgreSQL, Redis, Kafka), k6 부하 테스트 |
 
 ## 인프라 구조도
 
 ![나의쿠키 인프라 구조도](docs/architecture/architecture.png)
 
-- 노트북 한 대(**홈서버**, 메모리 8GB)에서 화면(nginx), 백엔드, PostgreSQL을 Docker Compose로 운영과 스테이징을 함께 돌립니다.
+- 노트북 한 대(**홈서버**, 메모리 8GB)에서 화면(nginx), 백엔드, PostgreSQL, Redis, Kafka를 Docker Compose로 운영과 스테이징을 함께 돌립니다(메모리 한도 합계 약 3.4GB).
 - 공유기 포트를 열지 않고 **Cloudflare Tunnel**로 외부 요청을 받습니다. 도메인, HTTPS 인증서, 방화벽도 Cloudflare가 맡습니다.
 - 화면과 API를 같은 주소에서 nginx가 나눠 보내서 CORS가 필요 없습니다.
+- **Redis:** 접속자 수, 채팅 참여자, IP별 요청 제한처럼 짧게 사는 상태를 둡니다. 백엔드를 다시 띄워도 남고, 여러 대로 늘려도 같은 값을 봅니다.
+- **Kafka:** 건의, 버그 제보가 들어오면 이벤트만 넣고 바로 답합니다. 소비자가 GitHub 이슈를 만들고 Mattermost로 알리며, 실패하면 다시 시도한 뒤 DLT에 남깁니다.
+- Redis나 Kafka가 멈춰도 사이트는 멈추지 않도록 메모리 값과 바로 처리로 대신합니다.
 - **자동 배포:** 5분마다 `master`, `dev`를 확인해 바뀐 쪽(화면 또는 백엔드)만 다시 빌드합니다.
 - **백업:** 매일 04:00 DB를 덤프해 홈서버에 보관하고, gpg(AES-256)로 암호화해 Google Drive에도 올립니다(3-2-1 원칙).
 

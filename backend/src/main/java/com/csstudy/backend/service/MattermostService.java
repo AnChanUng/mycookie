@@ -57,6 +57,17 @@ public class MattermostService {
         postDaily(LocalDate.now(SEOUL));
     }
 
+    /** 운영 알림(제보 접수 등)을 채널에 올린다. 꺼져 있으면 false, 보내다 실패하면 예외를 던진다(호출한 쪽이 다시 시도). */
+    public boolean postNotice(String text) {
+        if (!enabled()) return false;
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        http.postForEntity(webhookUrl, new HttpEntity<>(Map.of("username", "나의쿠키", "text", text), headers), String.class);
+        return true;
+    }
+
+    public String baseUrl() { return baseUrl; }
+
     /** 보냈으면 true. 이미 보낸 날이거나 꺼져 있으면 false. */
     public boolean postDaily(LocalDate date) {
         if (!enabled()) return false;

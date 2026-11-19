@@ -49,8 +49,8 @@ export default function OnboardingPage() {
         <p>노트북 한 대(홈서버)에서 화면, 백엔드, DB를 Docker Compose로 돌립니다. 바깥 요청은 Cloudflare 터널로만 들어오고, 공유기 포트는 하나도 열지 않습니다.</p>
         <figure className="ob-figure">
           <a className="ob-diagram-wrap" href={archImg} target="_blank" rel="noopener noreferrer">
-            <img className="ob-diagram" src={archImg} width="1680" height="1110" loading="lazy"
-              alt="사용자 요청이 Cloudflare와 cloudflared를 거쳐 홈서버의 nginx, Spring Boot, PostgreSQL로 이어지고, 자동 배포와 암호화 백업이 Google Drive로 이어지는 구조" />
+            <img className="ob-diagram" src={archImg} width="1680" height="1265" loading="lazy"
+              alt="사용자 요청이 Cloudflare와 cloudflared를 거쳐 홈서버의 nginx, Spring Boot, PostgreSQL, Redis, Kafka로 이어지고, 자동 배포와 암호화 백업이 Google Drive로 이어지는 구조" />
           </a>
           <figcaption>그림 1. 전체 구조. 회색은 사용자 요청, 보라는 외부 연동, 파란 점선은 배포, 초록은 백업 흐름입니다. 그림을 누르면 크게 볼 수 있어요(원본: <code>docs/architecture/build.py</code>)</figcaption>
         </figure>
@@ -61,14 +61,21 @@ export default function OnboardingPage() {
             <tr><td>cloudflared</td><td>홈서버가 먼저 Cloudflare로 연결을 걸어 두는 터널 프로그램. 주소(mycookie.dev, staging.mycookie.dev)에 따라 운영, 스테이징 nginx로 나눠 보냅니다</td></tr>
             <tr><td>nginx (화면 서버)</td><td>React 빌드 파일을 내보내고, <code>/api/</code> 요청은 같은 주소 그대로 백엔드에 넘깁니다(CORS 불필요)</td></tr>
             <tr><td>Spring Boot (백엔드)</td><td>로그인, 채점, 대결, 학습 기록, 채팅(SSE), 메일 발송</td></tr>
-            <tr><td>PostgreSQL 18</td><td>운영 DB <code>cookie_prod</code>와 스테이징 DB <code>cookie_staging</code>. 계정도 따로입니다</td></tr>
+            <tr><td>PostgreSQL 18</td><td>운영 DB <code>cookie_prod</code>와 스테이징 DB <code>cookie_staging</code>. 계정도 따로입니다. 사라지면 안 되는 데이터는 모두 여기에 둡니다</td></tr>
+            <tr><td>Redis 7.4</td><td>지금 공부 중인 사람 수, 채팅 참여자, IP별 요청 제한처럼 <b>짧게 사는 상태</b>. 백엔드를 다시 띄워도 남고, 여러 대로 늘려도 같은 값을 봅니다. 운영과 스테이징은 키 앞머리(<code>prod:</code>, <code>staging:</code>)로 나눕니다. 디스크에 남기지 않습니다</td></tr>
+            <tr><td>Kafka 3.9 (KRaft)</td><td>제보가 들어오면 <code>prod.feedback.created</code> 이벤트를 넣고 바로 답합니다. 소비자가 GitHub 이슈를 만들고 Mattermost로 알립니다. 실패하면 10초 간격으로 3번 다시 시도하고, 그래도 안 되면 <code>.dlt</code> 토픽에 남깁니다</td></tr>
             <tr><td>자동 배포</td><td>systemd 타이머가 5분마다 <code>deploy.sh</code>를 돌려 새 커밋을 받고, 바뀐 쪽(화면 또는 백엔드)만 다시 빌드합니다</td></tr>
             <tr><td>백업</td><td>매일 새벽 4시 덤프, 홈서버 안 14일 + 구글 드라이브(gpg 암호화) 30일</td></tr>
             <tr><td>Tailscale</td><td>집 밖에서 홈서버에 SSH로 들어가는 사설 네트워크</td></tr>
             <tr><td>GitHub Actions</td><td>PR마다 백엔드 테스트, 화면 린트와 빌드, 데이터 검사를 돌립니다(<code>.github/workflows/ci.yml</code>)</td></tr>
-            <tr><td>외부 서비스</td><td>Mattermost(매일 CS 알림 웹훅), 소셜 로그인(Google, Kakao, Naver, GitHub), 티스토리 RSS(기술 블로그 목록)</td></tr>
+            <tr><td>외부 서비스</td><td>Mattermost(매일 CS 알림, 제보 알림 웹훅), 소셜 로그인(Google, Kakao, Naver, GitHub), 티스토리 RSS(기술 블로그 목록)</td></tr>
           </tbody>
         </table>
+
+        <Note>
+          Redis나 Kafka가 멈춰도 사이트는 멈추지 않습니다. Redis가 안 되면 각 백엔드의 메모리 값으로, Kafka가 안 되면 제보를 요청 안에서 바로 처리합니다.
+          로컬 개발과 테스트에서는 둘 다 꺼진 채(<code>REDIS_ENABLED</code>, <code>KAFKA_ENABLED</code>가 false) 예전처럼 돌아갑니다.
+        </Note>
 
         <h3>메모리 예산 (8GB)</h3>
         <p>모든 컨테이너에 <code>mem_limit</code>을 걸어 둡니다. 새 컨테이너를 넣기 전에 이 합계부터 확인하세요.</p>
@@ -78,8 +85,10 @@ export default function OnboardingPage() {
             <tr><td>backend-prod</td><td>1GB (JVM 힙은 75%까지)</td></tr>
             <tr><td>backend-staging</td><td>768MB</td></tr>
             <tr><td>postgres</td><td>768MB</td></tr>
+            <tr><td>kafka</td><td>640MB (JVM 힙 256MB)</td></tr>
+            <tr><td>redis</td><td>96MB (데이터 64MB, 넘치면 오래된 키부터 지움)</td></tr>
             <tr><td>frontend-prod, frontend-staging</td><td>각 64MB</td></tr>
-            <tr><td><b>합계</b></td><td><b>약 2.7GB</b> (나머지는 Windows, WSL, 빌드에 씁니다)</td></tr>
+            <tr><td><b>합계</b></td><td><b>약 3.4GB</b> (나머지는 Windows, WSL, 빌드에 씁니다)</td></tr>
           </tbody>
         </table>
       </Section>

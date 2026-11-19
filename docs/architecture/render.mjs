@@ -16,7 +16,7 @@ const face = fontDir
   }).join('')
   : '';
 const browser = await chromium.launch();
-const page = await browser.newPage({ viewport: { width: 1680, height: 1110 }, deviceScaleFactor: 2 });
+const page = await browser.newPage({ viewport: { width: 1680, height: 1265 }, deviceScaleFactor: 2 });
 await page.setContent(`<style>${face}html,body{margin:0}</style>${svg}`);
 await page.evaluate(() => document.fonts.ready);
 await page.locator('svg').first().screenshot({ path: join(here, 'architecture.png') });

@@ -51,8 +51,8 @@ deploy() {
 }
 
 mkdir -p "$ROOT/pgdata18" "$ROOT/backups"
-# DB가 먼저 떠 있어야 백엔드가 붙는다(처음 한 번은 postgres-init.sh가 운영 · 스테이징 DB를 만든다)
-"${COMPOSE[@]}" up -d postgres
+# DB, Redis, Kafka가 먼저 떠 있어야 백엔드가 붙는다(처음 한 번은 postgres-init.sh가 운영 · 스테이징 DB를 만든다)
+"${COMPOSE[@]}" up -d postgres redis kafka
 deploy app "$PROD_BRANCH" prod production
 deploy staging "$STAGING_BRANCH" staging preview
 # 터널 토큰을 넣기 전에는 그램 안(localhost:8080)에서만 확인한다
