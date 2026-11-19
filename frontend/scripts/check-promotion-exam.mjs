@@ -20,12 +20,12 @@ try {
   api.defaults.adapter=async config=>{
     assert.ok(config.headers['X-Visitor-Id']);
     let data;
-    if(config.url==='/membership') data={tier:'GOLD',division:paper.result?4:5,tierName:paper.result?'골드 Ⅳ':'골드 Ⅴ',nickname:'시험응시자',solvedCount:0};
+    if(config.url==='/membership') data={tier:'GOLD',division:paper.result?4:5,tierName:paper.result?'금 쿠키 Ⅳ':'금 쿠키 Ⅴ',nickname:'시험응시자',solvedCount:0};
     else if(config.url==='/promotion-exams'){starts++;data=paper;}
     else if(config.url.endsWith('/submit')){
       submits++;lastRequest=JSON.parse(config.data);
       if(failSubmit)throw new Error('offline');
-      data={correct:29,total:30,score:96.7,passed:true,promoted:true,tierName:'골드 Ⅳ',review:questions.map(q=>({id:q.id,answer:1,selected:lastRequest.answers[q.id],correct:true,explanation:'해설'}))};
+      data={correct:29,total:30,score:96.7,passed:true,promoted:true,tierName:'금 쿠키 Ⅳ',review:questions.map(q=>({id:q.id,answer:1,selected:lastRequest.answers[q.id],correct:true,explanation:'해설'}))};
       paper.result=data;
     } else data=paper;
     return {data,status:200,statusText:'OK',headers:{},config};
@@ -33,7 +33,7 @@ try {
   const mount=async()=>{await act(async()=>{view=TestRenderer.create(React.createElement(MemoryRouter,null,React.createElement(React.Fragment,null,React.createElement(Menu),React.createElement(Page))));});};
   const button=label=>view.root.findAllByType('button').find(b=>text(b).includes(label));
   await mount();await act(async()=>{await button('시험 시작').props.onClick();});
-  assert.equal(view.root.findAllByProps({'aria-label':'등급 골드 Ⅴ'}).length,1);
+  assert.equal(view.root.findAllByProps({'aria-label':'등급 금 쿠키 Ⅴ'}).length,1);
   assert.equal(starts,1);assert.equal(view.root.findAllByType('fieldset').length,30);
   assert.equal(button('시험 제출').props.disabled,true);
   assert.equal(view.root.findAllByProps({className:'promotion-review'}).length,0);
@@ -49,12 +49,12 @@ try {
   await act(async()=>{await view.root.findByType('form').props.onSubmit({preventDefault(){}});});
   assert.equal(submits,2);assert.equal(Object.keys(lastRequest.answers).length,30);
   assert.equal(lastRequest.score,undefined);
-  assert.ok(text(view.toJSON()).includes('골드 Ⅳ 승급 완료'));
-  assert.equal(view.root.findAllByProps({'aria-label':'등급 골드 Ⅳ'}).length,1);
+  assert.ok(text(view.toJSON()).includes('금 쿠키 Ⅳ 승급 완료'));
+  assert.equal(view.root.findAllByProps({'aria-label':'등급 금 쿠키 Ⅳ'}).length,1);
   assert.equal(view.root.findAllByProps({className:'promotion-review'}).length,30);
   await act(()=>view.unmount());await mount();
-  assert.ok(text(view.toJSON()).includes('골드 Ⅳ 승급 완료'));
-  assert.equal(view.root.findAllByProps({'aria-label':'등급 골드 Ⅳ'}).length,1);
+  assert.ok(text(view.toJSON()).includes('금 쿠키 Ⅳ 승급 완료'));
+  assert.equal(view.root.findAllByProps({'aria-label':'등급 금 쿠키 Ⅳ'}).length,1);
   assert.equal(starts,1);
   await act(()=>view.unmount());view=null;
   assert.deepEqual(errors,[]);

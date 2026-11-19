@@ -54,6 +54,7 @@ public class CriticalErrorAlerts {
     private final int threshold;
     private final Duration cooldown;
     private final String prefix;
+    private final String grafanaUrl;
     private final Deque<Event> events = new ArrayDeque<>();
     private final Map<String, Instant> localCooldown = new ConcurrentHashMap<>();
     private Clock clock = Clock.systemUTC();
@@ -65,7 +66,8 @@ public class CriticalErrorAlerts {
                                @Value("${app.redis.key-prefix:local:}") String prefix,
                                @Value("${app.alert.enabled:true}") boolean enabled,
                                @Value("${app.alert.error-threshold:10}") int threshold,
-                               @Value("${app.alert.cooldown-minutes:30}") int cooldownMinutes) {
+                               @Value("${app.alert.cooldown-minutes:30}") int cooldownMinutes,
+                               @Value("${app.alert.grafana-url:}") String grafanaUrl) {
         this.mattermost = mattermost;
         this.gemini = gemini;
         this.redis = redisEnabled ? redis.getIfAvailable() : null;
@@ -73,6 +75,7 @@ public class CriticalErrorAlerts {
         this.enabled = enabled;
         this.threshold = Math.max(1, threshold);
         this.cooldown = Duration.ofMinutes(Math.max(1, cooldownMinutes));
+        this.grafanaUrl = grafanaUrl == null ? "" : grafanaUrl.trim().replaceAll("/+$", "");
     }
 
     void useClock(Clock clock) { this.clock = clock; }
@@ -150,6 +153,7 @@ public class CriticalErrorAlerts {
         String message = "#### :rotating_light: [긴급] " + title + "\n"
                 + gemini.summarize(evidence).map(s -> "**🤖 Gemini 요약** (AI 추측이 섞일 수 있어요)\n" + s + "\n\n").orElse("")
                 + "**📎 원본 증거**\n" + evidence
+                + logsLink()
                 + "\n\n_같은 문제는 " + cooldown.toMinutes() + "분 동안 다시 알리지 않아요._";
         try {
             mattermost.postNotice(message);
@@ -157,6 +161,13 @@ public class CriticalErrorAlerts {
             release(key);   // 다음 확인 때 다시 보낸다
             log.warn("긴급 오류 알림을 보내지 못했습니다({})", e.getClass().getSimpleName());
         }
+    }
+
+    // Grafana가 있으면 최근 30분 운영 ERROR 로그로 바로 가는 링크(팀원은 Tailscale로 연다)
+    private String logsLink() {
+        if (grafanaUrl.isEmpty()) return "";
+        return "\n\n[📊 Grafana에서 최근 30분 운영 ERROR 로그 보기](" + grafanaUrl
+                + "/d/mycookie-logs?var-environment=prod&var-service=backend&var-level=ERROR&from=now-30m&to=now)";
     }
 
     // 많이 난 순서로 3개까지. 메시지는 개인정보를 가리고 200자로 자른다

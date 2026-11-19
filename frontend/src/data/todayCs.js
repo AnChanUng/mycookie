@@ -40,11 +40,11 @@ export const FACTS = [
   { t: 'Balanced BST', re: /AVL|레드|Red|이진 ?탐색 ?트리|균형 트리|BST/i, s: 'AVL은 balance factor를 ±1로 엄격히 유지해 탐색이 빠르고, Red-Black tree는 느슨한 균형으로 삽입 · 삭제 시 rotation이 적다. 둘 다 O(log n)을 보장한다.' },
   { t: 'Sorting', re: /정렬/i, not: /위상/, s: 'quick sort는 평균 O(n log n) · 최악 O(n²)에 in-place지만 unstable, merge sort는 항상 O(n log n)에 stable이지만 O(n) 추가 공간, heap sort는 O(n log n)에 in-place지만 unstable이다. 비교 정렬의 하한은 Ω(n log n).' },
   { t: 'Shortest Path', re: /최단 경로|다익스트라|벨만|플로이드/i, s: 'Dijkstra는 음수 가중치가 없을 때 priority queue로 O(E log V), Bellman-Ford는 음수 간선과 음수 cycle 검출까지 O(VE), Floyd-Warshall은 all-pairs를 DP로 O(V³)에 구한다.' },
-  { t: 'MST', re: /신장 트리|MST|프림|크루스칼|Prim|Kruskal/i, s: 'Kruskal은 간선을 정렬해 union-find로 cycle을 피하며 고르고(O(E log E)), Prim은 정점 집합을 넓혀 가며 최소 간선을 고른다(O(E log V)). 둘 다 cut property에 근거한 greedy다.' },
+  { t: 'MST', re: /신장 트리|MST|프림|크루스칼|Prim|Kruskal/i, more: /그래프/, s: 'Kruskal은 간선을 정렬해 union-find로 cycle을 피하며 고르고(O(E log E)), Prim은 정점 집합을 넓혀 가며 최소 간선을 고른다(O(E log V)). 둘 다 cut property에 근거한 greedy다.' },
   { t: 'Dynamic Programming', re: /동적 계획|분할 정복|탐욕|설계 기법/i, s: 'optimal substructure와 overlapping subproblems가 있을 때 부분 문제의 해를 memoization(top-down)이나 tabulation(bottom-up)으로 저장해 재계산을 없앤다.' },
 
   // 보안
-  { t: '대칭키 · 공개키 · 하이브리드', re: /대칭키|공개키|RSA|AES|DES/i, s: '대칭키(AES)는 빠르지만 key distribution이 문제이고, 공개키(RSA · ECC)는 느리지만 키 교환과 서명이 된다. 그래서 공개키로 세션 키를 합의하고 본문은 대칭키로 암호화한다.' },
+  { t: '대칭키 · 공개키 · 하이브리드', re: /대칭키|공개키|RSA|AES|DES|암호 알고리즘|암호 방식|^정보보호·암호$/i, s: '대칭키(AES)는 빠르지만 key distribution이 문제이고, 공개키(RSA · ECC)는 느리지만 키 교환과 서명이 된다. 그래서 공개키로 세션 키를 합의하고 본문은 대칭키로 암호화한다.' },
   { t: 'Digital Signature · PKI', re: /전자서명|PKI|인증서/i, s: '메시지 hash를 개인키로 서명하고 공개키로 검증해 integrity · authentication · non-repudiation을 얻는다. 공개키의 주인은 CA가 서명한 X.509 인증서의 chain of trust로 보증한다.' },
   { t: 'Password 저장', re: /솔트|비밀번호|패스워드|해시 함수/i, s: '사용자별 salt를 붙여 rainbow table을 무력화하고, bcrypt · scrypt · Argon2 같은 key stretching 함수로 brute force 비용을 높인다. 빠른 범용 hash(SHA-256) 한 번은 부적합하다.' },
   { t: 'Injection · XSS · CSRF', re: /인젝션|XSS|CSRF|SQL 삽입/i, s: 'SQL injection은 prepared statement로, XSS는 출력 escaping과 CSP로, CSRF는 SameSite 쿠키와 CSRF token으로 막는다. 셋 다 신뢰할 수 없는 입력이 실행 문맥에 들어가는 문제다.' },
@@ -83,12 +83,15 @@ export function factForDay(day) {
 }
 export function quizForDay(fact, day, questions) {
   const seen = new Set();
-  const pool = questions.filter(q => {
+  const pick = re => questions.filter(q => {
     const topic = q.topic.split(' · ')[0];
     const fingerprint = JSON.stringify([q.q, q.code || '', q.o]);
-    if (!fact.re.test(topic) || fact.not?.test(topic) || seen.has(fingerprint)) return false;
+    if (!re.test(topic) || fact.not?.test(topic) || seen.has(fingerprint)) return false;
     seen.add(fingerprint); return true;
   }).sort((a, b) => a.id.localeCompare(b.id, 'en'));
   const seed = [...fact.t].reduce((value, char) => Math.imul(value, 31) + char.charCodeAt(0) | 0, day);
-  return shuffled(pool, seed).slice(0, QUIZ_SIZE);
+  const quiz = shuffled(pick(fact.re), seed).slice(0, QUIZ_SIZE);
+  // 딱 맞는 문제가 5개보다 적은 주제는 같은 단원(fact.more) 문제로 나머지를 채운다
+  if (quiz.length < QUIZ_SIZE && fact.more) quiz.push(...shuffled(pick(fact.more), seed).slice(0, QUIZ_SIZE - quiz.length));
+  return quiz;
 }

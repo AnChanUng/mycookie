@@ -15,10 +15,10 @@ try{
  const {default:Page}=await server.ssrLoadModule('/src/pages/ChanungPage.jsx');
  const {default:api}=await server.ssrLoadModule('/src/api.js');api.get=async()=>({data:{available:true}});
  const {CHANUNG_QUESTIONS:qs,CHANUNG_CATEGORIES:cats}=await server.ssrLoadModule('/src/data/chanung.js');
- assert.deepEqual(cats,['인성','자소서꼬리질문','기술']);assert.equal(qs.length,43);
+ assert.deepEqual(cats,['인성','자소서꼬리질문','기술']);assert.equal(qs.length,46);
  for(const id of ['cu-etl-concept','cu-cloud-concept','cu-secure-coding-concept','cu-testing-concept','cu-deployment-concept'])assert.ok(!qs.some(q=>q.id===id),'generic knowledge removed');
  const concepts=qs.filter(q=>q.id==='cu-rag'||q.id.endsWith('-concept'));
- assert.equal(concepts.length,27);assert.equal(new Set(concepts.map(q=>q.topic)).size,6);
+ assert.equal(concepts.length,29);assert.equal(new Set(concepts.map(q=>q.topic)).size,6);
  for(const id of ['cu-tokenization-concept','cu-finetuning-concept','cu-transformer-concept','cu-tool-calling-concept','cu-cost-spike-concept'])assert.ok(concepts.some(q=>q.id===id));
  const mount=async()=>{await act(async()=>{view=TestRenderer.create(React.createElement(MemoryRouter,{initialEntries:['/chanung']},React.createElement(Page)));});};
  await mount();
@@ -35,7 +35,7 @@ try{
  for(const id of ['cu-intro-programs','cu-answer-quality','cu-high-traffic-concept','cu-inference-scaling-concept'])assert.ok(!qs.some(q=>q.id===id));
  const bank=JSON.parse(await (await import('node:fs/promises')).readFile('../backend/src/main/resources/interview-bank.json','utf8'));
  assert.deepEqual(bank,qs.map(({id,category,question,answer})=>({id,category,question,answer})),'backend answers stay in sync');
- assert.equal(view.root.findAllByType('article').length,16);
+ assert.equal(view.root.findAllByType('article').length,17);
  for(const q of qs)assert.equal(view.root.findByProps({id:`answer-${q.id}`}).props.hidden,true);
  assert.equal(view.root.findAllByProps({'aria-label':'음성 답변 연습'}).length,1);
  assert.ok(!view.root.findByProps({className:'chanung-concept-review'}).props.open);
@@ -62,19 +62,19 @@ try{
  assert.equal(view.root.findByProps({id:'hint-pf-rag-stack-2'}).props.hidden,true);
  await act(async()=>view.root.findByProps({id:'draft-pf-rag-stack-1'}).props.onChange({target:{value:'내 프로젝트 설명'}}));
  const click=async label=>{const b=view.root.findAllByType('button').find(n=>text(n)===label);assert.ok(b,label);await act(async()=>b.props.onClick());};
- await click('자기소개');assert.equal(view.root.findAllByType('article').length,16);assert.ok(scrolled.includes('cu-intro'));
+ await click('자기소개');assert.equal(view.root.findAllByType('article').length,17);assert.ok(scrolled.includes('cu-intro'));
  const draft=()=>view.root.findByProps({id:'draft-cu-intro'});
  await act(async()=>draft().props.onChange({target:{value:'내 답변'}}));
  await act(async()=>view.unmount());await mount();assert.equal(draft().props.value,'내 답변');assert.equal(view.root.findByProps({id:'draft-pf-rag-stack-1'}).props.value,'내 프로젝트 설명');
  assert.equal(new Set(view.root.findAll(n=>typeof n.type==='string'&&n.props.id).map(n=>n.props.id)).size,view.root.findAll(n=>typeof n.type==='string'&&n.props.id).length,'unique element IDs');
  const complete=()=>view.root.findByProps({'aria-label':'자기소개 학습 완료'});
- await act(async()=>complete().props.onChange());assert.equal(view.root.findAllByType('article').length,15);
+ await act(async()=>complete().props.onChange());assert.equal(view.root.findAllByType('article').length,16);
  assert.ok(!view.root.findAllByType('button').some(n=>text(n)==='자기소개'));
- await act(async()=>view.unmount());await mount();assert.equal(view.root.findAllByType('article').length,15);
+ await act(async()=>view.unmount());await mount();assert.equal(view.root.findAllByType('article').length,16);
  const toggle=view.root.findByProps({className:'notes-filters'}).findAllByType('input').find(n=>n.props.type==='checkbox');
- await act(async()=>toggle.props.onChange({target:{checked:true}}));assert.equal(view.root.findAllByType('article').length,16);
+ await act(async()=>toggle.props.onChange({target:{checked:true}}));assert.equal(view.root.findAllByType('article').length,17);
  await act(async()=>complete().props.onChange());
- await act(async()=>view.root.findByType('select').props.onChange({target:{value:'인성'}}));assert.equal(view.root.findAllByType('article').length,8);
+ await act(async()=>view.root.findByType('select').props.onChange({target:{value:'인성'}}));assert.equal(view.root.findAllByType('article').length,9);
  await act(async()=>view.root.findByProps({type:'search'}).props.onChange({target:{value:'없는질문xyz'}}));assert.equal(view.root.findAllByType('article').length,0);
  console.log('PASS: ordered interview flow, trimmed questions, hidden answers, drafts, completion and filters');
 }finally{if(view)await act(async()=>view.unmount());await server.close();}

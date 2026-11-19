@@ -41,6 +41,11 @@
 }
 .fb-field input { height: 44px; }
 .fb-field textarea { resize: vertical; min-height: 160px; }
+.fb-field textarea.fb-short { min-height: 64px; }
+.fb-attach { display: grid; gap: var(--ds-s2); padding: var(--ds-s3); border-radius: var(--ds-r-md); background: var(--ds-surface-2, var(--ds-brand-soft)); font-size: var(--ds-fs-small); color: var(--ds-text-2); }
+.fb-attach label { display: flex; gap: var(--ds-s2); align-items: flex-start; cursor: pointer; }
+.fb-attach ul { margin: 0; padding-left: var(--ds-s5); display: grid; gap: 2px; font-size: var(--ds-fs-caption); color: var(--ds-text-3); }
+.fb-attach code { font-size: inherit; overflow-wrap: anywhere; }
 .fb-field input:focus, .fb-field textarea:focus { outline: none; border-color: var(--ds-brand); box-shadow: 0 0 0 3px var(--ds-brand-soft); }
 .fb-count { justify-self: end; font-weight: 400; font-size: var(--ds-fs-caption); color: var(--ds-text-3); }
 .fb-note { margin: 0; font-size: var(--ds-fs-caption); line-height: 1.6; color: var(--ds-text-3); }

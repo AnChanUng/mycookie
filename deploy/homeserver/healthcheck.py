@@ -130,6 +130,9 @@ def main():
                 text += f"**🤖 Gemini 요약** (AI 추측이 섞일 수 있어요)\n{summary}\n\n"
             text += f"**📎 컨테이너 상태**\n```\n{ps.strip()[:1500]}\n```\n"
             text += "바로 확인: `sudo /srv/devcookie/app/deploy/homeserver/compose.sh logs --tail 100 backend-prod`"
+            grafana = env("GRAFANA_URL").rstrip("/")
+            if grafana:
+                text += f"\n[📊 Grafana에서 최근 30분 로그 보기]({grafana}/d/mycookie-logs?var-environment=prod&var-environment=shared&from=now-30m&to=now)"
             try:
                 post(webhook, {"username": "나의쿠키", "text": text})
                 state["alerted"] = True

@@ -13,7 +13,8 @@ for(const fact of FACTS){
  assert.equal(selected.length,5,fact.t);
  assert.equal(new Set(selected.map(q=>q.id)).size,5);
  assert.equal(new Set(selected.map(q=>JSON.stringify([q.q,q.code||'',q.o]))).size,5);
- for(const q of selected){const topic=q.topic.split(' · ')[0];assert.ok(fact.re.test(topic));assert.ok(!fact.not?.test(topic));}
+ for(const q of selected){const topic=q.topic.split(' · ')[0];assert.ok(fact.re.test(topic)||fact.more?.test(topic),fact.t+' '+topic);assert.ok(!fact.not?.test(topic));}
+ assert.ok(selected.filter(q=>fact.re.test(q.topic.split(' · ')[0])).length>=Math.min(4,selected.length),'backfill only fills the gap');
  assert.deepEqual(selected,quizForDay(fact,20743,[...TOPICS.questions].reverse()),'same day selection does not depend on pool ordering');
 }
 globalThis.IS_REACT_ACT_ENVIRONMENT=true;
