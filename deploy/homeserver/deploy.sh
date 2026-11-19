@@ -4,7 +4,11 @@
 set -euo pipefail
 
 ROOT=/srv/devcookie
-REPO=https://github.com/AnChanUng/mycookie.git
+# 저장소가 비공개라 그램 전용 읽기 키(GitHub Deploy key, ~devcookie/.ssh/id_ed25519)로 SSH로 받는다
+REPO=git@github.com:AnChanUng/mycookie.git
+# 배포할 브랜치. 바꾸려면 .env에 PROD_BRANCH · STAGING_BRANCH를 넣는다(처음 시험할 때 등)
+PROD_BRANCH=$(grep -E '^PROD_BRANCH=' "$ROOT/.env" 2>/dev/null | cut -d= -f2- || true); PROD_BRANCH=${PROD_BRANCH:-master}
+STAGING_BRANCH=$(grep -E '^STAGING_BRANCH=' "$ROOT/.env" 2>/dev/null | cut -d= -f2- || true); STAGING_BRANCH=${STAGING_BRANCH:-dev}
 COMPOSE=(docker compose --project-directory "$ROOT" -f "$ROOT/app/deploy/homeserver/docker-compose.yml" --env-file "$ROOT/.env")
 FORCE=${1:-}
 
@@ -40,7 +44,7 @@ deploy() {
 mkdir -p "$ROOT/pgdata" "$ROOT/backups"
 # DB가 먼저 떠 있어야 백엔드가 붙는다(처음 한 번은 postgres-init.sh가 운영 · 스테이징 DB를 만든다)
 "${COMPOSE[@]}" up -d postgres
-deploy app master prod production
-deploy staging dev staging preview
+deploy app "$PROD_BRANCH" prod production
+deploy staging "$STAGING_BRANCH" staging preview
 "${COMPOSE[@]}" up -d cloudflared
 docker image prune -f >/dev/null
