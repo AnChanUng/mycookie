@@ -7,7 +7,7 @@
 | 화면 (`master`) | Vercel | 노트북 `frontend-prod`(nginx) → `https://mycookie.dev` |
 | 화면 (`dev`) | Vercel 미리보기 | 노트북 `frontend-staging` → `https://staging.mycookie.dev` |
 | 백엔드 | Render 운영 · 스테이징 | 노트북 `backend-prod` · `backend-staging` (화면과 같은 주소의 `/api/`) |
-| DB | Neon main · staging | 노트북 PostgreSQL 17 (`cookie_prod` · `cookie_staging`), 매일 새벽 4시 백업 |
+| DB | Neon main · staging | 노트북 PostgreSQL 18 (`cookie_prod` · `cookie_staging`), 매일 새벽 4시 백업 |
 | 외부 노출 | Vercel · Render | Cloudflare Tunnel (공유기 포트 개방 없음) |
 | 배포 | 각 서비스 자동 배포 | `deploy.sh`가 5분마다 브랜치를 확인해서 바뀐 쪽의 백엔드 · 화면을 다시 빌드 |
 
@@ -205,6 +205,7 @@ sudo -u devcookie /srv/devcookie/app/deploy/homeserver/backup.sh   # 백업이 �
 | --- | --- |
 | 로그 보기 | `docker logs -f --tail 200 devcookie-backend-prod-1` (화면: `devcookie-frontend-prod-1`, DB: `devcookie-postgres-1`) |
 | DB 접속 | `docker exec -it devcookie-postgres-1 psql -U postgres -d cookie_prod` |
+| 컨테이너 다루기 | `deploy/homeserver/compose.sh ps` · `compose.sh restart backend-prod` · `compose.sh logs -f backend-prod` |
 | 백업 기록 | `journalctl -u devcookie-backup -n 20` |
 | 배포 기록 | `journalctl -u devcookie-deploy -n 50` |
 | 바로 다시 배포 | `sudo -u devcookie /srv/devcookie/app/deploy/homeserver/deploy.sh --force` |

@@ -62,9 +62,10 @@ x-frontend: &frontend
   logging: *logging
 
 services:
-  # 운영 · 스테이징 DB를 한 서버에 따로 둔다. 데이터는 노트북 디스크(/srv/devcookie/pgdata)에 남고, backup.sh가 매일 덤프를 뜬다
+  # 운영 · 스테이징 DB를 한 서버에 따로 둔다. 데이터는 노트북 디스크(/srv/devcookie/pgdata18)에 남고, backup.sh가 매일 덤프를 뜬다
+  # 버전은 옮겨 오는 Neon(18)과 맞춘다(pg_dump는 자기보다 새 서버를 덤프하지 못한다)
   postgres:
-    image: postgres:17-alpine
+    image: postgres:18-alpine
     restart: unless-stopped
     mem_limit: 768m
     environment:
@@ -74,7 +75,7 @@ services:
       TZ: Asia/Seoul
     command: ["postgres", "-c", "shared_buffers=128MB", "-c", "effective_cache_size=384MB", "-c", "max_connections=60", "-c", "timezone=Asia/Seoul"]
     volumes:
-      - ./pgdata:/var/lib/postgresql/data
+      - ./pgdata18:/var/lib/postgresql
       - ./app/deploy/homeserver/postgres-init.sh:/docker-entrypoint-initdb.d/10-cookie.sh:ro
     healthcheck:
       test: ["CMD", "pg_isready", "-U", "postgres"]

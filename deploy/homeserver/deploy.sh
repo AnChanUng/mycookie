@@ -43,7 +43,7 @@ deploy() {
   "${COMPOSE[@]}" up -d --no-deps "backend-$tag" "frontend-$tag"
 }
 
-mkdir -p "$ROOT/pgdata" "$ROOT/backups"
+mkdir -p "$ROOT/pgdata18" "$ROOT/backups"
 # DB가 먼저 떠 있어야 백엔드가 붙는다(처음 한 번은 postgres-init.sh가 운영 · 스테이징 DB를 만든다)
 "${COMPOSE[@]}" up -d postgres
 deploy app "$PROD_BRANCH" prod production

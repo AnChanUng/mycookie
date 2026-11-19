@@ -18,7 +18,7 @@ DUMP="$ROOT/backups/neon-$WHICH-$(date '+%Y%m%d-%H%M').dump"
 mkdir -p "$ROOT/backups"
 
 echo "1/3 Neon에서 덤프 → $DUMP"
-# postgres 컨테이너의 pg_dump(17)를 쓴다. JDBC용 channel_binding 옵션은 그대로 둬도 libpq가 이해한다
+# postgres 컨테이너의 pg_dump(18)를 쓴다. JDBC용 channel_binding 옵션은 그대로 둬도 libpq가 이해한다
 "${COMPOSE[@]}" exec -T postgres pg_dump "$SRC" -Fc --no-owner --no-acl > "$DUMP.part"
 mv "$DUMP.part" "$DUMP"
 
