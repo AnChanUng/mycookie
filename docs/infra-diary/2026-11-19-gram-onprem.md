@@ -146,6 +146,13 @@ wsl --install -d Ubuntu-24.04   # 관리자 PowerShell, 재부팅 후 리눅스 
 - 실제 사이트는 아직 Vercel, Render, Neon이라 영향 없음.
 - **해결:** 복원 전에 `DROP DATABASE ... WITH (FORCE)` → `CREATE DATABASE`로 통째로 비우고, `--clean` 대신 `--exit-on-error`로 복원(restore.sh도 같게).
 
+## 11. 운영 전환 완료 (집 와이파이)
+- 고친 스크립트로 `migrate-from-neon.sh prod` 성공(오류 없음).
+- Cloudflare DNS에서 Vercel A 기록(216.198.79.1) 삭제 → 터널 Routes에 `mycookie.dev` → `http://frontend-prod:80` 추가.
+- 주의: 왼쪽 메뉴 Networking → Routes는 네트워크 경로(CIDR) 화면이라 다른 곳. 터널 상세 안의 Routes에서 추가해야 한다.
+- `curl -sI https://mycookie.dev | grep -ci x-vercel` → 0. 문제 풀이, 기록 저장 정상.
+- 남은 문제: 네이버 로그인이 네이버의 "페이지를 찾을 수 없습니다"로 끝남(확인 중).
+
 ## 남은 일
 - [ ] Windows 자동 로그인(netplwiz)
 - [ ] **이사:** `migrate-from-neon.sh prod` → 곧바로 `mycookie.dev` → `frontend-prod:80` (Vercel A 기록 대체), www → 308
