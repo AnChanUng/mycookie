@@ -66,7 +66,10 @@ class RedisStateTest {
     }
 
     @Test
-    void rateLimitIsCountedInRedis() {
+    void rateLimitIsCountedInRedis() throws InterruptedException {
+        // 1분 단위로 세므로, 분이 바뀌기 직전이면 다음 분까지 기다렸다가 센다(두 칸에 나뉘어 세지지 않게)
+        long intoMinute = System.currentTimeMillis() % 60_000;
+        if (intoMinute > 55_000) Thread.sleep(60_000 - intoMinute + 100);
         for (int i = 0; i < 15; i++) assertThat(traffic.check("1.2.3.4", "POST", "/api/v1/code/java").allowed()).isTrue();
         var blocked = traffic.check("1.2.3.4", "POST", "/api/v1/code/java");
         assertThat(blocked.allowed()).isFalse();

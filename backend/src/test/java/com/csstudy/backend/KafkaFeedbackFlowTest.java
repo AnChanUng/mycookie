@@ -19,9 +19,11 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.kafka.KafkaContainer;
 
+import java.time.Duration;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -67,8 +69,11 @@ class KafkaFeedbackFlowTest {
                 && text.contains("issues/7") && !text.contains("@channel")));
         verify(github, times(1)).create(startsWith("[버그] "), anyString(), anyList());
 
-        Feedback saved = feedbacks.findAll().stream().filter(f -> "kafka-1".equals(f.getVisitorId())).findFirst().orElseThrow();
-        assertThat(saved.getIssueNumber()).isEqualTo(7);
-        assertThat(saved.getNotifiedAt()).isNotNull();
+        // 알림을 보낸 뒤에 알린 시각을 저장하므로, 소비자 스레드가 저장을 마칠 때까지 기다린다
+        await().atMost(Duration.ofSeconds(20)).untilAsserted(() -> {
+            Feedback saved = feedbacks.findAll().stream().filter(f -> "kafka-1".equals(f.getVisitorId())).findFirst().orElseThrow();
+            assertThat(saved.getIssueNumber()).isEqualTo(7);
+            assertThat(saved.getNotifiedAt()).isNotNull();
+        });
     }
 }
