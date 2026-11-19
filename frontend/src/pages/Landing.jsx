@@ -205,18 +205,18 @@ export default function Landing() {
           <h2 id="l-team-title" data-reveal>SSAFY에서<br />시작한 팀이에요</h2>
           <div className="l-story-body">
             <p data-reveal>
-              나의쿠키는 <b>삼성 청년 SW·AI 아카데미(SSAFY)</b>에서 시작했어요. 처음에는 <b>한 사람이 혼자 운영하던 개인 사이트</b>였어요.
-              취업 준비를 하며 직접 만든 문제집을 같은 반 친구들과 함께 풀면서 조금씩 기능이 늘어났어요.
+              나의쿠키는 <b>삼성 청년 SW·AI 아카데미(SSAFY)</b>에서 시작했어요.
+              처음에는 전공시험을 준비하면서 <b>친한 형과 같이 공부하려고 만든 개인 사이트</b>였어요.
             </p>
             <p data-reveal>
-              그러다 우리 반만이 아니라 <b>SSAFY 전 캠퍼스의 교육생</b>, 그리고 <b>다른 곳에서 개발자 취업을 준비하는 분들</b>에게도
-              도움이 되고 싶어졌어요. 그래서 지금은 팀이 되어 함께 만들고 있습니다.
+              그러다 반 친구들에게도 공유하게 되었고, 우리 서비스를 더 잘 만들어 줄 <b>멋진 팀원</b>을 만나
+              지금은 <b>2명이 함께 개발</b>하고 있어요.
             </p>
           </div>
           <ul className="l-story-points">
-            <li data-reveal><b>개인 사이트로 시작</b><span>혼자 공부하려고 만든 문제집</span></li>
-            <li data-reveal><b>SSAFY 16기 대전 4반</b><span>같은 반 친구들과 함께 쓰며 다듬은 첫 사용자들</span></li>
-            <li data-reveal><b>이제는 팀으로</b><span>SSAFY 전 캠퍼스와 모든 개발자 취업 준비생을 위해</span></li>
+            <li data-reveal><b>둘이 공부하던 사이트</b><span>전공시험 준비를 친한 형과 함께</span></li>
+            <li data-reveal><b>우리 반에 공유</b><span>SSAFY 16기 대전 4반 친구들이 첫 사용자로</span></li>
+            <li data-reveal><b>2인 개발팀</b><span>서비스를 더 잘 만들어 줄 팀원과 함께</span></li>
           </ul>
         </div>
       </section>
