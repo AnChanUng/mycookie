@@ -1,28 +1,33 @@
-# 노트북 홈서버
+# 그램 온프레미스 서버
 
-Render 무료 백엔드(운영 · 스테이징)를 노트북 한 대로 옮깁니다. 잠들지 않고 월 750시간 제한도 없어집니다.
+나의쿠키의 화면 · 백엔드 · DB를 LG 그램 노트북 한 대로 옮깁니다. Vercel · Render · Neon 없이 직접 운영합니다.
 
-| 구분 | 지금 | 홈서버 |
+| 구분 | 지금 | 그램 서버 |
 | --- | --- | --- |
-| 프론트엔드 | Vercel | Vercel (그대로) |
-| 운영 백엔드 (`master`) | Render `cs-study-backend` | 노트북 `backend-prod` → `https://api.<도메인>` |
-| 스테이징 백엔드 (`dev`) | Render `cs-study-backend-staging` | 노트북 `backend-staging` → `https://api-staging.<도메인>` |
-| DB | Neon main · staging | Neon main · staging (그대로) |
-| 외부 노출 | Render | Cloudflare Tunnel (공유기 포트 개방 없음) |
-| 배포 | Render 자동 배포 | `deploy.sh`가 5분마다 브랜치를 확인해서 바뀐 서버만 다시 빌드 |
+| 화면 (`master`) | Vercel | 노트북 `frontend-prod`(nginx) → `https://mycookie.dev` |
+| 화면 (`dev`) | Vercel 미리보기 | 노트북 `frontend-staging` → `https://staging.mycookie.dev` |
+| 백엔드 | Render 운영 · 스테이징 | 노트북 `backend-prod` · `backend-staging` (화면과 같은 주소의 `/api/`) |
+| DB | Neon main · staging | 노트북 PostgreSQL 18 (`cookie_prod` · `cookie_staging`), 매일 새벽 4시 백업 |
+| 외부 노출 | Vercel · Render | Cloudflare Tunnel (공유기 포트 개방 없음) |
+| 배포 | 각 서비스 자동 배포 | `deploy.sh`가 5분마다 브랜치를 확인해서 바뀐 쪽의 백엔드 · 화면을 다시 빌드 |
 
 파일은 [`deploy/homeserver/`](../deploy/homeserver)에 있습니다.
 
 ```
-요청 → Cloudflare(HTTPS) ⇄ cloudflared(노트북이 바깥으로 연결) → backend-prod / backend-staging → Neon
+방문자 → Cloudflare(HTTPS) ⇄ cloudflared → frontend(nginx) ─┬─ 화면 파일
+                                                            └─ /api/ → backend → PostgreSQL
 ```
 
 노트북의 포트는 하나도 열지 않습니다. cloudflared가 노트북에서 Cloudflare로 바깥 연결을 만들고, 요청은 그 연결로만 들어옵니다.
+화면과 API가 같은 주소라 CORS 설정이 필요 없고, nginx가 Vercel과 같은 보안 헤더를 붙입니다(`frontend/nginx/`).
+
+메모리(8GB 기준): 백엔드 1GB + 768MB, PostgreSQL 768MB, nginx 64MB × 2, cloudflared 약 50MB. 나머지는 OS와 파일 캐시가 씁니다.
 
 ## 준비물
 
 - 8GB 이상 USB (설치 후 다시 써도 됨)
-- **Cloudflare에 연결된 도메인** 하나. 없으면 Cloudflare Registrar나 가비아 등에서 사서 네임서버를 Cloudflare로 바꿉니다(.com 기준 연 1~2만 원).
+- **Cloudflare에 연결된 도메인**: `mycookie.dev`(가비아)의 네임서버를 Cloudflare로 바꿉니다. Cloudflare에서 사이트 추가(무료 요금제) → 안내하는 네임서버 2개를 가비아 도메인 관리의 네임서버 설정에 넣습니다. 바꾸기 전에 지금 DNS 레코드(Vercel A · CNAME)가 Cloudflare에 그대로 옮겨졌는지 확인합니다.
+- **백업용 외장 디스크(권장)**: 노트북 디스크가 고장 나면 DB도 같이 사라지므로 백업 복사본을 둘 곳
 - 노트북 안의 자료 백업. **설치하면 디스크가 전부 지워집니다.**
 
 ## 1. Ubuntu Server 설치
@@ -129,58 +134,82 @@ sudo -u devcookie nano /srv/devcookie/.env
 
 | 키 | 값 |
 | --- | --- |
-| `PROD_DATABASE_URL` | Render `cs-study-backend`에 넣어 둔 Neon **main** 연결 문자열 |
-| `STAGING_DATABASE_URL` | Render 스테이징에 넣어 둔 Neon **staging** 연결 문자열 |
+| `POSTGRES_PASSWORD` · `PROD_DB_PASSWORD` · `STAGING_DB_PASSWORD` | 각각 `openssl rand -hex 24`로 만든 값(서로 다르게, 영문 · 숫자만) |
 | `PROD_ADMIN_KEY` / `STAGING_ADMIN_KEY` | Render에 쓰던 값을 그대로 쓰거나 `openssl rand -hex 24`로 새로 만든 값(서로 다르게) |
 | `TUNNEL_TOKEN` | 6번에서 받는 토큰 |
-| `MAIL_HOST` 외 `MAIL_*` | 비밀번호 재설정 메일을 보낼 SMTP 서버. 비우면 이메일 등록과 비밀번호 찾기만 꺼집니다 |
+| `BACKUP_COPY_DIR` | 외장 디스크 마운트 경로(예: `/mnt/backup/devcookie`). 비우면 노트북 안에만 백업 |
+| `NEON_PROD_URL` · `NEON_STAGING_URL` | 8번에서 데이터를 옮길 때만 Neon 연결 문자열을 넣고, 옮긴 뒤 지웁니다 |
+| `MAIL_HOST` 외 `MAIL_*` | 메일을 보낼 SMTP 서버. 비우면 이메일 등록, 비밀번호 찾기, 학습 메일만 꺼집니다 |
 
 ## 6. Cloudflare Tunnel
 
 1. Cloudflare 대시보드 → **Zero Trust** → **Networks → Tunnels** → **Create a tunnel** → **Cloudflared**, 이름 `devcookie`.
 2. 설치 명령 화면에 나오는 `--token` 뒤의 긴 값을 복사해 `.env`의 `TUNNEL_TOKEN`에 넣습니다(설치 명령 자체는 실행하지 않습니다. compose가 cloudflared를 띄웁니다).
-3. **Public Hostnames**에 두 개를 추가합니다.
+3. **Public Hostnames**에 두 개를 추가합니다(화면 서버가 `/api/`를 백엔드로 넘기므로 백엔드는 따로 열지 않습니다).
 
 | Subdomain | Domain | Service |
 | --- | --- | --- |
-| `api` | `<도메인>` | `HTTP` · `backend-prod:8080` |
-| `api-staging` | `<도메인>` | `HTTP` · `backend-staging:8080` |
+| (비움) | `mycookie.dev` | `HTTP` · `frontend-prod:80` |
+| `staging` | `mycookie.dev` | `HTTP` · `frontend-staging:80` |
 
-DNS 레코드와 HTTPS 인증서는 Cloudflare가 알아서 만듭니다.
+DNS 레코드와 HTTPS 인증서는 Cloudflare가 알아서 만듭니다. 기존 Vercel용 A · CNAME 레코드가 있으면 터널이 만든 레코드로 바뀝니다(8번 전환 때 진행).
+`www.mycookie.dev`도 쓰려면 Cloudflare **Rules → Redirect Rules**에서 `www` → `https://mycookie.dev` 308 이동을 만듭니다.
 
 ## 7. 첫 배포와 자동 배포
 
 ```bash
-# 첫 실행: 두 이미지를 빌드하고(10분 안팎) 세 컨테이너를 띄운다
+# 첫 실행: PostgreSQL을 띄워 운영 · 스테이징 DB를 만들고, 백엔드 · 화면 이미지 4개를 빌드해서(15분 안팎) 띄운다
 sudo -u devcookie /srv/devcookie/app/deploy/homeserver/deploy.sh
 
 # 5분마다 master · dev에 새 커밋이 있는지 보고 바뀐 쪽만 다시 배포
-sudo cp /srv/devcookie/app/deploy/homeserver/systemd/devcookie-deploy.* /etc/systemd/system/
+# 매일 새벽 4시 DB 백업
+sudo cp /srv/devcookie/app/deploy/homeserver/systemd/devcookie-*.{service,timer} /etc/systemd/system/
 sudo systemctl daemon-reload
-sudo systemctl enable --now devcookie-deploy.timer
+sudo systemctl enable --now devcookie-deploy.timer devcookie-backup.timer
 ```
 
 확인:
 
 ```bash
-docker ps                                   # 세 컨테이너가 Up (healthy)
-curl -s https://api.<도메인>/api/v1/categories | head -c 200
-curl -s https://api-staging.<도메인>/api/v1/categories | head -c 200
+docker ps                                                   # 6개 컨테이너가 Up (healthy)
+curl -s https://staging.mycookie.dev/api/v1/categories | head -c 200
+sudo -u devcookie /srv/devcookie/app/deploy/homeserver/backup.sh   # 백업이 만들어지는지 한 번 확인
 ```
 
-## 8. 전환 (홈서버가 잘 도는 것을 며칠 본 뒤에)
+## 8. 데이터 옮기기와 전환 (스테이징으로 며칠 확인한 뒤에)
 
-1. 스테이징 먼저: Vercel → Settings → Environment Variables의 `VITE_STAGING_API_URL`(Preview)을 `https://api-staging.<도메인>/api/v1`로 바꾸고 `dev` 미리보기를 다시 배포합니다.
-2. 운영: [`frontend/src/api.js`](../frontend/src/api.js)의 `BACKEND`를 `https://api.<도메인>/api/v1`로 바꾸는 PR을 `dev` → `master`로 배포합니다.
-3. 정리: [`keep-backend-awake.yml`](../.github/workflows/keep-backend-awake.yml) 워크플로를 지우고, Render 백엔드 두 개를 Suspend했다가 문제가 없으면 삭제합니다. [`render.yaml`](../render.yaml)과 [staging.md](staging.md)의 Render 설명도 함께 고칩니다.
+1. **스테이징 먼저:** `.env`에 `NEON_STAGING_URL`을 넣고 옮긴 뒤 `https://staging.mycookie.dev`에서 로그인 · 학습 기록을 확인합니다.
+   ```bash
+   sudo -u devcookie /srv/devcookie/app/deploy/homeserver/migrate-from-neon.sh staging
+   ```
+2. **운영 옮기기:** 사람이 적은 시간에 `NEON_PROD_URL`을 넣고 옮깁니다. 옮기는 동안 Render 운영 백엔드에 새로 쌓인 기록은 따라오지 않으므로, 옮기기 직전에 Vercel 사이트에 점검 안내를 띄우거나(`frontend/src/maintenance.js`) 바로 4번으로 넘어갑니다.
+   ```bash
+   sudo -u devcookie /srv/devcookie/app/deploy/homeserver/migrate-from-neon.sh prod
+   ```
+3. **확인:** 터널 Public Hostname의 `mycookie.dev`가 `frontend-prod:80`을 가리키는지 보고, 브라우저에서 로그인 · 문제 풀이 · 채팅을 확인합니다.
+4. **주소 전환:** Cloudflare DNS에서 `mycookie.dev`가 터널을 가리키게 합니다(터널 Public Hostname을 저장하면 자동). 몇 분 안에 노트북으로 들어옵니다.
+5. **소셜 로그인:** 구글 · 카카오 · 깃허브 콘솔의 리디렉션 주소는 `https://mycookie.dev/auth/callback` 그대로입니다. 스테이징을 쓰려면 `https://staging.mycookie.dev/auth/callback`을 추가합니다.
+6. **정리(일주일쯤 문제없으면):** `.env`의 `NEON_*` 줄 삭제, Render 백엔드 두 개와 Vercel 프로젝트 Suspend, Neon 프로젝트는 마지막 덤프를 받아 둔 뒤 삭제. [`keep-backend-awake.yml`](../.github/workflows/keep-backend-awake.yml)과 [`render.yaml`](../render.yaml)을 지우고 [staging.md](staging.md)를 고칩니다.
 
-CORS 허용 주소는 프론트엔드(Vercel) 기준이라 백엔드 주소가 바뀌어도 그대로 둡니다.
+되돌리기: 4번 전에는 아무것도 바뀌지 않습니다. 4번 뒤에 문제가 생기면 Cloudflare DNS를 Vercel 레코드로 되돌리면 됩니다(그동안 노트북 DB에 쌓인 기록은 Neon에 없습니다).
+
+## 백업과 복구
+
+- `backup.sh`가 매일 새벽 4시 운영 · 스테이징 DB를 `/srv/devcookie/backups`에 덤프하고 14일치를 남깁니다. `BACKUP_COPY_DIR`이 있으면 같은 파일을 외장 디스크에도 복사합니다.
+- **집 밖 사본(구글 드라이브):** `sudo .../setup-offsite-backup.sh`를 한 번 실행하면, 매일 백업을 비밀번호로 암호화(gpg, AES-256)해서 구글 드라이브 `mycookie-backups` 폴더에 올리고 30일치만 남깁니다. 비밀번호는 `/srv/devcookie/.backup-passphrase`에 있고, **따로 적어 두지 않으면 그램이 고장 났을 때 클라우드 백업을 열 수 없습니다.**
+  - 클라우드에서 되살리기: `rclone copy gdrive:mycookie-backups/<파일>.gpg .` → `gpg -d <파일>.gpg > <파일>` (비밀번호 입력) → `restore.sh`
+- 되살리기: `restore.sh /srv/devcookie/backups/cookie_prod-<날짜>.dump cookie_prod`
+- **되살리기 시험(한 달에 한 번):** `sudo -u devcookie .../restore-test.sh` → 구글 드라이브의 최신 운영 백업을 받아 풀고 스테이징 DB에 되살린 뒤 회원 수를 보여 줍니다. 운영 DB는 건드리지 않습니다. (그 백엔드를 잠깐 멈추고 덤프 내용으로 바꿉니다)
+- 노트북을 새로 설치할 때: 이 문서대로 다시 설치 → `deploy.sh`로 빈 DB를 만든 뒤 외장 디스크의 최신 덤프로 `restore.sh`.
 
 ## 운영
 
 | 할 일 | 명령 |
 | --- | --- |
-| 로그 보기 | `docker logs -f --tail 200 devcookie-backend-prod-1` |
+| 로그 보기 | `docker logs -f --tail 200 devcookie-backend-prod-1` (화면: `devcookie-frontend-prod-1`, DB: `devcookie-postgres-1`) |
+| DB 접속 | `docker exec -it devcookie-postgres-1 psql -U postgres -d cookie_prod` |
+| 컨테이너 다루기 | `deploy/homeserver/compose.sh ps` · `compose.sh restart backend-prod` · `compose.sh logs -f backend-prod` |
+| 백업 기록 | `journalctl -u devcookie-backup -n 20` |
 | 배포 기록 | `journalctl -u devcookie-deploy -n 50` |
 | 바로 다시 배포 | `sudo -u devcookie /srv/devcookie/app/deploy/homeserver/deploy.sh --force` |
 | 메모리 · CPU | `docker stats --no-stream` |
@@ -188,6 +217,6 @@ CORS 허용 주소는 프론트엔드(Vercel) 기준이라 백엔드 주소가 �
 
 - 빌드가 실패하면 `deploy.sh`가 멈추고 돌던 컨테이너는 이전 이미지로 계속 돕니다.
 - 재부팅하면 Docker가 컨테이너를 다시 올리고(`restart: unless-stopped`), 타이머가 2분 뒤 배포를 확인합니다.
-- DB는 Neon에 그대로 있으므로 노트북이 망가져도 데이터는 남습니다. 다시 설치하고 이 문서대로 하면 복구됩니다.
+- DB도 노트북에 있으므로 **외장 디스크 백업이 유일한 안전장치**입니다. 한 달에 한 번 `restore.sh`로 스테이징에 되살려 백업이 정말 쓸 수 있는지 확인합니다.
 - 정전 · 공유기 재부팅 · 노트북 고장 동안은 사이트가 멈춥니다. 집 인터넷 업로드 속도와 통신사 약관(가정용 회선의 서버 운영 제한)도 한 번 확인해 두세요.
 - RAG 스택(ChromaDB · 임베딩 · 재정렬 모델)은 RAM 8GB에서 백엔드 두 개와 함께 돌리기 어려워 넣지 않았습니다.

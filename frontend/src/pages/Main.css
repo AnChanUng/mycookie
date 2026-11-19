@@ -52,13 +52,6 @@
 a.ds-card:hover .mn-more .line-icon { transform: translateX(3px); }
 
 /* 학습 현황: 칸을 나눈 한 줄 */
-.mn-statbar { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)) minmax(0, 1.6fr); border: 1px solid var(--ds-line-strong); border-radius: var(--ds-r-lg); background: var(--ds-surface); overflow: hidden; }
-.mn-stat { display: grid; gap: 4px; align-content: start; padding: 18px 22px; border-left: 1px solid var(--ds-line-strong); color: var(--ds-text); text-decoration: none; }
-.mn-stat:first-child { border-left: none; }
-.mn-stat span { font-size: 13px; color: var(--ds-text-3); }
-.mn-stat b { font-size: 26px; font-weight: 800; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; }
-.mn-stat small { font-size: 13px; color: var(--ds-text-2); }
-.mn-stat--link:hover { background: var(--ds-surface-2); }
 
 /* 카테고리 카드(아이콘 · 제목 · 설명 · 화살표) */
 .mn-cat { flex-direction: row; align-items: center; gap: 16px; padding: 22px 20px; min-height: 92px; }
@@ -78,8 +71,6 @@ a:hover > .mn-chev { color: var(--ds-brand); transform: translateX(3px); }
 /* 태블릿 */
 @media (max-width: 1024px) {
   .mn-cards, .mn-cards--4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .mn-statbar { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .mn-stat--link { grid-column: 1 / -1; border-left: none; border-top: 1px solid var(--ds-line-strong); }
 }
 
 /* 휴대폰 */
@@ -97,8 +88,6 @@ a:hover > .mn-chev { color: var(--ds-brand); transform: translateX(3px); }
   .mn-cards--4 .mn-chev { display: none; }
   .mn-feature { min-height: 0; padding: 18px; }
   .mn-cat { padding: 16px; min-height: 0; }
-  .mn-stat { padding: 14px 16px; }
-  .mn-stat b { font-size: 22px; }
   .mn-intro { flex-direction: column; align-items: flex-start; margin-top: 40px; }
 }
 @media (prefers-reduced-motion: reduce) {

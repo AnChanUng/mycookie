@@ -60,6 +60,6 @@ class PromotionBroadcastTest {
         verifyNoInteractions(events);
         notices.announce("user:1",below,promoted);
         verify(events).publishEvent(argThat((Object value)->value instanceof PromotionNoticeService.Promoted event
-                && event.notice().tierName().equals("다이아 Ⅴ")&&event.notice().nickname().equals("nickname")));
+                && event.notice().tierName().equals("다이아 쿠키 Ⅴ")&&event.notice().nickname().equals("nickname")));
     }
 }

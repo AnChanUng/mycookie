@@ -181,20 +181,6 @@ export default function Main() {
         <div className="mn-cards">{DEV_STUDY.map(item => <Category key={item.to} {...item} />)}</div>
       </Section>
 
-      {/* 학습 현황: 한 문제라도 푼 뒤에만 보여 준다(처음 온 사람에게 0만 늘어놓지 않는다) */}
-      {learning?.solved > 0 && <Section id="mn-stats" title="내 학습 현황" more={{ to: '/stats', label: '자세히 보기' }}>
-        <div className="mn-statbar">
-          <Stat label="이번 주 푼 문제" value={learning.week} />
-          <Stat label="정답률" value={learning.rate != null ? `${learning.rate}%` : '–'} />
-          <Stat label="누적" value={learning.solved.toLocaleString()} />
-          <Link to="/weak" className="mn-stat mn-stat--link">
-            <span>다시 풀 오답</span>
-            <b>{learning.wrongOpen || 0}</b>
-            <small>{learning.weak?.[0] ? `약한 주제: ${learning.weak[0].name} ${learning.weak[0].rate}%` : '풀수록 약한 주제를 알려 드려요'}</small>
-          </Link>
-        </div>
-      </Section>}
-
       <Section id="mn-practice" title="전공필기" more={{ to: '/exam', label: '전체 보기' }}>
         <div className="mn-cards">{PRACTICE.map(item => <Category key={item.to} {...item} />)}</div>
       </Section>
@@ -212,10 +198,6 @@ export default function Main() {
         </div>
       </Section>
 
-      <Link to="/intro" className="mn-intro">
-        <span><small>나의쿠키가 처음이라면</small><b>개발자 취업 준비, 이제 쿠키 하나로</b></span>
-        <span className="ds-btn ds-btn--primary ds-btn--sm">서비스 소개 보기</span>
-      </Link>
     </div>
   );
 }
@@ -237,8 +219,4 @@ function Category({ to, icon, name, sub }) {
     <span className="mn-cat-text"><b>{name}</b><small>{sub}</small></span>
     <LineIcon name="chevron" size={18} className="mn-chev" />
   </Link>;
-}
-
-function Stat({ label, value }) {
-  return <div className="mn-stat"><span>{label}</span><b>{value}</b></div>;
 }

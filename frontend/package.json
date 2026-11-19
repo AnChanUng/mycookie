@@ -25,6 +25,7 @@
     "check:revised-notes": "node scripts/check-revised-notes.mjs",
     "check:promotion-exam": "node --import ./scripts/extensionless-loader.mjs scripts/check-promotion-exam.mjs",
     "check:promotion-bank": "node --import ./scripts/extensionless-loader.mjs scripts/export-promotion-bank.mjs --check",
+    "check:nginx-headers": "node scripts/export-nginx-headers.mjs --check",
     "check:web-essentials-export": "node --import ./scripts/extensionless-loader.mjs scripts/export-web-essentials.mjs --check",
     "check:duel-bank": "node --import ./scripts/extensionless-loader.mjs scripts/export-duel-bank.mjs --check",
     "check:promotion-announcements": "node --import ./scripts/extensionless-loader.mjs scripts/check-promotion-announcements.mjs",

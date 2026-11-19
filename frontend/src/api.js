@@ -11,6 +11,8 @@ export const DEPLOY_ENV = import.meta.env.VITE_DEPLOY_ENV || 'local';
 // VITE_API_URL은 로컬 개발에서만 백엔드를 바꿔 끼우는 용도다
 function baseURL() {
   if (import.meta.env.DEV && import.meta.env.VITE_API_URL) return import.meta.env.VITE_API_URL;
+  // 온프레미스(그램 서버): 화면과 API를 같은 주소에서 내보내므로 상대 경로(/api/v1)를 쓴다
+  if (import.meta.env.VITE_API_BASE) return import.meta.env.VITE_API_BASE;
   if (DEPLOY_ENV === 'preview') return STAGING;
   return BACKEND;
 }

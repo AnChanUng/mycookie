@@ -81,7 +81,7 @@ function BugHuntGame() {
     <header className="page-header">
       <Link to="/" className="back-link">← 홈으로</Link>
       <span className="bug-hunt-kicker">DEBUG CHALLENGE</span>
-      <h1>🐛 코드 범인 찾기</h1>
+      <h1>코드 범인 찾기</h1>
       <p>수상한 코드 한 줄, 그 이유까지 찾아보세요.</p>
     </header>
     {!round ? <>
@@ -153,7 +153,7 @@ function BugCase({ question: q, answer, onSubmit }) {
     {!answer ? <div className="bug-hunt-submit">
       <button type="button" className="exam-btn primary" disabled={line === null || reason === null} onClick={() => onSubmit(line, reason)}>범인 지목하기</button>
       <button type="button" className="exam-btn" aria-expanded={hint} onClick={() => setHint(value => !value)}>{hint ? '힌트 접기' : '힌트 보기'}</button>
-      {hint && <p className="bug-hunt-hint">💡 {q.hint}</p>}
+      {hint && <p className="bug-hunt-hint">힌트: {q.hint}</p>}
     </div> : <section className={`bug-hunt-review ${answer.correct ? 'correct' : ''}`} aria-label="사건 해설">
       <h3 role="status">{answer.correct ? '정확히 검거했습니다!' : '놓친 단서를 확인해 보세요.'} · {answer.points} / 20점</h3>
       <p>줄 찾기 {answer.lineCorrect ? '정답' : '오답'} · 이유 찾기 {answer.reasonCorrect ? '정답' : '오답'}</p>

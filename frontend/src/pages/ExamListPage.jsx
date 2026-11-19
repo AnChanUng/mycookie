@@ -107,7 +107,7 @@ function CompanyList({ category }) {
     <div className="fade-in">
       <div className="page-header">
         <Link to="/exam" className="back-link">← 기업별 기출문제</Link>
-        <h1>📚 {category.name}</h1>
+        <h1>{category.name}</h1>
         <p>{category.desc}</p>
       </div>
 

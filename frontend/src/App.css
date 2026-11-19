@@ -4258,6 +4258,40 @@ a.goal-exam:hover { border-color: var(--accent-blue); }
 .member-menu .tier-badge { margin-left: 0; }
 .member-menu-name { max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .member-tier-status { color: var(--text-secondary); font-size: .7rem; }
+/* 내 계정 메뉴: 버튼을 누르면 아래로 열리는 판(내 등급, 학습 현황, 바로가기, 로그아웃) */
+.member-menu-actions { position: relative; }
+button.member-menu { font: inherit; font-size: .8rem; font-weight: 700; background: var(--ds-surface); cursor: pointer; }
+button.member-menu:hover { background: var(--ds-surface-2); }
+.member-caret { display: inline-block; transition: transform .15s; }
+.member-caret.on { transform: rotate(180deg); }
+.member-panel { position: absolute; z-index: 120; top: calc(100% + 8px); right: 0; width: 300px; padding: 16px; border: 1px solid var(--ds-line-strong); border-radius: var(--ds-r-lg); background: var(--ds-surface); color: var(--ds-text); box-shadow: var(--ds-shadow-lg); text-align: left; }
+.member-panel-head { display: flex; align-items: center; gap: 10px; }
+.member-panel-head .tier-badge { margin-left: 0; flex: none; }
+.member-panel-head b { display: block; font-size: 16px; font-weight: 800; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 220px; }
+.member-panel-head small { display: block; margin-top: 2px; font-size: 12.5px; color: var(--ds-text-3); }
+.member-panel-next { margin: 10px 0 0; font-size: 13px; color: var(--ds-text-2); }
+.member-panel-next b { color: var(--ds-brand); }
+.member-panel-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); margin-top: 14px; border: 1px solid var(--ds-line); border-radius: var(--ds-r-md); background: var(--ds-surface-2); }
+.member-panel-stat { display: grid; gap: 2px; padding: 10px 4px; text-align: center; border-left: 1px solid var(--ds-line); }
+.member-panel-stat:first-child { border-left: none; }
+.member-panel-stat span { font-size: 11px; color: var(--ds-text-3); white-space: nowrap; }
+.member-panel-stat b { font-size: 17px; font-weight: 800; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
+.member-panel-empty { grid-column: 1 / -1; margin: 0; padding: 14px 12px; font-size: 13px; color: var(--ds-text-2); text-align: center; }
+.member-panel-weak { margin: 8px 2px 0; font-size: 12.5px; color: var(--ds-text-2); }
+.member-panel-links { display: grid; margin-top: 12px; padding-top: 8px; border-top: 1px solid var(--ds-line); }
+.member-panel-links a { display: flex; justify-content: space-between; align-items: center; padding: 10px 8px; border-radius: var(--ds-r-sm); color: var(--ds-text); font-size: 14px; font-weight: 600; text-decoration: none; }
+.member-panel-links a span { color: var(--ds-text-3); font-size: 18px; line-height: 1; }
+.member-panel-links a:hover, .member-panel-links a:focus-visible { background: var(--ds-surface-2); }
+.member-panel-foot { margin-top: 8px; padding-top: 12px; border-top: 1px solid var(--ds-line); }
+.member-panel-logout, .member-panel-login { display: block; width: 100%; padding: 10px; border-radius: var(--ds-r-md); font: inherit; font-size: 14px; font-weight: 700; text-align: center; text-decoration: none; cursor: pointer; box-sizing: border-box; }
+.member-panel-logout { border: 1px solid var(--ds-line-strong); background: var(--ds-surface); color: var(--ds-text-2); }
+.member-panel-logout:hover { color: var(--ds-red); border-color: var(--ds-red); }
+.member-panel-login { border: none; background: var(--ds-brand); color: #fff; }
+.member-notice { position: absolute; z-index: 120; top: calc(100% + 8px); right: 0; width: max-content; max-width: 280px; margin: 0; padding: 10px 14px; border-radius: var(--ds-r-md); background: var(--ds-text); color: var(--ds-surface); font-size: 13px; line-height: 1.5; box-shadow: var(--ds-shadow-md); }
+@media (max-width: 640px) {
+  .member-panel { position: fixed; top: 52px; left: 16px; right: 16px; width: auto; }
+  .member-notice { position: fixed; top: 52px; left: 16px; right: 16px; max-width: none; width: auto; }
+}
 #settings { scroll-margin-top: 90px; }
 #settings form { margin-top: 12px; }
 .solve-rank-title { display: flex; align-items: center; gap: 8px; }

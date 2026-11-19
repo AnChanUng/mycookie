@@ -27,16 +27,17 @@
   --accent-cyan: #06B6D4;
   --gradient-primary: linear-gradient(135deg, #6366F1 0%, #8B5CF6 50%, #A78BFA 100%);
   --gradient-hero: linear-gradient(135deg, #6366F1 0%, #8B5CF6 40%, #EC4899 100%);
-  --gradient-card: linear-gradient(135deg, rgba(99, 102, 241, 0.03) 0%, rgba(139, 92, 246, 0.03) 100%);
+  --gradient-card: none;
   --glass-bg: rgba(255, 255, 255, 0.72);
   --glass-border: rgba(255, 255, 255, 0.5);
-  --card-shadow: 0 1px 3px rgba(15, 23, 42, 0.04), 0 1px 2px rgba(15, 23, 42, 0.02);
-  --card-shadow-hover: 0 20px 40px rgba(15, 23, 42, 0.08), 0 4px 12px rgba(15, 23, 42, 0.04);
-  --card-shadow-glow: 0 8px 32px rgba(99, 102, 241, 0.12), 0 2px 8px rgba(99, 102, 241, 0.06);
-  --radius-sm: 12px;
-  --radius-md: 16px;
-  --radius-lg: 22px;
-  --radius-xl: 28px;
+  /* 웹 스타일: 그림자 대신 테두리, 덜 둥근 모서리 */
+  --card-shadow: none;
+  --card-shadow-hover: 0 4px 12px rgba(15, 23, 42, 0.06);
+  --card-shadow-glow: 0 4px 12px rgba(15, 23, 42, 0.06);
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 10px;
+  --radius-xl: 12px;
   --radius-full: 9999px;
   --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   --transition-bounce: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -143,9 +144,9 @@
   --gradient-card: linear-gradient(135deg, rgba(129, 136, 247, 0.07) 0%, rgba(167, 139, 250, 0.07) 100%);
   --glass-bg: rgba(27, 37, 55, 0.78);
   --glass-border: rgba(148, 163, 184, 0.16);
-  --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2);
-  --card-shadow-hover: 0 20px 40px rgba(0, 0, 0, 0.45), 0 4px 12px rgba(0, 0, 0, 0.3);
-  --card-shadow-glow: 0 8px 32px rgba(129, 136, 247, 0.2), 0 2px 8px rgba(129, 136, 247, 0.12);
+  --card-shadow: none;
+  --card-shadow-hover: 0 4px 12px rgba(0, 0, 0, 0.35);
+  --card-shadow-glow: 0 4px 12px rgba(0, 0, 0, 0.35);
 }
 
 :root[data-theme='dim'] {

@@ -4,6 +4,8 @@ import { EXPERIENCES, EXPERIENCE_CATEGORIES } from '../data/experiences';
 import './ExperiencePage.css';
 
 const BASE = '/p/7b92e1c4-a6d8-4f03-9c51-26de8a740bf9';
+// 검사 스크립트가 쓰는 함수라 화면 파일에서 함께 내보낸다
+// eslint-disable-next-line react-refresh/only-export-components
 export function filterExperiences(category, query, org) {
   const words = query.trim().toLocaleLowerCase().split(/\s+/).filter(Boolean);
   return EXPERIENCES.filter(e => (category === '전체' || e.category === category)

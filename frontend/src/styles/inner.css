@@ -119,3 +119,56 @@
 .exam-section .d { color: var(--ds-text-2); font-size: var(--ds-fs-small); line-height: 1.55; }
 .exam-section .d:last-child { color: var(--ds-brand); font-weight: 600; margin-top: var(--ds-s2); }
 .exam-section.coding { border-left-width: 1px; }
+
+/* ============================================================
+   전체 화면 웹 스타일 마무리(나머지 화면)
+   - 마우스를 올려도 카드가 위로 들리지 않는다. 테두리 색만 바뀐다
+   - 버튼은 알약 대신 8px 모서리(태그, 칩, 배지는 알약 그대로)
+   - 반투명 유리 카드 → 흰 면 + 얇은 테두리
+   - 빈 화면의 큰 이모지는 숨긴다
+   ============================================================ */
+:root { --glass-bg: var(--bg-primary); --glass-border: var(--ds-line-strong); }
+
+/* 들리는 효과 제거 */
+body .stats-summary-card:hover, body .category-card:hover, body .submit-btn:hover, body .stat-card:hover,
+body .difficulty-card:hover, body .grade-card:hover, body .home-menu-item:hover, body button.today-cs:hover,
+body .home-continue:hover, body .home-cta-btn.primary:hover, body .login-btn:hover, body .interview-record-btn.start:hover,
+body .exam-company-card:hover, body .exam-book:hover:not(:disabled), body .exam-mode:hover:not(:disabled),
+body .ssafy-card:hover, body .exam-company-grid.compact .exam-company-card:hover, body .cos-item:hover,
+body .mental-sos:hover, body .mental-pick button:hover, body .mental-coach-open:hover {
+  transform: none;
+  box-shadow: var(--card-shadow-hover);
+}
+body .category-card:hover, body .stat-card:hover, body .exam-company-card:hover, body .exam-book:hover:not(:disabled),
+body .exam-mode:hover:not(:disabled), body .ssafy-card:hover, body .cos-item:hover, body .home-menu-item:hover {
+  border-color: color-mix(in srgb, var(--accent-blue) 55%, transparent);
+}
+
+/* 버튼: 알약 → 8px */
+body .login-btn, body .logout-btn, body .action-btn, body .submit-btn, body .interview-cat-btn, body .interview-camera-btn,
+body .home-cta-btn, body .exam-report-open, body .lounge-join, body .ssafy-go, body .mental-coach-open, body .goal-edit,
+body .exam-btn {
+  border-radius: 8px;
+}
+
+/* 카드 그림자 정리 */
+body .today-cs, body .exam-mode, body .ssafy-card, body .home-menu-item, body .notes-detail-card { box-shadow: none; }
+
+/* 아이콘 상자: 선 아이콘 + 브랜드 색 */
+body .cs-track-icon, body .ml-task-icon {
+  border-radius: 8px;
+  background: var(--ds-surface-2);
+  color: var(--ds-brand);
+}
+
+/* 빈 화면의 큰 이모지 숨김(문구만 남긴다) */
+body .empty-icon { display: none; }
+
+/* 면접 연습 제목: 색 강조 대신 기본 제목 */
+body .interview-title { background: none; -webkit-text-fill-color: currentColor; color: var(--ds-text); }
+
+/* 정의되지 않았던 --bg-card(기본값 흰색)를 테마 바탕색에 맞춘다: 다크 모드에서 흰 상자가 튀던 문제 */
+:root { --bg-card: var(--bg-primary); }
+/* 대결 결과의 옅은 파랑, 빨강 그라데이션은 다크 모드에서 바탕만 쓴다 */
+:root[data-mode='dark'] .duel-result,
+:root[data-mode='dark'] .duel-result.loss { background: var(--bg-primary) !important; border-color: var(--border-color) !important; }

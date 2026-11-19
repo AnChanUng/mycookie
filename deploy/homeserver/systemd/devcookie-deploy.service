@@ -1,5 +1,5 @@
 [Unit]
-Description=DevCookie 백엔드 배포 (master → 운영, dev → 스테이징)
+Description=DevCookie 배포 (master → 운영, dev → 스테이징: 백엔드 · 화면)
 After=network-online.target docker.service
 Wants=network-online.target
 Requires=docker.service
