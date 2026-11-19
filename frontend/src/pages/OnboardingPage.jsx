@@ -17,12 +17,12 @@ export default function OnboardingPage() {
         <h1>신입 개발자 온보딩</h1>
         <p className="ob-lead">
           나의쿠키에 오신 걸 환영합니다. 이 페이지 하나로 나의쿠키가 무엇이고, 어떻게 생겼고, 어디서부터 손대면 되는지 알 수 있게 정리했습니다.
-          위에서부터 순서대로 읽고, 마지막의 첫 주 체크리스트를 따라가 보세요.
+          위에서부터 순서대로 읽되, 모르는 부분은 넘어가도 괜찮습니다.
         </p>
         <nav className="ob-toc" aria-label="목차">
           {[['about', '한눈에 보기'], ['arch', '아키텍처'], ['flow', '요청 흐름'], ['stack', '기술 스택'], ['repo', '저장소 구조'],
             ['local', '로컬 실행'], ['env', '환경과 브랜치'], ['github', 'GitHub 작업 순서'], ['release', '버전과 릴리스'], ['ai', 'AI와 함께 일하기'],
-            ['rules', '작업 규칙'], ['blog', '기술 블로그'], ['first', '첫 주 체크리스트']]
+            ['rules', '작업 규칙'], ['blog', '기술 블로그'], ['docs', '더 읽을 문서']]
             .map(([id, label], i) => <a key={id} href={`#${id}`}><span>{String(i + 1).padStart(2, '0')}</span>{label}</a>)}
         </nav>
       </header>
@@ -236,16 +236,7 @@ git push origin v0.24.0`}</pre>
         <BlogPosts />
       </Section>
 
-      <Section id="first" no="13" title="첫 주 체크리스트">
-        <ul className="ob-check">
-          <li>GitHub 저장소 접근 권한 받기 (비공개 저장소)</li>
-          <li><a href={doc('CLAUDE.md')}>CLAUDE.md</a>와 <a href={doc('README.md')}>README.md</a> 읽기</li>
-          <li>로컬에서 백엔드, 화면 띄우고 회원가입부터 문제 풀이까지 해 보기</li>
-          <li><a href="https://staging.mycookie.dev">스테이징</a>과 <a href="https://mycookie.dev">운영</a> 사이트 둘러보기</li>
-          <li><a href={doc('docs/homeserver.md')}>docs/homeserver.md</a>로 서버 구조 익히기</li>
-          <li>작은 이슈 하나 골라서 기능 브랜치 → <code>dev</code> PR 올려 보기</li>
-        </ul>
-        <h3>더 읽을 문서</h3>
+      <Section id="docs" no="13" title="더 읽을 문서">
         <div className="ob-links">
           {[['docs/homeserver.md', '홈서버 구축, 배포, 백업과 복구'], ['docs/design-system.md', '디자인 시스템'], ['docs/security.md', '보안 설계'],
             ['docs/seo.md', '검색 노출'], ['docs/staging.md', '스테이징과 운영 환경'], ['docs/membership.md', '등급과 승급']]
