@@ -59,12 +59,9 @@ jobs:
       - run: npm ci --no-audit --no-fund
       - run: npm run lint
       - run: npm run build
-      # 통과하는 검사만 돌린다. 기대값이 오래된 검사(chanung, explanations, exam-flow, member-menu, notes,
-      # promotion-exam, today-cs)는 고친 뒤 여기에 다시 넣는다
+      # package.json의 check:* 검사를 모두 돌린다(목록을 따로 두지 않아 새 검사가 빠지지 않는다)
       - name: 데이터 검사
         run: |
-          for s in interview-audio questions account-retry membership lounge-chat pearl-answers notice \
-                   imported-notes revised-notes promotion-bank nginx-headers web-essentials-export duel-bank \
-                   promotion-announcements bug-hunt technical-interview cross-device-sync chanung-completion; do
-            echo "::group::check:$s"; npm run -s "check:$s"; echo "::endgroup::"
+          for s in $(node -p "Object.keys(require('./package.json').scripts).filter(k => k.startsWith('check:')).join(' ')"); do
+            echo "::group::$s"; npm run -s "$s"; echo "::endgroup::"
           done

@@ -32,7 +32,7 @@ try {
   assert.equal(migrateNotesCompletion(historical)[entries[0].id],undefined);
   assert.equal(entries.length,169);
   assert.ok(!CS_NOTES.some(s => s.id === 'web-essentials'), 'Web answers belong to their separate collection');
-  assert.equal(WEB_ESSENTIALS.items.length,52);
+  assert.equal(WEB_ESSENTIALS.items.length,57);
   assert.equal(new Set(entries.map(e=>e.id)).size,entries.length);
   assert.ok(entries.every(e=>e.question && e.answer));
   assert.ok(!CS_NOTES.some(s=>['커뮤니케이션','기타','개인의 역량','최신기술에 관심이 있는지'].includes(s.title)));
@@ -162,8 +162,8 @@ try {
   assert.ok(saved[entries[0].id].done && saved[entries[1].id].done,'Web updates retain existing subject records');
   await act(async()=>{await webCheckbox().props.onChange();});
   const toc = view.root.findByProps({'aria-label':'웹 필수지식 목차'});
-  assert.equal(toc.findAllByType('a').filter(a=>a.props.className==='web-toc-topic').length,8);
-  assert.equal(toc.findAllByType('a').length,8 + WEB_ESSENTIALS.items.length,'Topic and question links cover the complete collection');
+  assert.equal(toc.findAllByType('a').filter(a=>a.props.className==='web-toc-topic').length,9);
+  assert.equal(toc.findAllByType('a').length,9 + WEB_ESSENTIALS.items.length,'Topic and question links cover the complete collection');
   await act(()=>toc.findAllByType('a').find(a=>a.props.href==='/web-essentials#web-topic-4').props.onClick({button:0,defaultPrevented:false,preventDefault(){this.defaultPrevented=true;}}));
   assert.equal(view.root.findAllByType('article').length,WEB_ESSENTIALS.items.length,'The table of contents scrolls without filtering any answers');
   assert.equal(scrolled.at(-1),'web-topic-4');
