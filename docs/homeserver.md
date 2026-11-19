@@ -163,15 +163,16 @@ sudo -u devcookie /srv/devcookie/app/deploy/homeserver/deploy.sh
 
 # 5분마다 master · dev에 새 커밋이 있는지 보고 바뀐 쪽만 다시 배포
 # 매일 새벽 4시 DB 백업
+# 1분마다 상태 확인: 3분 넘게 응답이 없으면 Mattermost 긴급 알림(Gemini 요약), 되살아나면 복구 알림
 sudo cp /srv/devcookie/app/deploy/homeserver/systemd/devcookie-*.{service,timer} /etc/systemd/system/
 sudo systemctl daemon-reload
-sudo systemctl enable --now devcookie-deploy.timer devcookie-backup.timer
+sudo systemctl enable --now devcookie-deploy.timer devcookie-backup.timer devcookie-health.timer
 ```
 
 확인:
 
 ```bash
-docker ps                                                   # 6개 컨테이너가 Up (healthy)
+docker ps                                                   # 8개 컨테이너가 Up (healthy)
 curl -s https://staging.mycookie.dev/api/v1/categories | head -c 200
 sudo -u devcookie /srv/devcookie/app/deploy/homeserver/backup.sh   # 백업이 만들어지는지 한 번 확인
 ```

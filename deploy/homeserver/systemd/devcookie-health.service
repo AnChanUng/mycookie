@@ -1,0 +1,10 @@
+[Unit]
+Description=DevCookie 상태 확인 (죽으면 Mattermost 긴급 알림)
+After=network-online.target docker.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=devcookie
+ExecStart=/usr/bin/python3 /srv/devcookie/app/deploy/homeserver/healthcheck.py
+TimeoutStartSec=3min
