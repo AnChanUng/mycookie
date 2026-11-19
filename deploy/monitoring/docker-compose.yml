@@ -1,7 +1,8 @@
-# 로그 모니터링(Grafana + Loki + Alloy). 서비스(devcookie)와 따로 띄우고 따로 내린다.
+# 모니터링(Grafana + Loki + Prometheus + Alloy). 서비스(devcookie)와 따로 띄우고 따로 내린다.
 #   - Alloy: devcookie 컨테이너의 로그를 Docker에서 읽어 environment(prod, staging, shared), service 라벨을 붙이고
-#            이메일, IP, 토큰 같은 값을 가린 뒤 Loki로 보낸다
+#            이메일, IP, 토큰 같은 값을 가린 뒤 Loki로 보낸다. 서버와 컨테이너의 CPU, 메모리, 디스크 지표도 모아 Prometheus로 보낸다
 #   - Loki: 로그 저장, 14일 보관(/srv/mycookie-monitoring/loki)
+#   - Prometheus: 지표 저장, 7일 보관(/srv/mycookie-monitoring/prometheus)
 #   - Grafana: 브라우저에서 로그 조회. 홈서버 안(127.0.0.1:3000)에서만 열고, 팀원은 Tailscale로 접속한다
 # 띄우기: deploy/monitoring/up.sh (문서 docs/monitoring.md)
 name: mycookie-monitoring
@@ -29,19 +30,58 @@ services:
       retries: 20
     logging: *logging
 
+  prometheus:
+    image: prom/prometheus:v3.4.1
+    restart: unless-stopped
+    mem_limit: 256m
+    user: "65534"
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --storage.tsdb.retention.time=7d
+      - --storage.tsdb.retention.size=2GB
+      # Alloy가 지표를 밀어 넣는다(Prometheus가 직접 긁으러 다니지 않는다)
+      - --web.enable-remote-write-receiver
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ${MONITORING_DATA:-/srv/mycookie-monitoring}/prometheus:/prometheus
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:9090/-/ready"]
+      interval: 15s
+      timeout: 5s
+      retries: 20
+    logging: *logging
+
   alloy:
     image: grafana/alloy:v1.9.1
     restart: unless-stopped
-    mem_limit: 192m
+    mem_limit: 256m
     command: ["run", "--storage.path=/var/lib/alloy/data", "/etc/alloy/config.alloy"]
     volumes:
       - ./config.alloy:/etc/alloy/config.alloy:ro
       # 컨테이너 목록과 로그를 읽기 위해 Docker 소켓이 필요하다(읽기 전용으로 붙이지만 강한 권한이므로 이 컨테이너만 쓴다)
       - /var/run/docker.sock:/var/run/docker.sock:ro
+      # 서버 전체(CPU, 메모리, 디스크) 지표를 읽기 위한 읽기 전용 마운트
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
       - ${MONITORING_DATA:-/srv/mycookie-monitoring}/alloy:/var/lib/alloy/data
     depends_on:
       loki:
         condition: service_healthy
+      prometheus:
+        condition: service_healthy
+    logging: *logging
+
+  # 컨테이너별 CPU, 메모리(docker stats와 같은 값)를 내보내는 작은 수집기. 표준 라이브러리만 쓴다
+  stats:
+    image: python:3.13-alpine
+    restart: unless-stopped
+    mem_limit: 64m
+    command: ["python", "-u", "/app/docker_stats_exporter.py"]
+    volumes:
+      - ./docker_stats_exporter.py:/app/docker_stats_exporter.py:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
     logging: *logging
 
   grafana:
@@ -61,7 +101,7 @@ services:
       GF_ANALYTICS_REPORTING_ENABLED: "false"
       GF_ANALYTICS_CHECK_FOR_UPDATES: "false"
       GF_NEWS_NEWS_FEED_ENABLED: "false"
-      GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH: /var/lib/grafana/dashboards/mycookie-logs.json
+      GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH: /var/lib/grafana/dashboards/mycookie-server.json
       GF_SERVER_ROOT_URL: ${GRAFANA_ROOT_URL:-http://localhost:3000}
     volumes:
       - ./grafana/provisioning:/etc/grafana/provisioning:ro
@@ -69,5 +109,7 @@ services:
       - ${MONITORING_DATA:-/srv/mycookie-monitoring}/grafana:/var/lib/grafana
     depends_on:
       loki:
+        condition: service_healthy
+      prometheus:
         condition: service_healthy
     logging: *logging

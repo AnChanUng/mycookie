@@ -238,5 +238,13 @@
         "prettifyLogMessage": false
       }
     }
+  ],
+  "links": [
+    {
+      "title": "서버 상태 (MyCookie Server)",
+      "type": "link",
+      "url": "/d/mycookie-server",
+      "icon": "dashboard"
+    }
   ]
 }

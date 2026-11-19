@@ -97,3 +97,44 @@ loki.write "local" {
     url = "http://loki:3100/loki/api/v1/push"
   }
 }
+
+// ── 지표: 서버 전체 CPU, 메모리, 디스크(unix 수집기)와 컨테이너별 CPU, 메모리(stats 수집기) ──
+prometheus.exporter.unix "host" {
+  procfs_path = "/host/proc"
+  sysfs_path  = "/host/sys"
+  rootfs_path = "/rootfs"
+  set_collectors = ["cpu", "meminfo", "loadavg", "filesystem", "netdev", "uname"]
+  filesystem {
+    mount_points_exclude = "^/(dev|proc|sys|run|var/lib/docker/.+|mnt/wsl.*|usr/lib/wsl.*|init)($|/)"
+  }
+}
+
+prometheus.scrape "host" {
+  targets         = prometheus.exporter.unix.host.targets
+  scrape_interval = "30s"
+  forward_to      = [prometheus.relabel.host.receiver]
+}
+
+// Alloy를 다시 띄우면 instance(컨테이너 이름)가 바뀌어 같은 지표가 갈라지므로 이름을 고정한다
+prometheus.relabel "host" {
+  rule {
+    target_label = "instance"
+    replacement  = "homeserver"
+  }
+  forward_to = [prometheus.remote_write.local.receiver]
+}
+
+// 컨테이너별 지표는 stats 수집기(docker_stats_exporter.py)에서 가져온다.
+// cAdvisor는 최신 Docker의 containerd 이미지 저장 방식에서 컨테이너를 읽지 못해 쓰지 않는다
+prometheus.scrape "containers" {
+  targets         = [{"__address__" = "stats:9101"}]
+  scrape_interval = "30s"
+  scrape_timeout  = "25s"
+  forward_to      = [prometheus.remote_write.local.receiver]
+}
+
+prometheus.remote_write "local" {
+  endpoint {
+    url = "http://prometheus:9090/api/v1/write"
+  }
+}

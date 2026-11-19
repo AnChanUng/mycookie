@@ -1,18 +1,28 @@
-# 로그 모니터링 (Grafana + Loki + Alloy)
+# 모니터링 (Grafana + Loki + Prometheus + Alloy)
 
-홈서버에서 도는 나의쿠키 컨테이너의 로그를 브라우저에서 찾아보는 곳입니다. 서버 계정이나 docker 권한 없이 팀원 모두가 운영, 스테이징 로그를 볼 수 있습니다.
+홈서버에서 도는 나의쿠키의 **로그**와 **서버 상태(CPU, 메모리, 디스크)**를 브라우저에서 보는 곳입니다. 서버 계정이나 docker 권한 없이 팀원 모두가 운영, 스테이징을 볼 수 있습니다.
+
+| 대시보드 | 보는 것 |
+| --- | --- |
+| **MyCookie Server** (첫 화면) | 서버 CPU, 메모리, 디스크 사용률, 컨테이너별 메모리(한도 대비), CPU |
+| **MyCookie Logs** | 환경, 서비스, 레벨, 검색어로 로그 찾기, ERROR 수, 레벨별 로그 양 |
 
 - 장애를 **알려 주는** 것은 Mattermost 긴급 알림(`CriticalErrorAlerts`, `healthcheck.py`)이 맡고, Grafana는 알림을 받은 뒤 **자세히 보는** 곳입니다. Grafana 알림 기능은 켜지 않습니다(알림이 두 군데서 오지 않게).
 - 서비스(`devcookie`)와 **따로** 띄우고 따로 내립니다. 설정은 `deploy/monitoring/`, 데이터는 `/srv/mycookie-monitoring/`.
-- CPU, 메모리 같은 지표는 다루지 않습니다(필요해지면 Prometheus를 검토).
 
 ## 구성
 
 | 컨테이너 | 하는 일 | 메모리 한도 |
 | --- | --- | --- |
-| alloy | `devcookie` 컨테이너 로그를 Docker에서 읽어 라벨을 붙이고, 개인정보를 가려 Loki로 보냄 | 192MB |
+| alloy | 로그 수집(라벨, 개인정보 가림) → Loki, 서버 CPU, 메모리, 디스크 지표 → Prometheus | 256MB |
+| stats | 컨테이너별 CPU, 메모리(`docker stats`와 같은 값)를 내보내는 작은 수집기(`docker_stats_exporter.py`) | 64MB |
 | loki | 로그 저장, **14일** 보관 | 384MB |
-| grafana | 로그 조회 화면. 홈서버 안 `127.0.0.1:3000`에만 열림 | 256MB |
+| prometheus | 지표 저장, **7일**(최대 2GB) 보관 | 256MB |
+| grafana | 조회 화면. 홈서버 안 `127.0.0.1:3000`에만 열림 | 256MB |
+
+합계 한도는 약 1.2GB입니다(시험에서 실제 사용은 약 250MB). 서비스(약 3.4GB)와 합쳐도 8GB 안에 들어옵니다.
+
+컨테이너 지표를 cAdvisor로 모으지 않는 이유: 최신 Docker의 이미지 저장 방식(containerd snapshotter)에서 cAdvisor가 컨테이너를 읽지 못합니다(`failed to identify the read-write layer ID`). 그래서 Docker API의 통계를 직접 읽습니다.
 
 ## 라벨
 
@@ -44,9 +54,17 @@ sudo /srv/devcookie/app/deploy/monitoring/up.sh
 
 인터넷에는 열지 않습니다. 팀원은 관리자가 Tailscale에 초대합니다(무료 요금제 3명까지).
 
-## 팀원 계정 (관리자)
+## 팀원 계정
 
-Grafana → Administration → Users → **New user**. 새 계정은 기본으로 **Viewer**(보기 전용)입니다. 운영, 스테이징 로그를 모두 볼 수 있고 대시보드는 고칠 수 없습니다.
+`/srv/mycookie-monitoring/.env`의 `GRAFANA_VIEWERS`에 `아이디:비밀번호`를 적고 `up.sh`를 다시 실행하면 보기 전용 계정이 만들어집니다(이미 있으면 건너뜀). 처음 한 번은 명령에 바로 넘겨도 됩니다.
+
+```bash
+sudo GRAFANA_VIEWERS="bomin:처음비밀번호" /srv/devcookie/app/deploy/monitoring/up.sh
+```
+
+- 계정은 **Viewer**(보기 전용)입니다. 운영, 스테이징 로그와 지표를 모두 볼 수 있고 대시보드는 고칠 수 없습니다.
+- 첫 로그인 뒤 오른쪽 위 프로필 → **Change password**로 비밀번호를 바꿉니다.
+- 화면에서 직접 만들 수도 있습니다: Administration → Users → **New user**.
 
 ## 로그 보는 법
 
