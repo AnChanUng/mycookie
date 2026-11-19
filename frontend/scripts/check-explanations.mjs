@@ -13,7 +13,7 @@ const old = BANKS.filter(b => b.key !== 'pearl').flatMap(allQuestions).filter(th
 assert.equal(old.length, 466);
 // 상세 해설이 아직 없는 문항(짧은 해설 e만 있음). 2026-11-05 CU 문제집 확장 때 들어온 문항 등.
 // 새로 생기는 공백은 실패시키고, 이 목록은 해설을 채우면서 줄여 간다(목표 0개)
-const KNOWN_GAPS = { cu: 42, ssafydb: 4 };
+const KNOWN_GAPS = {};  // 2026-11-20 CU 42, SSAFY DB 4문항 상세 해설을 채워 0개
 const gaps = {};
 for (const bank of BANKS.filter(b => b.key !== 'pearl'))
   for (const q of allQuestions(bank).filter(theoryFor))
@@ -23,7 +23,7 @@ for (const q of old.filter(q => explanationFor(q)?.length > 70)) {
   assert.equal(explanationFor({...q,id:'copied',topic:q.topic+' · 출처'}), explanationFor(q));
   assert.equal(explanationFor({...q,q:q.q+' changed'}), undefined, 'Changed questions must not inherit an unrelated answer');
 }
-assert.equal(Object.keys(notes).length + Object.keys(privateNotes).length, 637, '공개와 비공개 해설을 합치면 예전과 같은 637개여야 한다');
+assert.equal(Object.keys(notes).length + Object.keys(privateNotes).length, 683, '공개와 비공개 해설 합계(예전 637개 + 2026-11-20에 채운 46개)');
 for (const key of Object.keys(privateNotes)) assert.ok(!(key in notes), `해설이 공개, 비공개 양쪽에 있음: ${key.slice(0, 40)}`);
 const pearl = BANKS.find(b=>b.key==='pearl');
 assert.equal(companyPath(pearl),'/exam/pearl');
@@ -54,4 +54,4 @@ try {
   const escaped=renderToStaticMarkup(React.createElement(Detail,{q:{explanation:'<script>alert(1)</script>'}}));
   assert.ok(!escaped.includes('<script>'));
 } finally { await server.close(); }
-console.log('해설 검사 통과: 공개 이론 466문항, 공개와 비공개 해설 637개, 주제별 복사본, 펄어비스 50문항, 상세 해설 SSR');
+console.log('해설 검사 통과: 공개 이론 466문항, 공개와 비공개 해설 683개, 상세 해설 공백 0개, 주제별 복사본, 펄어비스 50문항, 상세 해설 SSR');
