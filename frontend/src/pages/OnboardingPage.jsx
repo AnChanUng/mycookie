@@ -22,7 +22,7 @@ export default function OnboardingPage() {
         <nav className="ob-toc" aria-label="목차">
           {[['about', '한눈에 보기'], ['arch', '아키텍처'], ['flow', '요청 흐름'], ['stack', '기술 스택'], ['repo', '저장소 구조'],
             ['local', '로컬 실행'], ['env', '환경과 브랜치'], ['github', 'GitHub 작업 순서'], ['release', '버전과 릴리스'], ['ai', 'AI와 함께 일하기'],
-            ['rules', '작업 규칙'], ['blog', '기술 블로그'], ['first', '첫 주 체크리스트'], ['faq', '자주 막히는 곳']]
+            ['rules', '작업 규칙'], ['blog', '기술 블로그'], ['first', '첫 주 체크리스트']]
             .map(([id, label], i) => <a key={id} href={`#${id}`}><span>{String(i + 1).padStart(2, '0')}</span>{label}</a>)}
         </nav>
       </header>
@@ -253,23 +253,8 @@ git push origin v0.24.0`}</pre>
         </div>
       </Section>
 
-      <Section id="faq" no="14" title="자주 막히는 곳">
-        <dl className="ob-faq">
-          <dt>Gradle이 실행되지 않아요</dt>
-          <dd>JDK 25 이상이면 Gradle 8.7이 동작하지 않습니다. JDK 17이나 21로 바꿔 주세요.</dd>
-          <dt>로컬 화면이 운영 API를 불러요</dt>
-          <dd><code>npm run dev</code>를 띄울 때 <code>VITE_API_URL=http://localhost:8080/api/v1</code>을 꼭 같이 줍니다.</dd>
-          <dt>DB를 복원하는데 identity 열 오류가 나요</dt>
-          <dd>백엔드가 먼저 만든 표와 덤프의 형식이 달라서입니다. <code>restore.sh</code>는 DB를 새로 만든 뒤 복원하니 직접 <code>pg_restore --clean</code>을 쓰지 마세요.</dd>
-          <dt>스테이징에서 소셜 로그인이 안 돼요</dt>
-          <dd>각 소셜 로그인 콘솔에 <code>https://staging.mycookie.dev/auth/callback</code>이 등록돼 있어야 합니다. 네이버는 검수 전까지 등록된 아이디만 로그인됩니다.</dd>
-          <dt>운영 서버를 직접 만져야 해요</dt>
-          <dd>운영자에게 요청하세요. 홈서버 접근 권한과 비밀값은 필요한 범위만 따로 전달합니다.</dd>
-        </dl>
-      </Section>
 
       <footer className="ob-foot">
-        <p>궁금한 점은 운영자에게 편하게 물어보세요. 이 페이지에서 틀린 내용을 발견하면 <code>frontend/src/pages/OnboardingPage.jsx</code>를 고쳐서 PR을 올려 주세요.</p>
         <Link to="/">나의쿠키 첫 화면으로</Link>
       </footer>
     </div>
