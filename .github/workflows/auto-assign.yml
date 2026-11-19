@@ -1,0 +1,29 @@
+# 새 PR과 이슈의 담당자(Assignees)에 저장소 주인을 자동으로 넣는다.
+# 사이트 제보로 백엔드가 만든 이슈도 포함된다(제보용 토큰으로 만든 이슈도 이 이벤트를 일으킨다).
+name: 담당자 자동 지정
+
+on:
+  issues:
+    types: [opened, reopened]
+  pull_request:
+    types: [opened, reopened]
+
+permissions:
+  issues: write
+  pull-requests: write
+
+jobs:
+  assign:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: 저장소 주인을 담당자로
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          OWNER: ${{ github.repository_owner }}
+          NUMBER: ${{ github.event.issue.number || github.event.pull_request.number }}
+        run: |
+          # 이슈와 PR은 같은 번호 체계라 issues API 하나로 둘 다 지정된다
+          gh api -X POST "repos/$REPO/issues/$NUMBER/assignees" -f "assignees[]=$OWNER" --silent \
+            || echo "::warning::담당자를 지정하지 못했어요(포크 PR이면 권한이 없어 건너뜁니다)"
