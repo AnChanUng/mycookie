@@ -27,20 +27,27 @@ checkout() {
 deploy() {
   local dir=$1 branch=$2 tag=$3 env=$4
   checkout "$dir" "$branch"
-  local current target
+  local current target changed
   current=$(git -C "$ROOT/$dir" rev-parse HEAD)
   target=$(git -C "$ROOT/$dir" rev-parse "origin/$branch")
-  if [ "$current" = "$target" ] && [ "$FORCE" != "--force" ] \
-     && docker image inspect "devcookie-backend:$tag" "devcookie-frontend:$tag" >/dev/null 2>&1; then
-    return
-  fi
-  echo "[$(date '+%F %T')] $tag: ${current:0:7} → ${target:0:7}"
+  changed=$(git -C "$ROOT/$dir" diff --name-only "$current" "$target")
   git -C "$ROOT/$dir" reset --quiet --hard "$target"
-  # 빌드가 하나라도 실패하면 set -e로 여기서 멈추고, 돌던 컨테이너는 이전 이미지로 계속 돈다
-  docker build --quiet -t "devcookie-backend:$tag" "$ROOT/$dir/backend"
-  docker build --quiet -t "devcookie-frontend:$tag" \
-    --build-arg VITE_DEPLOY_ENV="$env" --build-arg GIT_COMMIT="$target" "$ROOT/$dir/frontend"
-  "${COMPOSE[@]}" up -d --no-deps "backend-$tag" "frontend-$tag"
+  # 바뀐 쪽만 다시 빌드한다. 문서만 바뀐 커밋으로 사이트를 재시작하지 않게
+  local need_backend=0 need_frontend=0
+  if [ "$FORCE" = "--force" ] || ! docker image inspect "devcookie-backend:$tag" >/dev/null 2>&1 || grep -q '^backend/' <<<"$changed"; then need_backend=1; fi
+  if [ "$FORCE" = "--force" ] || ! docker image inspect "devcookie-frontend:$tag" >/dev/null 2>&1 || grep -q '^frontend/' <<<"$changed"; then need_frontend=1; fi
+  [ "$need_backend$need_frontend" = "00" ] && return
+  echo "[$(date '+%F %T')] $tag: ${current:0:7} → ${target:0:7} (백엔드 $need_backend, 화면 $need_frontend)"
+  # 빌드가 실패하면 set -e로 여기서 멈추고, 돌던 컨테이너는 이전 이미지로 계속 돈다
+  if [ "$need_backend" = 1 ]; then
+    docker build --quiet -t "devcookie-backend:$tag" "$ROOT/$dir/backend"
+    "${COMPOSE[@]}" up -d --no-deps "backend-$tag"
+  fi
+  if [ "$need_frontend" = 1 ]; then
+    docker build --quiet -t "devcookie-frontend:$tag" \
+      --build-arg VITE_DEPLOY_ENV="$env" --build-arg GIT_COMMIT="$target" "$ROOT/$dir/frontend"
+    "${COMPOSE[@]}" up -d --no-deps "frontend-$tag"
+  fi
 }
 
 mkdir -p "$ROOT/pgdata18" "$ROOT/backups"
