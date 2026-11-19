@@ -1,4 +1,4 @@
-<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>홈서버 이전기</title><style>
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>홈서버 구축하기</title><style>
 body{margin:0;background:#fff;color:#222;font-family:-apple-system,'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif}
 main{max-width:760px;margin:0 auto;padding:48px 20px 96px;font-size:17px;line-height:1.85;word-break:keep-all}
 h1{font-size:32px;line-height:1.35;margin:0 0 32px;letter-spacing:-0.02em}
@@ -13,7 +13,7 @@ th{background:#f6f6f6}
 pre{background:#f6f6f6;padding:14px 16px;overflow-x:auto;font-size:14px;line-height:1.6;border-radius:4px}
 code{font-family:Menlo,Consolas,monospace;font-size:0.9em}
 p code,td code,li code{background:#f2f2f2;padding:1px 5px;border-radius:3px}
-</style></head><body><main><h1>안 쓰던 노트북으로 홈서버 만들기: 나의쿠키를 클라우드에서 집으로 옮긴 기록</h1>
+</style></head><body><main><h1>홈서버 구축하기: 서버 구축부터 DB 마이그레이션까지</h1>
 <p>나의쿠키는 개발자 취업 준비생을 위한 학습 사이트입니다. 컴퓨터공학 전공 지식, 기술면접, 기업별 전공필기, 실시간 CS 대결 같은 기능을 혼자 만들고 운영하고 있습니다.</p>
 <p>지금까지 나의쿠키는 무료 클라우드 세 곳에 나뉘어 있었습니다. 화면은 Vercel, 백엔드는 Render, DB는 Neon이었습니다. 처음에는 편했지만 서비스가 커질수록 불편한 점이 쌓였습니다. 이 글은 집에서 쓰지 않던 노트북을 홈서버로 만들고, 화면, 백엔드, DB를 모두 옮긴 과정을 정리한 기록입니다. 설계하면서 정한 원칙, 실제로 부딪힌 문제와 해결 방법을 순서대로 적었습니다.</p>
 <h2>왜 옮기기로 했나</h2>
