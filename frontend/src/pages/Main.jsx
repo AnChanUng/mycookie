@@ -212,10 +212,6 @@ export default function Main() {
         </div>
       </Section>
 
-      <Link to="/intro" className="mn-intro">
-        <span><small>나의쿠키가 처음이라면</small><b>개발자 취업 준비, 이제 쿠키 하나로</b></span>
-        <span className="ds-btn ds-btn--primary ds-btn--sm">서비스 소개 보기</span>
-      </Link>
     </div>
   );
 }
