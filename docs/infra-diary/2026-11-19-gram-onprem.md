@@ -131,9 +131,15 @@ wsl --install -d Ubuntu-24.04   # 관리자 PowerShell, 재부팅 후 리눅스 
 5. "not fully protected" 경고 → I'll do this later(일부러 회색) → 05
 6. Cloudflare 네임서버 `gerald.ns.cloudflare.com`, `selah.ns.cloudflare.com`. 가비아의 `ns.gabia.co.kr`, `ns.gabia.net`, `ns1.gabia.co.kr`은 지운다 → 06
 
+## 9. 터널 연결과 스테이징 공개
+- 가비아 네임서버를 Cloudflare 2개로 바꾸고(DNSSEC는 원래 꺼져 있음) **몇 분 만에 Active 메일**이 왔다. → 07, 08, 09, 10, 11
+- 터널 메뉴는 Zero Trust 안이 아니라 **Networking → Tunnels**로 옮겨져 있었다. → 12, 13
+- 터널 토큰을 넣을 때 화면의 설치 명령 전체(`cloudflared.exe service install eyJ...`)가 같이 들어가 `.env`가 깨졌다 → `eyJ`부터만 남기도록 sed로 정리. 토큰은 `read -rsp`로 화면에 안 보이게 입력.
+- cloudflared 사전 검사(QUIC, HTTP/2, API) 모두 통과, `Registered tunnel connection` 12회 → 터널 Healthy. → 14
+- 새 화면은 Service Type과 URL을 한 칸에 적는다: Service URL `http://frontend-staging:80` (cloudflared가 Docker 안이라 `localhost`가 아니라 서비스 이름) → 15
+- `https://staging.mycookie.dev` 바깥에서 접속 성공.
+
 ## 남은 일
-- [ ] 가비아에서 네임서버를 Cloudflare 2개로 변경, DNSSEC 꺼져 있는지 확인 → Cloudflare "active" 메일
-- [ ] Zero Trust → Tunnel 만들기 → 토큰을 그램 `.env`에 → `staging.mycookie.dev` → `frontend-staging:80`으로 바깥 접속 시험
 - [ ] Windows 자동 로그인(netplwiz)
 - [ ] **이사:** `migrate-from-neon.sh prod` → 곧바로 `mycookie.dev` → `frontend-prod:80` (Vercel A 기록 대체), www → 308
 - [ ] Neon 비밀번호 재설정, 일주일 뒤 Render · Vercel · Neon 정리
