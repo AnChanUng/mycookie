@@ -1,10 +1,12 @@
 # PR 위험도 검사: 바뀐 파일로 위험도를 정하고, 위험도에 맞는 조건을 채웠는지 확인한다.
 #   🟢 낮음  문서, 문제 데이터, 테스트만        → CI 통과하면 자동 병합
-#   🟡 중간  그 외 백엔드, 화면 코드            → AI 리뷰 통과(또는 사람 승인)하면 자동 병합
+#   🟡 중간  그 외 백엔드, 화면 코드            → 저장소 주인(찬웅)이 올린 PR은 승인 없이 병합 가능,
+#                                                 다른 사람이 올린 PR은 저장소 주인의 승인 필요
 #   🔴 높음  보안, 결제, DB 엔티티, 설정, 배포,  → 작성자가 아닌 사람 1명 승인
-#           CI, 의존성 / 모든 dev → master        (master는 브랜치 규칙상 관리자만 병합)
+#           CI, 의존성
+#   운영    dev → master                         → 브랜치 규칙상 관리자만 병합
 # 이 잡("위험도 검사")을 dev, master 브랜치 규칙의 필수 검사로 둔다(.github/rulesets/).
-# 승인, 승인 취소가 생기면 다시 돌아 결과를 갱신한다. AI 리뷰는 커밋이 바뀔 때만 다시 한다.
+# 승인, 승인 취소가 생기면 다시 돌아 결과를 갱신한다.
 name: PR 위험도
 
 on:
@@ -15,7 +17,7 @@ on:
 
 permissions:
   contents: write        # 자동 병합
-  pull-requests: write   # 라벨, 리뷰 댓글, 자동 병합
+  pull-requests: write   # 라벨, 자동 병합
   issues: write          # 라벨 만들기
 
 concurrency:
@@ -35,6 +37,7 @@ jobs:
       HEAD: ${{ github.event.pull_request.head.ref }}
       HEAD_SHA: ${{ github.event.pull_request.head.sha }}
       AUTHOR: ${{ github.event.pull_request.user.login }}
+      OWNER: ${{ github.repository_owner }}
     steps:
       - name: 위험도 분류
         id: risk
@@ -78,7 +81,7 @@ jobs:
           LEVEL: ${{ steps.risk.outputs.level }}
         run: |
           gh label create "위험도: 높음" --repo "$REPO" --color d73a4a --description "사람 1명 승인 필요" --force >/dev/null
-          gh label create "위험도: 중간" --repo "$REPO" --color fbca04 --description "AI 리뷰 통과 시 자동 병합" --force >/dev/null
+          gh label create "위험도: 중간" --repo "$REPO" --color fbca04 --description "저장소 주인 승인 필요(주인이 올리면 바로 병합 가능)" --force >/dev/null
           gh label create "위험도: 낮음" --repo "$REPO" --color 0e8a16 --description "CI 통과 시 자동 병합" --force >/dev/null
           case "$LEVEL" in high) want="위험도: 높음" ;; medium) want="위험도: 중간" ;; *) want="위험도: 낮음" ;; esac
           for l in "위험도: 높음" "위험도: 중간" "위험도: 낮음"; do
@@ -87,95 +90,46 @@ jobs:
           done
           gh pr edit "$PR" --repo "$REPO" --add-label "$want" >/dev/null
 
-      # 중간 위험도: 커밋마다 한 번 AI 리뷰를 하고 결과를 PR 댓글에 남긴다(같은 커밋은 댓글의 결과를 다시 쓴다)
-      - name: AI 리뷰 결과 찾기
-        id: prior
-        if: steps.risk.outputs.level == 'medium'
-        run: |
-          body=$(gh api "repos/$REPO/issues/$PR/comments" --paginate --jq '[.[] | select(.body | contains("<!-- ai-review -->"))] | last | .body // ""')
-          if printf '%s' "$body" | grep -q "<!-- ai-review-sha: $HEAD_SHA -->"; then
-            verdict=$(printf '%s' "$body" | grep -o '<!-- ai-review-verdict: [a-z]* -->' | grep -o 'pass\|block')
-            echo "verdict=$verdict" >> "$GITHUB_OUTPUT"
-            echo "이 커밋은 이미 리뷰했어요: $verdict"
-          fi
-
-      - uses: actions/checkout@v4
-        if: steps.risk.outputs.level == 'medium' && steps.prior.outputs.verdict == ''
-        with:
-          sparse-checkout: .github/scripts
-
-      - uses: actions/setup-node@v4
-        if: steps.risk.outputs.level == 'medium' && steps.prior.outputs.verdict == ''
-        with:
-          node-version: 24
-
-      - name: AI 리뷰 (Claude)
-        id: ai
-        if: steps.risk.outputs.level == 'medium' && steps.prior.outputs.verdict == ''
-        env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          PR_TITLE: ${{ github.event.pull_request.title }}
-          PR_BODY: ${{ github.event.pull_request.body }}
-        run: |
-          gh pr diff "$PR" --repo "$REPO" > pr.diff
-          mkdir -p /tmp/ai && (cd /tmp/ai && npm init -y >/dev/null && npm install --silent @anthropic-ai/sdk >/dev/null)
-          cp .github/scripts/ai-review.mjs /tmp/ai/ai-review.mjs
-          node /tmp/ai/ai-review.mjs pr.diff review.json
-          verdict=$(jq -r .verdict review.json)
-          echo "verdict=$verdict" >> "$GITHUB_OUTPUT"
-          {
-            echo "<!-- ai-review -->"
-            echo "<!-- ai-review-sha: $HEAD_SHA -->"
-            echo "<!-- ai-review-verdict: $verdict -->"
-            if [ "$verdict" = pass ]; then echo "### 🤖 AI 리뷰: 통과"; else echo "### 🤖 AI 리뷰: 사람 확인 필요"; fi
-            echo
-            jq -r .summary review.json
-            echo
-            jq -r '.findings[] | "- " + (if .severity == "blocking" then "🔴 **꼭 고치기**" else "💡 제안" end) + " `" + .file + ":" + (.line|tostring) + "` **" + .title + "**: " + .detail' review.json
-            echo
-            echo "<sub>커밋 \`${HEAD_SHA:0:7}\` 기준 · 통과하면 CI 통과 후 자동 병합, 아니면 고치거나 팀원이 승인하면 병합돼요.</sub>"
-          } > comment.md
-          gh pr comment "$PR" --repo "$REPO" --body-file comment.md >/dev/null || echo "::warning::리뷰 댓글을 남기지 못했어요" 
-
       - name: 병합 조건 확인
         id: gate
         env:
           LEVEL: ${{ steps.risk.outputs.level }}
           REASONS: ${{ steps.risk.outputs.reasons }}
-          AI: ${{ steps.ai.outputs.verdict || steps.prior.outputs.verdict }}
         run: |
-          # 사람별 마지막 리뷰가 승인이고, 작성자가 아닌 사람 수
-          approvals=$(gh api "repos/$REPO/pulls/$PR/reviews" --paginate --jq '.[] | select(.state != "COMMENTED") | [.user.login, .state] | @tsv' \
-            | awk -F'\t' -v a="$AUTHOR" '$1 != a { last[$1] = $2 } END { n = 0; for (u in last) if (last[u] == "APPROVED") n++; print n }')
+          # 사람별 마지막 리뷰(댓글만 단 리뷰는 빼고)가 승인인 사람 목록. 작성자 자신은 뺀다
+          approvers=$(gh api "repos/$REPO/pulls/$PR/reviews" --paginate --jq '.[] | select(.state != "COMMENTED") | [.user.login, .state] | @tsv' \
+            | awk -F'\t' -v a="$AUTHOR" '$1 != a { last[$1] = $2 } END { for (u in last) if (last[u] == "APPROVED") print u }')
+          approvals=$(printf '%s' "$approvers" | grep -c . || true)
+          owner_ok=false; printf '%s\n' "$approvers" | grep -qx "$OWNER" && owner_ok=true
           ok=false; why=""
           if [ "$BASE" = master ]; then
-            if [ "$HEAD" = dev ]; then ok=true; why="dev → master 운영 배포 PR이에요. 병합은 관리자(찬웅님)만 할 수 있어요."
+            if [ "$HEAD" = dev ]; then ok=true; why="dev → master 운영 배포 PR이에요. 병합은 관리자($OWNER)만 할 수 있어요."
             else why="master에는 dev에서 오는 PR만 받아요. 작업 브랜치는 dev로 PR을 올려 주세요."; fi
           else
             case "$LEVEL" in
               low) ok=true; why="낮은 위험도라 CI가 통과하면 자동 병합돼요." ;;
               medium)
-                if [ "$AI" = pass ]; then ok=true; why="AI 리뷰를 통과해서 CI가 통과하면 자동 병합돼요."
-                elif [ "$approvals" -ge 1 ]; then ok=true; why="AI가 확인을 요청했지만 팀원 승인이 있어 병합할 수 있어요."
-                else why="AI 리뷰가 확인을 요청했어요. 지적을 고치거나 팀원 1명이 승인하면 병합돼요."; fi ;;
+                if [ "$AUTHOR" = "$OWNER" ]; then ok=true; why="저장소 주인이 올린 중간 위험도 PR이라 CI가 통과하면 바로 병합할 수 있어요."
+                elif [ "$owner_ok" = true ]; then ok=true; why="$OWNER 님이 승인해서 병합할 수 있어요."
+                else why="중간 위험도라 $OWNER 님의 승인이 필요해요."; fi ;;
               high)
-                if [ "$approvals" -ge 1 ]; then ok=true; why="팀원 승인 ${approvals}명이 있어 병합할 수 있어요."
-                else why="높은 위험도라 작성자가 아닌 팀원 1명의 승인이 필요해요."; fi ;;
+                if [ "$approvals" -ge 1 ]; then ok=true; why="작성자가 아닌 승인 ${approvals}명이 있어 병합할 수 있어요."
+                else why="높은 위험도라 작성자가 아닌 사람 1명의 승인이 반드시 필요해요."; fi ;;
             esac
           fi
           {
             echo "## PR 위험도: $LEVEL"
             echo; echo "$why"; echo
             echo "**판정 이유**"; echo "${REASONS:-- 문서, 데이터, 테스트만 바뀜}"
-            echo; echo "승인: ${approvals}명 · AI 리뷰: ${AI:-해당 없음}"
+            echo; echo "승인한 사람: ${approvers:-없음}"
           } >> "$GITHUB_STEP_SUMMARY"
           echo "ok=$ok" >> "$GITHUB_OUTPUT"
           echo "$why"
           [ "$ok" = true ] || exit 1
 
-      # 낮음, 중간은 조건을 채우면 자동 병합을 켠다(CI 등 필수 검사가 모두 통과하는 순간 GitHub이 병합)
+      # 낮음은 자동 병합을 켠다(CI 등 필수 검사가 모두 통과하는 순간 GitHub이 병합). 중간, 높음은 사람이 병합 버튼을 누른다
       - name: 자동 병합 켜기
-        if: steps.gate.outputs.ok == 'true' && env.BASE == 'dev' && (steps.risk.outputs.level == 'low' || steps.risk.outputs.level == 'medium')
+        if: steps.gate.outputs.ok == 'true' && env.BASE == 'dev' && steps.risk.outputs.level == 'low'
         run: |
           gh pr merge "$PR" --repo "$REPO" --auto --merge \
             || echo "::warning::자동 병합을 켜지 못했어요. 저장소 Settings에서 'Allow auto-merge'를 켰는지 확인해 주세요."

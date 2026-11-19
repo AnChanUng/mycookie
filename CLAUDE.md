@@ -16,6 +16,6 @@
 
 ## 브랜치와 PR
 - 작업 브랜치(`feature/*`, `fix/*`)는 항상 `dev`로 PR을 올린다. `master`에는 `dev` → `master` PR만 올리고, 운영 머지는 관리자만 한다.
-- PR 위험도는 `.github/workflows/pr-risk.yml`이 바뀐 파일로 정한다(낮음: 자동 머지, 중간: AI 리뷰 통과 시 자동 머지, 높음: 사람 1명 승인). 새 민감 영역(보안, 결제, 스키마, 배포)을 만들면 그 파일의 높음 목록에 경로를 추가한다.
-- 브랜치 규칙 원본은 `.github/rulesets/`에 둔다.
+- PR 위험도는 `.github/workflows/pr-risk.yml`이 바뀐 파일로 정한다(낮음: 자동 머지, 중간: 저장소 주인 승인, 주인이 올린 PR은 바로 머지 가능, 높음: 작성자 아닌 1명 승인 필수). 유료 API(Claude API 등)를 쓰는 자동화는 넣지 않는다. 새 민감 영역(보안, 결제, 스키마, 배포)을 만들면 그 파일의 높음 목록에 경로를 추가한다.
+- 브랜치 규칙 원본은 `.github/rulesets/`에 둔다. 새 PR과 이슈의 담당자는 저장소 주인으로 자동 지정된다(`.github/workflows/auto-assign.yml`).
 

@@ -213,14 +213,15 @@ cd frontend && npm run lint && npm run build`}</pre>
           <thead><tr><th>위험도</th><th>무엇이 바뀌면</th><th>머지 조건</th></tr></thead>
           <tbody>
             <tr><td>🟢 낮음</td><td>문서, 문제 데이터, 테스트만</td><td>CI 통과하면 <b>자동 머지</b></td></tr>
-            <tr><td>🟡 중간</td><td>그 외 백엔드, 화면 코드</td><td>CI 통과 + <b>AI(Claude) 리뷰 통과</b>하면 자동 머지. AI가 문제를 찾으면 고치거나 팀원 1명이 승인</td></tr>
-            <tr><td>🔴 높음</td><td>로그인, 보안, 결제, DB 엔티티, 설정(<code>application.yml</code>), 배포, CI, 의존성</td><td>CI 통과 + <b>작성자가 아닌 팀원 1명 승인</b></td></tr>
+            <tr><td>🟡 중간</td><td>그 외 백엔드, 화면 코드</td><td>CI 통과 + <b>찬웅님 승인</b>. 찬웅님이 올린 PR은 승인 없이 머지 가능</td></tr>
+            <tr><td>🔴 높음</td><td>로그인, 보안, 결제, DB 엔티티, 설정(<code>application.yml</code>), 배포, CI, 의존성</td><td>CI 통과 + <b>작성자가 아닌 사람 1명 승인</b>(필수)</td></tr>
             <tr><td>운영</td><td><code>dev</code> → <code>master</code></td><td>CI 통과 + <b>관리자만 머지</b></td></tr>
           </tbody>
         </table>
         <Note>
           판정은 PR의 <b>위험도 검사</b>(GitHub Actions)가 하고, 이유는 검사 결과 요약에 적힙니다. 여러 파일이 섞이면 가장 높은 위험도를 따릅니다.
-          <code>master</code>에는 <code>dev</code>에서 오는 PR만 받습니다. 작업 브랜치에서 <code>master</code>로 바로 올리면 검사가 막습니다.
+          <code>master</code>에는 <code>dev</code>에서 오는 PR만 받습니다. 작업 브랜치에서 <code>master</code>로 바로 올리면 검사가 막습니다.<br />
+          새 PR과 이슈의 담당자(Assignees)에는 찬웅님이 자동으로 들어갑니다.
         </Note>
 
         <h3>용어 정리</h3>
