@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../api';
 import './OnboardingPage.css';
+import archImg from '../assets/architecture.webp';
 
 // 신입 개발자 온보딩 페이지. 들어오는 주소는 /private/bomin, 화면에서는 알아보기 어려운 주소(ONBOARDING_PATH)로 바꿔 보여 준다.
 // 주소를 숨기는 것일 뿐 보안 장치는 아니다. 비밀번호, 키, 연결 주소 같은 비밀값은 이 페이지에 적지 않는다.
@@ -45,20 +46,40 @@ export default function OnboardingPage() {
       </Section>
 
       <Section id="arch" no="02" title="아키텍처">
-        <p>바깥에서 들어오는 요청은 Cloudflare 터널로만 들어옵니다. 홈서버는 공유기 포트를 하나도 열지 않습니다.</p>
+        <p>노트북 한 대(홈서버)에서 화면, 백엔드, DB를 Docker Compose로 돌립니다. 바깥 요청은 Cloudflare 터널로만 들어오고, 공유기 포트는 하나도 열지 않습니다.</p>
         <figure className="ob-figure">
-          <div className="ob-diagram-wrap"><ArchDiagram /></div>
-          <figcaption>그림 1. 전체 구조. 점선 상자 안은 모두 Docker Compose 컨테이너입니다. deploy.sh는 GitHub에서 코드를 받아 오고, backup.sh는 백업을 암호화해서 구글 드라이브에 올립니다</figcaption>
+          <a className="ob-diagram-wrap" href={archImg} target="_blank" rel="noopener noreferrer">
+            <img className="ob-diagram" src={archImg} width="1680" height="1110" loading="lazy"
+              alt="사용자 요청이 Cloudflare와 cloudflared를 거쳐 홈서버의 nginx, Spring Boot, PostgreSQL로 이어지고, 자동 배포와 암호화 백업이 Google Drive로 이어지는 구조" />
+          </a>
+          <figcaption>그림 1. 전체 구조. 회색은 사용자 요청, 보라는 외부 연동, 파란 점선은 배포, 초록은 백업 흐름입니다. 그림을 누르면 크게 볼 수 있어요(원본: <code>docs/architecture/build.py</code>)</figcaption>
         </figure>
         <table className="ob-table">
           <thead><tr><th>구성 요소</th><th>하는 일</th></tr></thead>
           <tbody>
             <tr><td>Cloudflare</td><td>DNS, HTTPS 인증서, 공격 방어. 터널 입구 역할을 합니다</td></tr>
-            <tr><td>cloudflared</td><td>홈서버가 먼저 Cloudflare로 연결을 걸어 두는 터널 프로그램</td></tr>
+            <tr><td>cloudflared</td><td>홈서버가 먼저 Cloudflare로 연결을 걸어 두는 터널 프로그램. 주소(mycookie.dev, staging.mycookie.dev)에 따라 운영, 스테이징 nginx로 나눠 보냅니다</td></tr>
             <tr><td>nginx (화면 서버)</td><td>React 빌드 파일을 내보내고, <code>/api/</code> 요청은 같은 주소 그대로 백엔드에 넘깁니다(CORS 불필요)</td></tr>
             <tr><td>Spring Boot (백엔드)</td><td>로그인, 채점, 대결, 학습 기록, 채팅(SSE), 메일 발송</td></tr>
             <tr><td>PostgreSQL 18</td><td>운영 DB <code>cookie_prod</code>와 스테이징 DB <code>cookie_staging</code>. 계정도 따로입니다</td></tr>
-            <tr><td>백업</td><td>매일 새벽 4시 덤프, 그램 안 14일 + 구글 드라이브(암호화) 30일</td></tr>
+            <tr><td>자동 배포</td><td>systemd 타이머가 5분마다 <code>deploy.sh</code>를 돌려 새 커밋을 받고, 바뀐 쪽(화면 또는 백엔드)만 다시 빌드합니다</td></tr>
+            <tr><td>백업</td><td>매일 새벽 4시 덤프, 홈서버 안 14일 + 구글 드라이브(gpg 암호화) 30일</td></tr>
+            <tr><td>Tailscale</td><td>집 밖에서 홈서버에 SSH로 들어가는 사설 네트워크</td></tr>
+            <tr><td>GitHub Actions</td><td>PR마다 백엔드 테스트, 화면 린트와 빌드, 데이터 검사를 돌립니다(<code>.github/workflows/ci.yml</code>)</td></tr>
+            <tr><td>외부 서비스</td><td>Mattermost(매일 CS 알림 웹훅), 소셜 로그인(Google, Kakao, Naver, GitHub), 티스토리 RSS(기술 블로그 목록)</td></tr>
+          </tbody>
+        </table>
+
+        <h3>메모리 예산 (8GB)</h3>
+        <p>모든 컨테이너에 <code>mem_limit</code>을 걸어 둡니다. 새 컨테이너를 넣기 전에 이 합계부터 확인하세요.</p>
+        <table className="ob-table">
+          <thead><tr><th>컨테이너</th><th>한도</th></tr></thead>
+          <tbody>
+            <tr><td>backend-prod</td><td>1GB (JVM 힙은 75%까지)</td></tr>
+            <tr><td>backend-staging</td><td>768MB</td></tr>
+            <tr><td>postgres</td><td>768MB</td></tr>
+            <tr><td>frontend-prod, frontend-staging</td><td>각 64MB</td></tr>
+            <tr><td><b>합계</b></td><td><b>약 2.7GB</b> (나머지는 Windows, WSL, 빌드에 씁니다)</td></tr>
           </tbody>
         </table>
       </Section>
@@ -294,67 +315,3 @@ function Note({ children }) {
   return <p className="ob-note">{children}</p>;
 }
 
-// 아키텍처 그림. 색은 테마 변수를 따라 라이트, 다크 모두에서 보인다
-function ArchDiagram() {
-  return (
-    <svg viewBox="0 0 1000 560" className="ob-diagram" role="img" aria-label="방문자가 Cloudflare를 거쳐 홈서버의 nginx, 백엔드, PostgreSQL로 이어지는 구조">
-      <defs>
-        <marker id="ob-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-          <path d="M0,0 L10,5 L0,10 z" className="ob-d-head" />
-        </marker>
-      </defs>
-      {/* 바깥 */}
-      <DBox x={20} y={200} w={120} h={60} title="방문자" sub="브라우저" />
-      <DBox x={180} y={200} w={140} h={60} title="Cloudflare" sub="DNS, HTTPS" accent />
-      <DArrow d="M140,230 L178,230" />
-      <text x={250} y={285} textAnchor="middle" className="ob-d-label">mycookie.dev</text>
-      <text x={250} y={300} textAnchor="middle" className="ob-d-label">staging.mycookie.dev</text>
-      {/* 홈서버 */}
-      <rect x={360} y={20} width={620} height={520} rx="10" className="ob-d-group" />
-      <text x={376} y={44} className="ob-d-group-t">홈서버 (노트북, Windows + WSL2 Ubuntu)</text>
-      <rect x={380} y={60} width={580} height={330} rx="8" className="ob-d-group ob-d-dash" />
-      <text x={396} y={82} className="ob-d-group-t">Docker Compose</text>
-      <DBox x={400} y={194} w={120} h={74} title="cloudflared" sub={'터널(홈서버가\n먼저 연결)'} />
-      <DArrow d="M400,230 L322,230" dash />
-      <DBox x={560} y={110} w={130} h={60} title="nginx 운영" sub="화면 + /api/" />
-      <DBox x={560} y={290} w={130} h={60} title="nginx 스테이징" sub="화면 + /api/" />
-      <DArrow d="M520,220 L558,150" />
-      <DArrow d="M520,240 L558,310" />
-      <DBox x={720} y={110} w={110} h={60} title="백엔드" sub="Spring Boot" />
-      <DBox x={720} y={290} w={110} h={60} title="백엔드" sub="스테이징" />
-      <DArrow d="M690,140 L718,140" />
-      <DArrow d="M690,320 L718,320" />
-      <DBox x={850} y={180} w={95} h={100} title="PostgreSQL" sub={'cookie_prod\ncookie_staging'} accent />
-      <DArrow d="M830,145 L848,200" />
-      <DArrow d="M830,315 L848,262" />
-      {/* 운영 도구 */}
-      <DBox x={400} y={420} w={170} h={60} title="deploy.sh" sub="5분마다 새 커밋 확인" />
-      <DBox x={600} y={420} w={170} h={60} title="backup.sh" sub="매일 4시 덤프" />
-      <DBox x={800} y={420} w={150} h={60} title="Tailscale" sub="원격 관리(SSH)" />
-      {/* 바깥 서비스 */}
-      <DBox x={180} y={400} w={140} h={50} title="GitHub" sub="비공개 저장소" />
-      <DBox x={180} y={480} w={140} h={50} title="구글 드라이브" sub="암호화 백업" />
-      <DArrow d="M400,450 L322,425" />
-      <DArrow d="M685,480 L685,505 L322,505" dash label="암호화해서 업로드" lx={500} ly={498} />
-    </svg>
-  );
-}
-
-function DBox({ x, y, w, h, title, sub, accent }) {
-  return (
-    <g>
-      <rect x={x} y={y} width={w} height={h} rx="8" className={accent ? 'ob-d-box ob-d-accent' : 'ob-d-box'} />
-      <text x={x + w / 2} y={y + h / 2 + (sub ? -4 : 5)} textAnchor="middle" className="ob-d-title">{title}</text>
-      {sub && sub.split('\n').map((line, i) => <text key={i} x={x + w / 2} y={y + h / 2 + 15 + i * 15} textAnchor="middle" className="ob-d-sub">{line}</text>)}
-    </g>
-  );
-}
-
-function DArrow({ d, dash, label, lx, ly }) {
-  return (
-    <g>
-      <path d={d} className={dash ? 'ob-d-line ob-d-dash' : 'ob-d-line'} markerEnd="url(#ob-arrow)" />
-      {label && <text x={lx} y={ly} textAnchor="middle" className="ob-d-label">{label}</text>}
-    </g>
-  );
-}

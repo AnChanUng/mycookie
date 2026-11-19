@@ -26,19 +26,9 @@
 .ob-note { padding: 14px 18px; border-left: 3px solid var(--ds-brand); border-radius: 0 8px 8px 0; background: var(--ds-surface-2); font-size: 15px; }
 
 .ob-figure { margin: 20px 0 24px; }
-.ob-diagram { display: block; width: 100%; height: auto; padding: 12px; border: 1px solid var(--ds-line-strong); border-radius: 10px; background: var(--ds-surface); box-sizing: border-box; }
-.ob-diagram-wrap { overflow-x: auto; }
+.ob-diagram { display: block; width: 100%; height: auto; border: 1px solid var(--ds-line-strong); border-radius: 10px; background: #fff; box-sizing: border-box; }
+.ob-diagram-wrap { display: block; overflow-x: auto; cursor: zoom-in; }
 .ob-figure figcaption { margin-top: 8px; text-align: center; font-size: 13.5px; color: var(--ds-text-3); }
-.ob-d-box { fill: var(--ds-surface); stroke: var(--ds-text-2); stroke-width: 1.4; }
-.ob-d-accent { stroke: var(--ds-brand); stroke-width: 1.8; }
-.ob-d-title { fill: var(--ds-text); font-size: 15px; font-weight: 700; }
-.ob-d-sub { fill: var(--ds-text-2); font-size: 12px; }
-.ob-d-label { fill: var(--ds-text-3); font-size: 12px; }
-.ob-d-line { fill: none; stroke: var(--ds-text-2); stroke-width: 1.5; }
-.ob-d-dash { stroke-dasharray: 6 5; }
-.ob-d-head { fill: var(--ds-text-2); }
-.ob-d-group { fill: none; stroke: var(--ds-line-strong); stroke-width: 1.4; }
-.ob-d-group-t { fill: var(--ds-text-2); font-size: 13px; font-weight: 700; }
 
 .ob-table { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 15px; line-height: 1.6; }
 .ob-table th, .ob-table td { padding: 10px 12px; border: 1px solid var(--ds-line-strong); text-align: left; vertical-align: top; }
@@ -72,7 +62,7 @@
   .ob-section h2 { font-size: 21px; }
   .ob-table td:first-child { white-space: normal; }
   /* 휴대폰: 그림을 읽을 수 있는 크기로 두고 옆으로 밀어서 본다 */
-  .ob-diagram { width: 760px; max-width: none; padding: 8px; }
+  .ob-diagram { width: 900px; max-width: none; }
 }
 
 .ob-muted { color: var(--ds-text-3); font-size: 14px; }
