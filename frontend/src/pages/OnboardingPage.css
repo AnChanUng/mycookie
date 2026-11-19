@@ -38,6 +38,22 @@
 .dl-sub { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 10px; }
 .dl-sub li { display: flex; gap: 12px; padding: 12px 14px; border-radius: 8px; background: var(--ds-surface-2); }
 .dl-no { flex: none; min-width: 28px; font-size: 14px; font-weight: 800; color: var(--ds-brand); font-variant-numeric: tabular-nums; line-height: 1.75; }
+.dl-goals { margin-top: 32px; padding-top: 24px; border-top: 1px solid var(--ds-line); }
+.dl-goals h3 { margin: 0 0 6px; font-size: 20px; }
+.dl-goals-lead { margin: 0 0 14px; color: var(--ds-text-2); font-size: 15px; line-height: 1.65; }
+.dl-goal-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.dl-goal-list button { display: flex; gap: 12px; align-items: flex-start; width: 100%; padding: 12px 14px; border: 1px solid var(--ds-line-strong); border-radius: 10px; background: var(--ds-surface); color: var(--ds-text); font: inherit; text-align: left; cursor: pointer; }
+.dl-goal-list button:hover { border-color: var(--ds-brand); }
+.dl-goal-list button.on { border-color: var(--ds-brand); background: var(--ds-brand-soft); }
+.dl-goal-list b { display: block; font-size: 16px; }
+.dl-goal-list small { display: block; margin-top: 2px; font-size: 14px; line-height: 1.55; color: var(--ds-text-2); }
+.dl-rank { flex: none; display: grid; place-items: center; width: 28px; height: 28px; border: 1.5px dashed var(--ds-line-strong); border-radius: 50%; font-weight: 800; font-variant-numeric: tabular-nums; }
+.dl-goal-list button.on .dl-rank { border: 0; background: var(--ds-brand); color: #fff; }
+.dl-goal-actions { display: flex; gap: 8px; align-items: center; margin-top: 14px; flex-wrap: wrap; }
+.dl-goal-actions [role=status] { margin-right: auto; font-size: 14px; color: var(--ds-text-3); }
+.dl-goal-btn { height: 38px; padding: 0 14px; border: 1px solid var(--ds-line-strong); border-radius: 8px; background: var(--ds-surface); color: var(--ds-text); font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; }
+.dl-goal-btn.primary { border-color: var(--ds-brand); background: var(--ds-brand); color: #fff; }
+.dl-goal-btn:disabled { opacity: .45; cursor: default; }
 
 .ob-section { padding-top: 52px; scroll-margin-top: 80px; }
 .ob-section h2 { display: flex; gap: 12px; align-items: baseline; margin: 0 0 16px; font-size: 25px; letter-spacing: -0.02em; }
