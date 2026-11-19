@@ -46,5 +46,10 @@ mkdir -p "$ROOT/pgdata" "$ROOT/backups"
 "${COMPOSE[@]}" up -d postgres
 deploy app "$PROD_BRANCH" prod production
 deploy staging "$STAGING_BRANCH" staging preview
-"${COMPOSE[@]}" up -d cloudflared
+# 터널 토큰을 넣기 전에는 그램 안(localhost:8080)에서만 확인한다
+if grep -qE '^TUNNEL_TOKEN=.+' "$ROOT/.env"; then
+  "${COMPOSE[@]}" up -d cloudflared
+else
+  echo "TUNNEL_TOKEN이 비어 있어 터널은 띄우지 않았습니다. 확인: http://localhost:8080"
+fi
 docker image prune -f >/dev/null
