@@ -125,6 +125,12 @@ app:
   redis:
     enabled: ${REDIS_ENABLED:false}
     key-prefix: ${REDIS_KEY_PREFIX:local:}
+  # 고위험 오류(치명 오류, 5분간 ERROR 급증)만 Mattermost로 알리고 Gemini(무료)로 요약을 붙인다. 웹훅이 없으면 보내지 않는다
+  alert:
+    enabled: ${ALERT_ENABLED:true}
+    error-threshold: ${ALERT_ERROR_THRESHOLD:10}
+    cooldown-minutes: ${ALERT_COOLDOWN_MINUTES:30}
+    gemini-model: ${ALERT_GEMINI_MODEL:gemini-2.5-flash}
   # 제보가 들어오면 이벤트를 Kafka에 넣고, 받는 쪽에서 GitHub 이슈와 Mattermost 알림을 처리한다
   kafka:
     enabled: ${KAFKA_ENABLED:false}
