@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import api from '../api';
 import './OnboardingPage.css';
 
-// 신규 개발자 안내 페이지. 들어오는 주소는 /private/bomin, 화면에서는 알아보기 어려운 주소(ONBOARDING_PATH)로 바꿔 보여 준다.
+// 신입 개발자 온보딩 페이지. 들어오는 주소는 /private/bomin, 화면에서는 알아보기 어려운 주소(ONBOARDING_PATH)로 바꿔 보여 준다.
 // 주소를 숨기는 것일 뿐 보안 장치는 아니다. 비밀번호, 키, 연결 주소 같은 비밀값은 이 페이지에 적지 않는다.
 export const ONBOARDING_PATH = '/x/f9aa1502c8';
 const REPO = 'https://github.com/AnChanUng/mycookie';
@@ -13,10 +13,10 @@ export default function OnboardingPage() {
   return (
     <div className="ob">
       <header className="ob-hero">
-        <p className="ob-eyebrow">신규 개발자 안내</p>
-        <h1>나의쿠키에 오신 걸 환영합니다</h1>
+        <p className="ob-eyebrow">나의쿠키</p>
+        <h1>신입 개발자 온보딩</h1>
         <p className="ob-lead">
-          이 페이지 하나로 나의쿠키가 무엇이고, 어떻게 생겼고, 어디서부터 손대면 되는지 알 수 있게 정리했습니다.
+          나의쿠키에 오신 걸 환영합니다. 이 페이지 하나로 나의쿠키가 무엇이고, 어떻게 생겼고, 어디서부터 손대면 되는지 알 수 있게 정리했습니다.
           위에서부터 순서대로 읽고, 마지막의 첫 주 체크리스트를 따라가 보세요.
         </p>
         <nav className="ob-toc" aria-label="목차">
