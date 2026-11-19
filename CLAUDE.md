@@ -13,3 +13,9 @@
 ## 패치노트 (frontend/src/data/patchNotes.js, frontend/src/data/changelog.js)
 - 사용자가 체감하는 기능 변화만 적는다. 부하 테스트, 성능 측정, 인프라, 문서, 리팩터링 같은 비기능 항목은 넣지 않는다.
 - 핵심만 짧게. 버전당 항목 3~4개 이내, 자잘한 수정은 생략한다.
+
+## 브랜치와 PR
+- 작업 브랜치(`feature/*`, `fix/*`)는 항상 `dev`로 PR을 올린다. `master`에는 `dev` → `master` PR만 올리고, 운영 머지는 관리자만 한다.
+- PR 위험도는 `.github/workflows/pr-risk.yml`이 바뀐 파일로 정한다(낮음: 자동 머지, 중간: AI 리뷰 통과 시 자동 머지, 높음: 사람 1명 승인). 새 민감 영역(보안, 결제, 스키마, 배포)을 만들면 그 파일의 높음 목록에 경로를 추가한다.
+- 브랜치 규칙 원본은 `.github/rulesets/`에 둔다.
+
