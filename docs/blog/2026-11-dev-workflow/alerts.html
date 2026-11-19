@@ -1,56 +1,71 @@
 <!doctype html>
-<!-- 그림 3: mycookie-alerts 채널에 오는 알림 예시(설명용으로 다시 그린 화면) -->
+<!-- 그림 3: mycookie-alerts 채널에 오는 알림 예시(설명용으로 다시 그린 화면, 보내는 이름은 cookie 봇) -->
 <html lang="ko"><head><meta charset="utf-8">
 <style>
   body { margin: 0; background: #fff; font-family: Pretendard, sans-serif; }
-  .win { width: 880px; margin: 24px; border: 1px solid #E2E8F0; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 16px rgba(15,23,42,.08); }
-  .head { padding: 14px 20px; border-bottom: 1px solid #E2E8F0; font-weight: 700; font-size: 16px; color: #1E293B; }
+  .win { width: 860px; margin: 24px; border: 1px solid #E2E8F0; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 16px rgba(15,23,42,.08); background: #fff; }
+  .head { padding: 14px 22px; border-bottom: 1px solid #E2E8F0; font-weight: 700; font-size: 17px; color: #1E293B; }
   .head span { color: #94A3B8; font-weight: 500; margin-left: 8px; font-size: 13px; }
-  .post { display: flex; gap: 12px; padding: 16px 20px; border-bottom: 1px solid #F1F5F9; }
-  .avatar { flex: none; width: 36px; height: 36px; border-radius: 8px; display: grid; place-items: center; color: #fff; font-weight: 800; font-size: 14px; }
-  .who { font-weight: 700; font-size: 14px; color: #1E293B; }
-  .who time { font-weight: 500; color: #94A3B8; margin-left: 6px; font-size: 12px; }
-  h4 { margin: 6px 0 4px; font-size: 15px; color: #0F172A; }
-  p, li { margin: 2px 0; font-size: 13.5px; line-height: 1.6; color: #334155; }
-  ul { margin: 4px 0; padding-left: 18px; }
-  blockquote { margin: 4px 0; padding-left: 10px; border-left: 3px solid #CBD5E1; color: #475569; font-size: 13.5px; }
+  .post { display: flex; gap: 14px; padding: 16px 22px; }
+  .post + .post { border-top: 1px solid #F1F5F9; }
+  .avatar { position: relative; flex: none; width: 42px; height: 42px; border-radius: 50%; display: grid; place-items: center; font-size: 22px;
+            background: linear-gradient(135deg, #8B5CF6, #3B82F6); box-shadow: 0 2px 6px rgba(59,130,246,.35); }
+  .avatar::after { content: "AI"; position: absolute; right: -4px; bottom: -3px; padding: 0 4px; border-radius: 6px; background: #0F172A; color: #fff; font-size: 9px; font-weight: 800; line-height: 15px; }
+  .who { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 15px; color: #1E293B; }
+  .bot { padding: 1px 6px; border-radius: 4px; background: #F1F5F9; color: #475569; font-size: 11px; font-weight: 700; }
+  time { font-weight: 500; color: #94A3B8; font-size: 13px; }
+  h4 { margin: 8px 0 6px; font-size: 20px; color: #0F172A; }
+  h4 a { color: #4F6BED; }
+  p, li { margin: 3px 0; font-size: 14.5px; line-height: 1.6; color: #334155; }
+  b { color: #0F172A; }
+  code, .chip { background: #F1F5F9; padding: 1px 6px; border-radius: 4px; font-size: 13px; color: #334155; font-family: Menlo, monospace; }
+  .chip { font-family: inherit; }
   a { color: #2563EB; text-decoration: none; }
-  code { background: #F1F5F9; padding: 1px 5px; border-radius: 4px; font-size: 12.5px; }
-  .ai { margin-top: 6px; padding: 8px 12px; background: #F5F3FF; border-radius: 8px; }
-  .label { font-weight: 700; font-size: 13px; color: #1E293B; margin-top: 6px; }
+  ul { margin: 4px 0; padding-left: 18px; }
+  .ai { margin-top: 8px; padding: 10px 14px; background: #F5F3FF; border-radius: 10px; }
+  .label { font-weight: 700; font-size: 14px; color: #1E293B; margin-top: 8px; }
+  .muted { color: #94A3B8; font-size: 12.5px; }
 </style></head>
 <body>
 <div class="win">
   <div class="head"># mycookie-alerts <span>나의쿠키 서버의 할 일 알림</span></div>
 
   <div class="post">
-    <div class="avatar" style="background:#2563EB">쿠</div>
+    <div class="avatar">🍪</div>
     <div>
-      <div class="who">나의쿠키<time>오후 2:14</time></div>
-      <h4>🐞 새 버그 제보</h4>
-      <p><b>대결 결과 화면이 안 떠요</b></p>
-      <blockquote>대결 끝나고 결과 보기를 누르면 빈 화면만 나와요</blockquote>
-      <p><a>GitHub 이슈 #92</a> | 화면 <code>/duel</code></p>
+      <div class="who">cookie <span class="bot">BOT</span> <time>오후 11:09</time></div>
+      <h4>👀 리뷰 요청 PR <a>#82</a></h4>
+      <p><b>운영 배포: 고위험 오류 긴급 알림 (dev → master)</b></p>
+      <p><code>dev</code> → <code>master</code></p>
     </div>
   </div>
 
   <div class="post">
-    <div class="avatar" style="background:#24292F">G</div>
+    <div class="avatar">🍪</div>
     <div>
-      <div class="who">GitHub<time>오후 2:31</time></div>
+      <div class="who">cookie <span class="bot">BOT</span> <time>오후 11:09</time></div>
+      <h4>📝 새 이슈 <a>#83</a></h4>
+      <p><b>[기능] SSAFY 계정 소셜 로그인 (OAuth)</b> <span class="chip">기능</span></p>
+    </div>
+  </div>
+
+  <div class="post">
+    <div class="avatar">🍪</div>
+    <div>
+      <div class="who">cookie <span class="bot">BOT</span> <time>오후 11:31</time></div>
       <h4>🚨 CI 실패</h4>
-      <p><code>fix/duel-result</code> · 대결 결과 저장 순서 수정 · bomin</p>
+      <p><code>fix/duel-result</code> · 대결 결과 저장 순서 수정</p>
       <p><a>실패한 검사 보기</a></p>
     </div>
   </div>
 
   <div class="post">
-    <div class="avatar" style="background:#DC2626">!</div>
+    <div class="avatar">🍪</div>
     <div>
-      <div class="who">나의쿠키<time>오후 3:02</time></div>
+      <div class="who">cookie <span class="bot">BOT</span> <time>오후 11:47</time></div>
       <h4>🚨 [긴급] 서버 오류 급증: 5분간 ERROR 12건</h4>
       <div class="ai">
-        <div class="label">🤖 Gemini 요약 (AI 추측이 섞일 수 있어요)</div>
+        <div class="label">🤖 AI 요약 (추측이 섞일 수 있어요)</div>
         <ul>
           <li>무슨 일: 대결 결과 저장 중 DB 연결을 얻지 못하고 있습니다.</li>
           <li>영향: 대결을 끝낸 사용자의 결과 화면이 뜨지 않습니다.</li>
@@ -60,8 +75,8 @@
         </ul>
       </div>
       <div class="label">📎 원본 증거</div>
-      <p>- <code>CannotGetJdbcConnectionException</code> × 12 (처음 14:58:10, 마지막 15:01:47) 위치 <code>DuelService.finish:42</code></p>
-      <p style="color:#94A3B8;font-size:12px">같은 문제는 30분 동안 다시 알리지 않아요.</p>
+      <p><code>CannotGetJdbcConnectionException</code> × 12 (처음 23:43:10, 마지막 23:46:47) · <code>DuelService.finish:42</code></p>
+      <p class="muted">같은 문제는 30분 동안 다시 알리지 않아요.</p>
     </div>
   </div>
 </div>
