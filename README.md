@@ -81,6 +81,7 @@ CS 전공지식, 기술면접, 코딩테스트, 실전 대결, 학습 기록을 
 | [클라우드에서 홈서버로](docs/homeserver.md) | Vercel, Render, Neon에서 노트북 홈서버로 옮긴 과정(DB 이전, 터널 전환, 백업) |
 | [대결 동시성](docs/duel-concurrency.md) | 두 사람이 동시에 답을 낼 때 점수가 꼬이지 않게 처리 |
 | [커넥션 풀](docs/hikaricp-pool.md) | 부하 테스트로 HikariCP 풀 크기 정하기 |
+| [모니터링](docs/monitoring.md) | Grafana, Loki, Prometheus로 로그와 서버 상태 보기(개인정보 가림, 팀원 보기 전용 계정) |
 | [보안 설계](docs/security.md) | 비밀번호 재설정 메일 인증, 요청 제한, 크롤링 대응, 보안 헤더 |
 | [검색 노출](docs/seo.md) | SPA를 미리 렌더링해 검색엔진에 노출 |
 
