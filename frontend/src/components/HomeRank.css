@@ -1,0 +1,47 @@
+/* 첫 화면 "실시간 순위" 카드: 시상대(1~3위) + 짧은 줄(4~5위) + 내 순위 고정 */
+.hr { display: flex; flex-direction: column; border: 1px solid var(--ds-line-strong); border-radius: var(--ds-r-xl); background: var(--ds-surface); overflow: hidden; }
+.hr-head { display: flex; align-items: center; gap: var(--ds-s2); padding: var(--ds-s4) var(--ds-s5) 0; }
+.hr-head h2 { display: flex; align-items: center; gap: 8px; margin: 0; font-size: var(--ds-fs-body); font-weight: 700; }
+.hr-live { width: 8px; height: 8px; border-radius: 50%; background: var(--ds-green); box-shadow: 0 0 0 0 var(--ds-green-soft); animation: hr-pulse 2s ease-out infinite; }
+@keyframes hr-pulse { 0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--ds-green) 45%, transparent); } 70%, 100% { box-shadow: 0 0 0 7px transparent; } }
+@media (prefers-reduced-motion: reduce) { .hr-live { animation: none; } }
+.hr-total { font-size: var(--ds-fs-caption); color: var(--ds-text-3); }
+.hr-more { margin-left: auto; font-size: var(--ds-fs-caption); color: var(--ds-text-2); text-decoration: none; }
+.hr-more:hover { color: var(--ds-brand); }
+
+/* 시상대: 1위가 가운데, 조금 더 높게 */
+.hr-podium { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: end; gap: var(--ds-s2); margin: 0; padding: var(--ds-s5) var(--ds-s4) var(--ds-s4); list-style: none; }
+.hr-step { position: relative; display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 0; padding: var(--ds-s4) var(--ds-s2) var(--ds-s3); border-radius: var(--ds-r-lg); background: var(--ds-surface-2); text-align: center; }
+.hr-step.p1 { padding-top: var(--ds-s6); background: color-mix(in srgb, #ffda78 22%, var(--ds-surface)); }
+.hr-step.p2 { background: color-mix(in srgb, #c7d0da 22%, var(--ds-surface)); }
+.hr-step.p3 { background: color-mix(in srgb, #e3a674 18%, var(--ds-surface)); }
+.hr-step.me { outline: 2px solid var(--ds-brand); outline-offset: -2px; }
+.hr-step .tier-badge { width: 40px; height: 40px; }
+.hr-step.p1 .tier-badge { width: 52px; height: 52px; }
+.hr-medal { position: absolute; top: -10px; display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; color: #fff; font-size: 12px; font-weight: 800; box-shadow: 0 0 0 2px var(--ds-surface); }
+.p1 .hr-medal { background: #d9a227; }
+.p2 .hr-medal { background: #8b98a8; }
+.p3 .hr-medal { background: #b8733f; }
+.hr-pname { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--ds-fs-small); }
+.hr-pcount { font-size: var(--ds-fs-caption); color: var(--ds-text-2); font-variant-numeric: tabular-nums; }
+
+/* 4위부터 짧은 줄 */
+.hr-list { margin: 0; padding: 0 0 var(--ds-s2); list-style: none; border-top: 1px solid var(--ds-line); }
+.hr-row { display: grid; grid-template-columns: 22px 24px minmax(0, 1fr) auto; align-items: center; gap: var(--ds-s3); padding: 9px var(--ds-s5); }
+.hr-row .tier-badge { width: 24px; height: 24px; }
+.hr-rank { font-size: var(--ds-fs-small); font-weight: 700; color: var(--ds-text-3); text-align: center; font-variant-numeric: tabular-nums; }
+.hr-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--ds-fs-small); font-weight: 600; }
+.hr-name em { margin-left: 6px; padding: 1px 6px; border-radius: var(--ds-r-sm); background: var(--ds-brand); color: #fff; font-style: normal; font-size: 11px; font-weight: 700; }
+.hr-count { font-size: var(--ds-fs-small); font-variant-numeric: tabular-nums; }
+.hr-row.me { background: var(--ds-brand-soft); }
+.hr-row.pinned { margin-top: 4px; border-top: 1px dashed var(--ds-line-strong); }
+.hr-hint { margin: 0; padding: var(--ds-s3) var(--ds-s5); border-top: 1px solid var(--ds-line); font-size: var(--ds-fs-caption); color: var(--ds-brand); }
+.hr-empty { margin: 0; padding: var(--ds-s10) var(--ds-s5); text-align: center; font-size: var(--ds-fs-small); color: var(--ds-text-3); }
+
+/* 시상대 밖일 때 내 순위 한 줄(4~5위 줄 대신) */
+.hr-mine { display: grid; grid-template-columns: auto 24px minmax(0, 1fr) auto; align-items: center; gap: var(--ds-s3); padding: 10px var(--ds-s5); border-top: 1px solid var(--ds-line); background: var(--ds-brand-soft); color: var(--ds-text); text-decoration: none; }
+.hr-mine:hover { background: color-mix(in srgb, var(--ds-brand) 16%, transparent); }
+.hr-mine .tier-badge { width: 24px; height: 24px; }
+.hr-mine-rank { font-size: var(--ds-fs-small); font-weight: 800; color: var(--ds-brand); font-variant-numeric: tabular-nums; }
+.hr-mine-gap { font-size: var(--ds-fs-caption); color: var(--ds-text-2); white-space: nowrap; font-variant-numeric: tabular-nums; }
+@media (max-width: 420px) { .hr-mine-gap { white-space: normal; text-align: right; } }

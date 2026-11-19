@@ -57,7 +57,7 @@ public class OAuthService {
         this.allowedOrigins = Arrays.stream(origins.split(",")).map(String::trim).filter(s -> !s.isEmpty()).toList();
     }
 
-    public record Ticket(String provider, String subject, String email, String name) {}
+    public record Ticket(String provider, String subject, String email, String name, String ageRange) {}
 
     public List<String> providers() {
         return OAuthClient.ORDER.stream().filter(client::enabled).toList();
@@ -83,17 +83,25 @@ public class OAuthService {
         if (code == null || code.isBlank()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "로그인이 취소되었습니다.");
         }
-        OAuthClient.Profile profile = client.fetch(provider, code, redirectUri);
+        OAuthClient.Profile profile = client.fetch(provider, code, redirectUri, state);
         if (profile.subject() == null || profile.subject().isBlank()) {
             throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "사용자 정보를 읽지 못했습니다.");
         }
         Optional<SocialAccount> linked = socials.findByProviderAndProviderUserId(provider, profile.subject());
-        if (linked.isPresent()) return new Result(linked.get().getUser(), null, profile);
+        if (linked.isPresent()) {
+            SocialAccount account = linked.get();
+            if (profile.ageRange() != null && !profile.ageRange().equals(account.getAgeRange())) {
+                account.setAgeRange(profile.ageRange());
+                socials.save(account);
+            }
+            return new Result(account.getUser(), null, profile);
+        }
         ObjectNode payload = json.createObjectNode()
                 .put("t", "ticket").put("p", provider).put("s", profile.subject())
                 .put("e", System.currentTimeMillis() + TICKET_TTL_MS);
         if (profile.email() != null) payload.put("m", profile.email());
         if (profile.name() != null) payload.put("a", profile.name());
+        if (profile.ageRange() != null) payload.put("g", profile.ageRange());
         return new Result(null, sign(payload), profile);
     }
 
@@ -102,7 +110,8 @@ public class OAuthService {
     public Ticket readTicket(String ticket) {
         JsonNode t = verify(ticket, "ticket");
         return new Ticket(t.path("p").asText(), t.path("s").asText(),
-                t.hasNonNull("m") ? t.get("m").asText() : null, t.hasNonNull("a") ? t.get("a").asText() : null);
+                t.hasNonNull("m") ? t.get("m").asText() : null, t.hasNonNull("a") ? t.get("a").asText() : null,
+                t.hasNonNull("g") ? t.get("g").asText() : null);
     }
 
     @Transactional
@@ -116,7 +125,7 @@ public class OAuthService {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "이 닉네임에는 이미 다른 " + label(ticket.provider()) + " 계정이 연결되어 있습니다.");
         }
         socials.saveAndFlush(SocialAccount.builder().provider(ticket.provider()).providerUserId(ticket.subject())
-                .email(ticket.email()).user(user).build());
+                .email(ticket.email()).ageRange(ticket.ageRange()).user(user).build());
     }
 
     public List<String> linkedProviders(User user) {
@@ -124,7 +133,7 @@ public class OAuthService {
     }
 
     public static String label(String provider) {
-        return switch (provider) { case "google" -> "구글"; case "kakao" -> "카카오"; case "github" -> "깃허브"; default -> provider; };
+        return switch (provider) { case "google" -> "구글"; case "naver" -> "네이버"; case "kakao" -> "카카오"; case "github" -> "깃허브"; default -> provider; };
     }
 
     private void requireProvider(String provider) {

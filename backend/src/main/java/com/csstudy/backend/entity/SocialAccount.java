@@ -25,7 +25,7 @@ public class SocialAccount {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // google · kakao · github
+    // google · naver · kakao · github
     @Column(nullable = false, length = 16)
     private String provider;
 
@@ -35,6 +35,10 @@ public class SocialAccount {
 
     @Column(length = 255)
     private String email;
+
+    // 네이버 로그인에서 동의한 연령대(예: "20-29"). 로그인할 때마다 최신 값으로 바꾼다
+    @Column(name = "age_range", length = 16)
+    private String ageRange;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id", nullable = false)

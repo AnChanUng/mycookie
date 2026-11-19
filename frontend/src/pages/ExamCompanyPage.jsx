@@ -25,7 +25,7 @@ const Rich = ({ text }) => {
 };
 
 // 따로 상단 메뉴를 가진 분류(hub)에서 풀이 화면을 열었을 때 돌아갈 메뉴 이름
-const HUB_NAMES = { ssafy: 'SSAFY', aptitude: 'NCS/인적성', major: '필기이론', web: '웹' };
+const HUB_NAMES = { ssafy: 'SSAFY', aptitude: 'NCS/인적성', major: '필기이론', web: '웹', ai: 'AI' };
 
 const shuffle = (arr) => {
   const a = arr.slice();

@@ -79,6 +79,25 @@ app:
   security:
     rate-limit-enabled: true
     trust-forwarded-for: ${TRUST_FORWARDED_FOR:${RENDER:false}}
+  # 등급 구매(토스페이먼츠). 두 키가 모두 있어야 결제가 켜진다. 개발 중에는 test_ck_ · test_sk_ 테스트 키를 쓴다
+  payment:
+    # 결제 열기. 키가 있어도 false면 등급 구매 화면은 "준비 중"이고 주문을 받지 않는다
+    open: ${PAYMENT_OPEN:false}
+    toss:
+      client-key: ${TOSS_CLIENT_KEY:}
+      secret-key: ${TOSS_SECRET_KEY:}
+    # 등급별 가격(원). 비우면 TierPurchaseService의 기본값(은 1,900 · 금 3,900 · 다이아 19,900 · 루비 49,900)
+    prices:
+      silver: ${PRICE_SILVER:1900}
+      gold: ${PRICE_GOLD:3900}
+      diamond: ${PRICE_DIAMOND:19900}
+      ruby: ${PRICE_RUBY:49900}
+  # 건의 · 버그 제보를 GitHub 이슈로 올린다. 토큰이 비어 있으면 DB에만 저장한다
+  # 토큰: GitHub fine-grained token, 이 저장소만 · Issues: Read and write 권한만
+  feedback:
+    github:
+      token: ${FEEDBACK_GITHUB_TOKEN:}
+      repo: ${FEEDBACK_GITHUB_REPO:AnChanUng/mycookie}
   # 소셜 · 깃허브 로그인. 클라이언트 ID가 비어 있는 제공자는 버튼을 숨긴다
   # 각 제공자 콘솔에 등록할 리디렉션 주소: <사이트 주소>/auth/callback (예: https://mycookie.dev/auth/callback)
   oauth:
@@ -88,6 +107,9 @@ app:
     google:
       client-id: ${OAUTH_GOOGLE_CLIENT_ID:}
       client-secret: ${OAUTH_GOOGLE_CLIENT_SECRET:}
+    naver:
+      client-id: ${OAUTH_NAVER_CLIENT_ID:}
+      client-secret: ${OAUTH_NAVER_CLIENT_SECRET:}
     kakao:
       client-id: ${OAUTH_KAKAO_CLIENT_ID:}
       client-secret: ${OAUTH_KAKAO_CLIENT_SECRET:}

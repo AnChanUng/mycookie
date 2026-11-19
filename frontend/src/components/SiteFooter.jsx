@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import NewsletterSubscribe from './NewsletterSubscribe';
 import './SiteFooter.css';
 
@@ -6,6 +6,7 @@ const GITHUB = 'https://github.com/AnChanUng/mycookie';
 
 // 사이트 맨 아래 푸터. 필수 안내(패치노트 · 이용약관 · 개인정보 처리방침)만 둔다
 export default function SiteFooter() {
+  const { pathname } = useLocation();
   return (
     <footer className="site-footer">
       <div className="site-footer-inner">
@@ -26,7 +27,7 @@ export default function SiteFooter() {
               <ul>
                 <li><Link to="/terms">서비스 이용약관</Link></li>
                 <li><Link to="/privacy"><strong>개인정보 처리방침</strong></Link></li>
-                <li><a href={`${GITHUB}/issues`} target="_blank" rel="noreferrer">문의 · 오류 제보</a></li>
+                <li><Link to="/feedback" state={pathname === "/feedback" ? undefined : { from: pathname }}>건의 · 버그 제보</Link></li>
               </ul>
             </div>
           </nav>

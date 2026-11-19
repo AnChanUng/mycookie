@@ -9,6 +9,8 @@ import { RenewalNotice, RenewalShell } from './Renewal';
 import { MAINTENANCE } from './maintenance';
 import './App.css';
 import './exam.css';
+// 안쪽 화면을 첫 화면과 같은 스타일로 덮어쓴다. 반드시 다른 CSS보다 뒤에 둔다
+import './styles/inner.css';
 
 const PromotionExamPage = lazy(() => import('./pages/PromotionExamPage'));
 const ChangelogPage = lazy(() => import('./pages/ChangelogPage'));
@@ -29,12 +31,18 @@ const InterviewPracticePage = lazy(() => import('./pages/InterviewPracticePage')
 const CsNotesPage = lazy(() => import('./pages/CsNotesPage'));
 const WebEssentialsPage = lazy(() => import('./pages/WebEssentialsPage'));
 const WebPage = lazy(() => import('./pages/WebPage'));
+const AiPage = lazy(() => import('./pages/AiPage'));
+const FeedbackPage = lazy(() => import('./pages/FeedbackPage'));
+const TierShopPage = lazy(() => import('./pages/TierShopPage'));
+const PaymentResultPage = lazy(() => import('./pages/PaymentResultPage'));
+const RankPage = lazy(() => import('./pages/RankPage'));
 const TechBlogsPage = lazy(() => import('./pages/TechBlogsPage'));
 const MajorPage = lazy(() => import('./pages/MajorPage'));
 const MajorExamPage = lazy(() => import('./pages/MajorExamPage'));
 const ExamListPage = lazy(() => import('./pages/ExamListPage'));
 const ExamCompanyPage = lazy(() => import('./pages/ExamCompanyPage'));
 const PrivateChanungPage = lazy(() => import('./pages/PrivateChanungPage'));
+const PrivateRedirect = lazy(() => import('./pages/PrivateRedirect'));
 const TopicPage = lazy(() => import('./pages/TopicPage'));
 const AlgoPage = lazy(() => import('./pages/AlgoPage'));
 const DuelPage = lazy(() => import('./pages/DuelPage'));
@@ -44,7 +52,6 @@ const NcsPage = lazy(() => import('./pages/NcsPage'));
 const WeakPage = lazy(() => import('./pages/WeakPage'));
 const SsafyPage = lazy(() => import('./pages/SsafyPage'));
 const AptitudePage = lazy(() => import('./pages/AptitudePage'));
-const CosProPage = lazy(() => import('./pages/CosProPage'));
 const AuthCallbackPage = lazy(() => import('./pages/AuthCallbackPage'));
 const VerifyEmailPage = lazy(() => import('./pages/AuthEmailPage').then(m => ({ default: m.VerifyEmailPage })));
 const ResetPasswordPage = lazy(() => import('./pages/AuthEmailPage').then(m => ({ default: m.ResetPasswordPage })));
@@ -60,10 +67,12 @@ function App() {
   if (MAINTENANCE) return (
     <BrowserRouter>
       <Routes>
-        <Route path="private/chanung" element={<RenewalShell />}>
+        <Route path="x/c7e19b4f2d" element={<RenewalShell />}>
           <Route index element={<PrivateChanungPage />} />
-          <Route path=":id" element={<PrivateChanungPage />} />
+          <Route path=":code" element={<PrivateChanungPage />} />
         </Route>
+        <Route path="private/chanung" element={<PrivateRedirect />} />
+        <Route path="private/chanung/:id" element={<PrivateRedirect />} />
         <Route path="admin/cu" element={<Navigate to="/private/chanung/admin" replace />} />
         {/* 리뉴얼 기간에도 패치노트 · 약관은 공개한다 */}
         <Route element={<RenewalShell footer />}>
@@ -115,6 +124,13 @@ function App() {
           <Route path="web" element={<WebPage />} />
           <Route path="tech-blogs" element={<TechBlogsPage />} />
           <Route path="web/:company" element={<ExamCompanyPage />} />
+          <Route path="feedback" element={<FeedbackPage />} />
+          <Route path="tiers" element={<TierShopPage />} />
+          <Route path="rank" element={<RankPage />} />
+          <Route path="payments/success" element={<PaymentResultPage ok />} />
+          <Route path="payments/fail" element={<PaymentResultPage ok={false} />} />
+          <Route path="ai" element={<AiPage />} />
+          <Route path="ai/:company" element={<ExamCompanyPage />} />
           <Route path="major" element={<MajorPage />} />
           <Route path="major/:company" element={<ExamCompanyPage />} />
           <Route path="major-exam" element={<MajorExamPage />} />
@@ -125,11 +141,12 @@ function App() {
           <Route path="ssafy/:company" element={<ExamCompanyPage />} />
           <Route path="aptitude" element={<AptitudePage />} />
           <Route path="aptitude/:company" element={<ExamCompanyPage />} />
-          <Route path="aptitude/daou/cospro" element={<CosProPage />} />
-          <Route path="aptitude/daou/cospro/:pid" element={<CosProPage />} />
           <Route path="computer-general" element={<Navigate to="/private/chanung" replace />} />
-          <Route path="private/chanung" element={<PrivateChanungPage />} />
-          <Route path="private/chanung/:id" element={<PrivateChanungPage />} />
+          {/* 관리자: 들어오는 주소는 /private/chanung, 화면 안에서는 메뉴 이름이 안 보이는 주소(privatePath.js) */}
+          <Route path="x/c7e19b4f2d" element={<PrivateChanungPage />} />
+          <Route path="x/c7e19b4f2d/:code" element={<PrivateChanungPage />} />
+          <Route path="private/chanung" element={<PrivateRedirect />} />
+          <Route path="private/chanung/:id" element={<PrivateRedirect />} />
           <Route path="topics" element={<TopicPage />} />
           <Route path="algo" element={<AlgoPage />} />
           <Route path="calc" element={<CalcPage />} />

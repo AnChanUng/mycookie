@@ -3,10 +3,23 @@
 // status: 'released' 배포됨(master) | 'dev' 개발 브랜치에만 있음 | 'wip' 작업 중
 export const PATCH_NOTES = [
   {
+    version: '0.23.0',
+    date: '2026-11-19',
+    title: '새 메뉴 · 실시간 순위 · 건의 제보',
+    status: 'released',
+    summary: '메뉴를 AI · 웹 개발 · 인적성 · 전공필기 중심으로 다시 나누고, 첫 화면 맨 위에 실시간 순위를 두었습니다.',
+    items: [
+      { type: 'feature', text: '상단 메뉴: 컴퓨터공학 · 웹 개발 · AI · 인적성 · 전공필기 · 코테 · 내 학습 · 소개. 인적성은 SKCT · GSAT · LG 모의고사(링커리어)로 바로 연결.' },
+      { type: 'feature', text: '첫 화면 맨 위 실시간 순위(1~3위 시상대 + 내 순위)와 전체 순위 화면.' },
+      { type: 'feature', text: '건의 · 버그 제보: 보내면 개발 목록(GitHub 이슈)에 바로 올라감.' },
+      { type: 'improve', text: '네이버 로그인, 로그인 · 문제집 화면을 첫 화면과 같은 디자인으로 정리.' },
+    ],
+  },
+  {
     version: '0.22.0',
     date: '2026-11-18',
     title: '소셜 로그인, 학습 메일 구독',
-    status: 'dev',
+    status: 'released',
     summary: '구글, 카카오, 깃허브 로그인을 추가하고 상단 메뉴를 나눴습니다.',
     items: [
       { type: 'feature', text: '소셜 로그인(구글, 카카오, 깃허브). 처음 로그인할 때 기존 닉네임 계정에 연결하거나 새 계정을 만듦.' },

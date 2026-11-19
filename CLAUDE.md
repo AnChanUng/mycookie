@@ -2,6 +2,7 @@
 
 ## 인프라: 온프레미스 (LG 그램 노트북 서버)
 - 화면(nginx) · 백엔드 · PostgreSQL을 그램 노트북 한 대에서 Docker Compose로 돌린다(`deploy/homeserver/`, 문서 `docs/homeserver.md`). 설계할 때 항상 이 전제를 지킨다.
+- `frontend/vercel.json`의 보안 헤더를 고치면 `node frontend/scripts/export-nginx-headers.mjs`로 그램 nginx 헤더도 다시 만든다.
 - 메모리 8GB 안에서 모두 돌아야 한다. 새 컨테이너나 무거운 기능을 넣을 때는 `mem_limit`과 합계를 확인한다.
 - 특정 클라우드 전용 서비스(관리형 큐, 메일 API, 서버리스 등)에 묶이지 않는다. 표준 프로토콜과 직접 띄울 수 있는 것만 쓴다(PostgreSQL, SMTP, Redis 등).
 - 상태는 PostgreSQL에 둔다. 메모리에만 두는 상태는 재시작이나 여러 대 운영에서 깨지지 않는지 확인한다.

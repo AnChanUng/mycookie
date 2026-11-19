@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { account } from '../sync';
 import './Landing.css';
 
@@ -140,6 +140,13 @@ function Visual({ kind }) {
 
 export default function Landing() {
   const ref = useReveal();
+  // 메뉴의 "만든 이야기"(/intro#story)로 오면 그 이야기로 바로 내려간다
+  const { hash, key } = useLocation();
+  useEffect(() => {
+    if (hash !== "#story") return;
+    const id = requestAnimationFrame(() => document.getElementById("story")?.scrollIntoView({ block: "start" }));
+    return () => cancelAnimationFrame(id);
+  }, [hash, key]);
   const signedIn = !!account()?.token;
   return (
     <div className="landing" ref={ref}>
@@ -157,6 +164,38 @@ export default function Landing() {
           </div>
         </div>
         <a href="#l-features" className="l-scroll" aria-label="기능 소개로 내려가기"><span /></a>
+      </section>
+
+      {/* 만든 이야기: 어디까지 공부해야 할지 고민하던 취업 준비생이 이 사이트를 만든 이유 */}
+      <section id="story" className="l-story" aria-labelledby="l-story-title">
+        <div className="l-wrap l-story-wrap">
+          <p className="l-eyebrow" data-reveal>나의쿠키를 만든 이유</p>
+          <h2 id="l-story-title" data-reveal>어디까지 공부해야 할까,<br />매일 고민했어요</h2>
+          <div className="l-story-body">
+            <p data-reveal>
+              개발자로 취업을 준비하면서 가장 많이 한 고민은 <b>"어디까지 깊게 알아야 할까"</b>였어요.
+              자료구조를 다시 봐야 할지, 스프링을 더 파야 할지, 요즘 다들 한다는 AI는 어디서부터 시작해야 할지요.
+              개발자 로드맵을 찾아볼수록 해야 할 것만 끝없이 늘어나더라고요.
+            </p>
+            <p data-reveal>
+              예전에는 백엔드나 프론트엔드 하나만 잘 알아도 괜찮았어요. 그런데 지금은 조금 달라요.
+              당장 쓰지 않더라도 <b>AI, 인프라, 백엔드를 고루 이해하고, 그중 한 분야는 깊게 아는 사람</b>이 필요하다고 생각해요.
+            </p>
+            <p data-reveal>
+              돌아보면 이 흐름은 예전에도 변한 적이 없었어요. 기술 이름만 바뀌었을 뿐,
+              넓게 이해하고 하나를 깊게 판 사람이 언제나 좋은 개발자였거든요.
+            </p>
+            <p data-reveal>
+              그래서 <b>컴퓨터공학 기초부터 웹 개발, AI까지 한곳에서 넓게 훑어보고, 내가 깊게 파고 싶은 분야를 찾을 수 있는</b> 나의쿠키를 만들었어요.
+              쿠키를 하나씩 모으듯, 하루에 한 문제씩 쌓아 가면 돼요.
+            </p>
+          </div>
+          <ul className="l-story-points">
+            <li data-reveal><b>넓게 이해하기</b><span>컴퓨터공학 · 웹 개발 · AI · 인프라를 고루</span></li>
+            <li data-reveal><b>하나는 깊게</b><span>내가 고른 분야는 면접에서 막히지 않을 만큼</span></li>
+            <li data-reveal><b>매일 조금씩</b><span>하루 한 문제라도 꾸준히 쌓기</span></li>
+          </ul>
+        </div>
       </section>
 
       <div id="l-features">

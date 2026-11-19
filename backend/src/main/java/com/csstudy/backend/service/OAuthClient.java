@@ -14,13 +14,16 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.util.List;
 import java.util.Map;
 
-// 제공자(구글 · 카카오 · 깃허브)마다 다른 주소와 응답 모양을 한곳에 모은다.
+// 제공자(구글 · 네이버 · 카카오 · 깃허브)마다 다른 주소와 응답 모양을 한곳에 모은다.
 // 키는 환경변수(OAUTH_<제공자>_CLIENT_ID · _SECRET)로만 받고, 키가 없는 제공자는 버튼도 숨긴다
 @Component
 @RequiredArgsConstructor
 public class OAuthClient {
 
-    public record Profile(String provider, String subject, String email, String name) {}
+    // ageRange: 네이버 연령대(예: "20-29"). 동의한 경우에만 오고, 다른 제공자는 비어 있다
+    public record Profile(String provider, String subject, String email, String name, String ageRange) {
+        public Profile(String provider, String subject, String email, String name) { this(provider, subject, email, name, null); }
+    }
 
     record Spec(String authorizeUrl, String tokenUrl, String userUrl, String scope) {}
 
@@ -30,8 +33,11 @@ public class OAuthClient {
             "kakao", new Spec("https://kauth.kakao.com/oauth/authorize", "https://kauth.kakao.com/oauth/token",
                     "https://kapi.kakao.com/v2/user/me", "profile_nickname"),
             "github", new Spec("https://github.com/login/oauth/authorize", "https://github.com/login/oauth/access_token",
-                    "https://api.github.com/user", "read:user user:email"));
-    public static final List<String> ORDER = List.of("google", "kakao", "github");
+                    "https://api.github.com/user", "read:user user:email"),
+            // 네이버는 받을 정보(이메일 · 별명)를 개발자센터 앱 설정에서 고르므로 scope를 쓰지 않는다
+            "naver", new Spec("https://nid.naver.com/oauth2.0/authorize", "https://nid.naver.com/oauth2.0/token",
+                    "https://openapi.naver.com/v1/nid/me", ""));
+    public static final List<String> ORDER = List.of("google", "naver", "kakao", "github");
 
     private final RestTemplate http;
     private final Environment env;
@@ -49,13 +55,13 @@ public class OAuthClient {
                 .queryParam("client_id", clientId(provider))
                 .queryParam("redirect_uri", redirectUri)
                 .queryParam("response_type", "code")
-                .queryParam("scope", spec.scope())
+                .queryParamIfPresent("scope", java.util.Optional.of(spec.scope()).filter(s -> !s.isBlank()))
                 .queryParam("state", state)
                 .encode().build().toUriString();
     }
 
     /** 인가 코드를 토큰으로 바꾸고 사용자 정보를 읽는다. */
-    public Profile fetch(String provider, String code, String redirectUri) {
+    public Profile fetch(String provider, String code, String redirectUri, String state) {
         Spec spec = SPECS.get(provider);
         try {
             var form = new LinkedMultiValueMap<String, String>();
@@ -64,6 +70,8 @@ public class OAuthClient {
             form.add("redirect_uri", redirectUri);
             form.add("client_id", clientId(provider));
             if (!clientSecret(provider).isBlank()) form.add("client_secret", clientSecret(provider));
+            // 네이버는 토큰을 받을 때도 state를 함께 보내야 한다
+            if ("naver".equals(provider)) form.add("state", state);
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
             headers.setAccept(List.of(MediaType.APPLICATION_JSON));
@@ -80,12 +88,22 @@ public class OAuthClient {
                 case "google" -> new Profile(provider, user.path("sub").asText(), text(user, "email"), text(user, "name"));
                 case "kakao" -> new Profile(provider, user.path("id").asText(),
                         text(user.path("kakao_account"), "email"), text(user.path("kakao_account").path("profile"), "nickname"));
+                case "naver" -> {
+                    JsonNode r = user.path("response");
+                    String name = text(r, "nickname");
+                    yield new Profile(provider, r.path("id").asText(""), text(r, "email"), name != null ? name : text(r, "name"), ageRange(text(r, "age")));
+                }
                 default -> new Profile(provider, user.path("id").asText(), text(user, "email"),
                         text(user, "login"));
             };
         } catch (RestClientException e) {
             throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "로그인 제공자와 연결하지 못했습니다. 잠시 후 다시 시도해 주세요.");
         }
+    }
+
+    // 네이버 연령대 값은 "20-29" 같은 모양만 받는다(이상한 값은 저장하지 않는다)
+    static String ageRange(String age) {
+        return age != null && age.matches("\\d{1,3}-(\\d{1,3})?") ? age : null;
     }
 
     private static String text(JsonNode node, String field) {

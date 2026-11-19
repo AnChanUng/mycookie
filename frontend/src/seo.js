@@ -31,7 +31,7 @@ export const PAGES = [
 ];
 // 검색에 나오지 않아야 하는 화면(계정, 개인 페이지, 메일 링크 등)
 // 비밀번호로 보호하는 개인 페이지와 1회용 메일 링크만 막는다(주소가 노출되면 안 되는 곳)
-const PRIVATE = /^\/(auth|newsletter|private|p|admin|chanung)(\/|$)/;
+const PRIVATE = /^\/(auth|newsletter|private|p|admin|chanung|x)(\/|$)/;
 
 export function seoFor(pathname) {
   if (pathname === '/') return { ...DEFAULT, index: true };

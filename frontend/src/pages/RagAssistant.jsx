@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../api';
+import { privatePath } from '../privatePath';
 
-const BASE = '/private/chanung';
+const BASE = privatePath();
 const SLOW = { timeout: 120000 };
 const EXAMPLES = ['교착 상태가 생기는 네 가지 조건은?', 'JPA에서 save 없이 값만 바꿔도 업데이트되는 이유는?', 'TCP 연결을 끊을 때 TIME_WAIT을 두는 이유는?'];
 

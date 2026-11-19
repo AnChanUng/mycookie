@@ -54,7 +54,7 @@ class OAuthLoginTest {
                 .andExpect(status().isOk())).path("state").asText();
     }
     private JsonNode callback(String provider, String subject) throws Exception {
-        when(client.fetch(eq(provider), eq("code-" + subject), eq(REDIRECT)))
+        when(client.fetch(eq(provider), eq("code-" + subject), eq(REDIRECT), anyString()))
                 .thenReturn(new OAuthClient.Profile(provider, subject, subject + "@example.com", "깃허브-" + subject));
         return read(postJson("/api/v1/auth/oauth/" + provider + "/callback",
                 Map.of("code", "code-" + subject, "state", state(provider), "redirectUri", REDIRECT), null).andExpect(status().isOk()));
@@ -62,8 +62,8 @@ class OAuthLoginTest {
 
     @Test void onlyConfiguredProvidersAreOffered() throws Exception {
         mvc.perform(get("/api/v1/auth/oauth/providers")).andExpect(status().isOk())
-                .andExpect(jsonPath("$.providers[0]").value("google")).andExpect(jsonPath("$.providers[1]").value("github"))
-                .andExpect(jsonPath("$.providers.length()").value(2));
+                .andExpect(jsonPath("$.providers[0]").value("google")).andExpect(jsonPath("$.providers[1]").value("naver")).andExpect(jsonPath("$.providers[2]").value("github"))
+                .andExpect(jsonPath("$.providers.length()").value(3));
         mvc.perform(get("/api/v1/auth/oauth/kakao/authorize").param("redirectUri", REDIRECT)).andExpect(status().isNotFound());
     }
 
@@ -134,6 +134,23 @@ class OAuthLoginTest {
                 .andExpect(jsonPath("$.hasPassword").value(true));
         postJson("/api/v1/auth/change-password", Map.of("currentPassword", "", "newPassword", "again"), token).andExpect(status().isBadRequest());
         postJson("/api/v1/auth/login", Map.of("nickname", "새회원", "password", "my-pass"), null).andExpect(status().isOk());
+    }
+
+    // 네이버 연령대는 가입할 때 저장되고, 다음 로그인에서 바뀌면 새 값으로 바뀐다
+    @Test void naverAgeRangeIsSavedAndRefreshed() throws Exception {
+        when(client.fetch(eq("naver"), eq("code-n-1"), eq(REDIRECT), anyString()))
+                .thenReturn(new OAuthClient.Profile("naver", "n-1", null, "쿠키", "20-29"));
+        JsonNode first = read(postJson("/api/v1/auth/oauth/naver/callback",
+                Map.of("code", "code-n-1", "state", state("naver"), "redirectUri", REDIRECT), null).andExpect(status().isOk()));
+        postJson("/api/v1/auth/oauth/signup", Map.of("ticket", first.path("ticket").asText(), "nickname", "네이버회원"), null)
+                .andExpect(status().isOk());
+        assertEquals("20-29", socials.findByProviderAndProviderUserId("naver", "n-1").orElseThrow().getAgeRange());
+
+        when(client.fetch(eq("naver"), eq("code-n-2"), eq(REDIRECT), anyString()))
+                .thenReturn(new OAuthClient.Profile("naver", "n-1", null, "쿠키", "30-39"));
+        postJson("/api/v1/auth/oauth/naver/callback", Map.of("code", "code-n-2", "state", state("naver"), "redirectUri", REDIRECT), null)
+                .andExpect(status().isOk());
+        assertEquals("30-39", socials.findByProviderAndProviderUserId("naver", "n-1").orElseThrow().getAgeRange());
     }
 
     @Test void plainLoginStillWorks() throws Exception {
