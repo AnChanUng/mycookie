@@ -31,3 +31,20 @@
   #web-cookie-session .notes-markdown th:first-child, #web-cookie-session .notes-markdown td:first-child { min-width: 96px; }
 }
 .web-channel .notes-markdown strong { color: light-dark(#1555b5, #8fc4ff); }
+
+/* 레벨 고르기 */
+.web-levels { display: grid; grid-template-columns: 0.6fr repeat(3, 1fr); gap: 8px; margin: 0 0 16px; }
+.web-levels button { display: grid; gap: 2px; align-content: start; padding: 12px 14px; border: 1px solid var(--ds-line-strong); border-radius: 10px; background: var(--ds-surface); color: var(--ds-text); font: inherit; text-align: left; cursor: pointer; }
+.web-levels button:hover { border-color: var(--ds-brand); }
+.web-levels button.on { border-color: var(--ds-brand); background: var(--ds-brand-soft); }
+.web-levels b { font-size: 15px; }
+.web-levels button.on b { color: var(--ds-brand); }
+.web-levels small { font-size: 12px; line-height: 1.45; color: var(--ds-text-3); word-break: keep-all; }
+.web-levels .web-level-count { margin-top: 4px; font-weight: 600; color: var(--ds-text-2); font-variant-numeric: tabular-nums; }
+.web-level-badge { margin-left: 6px; padding: 1px 8px; border-radius: 999px; font-size: 12px; font-style: normal; font-weight: 700; }
+.web-level-badge.lv1 { background: var(--ds-green-soft, #dcfce7); color: var(--ds-green, #15803d); }
+.web-level-badge.lv2 { background: var(--ds-brand-soft); color: var(--ds-brand); }
+.web-level-badge.lv3 { background: var(--ds-red-soft, #fee2e2); color: var(--ds-red, #b91c1c); }
+@media (max-width: 720px) {
+  .web-levels { grid-template-columns: 1fr 1fr; }
+}

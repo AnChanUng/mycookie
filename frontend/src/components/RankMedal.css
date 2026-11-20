@@ -1,0 +1,5 @@
+/* 순위 배지: 1위 금, 2위 은, 3위 동 색 원에 숫자(쿠키 그림은 등급 배지만 쓴다) */
+.rank-medal { display: inline-grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; color: #fff; font: 800 12px/1 system-ui, sans-serif; vertical-align: middle; box-shadow: inset 0 -2px 0 rgb(0 0 0 / .18); }
+.rank-medal.m1 { background: linear-gradient(145deg, #f2c94c, #c18a25); }
+.rank-medal.m2 { background: linear-gradient(145deg, #c9d3dd, #8293a6); }
+.rank-medal.m3 { background: linear-gradient(145deg, #d9a06b, #92532d); }

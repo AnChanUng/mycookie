@@ -1,7 +1,7 @@
 .promotion-celebration { position: fixed; inset: 0; z-index: 10000; isolation: isolate; display: grid; place-items: center; overflow: auto; padding: 28px 20px; color: #fff; background: radial-gradient(ellipse at 50% 38%, #44346c 0%, #17152beF 62%, #101222fa 100%); backdrop-filter: blur(14px); animation: promotion-enter .4s ease-out both; }
 .promotion-stage { position: relative; z-index: 2; width: min(100%, 1000px); text-align: center; margin: auto; }
 .promotion-eyebrow { color: #f8dc96; font-size: clamp(11px, 1.4vw, 16px); font-weight: 800; letter-spacing: .26em; }
-.promotion-medal { font-size: clamp(76px, 15vh, 164px); line-height: 1.2; margin: 14px 0; filter: drop-shadow(0 0 40px #ffd86a66); animation: promotion-medal .8s cubic-bezier(.2,.8,.3,1.2) both; }
+.promotion-medal { width: clamp(76px, 15vh, 150px); height: clamp(76px, 15vh, 150px); margin: 14px auto; filter: drop-shadow(0 0 40px #ffd86a66); animation: promotion-medal .8s cubic-bezier(.2,.8,.3,1.2) both; }
 .promotion-stage h2 { color: #fff; font-size: clamp(46px, 8vw, 100px); font-weight: 950; letter-spacing: -.06em; line-height: 1.1; margin: 0 0 10px; }
 .promotion-tier { color: #ffe29b; font-size: clamp(32px, 6vw, 72px); font-weight: 900; line-height: 1.25; text-shadow: 0 0 40px #ffc96855; overflow-wrap: anywhere; }
 .promotion-stage p { font-size: clamp(17px, 2.5vw, 27px); line-height: 1.5; margin: 18px 0 0; overflow-wrap: anywhere; }
@@ -17,5 +17,7 @@
 @keyframes promotion-fall { from { transform: translate3d(-20px, -5vh, 0) rotate(0deg); } to { transform: translate3d(65px, 110vh, 0) rotate(640deg); } }
 @keyframes promotion-enter { from { opacity: 0; } to { opacity: 1; } }
 @keyframes promotion-medal { from { transform: scale(.45) translateY(30px); opacity: 0; } to { transform: scale(1) translateY(0); opacity: 1; } }
-@media (max-height: 700px) { .promotion-medal { font-size: 64px; margin: 8px 0; } .promotion-stage h2 { font-size: 46px; } .promotion-tier { font-size: 34px; } .promotion-stage p { margin-top: 10px; } .promotion-stage .promotion-cheer { margin-bottom: 16px; } }
+@media (max-height: 700px) { .promotion-medal { width: 64px; height: 64px; margin: 8px auto; } .promotion-stage h2 { font-size: 46px; } .promotion-tier { font-size: 34px; } .promotion-stage p { margin-top: 10px; } .promotion-stage .promotion-cheer { margin-bottom: 16px; } }
 @media (prefers-reduced-motion: reduce) { .promotion-celebration, .promotion-medal, .promotion-confetti i { animation: none; } .promotion-confetti i { top: 12%; transform: rotate(25deg); } .promotion-confetti i:nth-child(2n) { top: 78%; } .promotion-confetti i:nth-child(3n) { top: 45%; } }
+
+.promotion-medal svg { display: block; width: 100%; height: 100%; overflow: visible; }

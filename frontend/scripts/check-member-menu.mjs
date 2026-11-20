@@ -67,7 +67,10 @@ try {
   await unmount(); fail = false;
   await mount(Rank);
   assert.equal(view.root.findAll(n => n.type === 'span' && String(n.props.className || '').startsWith('tier-badge')).length, 5);
-  assert.equal(view.root.findAllByType('svg').length, 5);
+  // 쿠키 그림은 등급 배지 5개 + 제목 쿠키 1개. 1~3위는 금, 은, 동 색 숫자 배지(이모지 없음)
+  assert.equal(view.root.findAllByType('svg').length, 6);
+  assert.deepEqual(view.root.findAllByProps({ className: 'rank-medal m1 ' }).concat(view.root.findAllByProps({ className: 'rank-medal m2 ' }), view.root.findAllByProps({ className: 'rank-medal m3 ' })).map(n => n.props['aria-label']), ['1위', '2위', '3위']);
+  assert.ok(!text(view.toJSON()).match(/[🥇🥈🥉🏆]/u), 'no medal emoji in rank');
   assert.deepEqual(view.root.findAllByProps({ className: 'cookie-division' }).map(n => n.children.join('')), ['5','4','3','2','1']);
   for (const tier of ['동 쿠키','은 쿠키','금 쿠키','다이아 쿠키','루비 쿠키']) assert.ok(!text(view.toJSON()).includes(tier), 'rank displays icons instead of tier names');
   assert.ok(!text(view.toJSON()).includes('대전 4반'));

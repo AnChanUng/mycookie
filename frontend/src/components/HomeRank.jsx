@@ -4,6 +4,7 @@ import api from '../api';
 import { account } from '../sync';
 import { visitorId } from '../track';
 import TierBadge from './TierBadge';
+import RankMedal from './RankMedal';
 import './HomeRank.css';
 
 // 첫 화면 맨 위 "실시간 순위" 카드. 1~3위는 시상대, 4~5위는 짧은 줄, 내 순위는 맨 아래에 고정한다.
@@ -57,7 +58,7 @@ export default function HomeRank() {
     {!rank ? <p className="hr-empty" role="status">{failed ? '순위를 불러오지 못했어요.' : '순위를 불러오는 중…'}</p> : <>
       <ol className="hr-podium" aria-label="1위부터 3위">
         {podium.map(r => <li key={r.rank} className={`hr-step p${r.rank}${r.me ? ' me' : ''}`} value={r.rank}>
-          <span className="hr-medal">{r.rank}</span>
+          <RankMedal rank={r.rank} className="hr-medal" />
           <TierBadge tier={r.tier} division={r.division} />
           <b className="hr-pname" title={r.nickname}>{r.nickname}</b>
           <span className="hr-pcount">{Number(r.count).toLocaleString()}문제</span>

@@ -33,6 +33,12 @@ try {
   assert.equal(entries.length,169);
   assert.ok(!CS_NOTES.some(s => s.id === 'web-essentials'), 'Web answers belong to their separate collection');
   assert.equal(WEB_ESSENTIALS.items.length,57);
+  // 웹 필수지식 레벨: 모든 문답에 레벨이 있고(webEssentialLevels.js), 없는 문답을 가리키는 레벨은 없다
+  const { WEB_LEVEL, LEVELS } = await server.ssrLoadModule('/src/data/webEssentialLevels.js');
+  const webIds = new Set(WEB_ESSENTIALS.items.map(e => e.id));
+  for (const id of webIds) assert.ok(WEB_LEVEL[id], `레벨이 없는 문답: ${id} (webEssentialLevels.js에 추가하세요)`);
+  for (const [id, lv] of Object.entries(WEB_LEVEL)) { assert.ok(webIds.has(id), `없는 문답의 레벨: ${id}`); assert.ok(LEVELS.some(l => l.level === lv), `잘못된 레벨 ${lv}: ${id}`); }
+  for (const l of LEVELS) assert.ok(Object.values(WEB_LEVEL).filter(v => v === l.level).length >= 5, `Lv.${l.level}에 문답이 너무 적어요`);
   assert.equal(new Set(entries.map(e=>e.id)).size,entries.length);
   assert.ok(entries.every(e=>e.question && e.answer));
   assert.ok(!CS_NOTES.some(s=>['커뮤니케이션','기타','개인의 역량','최신기술에 관심이 있는지'].includes(s.title)));
@@ -186,7 +192,7 @@ try {
   assert.ok(view.root.findAllByType('a').some(a=>a.props.href==='/web-essentials#web-csrf'),'Account links target the separate reader');
   await login('bob');assert.ok(!text(view.toJSON()).includes(q.q),'Dashboard resets on account switch');
   assert.equal(errors.length,0,errors.join('\n'));
-  console.log('PASS: Basic keyword questions visible by default; answers hidden until explicit reveal, sidebar/deep links stay collapsed; completion hides/restores across reload; account isolation, save retries, dashboard and in-flight switching.');
+  console.log('PASS: Web essentials levels cover every answer; Basic keyword questions visible by default; answers hidden until explicit reveal, sidebar/deep links stay collapsed; completion hides/restores across reload; account isolation, save retries, dashboard and in-flight switching.');
 } finally {
   if(view)await act(()=>view.unmount());
   await server.close();console.error=oldError;

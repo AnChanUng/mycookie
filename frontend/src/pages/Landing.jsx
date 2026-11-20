@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { account } from '../sync';
+import { STUDY_PATH } from '../data/trackIntros';
 import './Landing.css';
 
 // 리뉴얼 홈. 큰 문구로 시작해 스크롤하면 기능을 하나씩 소개한다(토스 스타일).
@@ -140,10 +141,10 @@ function Visual({ kind }) {
 
 export default function Landing() {
   const ref = useReveal();
-  // 메뉴의 "만든 이야기"(/intro#story), "만든 사람들"(/intro#team)로 오면 그 구역으로 바로 내려간다
+  // 메뉴의 "만든 이야기"(#story), "만든 사람들"(#team), "공부하는 법"(#how)으로 오면 그 구역으로 바로 내려간다
   const { hash, key } = useLocation();
   useEffect(() => {
-    if (hash !== "#story" && hash !== "#team") return;
+    if (!["#story", "#team", "#how"].includes(hash)) return;
     const id = requestAnimationFrame(() => document.getElementById(hash.slice(1))?.scrollIntoView({ block: "start" }));
     return () => cancelAnimationFrame(id);
   }, [hash, key]);
@@ -218,6 +219,21 @@ export default function Landing() {
             <li data-reveal><b>우리 반에 공유</b><span>SSAFY 16기 대전 4반 친구들이 첫 사용자로</span></li>
             <li data-reveal><b>2인 개발팀</b><span>서비스를 더 잘 만들어 줄 팀원과 함께</span></li>
           </ul>
+        </div>
+      </section>
+
+      {/* 공부하는 법: 사이트 전체를 어떤 순서로 쓰면 좋은지(메뉴마다의 본질은 각 메뉴 첫 화면의 TrackIntro) */}
+      <section id="how" className="l-story l-how" aria-labelledby="l-how-title">
+        <div className="l-wrap l-story-wrap">
+          <p className="l-eyebrow" data-reveal>공부하는 법</p>
+          <h2 id="l-how-title" data-reveal>나의쿠키,<br />이렇게 공부하세요</h2>
+          <p className="l-how-lead" data-reveal>처음이라 어디서부터 할지 모르겠다면 이 순서를 따라 해 보세요. 메뉴마다 첫 화면에 그 분야를 왜, 어떻게 공부하면 좋은지도 적어 두었어요.</p>
+          <ol className="l-how-steps">
+            {STUDY_PATH.map((step, i) => <li key={step.title} data-reveal>
+              <span className="l-how-no" aria-hidden="true">{i + 1}</span>
+              <div><b>{step.title}</b><p>{step.body}</p><Link to={step.to} className="l-link">바로 가기 <span aria-hidden="true">→</span></Link></div>
+            </li>)}
+          </ol>
         </div>
       </section>
 

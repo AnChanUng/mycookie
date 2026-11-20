@@ -4,6 +4,7 @@ import api from '../api';
 import { account } from '../sync';
 import { visitorId } from '../track';
 import TierBadge from '../components/TierBadge';
+import RankMedal from '../components/RankMedal';
 import '../components/HomeRank.css';
 import './RankPage.css';
 
@@ -57,7 +58,7 @@ export default function RankPage() {
       {state.data && !state.loading && !shown.length && <p className="hr-empty">찾는 닉네임이 없어요.</p>}
       <ol className="hr-list rk-list">
         {shown.slice(0, limit).map(r => <li key={`${r.rank}-${r.nickname}`} className={`hr-row rk-row${r.me ? ' me' : ''}${r.rank <= 3 ? ` t${r.rank}` : ''}`} value={r.rank}>
-          <span className="hr-rank">{r.rank}</span>
+          <span className="hr-rank"><RankMedal rank={r.rank} /></span>
           <TierBadge tier={r.tier} division={r.division} />
           <span className="hr-name">{r.nickname}{r.me && <em>나</em>}</span>
           <span className="rk-tier">{r.tierName}</span>

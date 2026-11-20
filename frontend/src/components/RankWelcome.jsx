@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import api from '../api';
 import { account } from '../sync';
 import './RankWelcome.css';
+import RankMedal from './RankMedal';
 
 export default function RankWelcome() {
   const [notices, setNotices] = useState([]);
@@ -37,7 +38,7 @@ export default function RankWelcome() {
   }, []);
   return createPortal(<div className="rank-welcome" role="status" aria-live="polite">
     {notices.map(n => <div key={n.id} className="rank-welcome-item">
-      <span>🏆 {n.rank}위 <strong>{n.nickname}</strong>님, 환영합니다!</span>
+      <span className="rank-welcome-text"><RankMedal rank={n.rank} /> {n.rank}위 <strong>{n.nickname}</strong>님, 환영합니다!</span>
       <button type="button" aria-label="환영 공지 닫기" onClick={() => setNotices(old => old.filter(x => x.id !== n.id))}>×</button>
     </div>)}
   </div>, document.body);
