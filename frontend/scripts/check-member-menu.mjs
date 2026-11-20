@@ -92,9 +92,11 @@ try {
   checkingAccount = true;
   await mount(AccountPage);
   assert.ok(!text(view.toJSON()).includes('본인 설정'), '로그아웃 상태에서는 본인 설정을 숨긴다');
-  assert.ok(text(view.toJSON()).includes('누적 125문제'));
-  assert.ok(text(view.toJSON()).includes('금 쿠키 Ⅰ 승급 기준: 누적 200문제 이상 · 앞으로 75문제'));
-  assert.ok(text(view.root.findByProps({ 'aria-label': '내 교육생 배지' })).includes('16기 대전 4반'));
+  assert.ok(view.root.findByProps({ 'aria-label': '로그인 닉네임' }));
+  for (const label of ['내 등급', '개인정보 · 교육생 배지', '풀었던 문제', '학습 완료한 전공노트', '현재 브라우저의 비로그인 풀이 기록']) {
+    assert.ok(!text(view.toJSON()).includes(label), label);
+  }
+  assert.equal(view.root.findAllByProps({ 'aria-label': '방문자 닉네임' }).length, 0);
   // 비밀번호 찾기는 이메일로 재설정 링크를 보낸다(닉네임만으로 바꾸던 방식은 보안 때문에 없앴다)
   await act(() => view.root.findAllByType('button').find(b => text(b) === '비밀번호 찾기').props.onClick());
   assert.ok(text(view.toJSON()).includes('재설정 링크를 보내 드려요'));
@@ -104,15 +106,17 @@ try {
   assert.deepEqual(resetRequest, { email: 'me@example.com' });
   assert.ok(text(view.toJSON()).includes('재설정 메일을 보냈습니다'));
   await act(() => view.root.findAllByType('button').find(b => text(b).includes('로그인으로 돌아가기')).props.onClick());
-  const nicknameInput = () => view.root.findByProps({ 'aria-label': '방문자 닉네임' });
-  await act(() => nicknameInput().props.onChange({ target: { value: '설정에서변경' } }));
-  await act(async () => { await nicknameInput().parent.props.onSubmit({ preventDefault() {} }); });
-  assert.equal(localStorage.getItem('lounge:nickname'), '설정에서변경');
-  assert.ok(text(view.toJSON()).includes('방문자 닉네임을 변경했습니다.'));
-  fail = true;
-  await act(() => nicknameInput().props.onChange({ target: { value: '중복이름' } }));
-  await act(async () => { await nicknameInput().parent.props.onSubmit({ preventDefault() {} }); });
-  assert.equal(localStorage.getItem('lounge:nickname'), '설정에서변경');
+  await act(() => view.root.findAllByType('button').find(b => text(b) === '새 계정 만들기').props.onClick());
+  assert.ok(view.root.findByProps({ 'aria-label': '가입 비밀번호 확인' }));
+  assert.ok(!text(view.toJSON()).includes('내 등급'));
+  await act(() => {
+    localStorage.setItem('sync:account', JSON.stringify({ id: 1, token: 'test-account', nickname: '회원닉네임' }));
+    window.dispatchEvent(new Event('sync:change'));
+  });
+  assert.ok(text(view.toJSON()).includes('본인 설정'));
+  assert.ok(text(view.toJSON()).includes('누적 125문제'));
+  assert.ok(text(view.root.findByProps({ 'aria-label': '내 교육생 배지' })).includes('16기 대전 4반'));
+  assert.ok(text(view.toJSON()).includes('풀었던 문제'));
   await unmount(); assert.deepEqual(errors, []);
   console.log('Member menu passed: nickname/tier, settings link, guest/member renames, account switching/offline state, logout, email password reset, five rank tiers, tier guide toggle/Escape/close. No live network.');
 } finally { if (view) await unmount(); await server.close(); console.error = originalError; }

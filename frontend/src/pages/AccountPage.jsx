@@ -10,9 +10,8 @@ import { buildAccountRetry } from '../accountRetry';
 import './AccountPage.css';
 import TierBadge from '../components/TierBadge';
 import { membershipHeaders, TIER_NAMES, useMembership } from '../membership';
-import { savedNickname, saveNickname } from '../nickname';
+import { savedNickname } from '../nickname';
 import api from '../api';
-import { visitorId } from '../track';
 
 const snapshot = () => account() ? `${account().token}:${account().nickname}` : '';
 export default function AccountPage() {
@@ -48,15 +47,17 @@ function AccountDashboard({ user, openForgot }) {
   const [limit, setLimit] = useState(20);
   const [badges, setBadges] = useState({ loading: true, values: [], error: false });
   useEffect(() => {
+    if (!user) return;
     const controller = new AbortController();
     api.get('/profile/badges', { headers: membershipHeaders(), signal: controller.signal })
       .then(({ data }) => { if (!controller.signal.aborted) setBadges({ loading: false, values: Array.isArray(data) ? data : [], error: false }); })
       .catch(() => { if (!controller.signal.aborted) setBadges({ loading: false, values: [], error: true }); });
     return () => controller.abort();
-  }, [revision]);
+  }, [user, revision]);
   const tierStatus = useMembership(revision);
   useEffect(() => {
     const controller = new AbortController();
+    if (!user) return;
     loadAccountRecords(user, controller.signal).then(next => {
       if (!controller.signal.aborted) { setResult(next); setLoading(false); }
     });
@@ -99,7 +100,7 @@ function AccountDashboard({ user, openForgot }) {
   const noteRecords = migrateNotesCompletion(result.records['cs-notes-v1']?.completed);
   const completed = [...CS_NOTES.flatMap(s => s.items), ...WEB_ESSENTIALS.items].filter(e => noteRecords[e.id]?.done);
   return <div className="account-page fade-in">
-    <header className="page-header"><h1>내 계정</h1><p>{user ? `${user.nickname}님의 학습 기록` : '로그인하면 내 계정에 저장된 학습 기록을 볼 수 있습니다.'}</p></header>
+    {user && <header className="page-header"><h1>내 계정</h1><p>{user.nickname}님의 학습 기록</p></header>}
     <section className="account-auth" id="settings" tabIndex={-1}>
       {user && <h2>본인 설정</h2>}
       {user ? <><div className="account-actions"><span className="acc-avatar" aria-hidden="true">{user.nickname.slice(0, 1)}</span><strong>{user.nickname}</strong><button className="exam-btn sm" disabled={authBusy} onClick={async () => { setAuthBusy(true); await signOut(); }}>로그아웃</button></div>
@@ -176,24 +177,14 @@ function AccountDashboard({ user, openForgot }) {
         </>}
         {message && <p className="auth-message" role="alert">{message}</p>}
       </div>}
-      {!user && <form onSubmit={async e => {
-        e.preventDefault(); setAuthBusy(true); setMessage('');
-        try {
-          const { data } = await api.put('/profile', { visitorId: visitorId(), nickname: nicknameDraft.trim() });
-          saveNickname(data.nickname); setNicknameDraft(data.nickname); setMessage('방문자 닉네임을 변경했습니다.'); setRevision(v => v + 1);
-        } catch (error) { setMessage(error?.response?.data?.error || '닉네임을 변경하지 못했습니다.'); }
-        finally { setAuthBusy(false); }
-      }}>
-        <input aria-label="방문자 닉네임" placeholder="방문자 닉네임" maxLength={20} value={nicknameDraft} onChange={e => setNicknameDraft(e.target.value)} />
-        <button className="exam-btn sm" disabled={authBusy || !nicknameDraft.trim()}>닉네임 변경</button>
-      </form>}
-      <div className="personal-badges" aria-label="내 교육생 배지">
+      {user && <div className="personal-badges" aria-label="내 교육생 배지">
         <h3>개인정보 · 교육생 배지</h3>
         {badges.loading ? <p role="status">배지를 불러오는 중…</p> : badges.error ? <p role="alert">배지를 불러오지 못했습니다. 새로고침해 주세요.</p>
           : badges.values.length ? badges.values.map(badge => <span className="cohort-badge" key={badge.name}>🎖 {badge.name}</span>) : <p>부여된 교육생 배지가 없습니다.</p>}
-      </div>
+      </div>}
       {user && message && <p role="alert">{message}</p>}
     </section>
+    {user && <>
     <section className="membership-panel">
       <h2>내 등급 {tierStatus.membership && <TierBadge tier={tierStatus.membership.tier} division={tierStatus.membership.division} />}<Link to="/tiers" className="acc-tier-up">등급 올리기 →</Link></h2>
       {tierStatus.loading ? <p role="status">등급을 불러오는 중…</p> : tierStatus.error ? <p role="alert">등급을 불러오지 못했습니다. 새로고침해 주세요.</p> : <p>
@@ -219,5 +210,6 @@ function AccountDashboard({ user, openForgot }) {
       {filtered.length > limit && <button className="exam-btn" onClick={() => setLimit(n => n + 20)}>20개 더 보기 ({Math.min(limit, filtered.length)}/{filtered.length})</button>}
     </section>
     <section className="account-notes"><h2>학습 완료한 전공노트</h2>{completed.length ? <ul>{completed.map(entry => <li key={entry.id}><Link to={`${entry.id.startsWith('web-') ? '/web-essentials' : '/notes'}#${entry.id}`}>✓ {entry.title}</Link></li>)}</ul> : <p>아직 완료한 지식이 없습니다.</p>}<Link to="/notes">전공노트 공부하기 →</Link></section>
+    </>}
   </div>;
 }
