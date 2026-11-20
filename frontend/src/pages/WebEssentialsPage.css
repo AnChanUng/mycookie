@@ -48,3 +48,7 @@
 @media (max-width: 720px) {
   .web-levels { grid-template-columns: 1fr 1fr; }
 }
+
+.web-answer-toggle > summary { width: fit-content; padding: 8px 12px; border: 1px solid var(--ds-line-strong); border-radius: 8px; color: var(--ds-brand); cursor: pointer; font-size: 14px; font-weight: 700; }
+.web-answer-toggle > summary:focus-visible { outline: 2px solid var(--ds-brand); outline-offset: 3px; }
+.web-answer-toggle[open] > summary { margin-bottom: 12px; }
