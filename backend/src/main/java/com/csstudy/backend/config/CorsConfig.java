@@ -19,6 +19,7 @@ public class CorsConfig {
                 "http://localhost:*",
                 "https://mycookie.dev",
                 "https://www.mycookie.dev",
+                "https://staging.mycookie.dev",
                 "https://cs-study-platform.vercel.app",
                 "https://cs-study-frontend.onrender.com",
                 "https://cs-study-frontend-dg8c.onrender.com",
