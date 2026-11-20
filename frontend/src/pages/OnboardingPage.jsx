@@ -81,7 +81,7 @@ function Onboarding() {
             <tr><td>Kafka 3.9 (KRaft)</td><td>제보가 들어오면 <code>prod.feedback.created</code> 이벤트를 넣고 바로 답합니다. 소비자가 GitHub 이슈를 만들고 Mattermost로 알립니다. 실패하면 10초 간격으로 3번 다시 시도하고, 그래도 안 되면 <code>.dlt</code> 토픽에 남깁니다</td></tr>
             <tr><td>자동 배포</td><td>systemd 타이머가 5분마다 <code>deploy.sh</code>를 돌려 새 커밋을 받고, 바뀐 쪽(화면 또는 백엔드)만 다시 빌드합니다</td></tr>
             <tr><td>백업</td><td>매일 새벽 4시 덤프, 홈서버 안 14일 + 구글 드라이브(gpg 암호화) 30일</td></tr>
-            <tr><td>Tailscale</td><td>집 밖에서 홈서버에 들어가는 사설 네트워크. SSH와 Grafana(로그, 서버 상태 화면)를 여기로만 엽니다</td></tr>
+            <tr><td>Tailscale</td><td>집 밖에서 홈서버에 SSH로 들어가는 사설 네트워크</td></tr>
             <tr><td>모니터링</td><td>Grafana, Loki(로그), Prometheus(지표), Alloy(수집). 서비스와 분리된 Compose 프로젝트로 돌고, 로그의 이메일, IP, 토큰은 저장 전에 가립니다(<a href={doc('docs/monitoring.md')}>docs/monitoring.md</a>)</td></tr>
             <tr><td>GitHub Actions</td><td>PR마다 백엔드 테스트, 화면 린트와 빌드, 데이터 검사(<code>ci.yml</code>), 위험도 판정(<code>pr-risk.yml</code>), 담당자 지정을 돌리고, 새 이슈, 새 PR, CI 실패를 Mattermost로 알립니다</td></tr>
             <tr><td>외부 서비스</td><td>Mattermost(매일 CS 알림, 제보 알림 웹훅), 소셜 로그인(Google, Kakao, Naver, GitHub), 티스토리 RSS(기술 블로그 목록)</td></tr>
@@ -146,7 +146,7 @@ function Onboarding() {
             <li><b>개발 편집기</b> — <a href="https://code.visualstudio.com/download" target="_blank" rel="noopener noreferrer">VS Code</a> 또는 <a href="https://www.jetbrains.com/idea/download/" target="_blank" rel="noopener noreferrer">IntelliJ IDEA</a>. Java와 JavaScript 작업에 사용할 편집기를 준비합니다.</li>
             <li><a href="https://docs.docker.com/get-started/get-docker/" target="_blank" rel="noopener noreferrer"><b>Docker와 Compose</b></a> — 로컬 PostgreSQL과 통합 테스트 실행. <code>docker --version</code>, <code>docker compose version</code>으로 확인합니다.</li>
             <li><a href="https://dbeaver.io/download/" target="_blank" rel="noopener noreferrer"><b>DBeaver Community</b></a> — PostgreSQL의 회원·구독·학습 기록 조회와 SQL 실행. 로컬 DB 연결과 <code>SELECT 1;</code> 실행을 확인합니다.</li>
-            <li><a href="https://tailscale.com/download" target="_blank" rel="noopener noreferrer"><b>Tailscale</b></a> — 팀 초대를 받은 계정으로 홈서버와 Grafana에 접속합니다. 설치 후 운영 담당자의 초대와 접속 권한 확인이 필요합니다.</li>
+            <li><a href="https://tailscale.com/download" target="_blank" rel="noopener noreferrer"><b>Tailscale</b></a>: 팀 초대를 받은 계정으로 홈서버에 SSH로 접속합니다(Grafana는 아래처럼 브라우저로 바로 열려요). 설치 후 운영 담당자의 초대와 접속 권한 확인이 필요합니다.</li>
           </ul>
           <Note>
             DBeaver의 DB 로그인은 사이트 로그인과 별도입니다. 운영·스테이징 연결을 구분하고, 홈서버 DB 접속에는 승인된 SSH 터널을 사용합니다.
@@ -301,7 +301,7 @@ npm run check:today-cs        # 데이터 검사는 check:* 하나씩 돌릴 수
           </tbody>
         </table>
         <Note>
-          <b>Grafana 접속:</b> 찬웅님이 Tailscale에 초대하고 보기 전용 계정을 만들어 드립니다. Tailscale에 들어온 뒤 <code>http://&lt;홈서버의 Tailscale 이름&gt;:3000</code>으로 엽니다(인터넷에는 열려 있지 않습니다).
+          <b>Grafana 접속:</b> 어디서나 <a href="https://grafana.mycookie.dev">grafana.mycookie.dev</a>를 열면 먼저 이메일 인증(허락한 팀원 이메일만)을 하고, 찬웅님이 만들어 준 보기 전용 계정으로 로그인합니다.
           처음 받은 비밀번호는 첫 로그인 뒤 오른쪽 위 프로필에서 바로 바꿔 주세요.
         </Note>
         <h3>알림 종류</h3>

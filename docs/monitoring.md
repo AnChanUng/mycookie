@@ -49,10 +49,35 @@ sudo /srv/devcookie/app/deploy/monitoring/up.sh
 
 | 누가 | 주소 |
 | --- | --- |
+| 어디서나(개발 PC, 휴대폰) | **https://grafana.mycookie.dev** (허락한 이메일로 인증 → Grafana 로그인) |
 | 홈서버 안 | http://127.0.0.1:3000 |
-| 팀원 | Tailscale에 들어온 뒤 `http://<홈서버의 Tailscale 이름>:3000` |
 
-인터넷에는 열지 않습니다. 팀원은 관리자가 Tailscale에 초대합니다(무료 요금제 3명까지).
+두 겹으로 막습니다. **Cloudflare Access**가 허락한 이메일만 통과시키고(이메일로 받은 인증 코드), 그다음 **Grafana 로그인**을 한 번 더 합니다. 허락하지 않은 사람은 Grafana 화면까지 오지도 못합니다.
+
+### 어디서나 보기 켜기 (관리자, 한 번만)
+
+순서가 중요합니다. **Access(1번)를 먼저 만들고** 터널 주소(2번)를 열어야, 주소가 잠깐이라도 아무에게나 열리지 않습니다.
+
+1. **Access 앱 만들기:** Cloudflare 대시보드 → **Zero Trust** → Access → Applications → **Add an application** → **Self-hosted**
+   - Application name: `Grafana`, Session duration: `24 hours`
+   - Application domain: subdomain `grafana`, domain `mycookie.dev`
+   - Policy: 이름 `팀원`, Action **Allow**, Include → **Emails** → 찬웅, 보민 이메일
+   - 로그인 방법은 기본값 **One-time PIN**(이메일로 코드)이면 됩니다 → Save
+2. **터널 주소 열기:** Zero Trust → Networks → **Tunnels** → 사이트에 쓰는 터널 → **Public Hostname** → Add
+   - Subdomain `grafana`, Domain `mycookie.dev`, Type **HTTP**, URL **`grafana:3000`** → Save
+   - 터널(cloudflared)은 사이트 네트워크에 있고, Grafana도 그 네트워크에 붙어 있어 `grafana:3000`으로 찾아갑니다
+3. **홈서버 설정 두 줄**
+   ```bash
+   # Grafana가 자기 주소를 알게(링크, 리디렉션)
+   echo 'GRAFANA_ROOT_URL=https://grafana.mycookie.dev' | sudo tee -a /srv/mycookie-monitoring/.env
+   sudo /srv/devcookie/app/deploy/monitoring/up.sh
+   # 긴급 알림에 붙는 로그 링크
+   echo 'GRAFANA_URL=https://grafana.mycookie.dev' | sudo tee -a /srv/devcookie/.env
+   sudo /srv/devcookie/app/deploy/homeserver/compose.sh up -d backend-prod
+   ```
+4. **확인:** 시크릿 창에서 https://grafana.mycookie.dev → Cloudflare 이메일 인증 화면이 먼저 나오고, 허락한 이메일로 코드를 넣으면 Grafana 로그인 화면이 나오면 성공입니다.
+
+팀원을 더하거나 빼려면 1번 Policy의 이메일 목록만 고칩니다(무료 요금제 50명까지).
 
 ## 팀원 계정
 

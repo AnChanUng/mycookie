@@ -20,6 +20,8 @@ if [ ! -f "$ENV" ]; then
   echo "$ENV을 만들었습니다(관리자 비밀번호 자동 생성)."
 fi
 
+# Grafana는 사이트 네트워크(devcookie_default)의 터널로도 열리므로 사이트가 먼저 떠 있어야 한다
+docker network inspect devcookie_default >/dev/null 2>&1 || { echo "사이트를 먼저 띄워 주세요: sudo /srv/devcookie/app/deploy/homeserver/compose.sh up -d"; exit 1; }
 docker compose --project-directory "$HERE" -f "$HERE/docker-compose.yml" --env-file "$ENV" up -d
 docker compose --project-directory "$HERE" -f "$HERE/docker-compose.yml" --env-file "$ENV" ps
 
