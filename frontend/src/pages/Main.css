@@ -36,6 +36,8 @@
 
 /* 카드 그리드: 3열(코딩테스트는 4열) */
 .mn-cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.mn-cards--2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.mn-cards.mn-cards--single { grid-template-columns: 1fr; }
 .mn-cards--4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 
 /* 오늘의 학습 카드 */
@@ -82,7 +84,7 @@ a:hover > .mn-chev { color: var(--ds-brand); transform: translateX(3px); }
   .mn-section { margin-top: 32px; }
   .mn-section-head h2 { font-size: 19px; }
   .mn-note { display: none; }
-  .mn-cards, .mn-cards--4 { grid-template-columns: 1fr; gap: 10px; }
+  .mn-cards, .mn-cards--2, .mn-cards--4 { grid-template-columns: 1fr; gap: 10px; }
   .mn-cards--4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .mn-cards--4 .mn-cat { flex-direction: column; align-items: flex-start; gap: 10px; padding: 16px; }
   .mn-cards--4 .mn-chev { display: none; }
