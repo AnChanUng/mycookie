@@ -7,7 +7,7 @@ import { factForDay, koreanDay } from '../data/todayCs';
 import TierBadge from '../components/TierBadge';
 import LineIcon from '../components/LineIcon';
 import HomeRank from '../components/HomeRank';
-import { quoteForDay } from '../data/quotes';
+import { quoteForVisit, rememberQuote } from '../data/quotes';
 import './Main.css';
 
 // 나의쿠키 메인. 디자인 시스템(styles/ds.css) 부품만으로 만든 벤토 그리드.
@@ -92,7 +92,8 @@ export default function Main() {
   const [resume] = useState(readContinue);
   const day = koreanDay();
   const today = factForDay(day);
-  const quote = quoteForDay(day);
+  const [quote] = useState(quoteForVisit);
+  useEffect(() => { rememberQuote(quote); }, [quote]);
   const [todayDone] = useState(() => readTodayDone(day));
   const now = new Date();
   const dateLabel = `${now.getMonth() + 1}월 ${now.getDate()}일 ${WEEKDAYS[now.getDay()]}요일`;
