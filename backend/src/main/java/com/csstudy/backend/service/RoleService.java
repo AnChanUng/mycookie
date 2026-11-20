@@ -58,12 +58,12 @@ public class RoleService {
         return rolesOf(user);
     }
 
-    /** 예약된 이름(admin…)으로 관리자 계정을 만든다. 비밀번호는 12자 이상이고 아이디를 포함하면 안 된다 */
+    /** 예약된 이름(admin…)으로 관리자 계정을 만든다. 비밀번호는 8자 이상이고 아이디를 포함하면 안 된다 */
     @Transactional
     public User createReservedAccount(String nickname, String password, Collection<Role> grant) {
         String name = NicknameService.validate(nickname);
         if (!NicknameService.isReserved(name)) throw new CookieException(CookieErrorCode.INVALID_REQUEST, "관리자 계정 이름은 admin으로 시작해야 해요.");
-        if (password == null || password.length() < 12 || password.toLowerCase(Locale.ROOT).contains(name.toLowerCase(Locale.ROOT)))
+        if (password == null || password.length() < 8 || password.toLowerCase(Locale.ROOT).contains(name.toLowerCase(Locale.ROOT)))
             throw new CookieException(CookieErrorCode.WEAK_ADMIN_PASSWORD);
         if (users.existsByNickname(name)) throw new CookieException(CookieErrorCode.NICKNAME_DUPLICATED);
         User user = nicknames.registerReserved(name, encoder.encode(password));

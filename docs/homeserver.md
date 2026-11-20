@@ -233,7 +233,7 @@ sudo -u devcookie /srv/devcookie/app/deploy/homeserver/backup.sh   # 백업이 �
 | `TEAM` | `/private/bomin` 온보딩, 개발 일지 | 보민, 찬웅, admin1, admin2 |
 
 - `admin`, `관리자`, `운영자`로 시작하는 닉네임은 일반 가입과 닉네임 변경에서 막혀 있어, 다른 사람이 먼저 가져갈 수 없습니다.
-- 관리자 계정 생성과 권한 부여는 **홈서버의 관리자 키로만** 됩니다(인터넷 쪽 화면에는 없음). 관리자 비밀번호는 12자 이상이고 아이디를 포함하면 안 됩니다.
+- 관리자 계정 생성과 권한 부여는 **홈서버의 관리자 키로만** 됩니다(인터넷 쪽 화면에는 없음). 관리자 비밀번호는 8자 이상이고 아이디를 포함하면 안 됩니다.
 
 ```bash
 cd /srv/devcookie/app/deploy/homeserver

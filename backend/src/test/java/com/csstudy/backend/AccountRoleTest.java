@@ -77,6 +77,8 @@ class AccountRoleTest {
         postJson("/api/v1/admin/accounts", body, KEY, null).andExpect(status().isOk())
                 .andExpect(jsonPath("$.nickname").value("admin7")).andExpect(jsonPath("$.roles", hasItem("ADMIN")));
         postJson("/api/v1/admin/accounts", body, KEY, null).andExpect(status().isConflict());
+        // 8자면 충분하다(아이디만 포함하지 않으면)
+        postJson("/api/v1/admin/accounts", Map.of("nickname", "admin6", "password", "cookie!9", "roles", "ADMIN"), KEY, null).andExpect(status().isOk());
 
         String admin = login("admin7", "a-long-and-random-passphrase");
         mvc.perform(get("/api/v1/auth/me").header("Authorization", "Bearer " + admin)).andExpect(jsonPath("$.roles", hasItem("TEAM")));

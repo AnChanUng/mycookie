@@ -24,7 +24,7 @@ json() { python3 -c 'import json,sys; print(json.dumps(dict(zip(sys.argv[1::2], 
 case "${1:-}" in
   create)
     name=${2:?닉네임을 적어 주세요(예: admin1)}; roles=${3:-ADMIN,TEAM}
-    read -rsp "$name 비밀번호(12자 이상, 아이디 포함 금지): " pw; echo
+    read -rsp "$name 비밀번호(8자 이상, 아이디 포함 금지): " pw; echo
     read -rsp "한 번 더: " pw2; echo
     [ "$pw" = "$pw2" ] || { echo "두 비밀번호가 달라요."; exit 1; }
     body=$(python3 -c 'import json,sys; print(json.dumps({"nickname":sys.argv[1],"password":sys.argv[2],"roles":sys.argv[3].split(",")}))' "$name" "$pw" "$roles")
