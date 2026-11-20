@@ -15,6 +15,9 @@ const newId = () => Math.random().toString(36).slice(2, 10);
 const todayKst = () => new Date(Date.now() + 9 * 3600000).toISOString().slice(0, 10);
 const nextDay = date => new Date(Date.parse(`${date}T00:00:00Z`) + 86400000).toISOString().slice(0, 10);
 const auth = () => (account()?.token ? { Authorization: `Bearer ${account().token}` } : {});
+// 서버가 보낸 문구가 있으면 그대로, 없으면(서버까지 못 닿음, 시간 초과, 재시작 중) 원인을 알 수 있게 상태를 붙인다
+const failure = (error, what) => error?.response?.data?.error
+  || `${what} 못했어요. 잠시 후 다시 시도해 주세요. (${error?.response?.status ? `오류 ${error.response.status}` : error?.code === 'ECONNABORTED' ? '시간 초과' : '서버에 연결하지 못함'})`;
 const leaves = items => items.flatMap(i => (i.sub?.length ? i.sub : [i]));
 const isComplete = items => leaves(items).length > 0 && leaves(items).every(l => l.done);
 
@@ -59,7 +62,7 @@ export default function DevLogPage() {
       setParams({ d: data.date }, { replace: true });
       setMessage(check ? (data.complete && !wasComplete ? '오늘 할 일을 모두 끝냈어요!' : '') : '저장했어요.');
     } catch (error) {
-      setMessage(error?.response?.data?.error || '저장하지 못했어요. 잠시 후 다시 시도해 주세요.');
+      setMessage(failure(error, '저장하지'));
       if (error?.response?.status === 409) load();
     } finally { setBusy(false); }
   }
@@ -74,7 +77,7 @@ export default function DevLogPage() {
     if (!window.confirm(`${label(current.date).long} 일지를 지울까요?`)) return;
     setBusy(true);
     try { await api.delete(`/devlog/${current.date}`, { headers: auth() }); setParams({}, { replace: true }); await load(); setMessage('지웠어요.'); }
-    catch (error) { setMessage(error?.response?.data?.error || '지우지 못했어요.'); }
+    catch (error) { setMessage(failure(error, '지우지')); }
     finally { setBusy(false); }
   }
 
