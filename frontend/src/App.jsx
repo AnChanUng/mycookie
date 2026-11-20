@@ -145,8 +145,8 @@ function App() {
           <Route path="aptitude/:company" element={<ExamCompanyPage />} />
           <Route path="computer-general" element={<Navigate to="/private/chanung" replace />} />
           {/* 관리자: 들어오는 주소는 /private/chanung, 화면 안에서는 메뉴 이름이 안 보이는 주소(privatePath.js) */}
-          {/* 신규 개발자 안내: 들어오는 주소는 /private/bomin, 화면에서는 알아보기 어려운 주소 */}
-          <Route path="private/bomin" element={<Navigate to="/x/f9aa1502c8" replace />} />
+          {/* 신규 개발자 안내: 들어오는 주소는 /private/bomin(개발 일지가 먼저), 화면에서는 알아보기 어려운 주소 */}
+          <Route path="private/bomin" element={<Navigate to="/x/f9aa1502c8/log" replace />} />
           <Route path="x/f9aa1502c8" element={<OnboardingPage />} />
           <Route path="private/bomin/log" element={<Navigate to="/x/f9aa1502c8/log" replace />} />
           <Route path="x/f9aa1502c8/log" element={<DevLogPage />} />

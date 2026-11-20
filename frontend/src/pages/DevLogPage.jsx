@@ -14,6 +14,17 @@ const label = date => {
 const newId = () => Math.random().toString(36).slice(2, 10);
 const todayKst = () => new Date(Date.now() + 9 * 3600000).toISOString().slice(0, 10);
 const nextDay = date => new Date(Date.parse(`${date}T00:00:00Z`) + 86400000).toISOString().slice(0, 10);
+// 주말에는 개발하지 않는다: 토, 일은 건너뛴다
+const isWeekend = date => [0, 6].includes(new Date(Date.parse(`${date}T00:00:00Z`)).getUTCDay());
+const workdayFrom = date => { let d = date; while (isWeekend(d)) d = nextDay(d); return d; };
+const nextWorkday = date => workdayFrom(nextDay(date));
+// "다음으로 옮기기"가 보낼 날짜: 오늘이나 앞날의 일은 다음 평일, 지난 날짜에 밀린 일은 오늘(주말이면 월요일)
+const moveTarget = date => (date < todayKst() ? workdayFrom(todayKst()) : nextWorkday(date));
+// 처음 열 때 보여 줄 하루: 오늘 → 다가오는 가장 가까운 날 → 가장 최근 날
+const defaultEntry = entries => {
+  const today = todayKst();
+  return entries.find(e => e.date === today) || [...entries].filter(e => e.date > today).sort((a, b) => a.date.localeCompare(b.date))[0] || entries[0];
+};
 const auth = () => (account()?.token ? { Authorization: `Bearer ${account().token}` } : {});
 // 서버가 보낸 문구가 있으면 그대로, 없으면(서버까지 못 닿음, 시간 초과, 재시작 중) 원인을 알 수 있게 상태를 붙인다
 const failure = (error, what) => error?.response?.data?.error
@@ -50,7 +61,7 @@ export default function DevLogPage() {
   useEffect(() => { load(); }, [load]);
 
   const entries = state.entries;
-  const current = draft || entries.find(e => e.date === params.get('d')) || entries[0];
+  const current = draft || entries.find(e => e.date === params.get('d')) || defaultEntry(entries);
   const goals = DEV_LOG.find(e => e.date === current?.date)?.goals;
 
   async function save(entry, { check = false, wasComplete = false } = {}) {
@@ -73,6 +84,35 @@ export default function DevLogPage() {
     save({ ...current, items }, { check: true, wasComplete: isComplete(current.items) });
   }
 
+  // 안 끝낸 할 일 하나를 다음 평일 일지로 옮긴다(그날 일지가 없으면 만든다). 하위 항목은 같은 이름의 상위 항목 아래로 간다
+  async function moveItem(itemId, subId) {
+    const target = moveTarget(current.date);
+    const parent = current.items.find(i => i.id === itemId);
+    const moving = subId ? parent.sub.find(s => s.id === subId) : parent;
+    const sourceItems = subId
+      ? current.items.map(i => i.id !== itemId ? i : { ...i, sub: i.sub.filter(s => s.id !== subId) }).filter(i => i.id !== itemId || i.sub.length)
+      : current.items.filter(i => i.id !== itemId);
+    const existing = entries.find(e => e.date === target);
+    const base = existing ? structuredClone(existing)
+      : { date: target, title: `개발 ${entries.filter(e => e.date < target).length + 1}일차`, owner: current.owner || '', version: null, items: [] };
+    const copy = { id: newId(), text: moving.text, note: moving.note || '', done: false };
+    if (subId) {
+      const same = base.items.find(i => i.text === parent.text && i.sub?.length);
+      if (same) same.sub.push(copy);
+      else base.items.push({ id: newId(), text: parent.text, note: parent.note || '', done: false, sub: [copy] });
+    } else base.items.push({ ...copy, sub: [] });
+    setBusy(true); setMessage('');
+    try {
+      await api.put(`/devlog/${target}`, { title: base.title, owner: base.owner, items: base.items, version: base.version }, { headers: auth(), timeout: 15000 });
+      await api.put(`/devlog/${current.date}`, { title: current.title, owner: current.owner, items: sourceItems, version: current.version }, { headers: auth(), timeout: 15000 });
+      await load();
+      setMessage(`"${moving.text}"을(를) ${label(target).short}(${label(target).long.slice(-2, -1)})로 옮겼어요.`);
+    } catch (error) {
+      setMessage(failure(error, '옮기지'));
+      load();
+    } finally { setBusy(false); }
+  }
+
   async function remove() {
     if (!window.confirm(`${label(current.date).long} 일지를 지울까요?`)) return;
     setBusy(true);
@@ -81,11 +121,11 @@ export default function DevLogPage() {
     finally { setBusy(false); }
   }
 
-  // 오늘이 비어 있으면 오늘, 이미 있으면 가장 최근 날짜의 다음 날로 시작한다(날짜는 바꿀 수 있다)
+  // 오늘(주말이면 월요일)이 비어 있으면 그날, 이미 있으면 가장 최근 날짜의 다음 평일로 시작한다(날짜는 바꿀 수 있다)
   const startNew = () => {
     const taken = new Set(entries.map(e => e.date));
-    let date = todayKst();
-    if (taken.has(date)) date = nextDay(entries.map(e => e.date).sort().at(-1));
+    let date = workdayFrom(todayKst());
+    if (taken.has(date)) date = nextWorkday(entries.map(e => e.date).sort().at(-1));
     setMessage('');
     setDraft({ date, title: `개발 ${entries.length + 1}일차`, owner: '', version: null, isNew: true, items: [{ id: newId(), text: '', note: '', done: false, sub: [] }] });
   };
@@ -131,11 +171,13 @@ export default function DevLogPage() {
             <Progress items={current.items} />
             <ol className="dl-items">
               {current.items.map(item => <li key={item.id}>
-                {item.sub?.length ? <b>{item.text}</b> : <Check item={item} canEdit={state.canEdit} busy={busy} onToggle={() => toggle(item.id)} strong />}
+                {item.sub?.length ? <b>{item.text}</b> : <div className="dl-line"><Check item={item} canEdit={state.canEdit} busy={busy} onToggle={() => toggle(item.id)} strong />
+                  {state.canEdit && !item.done && <MoveButton date={current.date} busy={busy} onMove={() => moveItem(item.id)} />}</div>}
                 {item.note && <p>{item.note}</p>}
                 {!!item.sub?.length && <ol className="dl-sub">
                   {item.sub.map(s => <li key={s.id}>
-                    <div><Check item={s} canEdit={state.canEdit} busy={busy} onToggle={() => toggle(item.id, s.id)} />{s.note && <p>{s.note}</p>}</div>
+                    <div><div className="dl-line"><Check item={s} canEdit={state.canEdit} busy={busy} onToggle={() => toggle(item.id, s.id)} />
+                      {state.canEdit && !s.done && <MoveButton date={current.date} busy={busy} onMove={() => moveItem(item.id, s.id)} />}</div>{s.note && <p>{s.note}</p>}</div>
                   </li>)}
                 </ol>}
               </li>)}
@@ -147,6 +189,11 @@ export default function DevLogPage() {
       </div>
     </div>
   );
+}
+
+function MoveButton({ date, busy, onMove }) {
+  const to = label(moveTarget(date));
+  return <button type="button" className="dl-move" disabled={busy} onClick={onMove} title={`${to.long}로 옮기기`}>→ {to.short}({to.long.slice(-2, -1)})로</button>;
 }
 
 function Progress({ items }) {

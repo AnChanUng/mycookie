@@ -76,6 +76,10 @@
   .dl-edit-row { grid-template-columns: 1fr; }
   .dl-head { flex-direction: column; }
 }
+.dl-line { display: flex; gap: 8px; align-items: flex-start; justify-content: space-between; }
+.dl-move { flex: none; padding: 2px 9px; border: 1px solid var(--ds-line-strong); border-radius: 999px; background: var(--ds-surface); color: var(--ds-text-3); font: inherit; font-size: 12px; white-space: nowrap; cursor: pointer; }
+.dl-move:hover:not(:disabled) { border-color: var(--ds-brand); color: var(--ds-brand); }
+.dl-move:disabled { opacity: .5; cursor: default; }
 .dl-goals { margin-top: 32px; padding-top: 24px; border-top: 1px solid var(--ds-line); }
 .dl-goals h3 { margin: 0 0 6px; font-size: 20px; }
 .dl-goals-lead { margin: 0 0 14px; color: var(--ds-text-2); font-size: 15px; line-height: 1.65; }
