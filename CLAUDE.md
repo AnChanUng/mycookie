@@ -11,6 +11,12 @@
 - 접속 주소, 키, 메일 서버 같은 환경 값은 모두 환경변수로 받고 `deploy/homeserver/.env.example`과 `deploy/homeserver/docker-compose.yml`에 같이 적는다.
 - DB는 지금 JPA `ddl-auto: update`로 스키마를 만든다. 온프레미스 DB로 옮길 때 마이그레이션 도구(Flyway 등) 도입을 검토한다.
 
+## 예외 처리 (backend/.../exception/)
+- 오류는 `CookieErrorCode`(상태, 이름, 사용자 문구)에 한 줄 추가하고 `throw new CookieException(CookieErrorCode.이름)`으로 던진다. 새 코드에서 `ResponseStatusException`이나 컨트롤러별 `@ExceptionHandler`를 새로 만들지 않는다.
+- 응답은 전체 예외 처리 `CookieExceptionHandler`가 `{code, error}` 한 모양으로 만든다. 화면은 `error`를 보여 주고, 분기가 필요하면 `code`를 본다.
+- 문구에는 내부 정보(SQL, 클래스 이름, 개인정보)를 넣지 않는다. 예상 못 한 예외는 500으로 감추고 ERROR 로그로 남긴다(긴급 알림이 이 로그를 센다).
+- 기존 `ResponseStatusException`도 같은 모양으로 나가니, 그 코드를 고칠 때 `CookieException`으로 바꿔 나간다.
+
 ## 패치노트 (frontend/src/data/patchNotes.js, frontend/src/data/changelog.js)
 - 사용자가 체감하는 기능 변화만 적는다. 부하 테스트, 성능 측정, 인프라, 문서, 리팩터링 같은 비기능 항목은 넣지 않는다.
 - 핵심만 짧게. 버전당 항목 3~4개 이내, 자잘한 수정은 생략한다.

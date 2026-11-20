@@ -336,6 +336,7 @@ git push origin v0.24.0`}</pre>
           <li><b>메모리 8GB 예산:</b> 홈서버 한 대에서 모니터링까지 모두 돌아야 합니다. 새 컨테이너를 넣을 때는 <code>mem_limit</code> 합계(지금 약 4.6GB)를 확인합니다.</li>
           <li><b>상태는 알맞은 곳에:</b> 사라지면 안 되는 정보는 PostgreSQL, 접속자 수나 요청 제한처럼 짧게 사는 값은 Redis, 느린 후속 작업(이슈 생성, 알림)은 Kafka 이벤트로 넘깁니다. Redis와 Kafka가 멈춰도 사이트가 돌도록 대신하는 길을 꼭 남깁니다.</li>
           <li><b>유료 API 자동화 금지:</b> Claude API처럼 돈이 드는 API를 쓰는 자동화(AI 리뷰 등)는 넣지 않습니다. 요약은 무료 Gemini를 씁니다.</li>
+          <li><b>예외는 한곳에서:</b> 백엔드 오류는 <code>CookieErrorCode</code>에 한 줄 추가하고 <code>throw new CookieException(CookieErrorCode.이름)</code>으로 던집니다. 응답은 <code>CookieExceptionHandler</code>가 <code>{"{"}code, error{"}"}</code> 모양으로 만들어 화면은 <code>error</code>를 그대로 보여 줍니다.</li>
           <li><b>로그에 개인정보 금지:</b> 로그에 이메일, 토큰, 비밀번호를 그대로 찍지 않습니다. 모니터링도 한 번 더 가리지만 코드에서 먼저 조심합니다.</li>
           <li><b>패치노트:</b> 사용자가 체감하는 변화만, 버전당 3~4개 이내로 짧게 씁니다. 인프라, 리팩터링, 테스트는 넣지 않습니다.</li>
           <li><b>설정은 환경 변수로:</b> 새 설정은 <code>deploy/homeserver/.env.example</code>과 <code>docker-compose.yml</code>에 같이 적습니다.</li>
