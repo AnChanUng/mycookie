@@ -212,9 +212,10 @@ npm run check:today-cs        # 데이터 검사는 check:* 하나씩 돌릴 수
       <Section id="github" no="08" title="GitHub으로 일하는 순서">
         <ol className="ob-steps">
           <li><b>이슈 등록:</b> 할 일을 GitHub 이슈로 먼저 적습니다. <b>New issue</b>에서 양식(기능과 개선, 버그와 문제)을 고르면 제목 머리말과 라벨이 붙습니다. 사이트의 <Link to="/feedback">건의, 제보</Link> 양식으로 들어온 글도 <code>[기능개발]</code>, <code>[버그]</code> 이슈로 자동 등록되니, 이슈 목록이 곧 할 일 목록입니다.</li>
-          <li><b>브랜치 만들기:</b> 최신 <code>dev</code>에서 <code>feature/...</code>나 <code>fix/...</code> 브랜치를 만듭니다.</li>
-          <li><b>커밋:</b> 한 커밋에 한 가지 일만 담고, 메시지는 한글로 "무엇을 왜"를 첫 줄에 씁니다.</li>
-          <li><b>PR 올리기:</b> <code>dev</code>로 PR을 엽니다. 양식(관련 이슈, 무엇을, 왜, 확인한 것)을 채우고 <code>closes #이슈번호</code>를 적으면 머지할 때 이슈가 자동으로 닫힙니다.</li>
+          <li><b>브랜치 만들기:</b> 최신 <code>dev</code>에서 <code>feature/</code>, <code>fix/</code>, <code>docs/</code>, <code>refactor/</code>, <code>chore/</code>, <code>hotfix/</code> 중 하나로 시작하는 브랜치를 만듭니다.</li>
+          <li><b>커밋:</b> 한 커밋에 한 가지 일만 담고, 첫 줄은 <code>타입: 한글 요약</code>으로 씁니다. 예) <code>fix: 모의고사 채점이 0점으로 나오는 문제</code></li>
+          <li><b>PR 올리기:</b> 관련 이슈를 같은 작업 브랜치에 모아 <code>dev</code>로 PR 하나를 엽니다. 이슈가 20개 이상이어도 함께 검토하고 배포할 수 있으면 묶고, 후속 수정은 같은 PR에 추가합니다. 제목은 <code>타입: 요약</code>, 본문은 결과 요약 · 관련 이슈 · 검증 결과를 적습니다. <code>Closes #번호</code>의 자동 종료는 기본 브랜치 <code>master</code> 병합 때 적용됩니다. 배포 시점이나 승인 담당이 다른 작업은 나눕니다. 개인 학습과 블로그 초안은 개인 메모로 관리합니다.</li>
+          <li><b>리뷰:</b> 요청을 받으면 하루 안에 첫 의견을 남깁니다. 댓글 머리말 <code>[필수]</code>는 꼭 고칠 것, <code>[제안]</code>, <code>[질문]</code>, <code>[사소]</code>는 그보다 가벼운 의견입니다.</li>
           <li><b>위험도에 따라 머지:</b> PR을 올리면 바뀐 파일을 보고 위험도 라벨이 자동으로 붙습니다(아래 표). 조건을 채우면 머지되고, 5분 안에 스테이징에 자동 배포됩니다.</li>
           <li><b>운영 배포:</b> 스테이징에서 확인이 끝나면 <code>dev</code> → <code>master</code> PR을 엽니다. <b>운영 머지는 관리자(찬웅님)만</b> 할 수 있습니다. 5분 안에 운영에 반영됩니다.</li>
           <li><b>기록:</b> 사용자가 체감하는 변화면 패치노트를 쓰고, 버전 태그와 릴리스를 붙입니다(다음 항목).</li>
@@ -224,14 +225,16 @@ npm run check:today-cs        # 데이터 검사는 check:* 하나씩 돌릴 수
           <thead><tr><th>위험도</th><th>무엇이 바뀌면</th><th>머지 조건</th></tr></thead>
           <tbody>
             <tr><td>🟢 낮음</td><td>문서, 문제 데이터, 테스트만</td><td>CI 통과하면 <b>자동 머지</b></td></tr>
-            <tr><td>🟡 중간</td><td>그 외 백엔드, 화면 코드</td><td>CI 통과 + <b>찬웅님 승인</b>. 찬웅님이 올린 PR은 승인 없이 머지 가능</td></tr>
-            <tr><td>🔴 높음</td><td>로그인, 보안, 결제, DB 엔티티, 설정(<code>application.yml</code>), 배포, CI, 의존성</td><td>CI 통과 + <b>작성자가 아닌 사람 1명 승인</b>(필수)</td></tr>
+            <tr><td>🟡 중간</td><td>그 외 백엔드, 화면 코드</td><td>CI 통과 + <b>찬웅님 승인</b>. 찬웅님이 올린 PR은 CI가 통과하면 <code>dev</code>로 <b>자동 머지</b></td></tr>
+            <tr><td>🔴 높음</td><td>로그인, 보안, 결제, <b>기존</b> DB 엔티티 변경, 설정(<code>application.yml</code>), 배포, CI, 의존성. 새 엔티티(새 표) 추가는 🟡 중간</td><td>CI 통과 + <b>작성자가 아닌 사람 1명 승인</b>. 찬웅님이 올린 PR은 <code>dev</code>로 자동 머지되고 "사후 리뷰" 라벨이 붙어요(병합 뒤 읽고 질문하기)</td></tr>
             <tr><td>운영</td><td><code>dev</code> → <code>master</code></td><td>CI 통과 + <b>관리자만 머지</b></td></tr>
           </tbody>
         </table>
         <Note>
           판정은 PR의 <b>위험도 검사</b>(GitHub Actions)가 하고, 이유는 검사 결과 요약에 적힙니다. 여러 파일이 섞이면 가장 높은 위험도를 따릅니다.
           <code>master</code>에는 <code>dev</code>에서 오는 PR만 받습니다. 작업 브랜치에서 <code>master</code>로 바로 올리면 검사가 막습니다.<br />
+          <b>PR 규칙 검사</b>는 제목 형식과 브랜치 이름을 봅니다. 작업 브랜치 → <code>dev</code>는 <b>Squash and merge</b>, <code>dev</code> → <code>master</code>는 <b>merge commit</b>으로 합칩니다.
+          자세한 규칙은 <a href={`${REPO}/blob/master/CONTRIBUTING.md`}>CONTRIBUTING.md</a>에 있습니다.<br />
           새 PR과 이슈의 담당자(Assignees)에는 찬웅님이 자동으로 들어갑니다.
         </Note>
 
@@ -353,7 +356,7 @@ git push origin v0.24.0`}</pre>
 
       <Section id="docs" no="14" title="더 읽을 문서">
         <div className="ob-links">
-          {[['docs/homeserver.md', '홈서버 구축, 배포, 백업과 복구'], ['docs/monitoring.md', '로그, 서버 상태 보기 (Grafana)'], ['docs/design-system.md', '디자인 시스템'], ['docs/security.md', '보안 설계'],
+          {[['CONTRIBUTING.md', '브랜치, 커밋, PR, 리뷰 규칙'], ['docs/homeserver.md', '홈서버 구축, 배포, 백업과 복구'], ['docs/monitoring.md', '로그, 서버 상태 보기 (Grafana)'], ['docs/design-system.md', '디자인 시스템'], ['docs/security.md', '보안 설계'],
             ['docs/seo.md', '검색 노출'], ['docs/staging.md', '스테이징과 운영 환경'], ['docs/membership.md', '등급과 승급']]
             .map(([path, label]) => <a key={path} href={doc(path)}><b>{label}</b><small>{path}</small></a>)}
         </div>
