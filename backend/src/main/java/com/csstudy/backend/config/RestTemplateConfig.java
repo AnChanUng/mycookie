@@ -8,7 +8,6 @@ import org.springframework.web.client.RestTemplate;
 public class RestTemplateConfig {
 
     @Bean
-    @org.springframework.context.annotation.Primary
     public RestTemplate restTemplate() {
         return new RestTemplate();
     }

@@ -39,7 +39,7 @@ try {
   assert.ok(text(view.toJSON()).includes('팀 일정'), 'onboarding includes the team calendar');
   await act(() => view.root.findByProps({ 'aria-label': '2026-11-23 일정 보기' }).props.onClick());
   assert.ok(text(view.toJSON()).includes('저장된 팀 업무'));
-  assert.ok(text(view.toJSON()).includes('CS 구독 채널·관리자 기능 개발'));
+  assert.equal(view.root.findAllByType('a').filter(a => a.props.href === 'https://github.com/AnChanUng/mycookie/issues/102').length, 0, 'cancelled channel task is absent');
   assert.ok(text(view.toJSON()).includes('11월 말~12월 초'));
   assert.ok(view.root.findAllByType('a').some(a => a.props.href === 'https://dbeaver.io/download/'));
   await act(() => view.root.findByProps({ 'aria-label': '다음 달' }).props.onClick());
@@ -56,8 +56,8 @@ try {
   await mount();
   assert.ok(text(view.toJSON()).includes('저장된 개발 일지를 불러오지 못했습니다'));
   await act(() => view.root.findByProps({ 'aria-label': '2026-11-23 일정 보기' }).props.onClick());
-  assert.ok(text(view.toJSON()).includes('CS 구독 채널·관리자 기능 개발'));
-  console.log('Onboarding calendar passed: saved entries, CS task, tentative launch, tool link, year boundary and offline feedback.');
+  assert.equal(view.root.findAllByType('a').filter(a => a.props.href === 'https://github.com/AnChanUng/mycookie/issues/102').length, 0, 'cancelled channel task is absent');
+  console.log('Onboarding calendar passed: saved entries, cancelled task removal, tentative launch, tool link, year boundary and offline feedback.');
 } finally {
   if (view) await act(() => view.unmount());
   await server.close();

@@ -53,7 +53,7 @@ jobs:
           }
           while IFS=$'\t' read -r st f; do
             case "$f" in
-              backend/src/main/java/*/security/*|*Auth*.java|*OAuth*.java|*Password*.java|*Payment*.java|*Toss*.java|*Credential*.java|*CsChannel*.java|*RoleService.java)
+              backend/src/main/java/*/security/*|*Auth*.java|*OAuth*.java|*Password*.java|*Payment*.java|*Toss*.java|*Credential*.java|*RoleService.java)
                 bump high "\`$f\` 로그인, 보안, 결제" ;;
               backend/src/main/java/*/entity/*)
                 # 새 엔티티는 새 표만 생기고 기존 데이터를 건드리지 않아 중간. 기존 엔티티를 고치거나 지우면 높음

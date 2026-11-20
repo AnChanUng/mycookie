@@ -84,13 +84,10 @@ app:
     keywords: ${BLOG_KEYWORDS:나의쿠키,홈서버}
   # 메일 링크(비밀번호 재설정, 이메일 인증)가 가리키는 사이트 주소
   base-url: ${APP_BASE_URL:http://localhost:3000}
-  # Mattermost 채널에 오늘의 CS 질문 올리기. 웹훅 URL이 비면 꺼진다(스테이징에는 넣지 않는다)
+  # 장애·제보 운영 알림. 웹훅이 비어 있으면 꺼진다.
   mattermost:
     webhook-url: ${MATTERMOST_WEBHOOK_URL:}
-    cron: ${MATTERMOST_CRON:0 30 8 * * MON-FRI}
   # 학습 메일 구독(웹 필수지식). 메일 서버(MAIL_HOST)가 있어야 켜진다
-  cs-channel:
-    webhook-url: ${CS_CHANNEL_WEBHOOK_URL:}
   newsletter:
     cron: ${NEWSLETTER_CRON:0 30 8 * * MON-FRI}
     # 무료 SMTP 하루 한도보다 낮게(비밀번호 재설정 메일 몫을 남긴다). 못 보낸 사람은 다음 발송 때 먼저 보낸다

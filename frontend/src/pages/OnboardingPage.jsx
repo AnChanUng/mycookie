@@ -41,9 +41,9 @@ function Onboarding() {
 
       <section className="ob-section" aria-labelledby="bomin-work-title">
         <h2 id="bomin-work-title">보민의 담당업무</h2>
-        <p>매일 아래 세 영역을 확인하고, 발견한 문제는 개발 일지에 기록합니다. 11월 23일에 채널을 준비하고, 관리자 화면의 CS 채널 탭에서 운영합니다.</p>
+        <p>매일 아래 세 영역을 확인하고, 발견한 문제는 개발 일지에 기록합니다. 학습 콘텐츠는 기존 이메일 구독으로 전달합니다.</p>
         <div className="bomin-work-grid">
-          <article><h3>01 · CS 콘텐츠와 채널</h3><p>웹 필수지식에서 다음 콘텐츠를 선정하고 설명·질문·원문 링크를 검수합니다. 채널 준비 후 미리보기와 테스트 발송까지 담당합니다.</p><a href="https://github.com/AnChanUng/mycookie/issues/102">11/23 개발 과제 확인</a></article>
+          <article><h3>01 · 학습 메일 콘텐츠</h3><p>웹 필수지식의 설명·질문·원문 링크를 검수하고, 구독자가 받는 메일 내용에 오류가 없는지 확인합니다.</p></article>
           <article><h3>02 · 메일과 발송 상태</h3><p>누락·오류 제보와 발송 로그를 확인합니다. 실패 원인을 조사하고 수정 후 테스트 수신으로 확인합니다.</p><a href="https://grafana.mycookie.dev">Grafana에서 로그 확인</a></article>
           <article><h3>03 · 공개 전 품질 점검</h3><p>가입·로그인·비밀번호 변경·구독을 스테이징에서 확인하고, 테스트 계정의 등급별 화면과 권한을 점검합니다.</p><a href="https://staging.mycookie.dev/account">스테이징 계정 화면</a></article>
         </div>
@@ -94,7 +94,7 @@ function Onboarding() {
             <tr><td>Tailscale</td><td>집 밖에서 홈서버에 SSH로 들어가는 사설 네트워크</td></tr>
             <tr><td>모니터링</td><td>Grafana, Loki(로그), Prometheus(지표), Alloy(수집). 서비스와 분리된 Compose 프로젝트로 돌고, 로그의 이메일, IP, 토큰은 저장 전에 가립니다(<a href={doc('docs/monitoring.md')}>docs/monitoring.md</a>)</td></tr>
             <tr><td>GitHub Actions</td><td>PR마다 백엔드 테스트, 화면 린트와 빌드, 데이터 검사(<code>ci.yml</code>), 위험도 판정(<code>pr-risk.yml</code>), 담당자 지정을 돌리고, 새 이슈, 새 PR, CI 실패를 Mattermost로 알립니다</td></tr>
-            <tr><td>외부 서비스</td><td>Mattermost(매일 CS 알림, 제보 알림 웹훅), 소셜 로그인(Google, Kakao, Naver, GitHub), 티스토리 RSS(기술 블로그 목록)</td></tr>
+            <tr><td>외부 서비스</td><td>Mattermost(장애·제보 운영 알림 웹훅), 소셜 로그인(Google, Kakao, Naver, GitHub), 티스토리 RSS(기술 블로그 목록)</td></tr>
           </tbody>
         </table>
 
@@ -167,7 +167,7 @@ function Onboarding() {
             <li><a href="https://redis.io/docs/latest/develop/tools/insight/" target="_blank" rel="noopener noreferrer"><b>Redis Insight</b></a> — Redis 키·값·만료 시간을 확인할 때 설치합니다.</li>
             <li><a href="https://ui.docs.kafbat.io/" target="_blank" rel="noopener noreferrer"><b>Kafbat UI</b></a> — Kafka 토픽·메시지·소비자 상태 조회가 필요할 때 운영 담당자와 실행·접속 방법을 정합니다.</li>
             <li><b>Grafana</b> — 홈서버의 로그·지표를 브라우저로 조회합니다. 팀원 계정과 접속 방법은 <a href={doc('docs/monitoring.md')}>모니터링 운영 안내</a>에서 확인합니다.</li>
-            <li><b>Mattermost</b> — SSAFY 팀 초대를 받아 웹이나 데스크톱 앱으로 접속합니다. 11월 23일 과제에서 CS 구독 채널을 준비합니다.</li>
+            <li><b>Mattermost</b> — SSAFY 팀 초대를 받아 웹이나 데스크톱 앱으로 접속합니다. 장애·제보 운영 알림을 확인할 때 사용합니다.</li>
           </ul>
         </div>
       </Section>
