@@ -9,7 +9,7 @@ import { membershipHeaders } from '../membership';
 
 const PRESENCE_EVERY = 60 * 1000;
 
-// 헤더 오른쪽의 "지금 공부 중" 표시. 누르면 접속해 있는 사람들과의 채팅 창이 열린다
+// 헤더 오른쪽 채팅 버튼. 접속 인원은 헤더에 표시하지 않는다.
 export default function StudyCount() {
   const admin = useLocation().pathname.startsWith('/admin');
   const [count, setCount] = useState(0);
@@ -56,10 +56,8 @@ export default function StudyCount() {
   return (
     <>
       <button type="button" className={`study-count${open ? ' on' : ''}`} onClick={() => setOpen(o => !o)}
-        aria-expanded={open} title="최근 몇 분 안에 이 사이트를 열어 둔 사람 수 · 누르면 채팅이 열립니다">
-        <span className="study-count-dot" aria-hidden="true" />
-        {count > 0 ? `${count}명` : '채팅'}
-        {count > 0 && <span className="study-count-tail">&nbsp;공부 중</span>}
+        aria-expanded={open} title="채팅 열기">
+        채팅
         <span className="study-count-chat" aria-hidden="true">💬</span>
         {(unread || directUnread > 0) && !open && <span className="study-count-new" aria-label="새 채팅 또는 친구 요청" />}
       </button>

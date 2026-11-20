@@ -25,7 +25,7 @@ export default function MemberMenu() {
   const { membership, loading, error } = useMembership(`${identity}:${location.pathname}`);
   const signedIn = !!account()?.token;
   const access = useRoles();
-  const showCareer = access.nickname === '쿠우키' && access.roles.includes('OWNER');
+  const showCareer = access.signedIn && !access.loading && access.nickname === '쿠우키';
   const nickname = membership?.nickname || account()?.nickname || savedNickname() || '방문자';
   const [open, setOpen] = useState(false);
   const [learning, setLearning] = useState(null);

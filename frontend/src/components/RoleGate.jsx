@@ -6,7 +6,7 @@ import useRoles from '../useRoles';
 export default function RoleGate({ role, nickname, title, children }) {
   const { signedIn, loading, roles, nickname: verifiedNickname, error } = useRoles();
   const { pathname } = useLocation();
-  if (signedIn && !loading && roles.includes(role) && (!nickname || verifiedNickname === nickname)) return children;
+  if (signedIn && !loading && (role ? roles.includes(role) : !!nickname) && (!nickname || verifiedNickname === nickname)) return children;
   return <div className="fade-in role-gate">
     <div className="page-header">
       <Link to="/" className="back-link">← 홈으로</Link>
