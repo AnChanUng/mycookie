@@ -38,7 +38,7 @@ public enum CookieErrorCode {
     // 권한
     ADMIN_REQUIRED(HttpStatus.UNAUTHORIZED, "관리자만 볼 수 있어요. 관리자 계정으로 로그인해 주세요."),
     ROLE_REQUIRED(HttpStatus.FORBIDDEN, "이 페이지를 볼 권한이 없어요."),
-    WEAK_ADMIN_PASSWORD(HttpStatus.BAD_REQUEST, "관리자 비밀번호는 8자 이상이고, 아이디와 같거나 아이디를 포함하면 안 돼요.");
+    WEAK_ADMIN_PASSWORD(HttpStatus.BAD_REQUEST, "관리자 비밀번호를 입력해 주세요. 아이디와 같거나 아이디를 포함하면 안 돼요.");
 
     private final HttpStatus status;
     private final String message;
