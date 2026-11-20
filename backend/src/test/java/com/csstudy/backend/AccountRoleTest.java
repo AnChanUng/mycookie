@@ -65,8 +65,8 @@ class AccountRoleTest {
         postJson("/api/v1/admin/accounts", body, null, null).andExpect(status().isUnauthorized());
         postJson("/api/v1/admin/accounts", body, "wrong-key-wrong-key-wrong-key-wrong", null).andExpect(status().isUnauthorized());
         postJson("/api/v1/admin/accounts", body, null, register("키없는사용자")).andExpect(status().isUnauthorized());
-        // 약한 비밀번호(짧거나 아이디를 포함)는 거절
-        postJson("/api/v1/admin/accounts", Map.of("nickname", "admin8", "password", "short1!", "roles", "ADMIN"), KEY, null)
+        // 비어 있거나 아이디를 포함한 비밀번호는 거절(길이 제한은 없음)
+        postJson("/api/v1/admin/accounts", Map.of("nickname", "admin8", "password", " ", "roles", "ADMIN"), KEY, null)
                 .andExpect(status().isBadRequest()).andExpect(jsonPath("$.code").value("WEAK_ADMIN_PASSWORD"));
         postJson("/api/v1/admin/accounts", Map.of("nickname", "admin8", "password", "admin8admin8admin8", "roles", "ADMIN"), KEY, null)
                 .andExpect(status().isBadRequest()).andExpect(jsonPath("$.code").value("WEAK_ADMIN_PASSWORD"));
@@ -77,6 +77,8 @@ class AccountRoleTest {
         postJson("/api/v1/admin/accounts", body, KEY, null).andExpect(status().isOk())
                 .andExpect(jsonPath("$.nickname").value("admin7")).andExpect(jsonPath("$.roles", hasItem("ADMIN")));
         postJson("/api/v1/admin/accounts", body, KEY, null).andExpect(status().isConflict());
+        // 짧아도 아이디만 포함하지 않으면 된다
+        postJson("/api/v1/admin/accounts", Map.of("nickname", "admin6", "password", "ck9", "roles", "ADMIN"), KEY, null).andExpect(status().isOk());
 
         String admin = login("admin7", "a-long-and-random-passphrase");
         mvc.perform(get("/api/v1/auth/me").header("Authorization", "Bearer " + admin)).andExpect(jsonPath("$.roles", hasItem("TEAM")));

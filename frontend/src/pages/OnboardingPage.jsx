@@ -5,6 +5,7 @@ import OnboardingTabs from '../components/OnboardingTabs';
 import './OnboardingPage.css';
 import archImg from '../assets/architecture.webp';
 import RoleGate from '../components/RoleGate';
+import TeamCalendar from '../components/TeamCalendar';
 
 // 신입 개발자 온보딩 페이지. 들어오는 주소는 /private/bomin, 화면에서는 알아보기 어려운 주소(ONBOARDING_PATH)로 바꿔 보여 준다.
 // 주소를 숨기는 것일 뿐 보안 장치는 아니다. 비밀번호, 키, 연결 주소 같은 비밀값은 이 페이지에 적지 않는다.
@@ -29,12 +30,14 @@ function Onboarding() {
           위에서부터 순서대로 읽되, 모르는 부분은 넘어가도 괜찮습니다.
         </p>
         <nav className="ob-toc" aria-label="목차">
-          {[['about', '한눈에 보기'], ['arch', '아키텍처'], ['flow', '요청 흐름'], ['stack', '기술 스택'], ['repo', '저장소 구조'],
+          {[['calendar', '팀 일정'], ['about', '한눈에 보기'], ['arch', '아키텍처'], ['flow', '요청 흐름'], ['stack', '기술 스택'], ['tools', '설치할 도구'], ['repo', '저장소 구조'],
             ['local', '로컬 실행'], ['env', '환경과 브랜치'], ['github', 'GitHub 작업 순서'], ['ops', '운영과 장애 대응'], ['release', '버전과 릴리스'], ['ai', 'AI와 함께 일하기'],
             ['rules', '작업 규칙'], ['blog', '기술 블로그'], ['docs', '더 읽을 문서']]
-            .map(([id, label], i) => <a key={id} href={`#${id}`}><span>{String(i + 1).padStart(2, '0')}</span>{label}</a>)}
+            .map(([id, label]) => <a key={id} href={`#${id}`}>{label}</a>)}
         </nav>
       </header>
+
+      <TeamCalendar />
 
       <Section id="about" no="01" title="나의쿠키 한눈에 보기">
         <p>
@@ -133,6 +136,30 @@ function Onboarding() {
             <tr><td>테스트</td><td>JUnit 5, MockMvc, ESLint, 데이터 검사 스크립트(<code>npm run check:*</code>)</td></tr>
           </tbody>
         </table>
+        <div id="tools">
+          <h3>개발 PC에 설치할 도구</h3>
+          <p>아래 공식 링크에서 운영체제에 맞는 설치 파일을 받습니다. 설치 후 버전과 연결까지 확인해 주세요.</p>
+          <ul className="ob-tool-list">
+            <li><a href="https://git-scm.com/downloads/" target="_blank" rel="noopener noreferrer"><b>Git</b></a> — 저장소 복제와 브랜치 작업. <code>git --version</code>으로 확인합니다.</li>
+            <li><a href="https://nodejs.org/en/download" target="_blank" rel="noopener noreferrer"><b>Node.js 24</b></a> — 프런트엔드 실행과 빌드. <code>node --version</code>, <code>npm --version</code>으로 확인합니다.</li>
+            <li><a href="https://adoptium.net/temurin/releases/?version=17" target="_blank" rel="noopener noreferrer"><b>JDK 17</b></a> — 백엔드 실행. 기존 JDK 21도 사용 가능합니다. <code>java -version</code>, <code>javac -version</code>으로 확인합니다.</li>
+            <li><b>개발 편집기</b> — <a href="https://code.visualstudio.com/download" target="_blank" rel="noopener noreferrer">VS Code</a> 또는 <a href="https://www.jetbrains.com/idea/download/" target="_blank" rel="noopener noreferrer">IntelliJ IDEA</a>. Java와 JavaScript 작업에 사용할 편집기를 준비합니다.</li>
+            <li><a href="https://docs.docker.com/get-started/get-docker/" target="_blank" rel="noopener noreferrer"><b>Docker와 Compose</b></a> — 로컬 PostgreSQL과 통합 테스트 실행. <code>docker --version</code>, <code>docker compose version</code>으로 확인합니다.</li>
+            <li><a href="https://dbeaver.io/download/" target="_blank" rel="noopener noreferrer"><b>DBeaver Community</b></a> — PostgreSQL의 회원·구독·학습 기록 조회와 SQL 실행. 로컬 DB 연결과 <code>SELECT 1;</code> 실행을 확인합니다.</li>
+            <li><a href="https://tailscale.com/download" target="_blank" rel="noopener noreferrer"><b>Tailscale</b></a> — 팀 초대를 받은 계정으로 홈서버와 Grafana에 접속합니다. 설치 후 운영 담당자의 초대와 접속 권한 확인이 필요합니다.</li>
+          </ul>
+          <Note>
+            DBeaver의 DB 로그인은 사이트 로그인과 별도입니다. 운영·스테이징 연결을 구분하고, 홈서버 DB 접속에는 승인된 SSH 터널을 사용합니다.
+            접속 주소와 비밀번호는 운영 담당자에게 별도로 전달받습니다.
+          </Note>
+          <h3>담당 업무에 따라 사용할 도구</h3>
+          <ul className="ob-tool-list">
+            <li><a href="https://redis.io/docs/latest/develop/tools/insight/" target="_blank" rel="noopener noreferrer"><b>Redis Insight</b></a> — Redis 키·값·만료 시간을 확인할 때 설치합니다.</li>
+            <li><a href="https://ui.docs.kafbat.io/" target="_blank" rel="noopener noreferrer"><b>Kafbat UI</b></a> — Kafka 토픽·메시지·소비자 상태 조회가 필요할 때 운영 담당자와 실행·접속 방법을 정합니다.</li>
+            <li><b>Grafana</b> — 홈서버의 로그·지표를 브라우저로 조회합니다. 팀원 계정과 접속 방법은 <a href={doc('docs/monitoring.md')}>모니터링 운영 안내</a>에서 확인합니다.</li>
+            <li><b>Mattermost</b> — SSAFY 팀 초대를 받아 웹이나 데스크톱 앱으로 접속합니다. 11월 23일 과제에서 CS 구독 채널을 준비합니다.</li>
+          </ul>
+        </div>
       </Section>
 
       <Section id="repo" no="05" title="저장소 구조">
