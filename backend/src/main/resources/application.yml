@@ -155,6 +155,9 @@ app:
     github:
       client-id: ${OAUTH_GITHUB_CLIENT_ID:}
       client-secret: ${OAUTH_GITHUB_CLIENT_SECRET:}
+    ssafy:
+      client-id: ${OAUTH_SSAFY_CLIENT_ID:}
+      client-secret: ${OAUTH_SSAFY_CLIENT_SECRET:}
 
 gemini:
   api-key: ${GEMINI_API_KEY:}

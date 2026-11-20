@@ -63,7 +63,8 @@ class OAuthLoginTest {
     @Test void onlyConfiguredProvidersAreOffered() throws Exception {
         mvc.perform(get("/api/v1/auth/oauth/providers")).andExpect(status().isOk())
                 .andExpect(jsonPath("$.providers[0]").value("google")).andExpect(jsonPath("$.providers[1]").value("naver")).andExpect(jsonPath("$.providers[2]").value("github"))
-                .andExpect(jsonPath("$.providers.length()").value(3));
+                .andExpect(jsonPath("$.providers[3]").value("ssafy"))
+                .andExpect(jsonPath("$.providers.length()").value(4));
         mvc.perform(get("/api/v1/auth/oauth/kakao/authorize").param("redirectUri", REDIRECT)).andExpect(status().isNotFound());
     }
 
@@ -113,6 +114,23 @@ class OAuthLoginTest {
         postJson("/api/v1/auth/oauth/link", Map.of("ticket", ticket), user.path("token").asText()).andExpect(status().isOk());
         mvc.perform(get("/api/v1/auth/oauth/linked").header("Authorization", "Bearer " + user.path("token").asText()))
                 .andExpect(jsonPath("$.providers[0]").value("google"));
+    }
+
+    @Test void naverAndSsafyCanLogIntoTheSameAccount() throws Exception {
+        String naverTicket = callback("naver", "123").path("ticket").asText();
+        JsonNode user = read(postJson("/api/v1/auth/oauth/signup",
+                Map.of("ticket", naverTicket, "nickname", "두서비스회원"), null).andExpect(status().isOk()));
+        JsonNode ssafy = callback("ssafy", "123");
+        assertEquals("link", ssafy.path("status").asText());
+        postJson("/api/v1/auth/oauth/link", Map.of("ticket", ssafy.path("ticket").asText()),
+                user.path("token").asText()).andExpect(status().isOk());
+
+        JsonNode naverLogin = callback("naver", "123");
+        JsonNode ssafyLogin = callback("ssafy", "123");
+        assertEquals("ok", naverLogin.path("status").asText());
+        assertEquals("ok", ssafyLogin.path("status").asText());
+        assertEquals(user.path("id"), naverLogin.path("user").path("id"));
+        assertEquals(user.path("id"), ssafyLogin.path("user").path("id"));
     }
 
     @Test void newSocialUserCanCreateAccount() throws Exception {
