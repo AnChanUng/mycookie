@@ -14,7 +14,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.util.List;
 import java.util.Map;
 
-// 제공자(구글 · 네이버 · 카카오 · 깃허브)마다 다른 주소와 응답 모양을 한곳에 모은다.
+// 제공자마다 다른 주소와 응답 모양을 한곳에 모은다.
 // 키는 환경변수(OAUTH_<제공자>_CLIENT_ID · _SECRET)로만 받고, 키가 없는 제공자는 버튼도 숨긴다
 @Component
 @RequiredArgsConstructor
@@ -36,8 +36,10 @@ public class OAuthClient {
                     "https://api.github.com/user", "read:user user:email"),
             // 네이버는 받을 정보(이메일 · 별명)를 개발자센터 앱 설정에서 고르므로 scope를 쓰지 않는다
             "naver", new Spec("https://nid.naver.com/oauth2.0/authorize", "https://nid.naver.com/oauth2.0/token",
-                    "https://openapi.naver.com/v1/nid/me", ""));
-    public static final List<String> ORDER = List.of("google", "naver", "kakao", "github");
+                    "https://openapi.naver.com/v1/nid/me", ""),
+            "ssafy", new Spec("https://lab.ssafy.com/oauth/authorize", "https://lab.ssafy.com/oauth/token",
+                    "https://lab.ssafy.com/api/v4/user", "read_user"));
+    public static final List<String> ORDER = List.of("google", "naver", "kakao", "github", "ssafy");
 
     private final RestTemplate http;
     private final Environment env;
@@ -46,7 +48,8 @@ public class OAuthClient {
     private String clientSecret(String provider) { return env.getProperty("app.oauth." + provider + ".client-secret", ""); }
 
     public boolean enabled(String provider) {
-        return SPECS.containsKey(provider) && !clientId(provider).isBlank();
+        return SPECS.containsKey(provider) && !clientId(provider).isBlank()
+                && (!"ssafy".equals(provider) || !clientSecret(provider).isBlank());
     }
 
     public String authorizeUrl(String provider, String redirectUri, String state) {
@@ -93,6 +96,7 @@ public class OAuthClient {
                     String name = text(r, "nickname");
                     yield new Profile(provider, r.path("id").asText(""), text(r, "email"), name != null ? name : text(r, "name"), ageRange(text(r, "age")));
                 }
+                case "ssafy" -> new Profile(provider, user.path("id").asText(""), null, text(user, "username"));
                 default -> new Profile(provider, user.path("id").asText(), text(user, "email"),
                         text(user, "login"));
             };

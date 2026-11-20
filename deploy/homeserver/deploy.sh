@@ -17,7 +17,7 @@ FORCE=${1:-}
 exec 9>"$ROOT/.deploy.lock"
 flock -n 9 || { echo "다른 배포가 진행 중입니다"; exit 0; }
 
-# 작업 폴더: app(master, compose 파일도 여기서 읽는다), staging(dev)
+# 작업 폴더: app(master, 공용 인프라 설정), staging(dev)
 checkout() {
   local dir=$1 branch=$2
   [ -d "$ROOT/$dir/.git" ] || git clone --branch "$branch" "$REPO" "$ROOT/$dir"
@@ -27,6 +27,7 @@ checkout() {
 deploy() {
   local dir=$1 branch=$2 tag=$3 env=$4
   checkout "$dir" "$branch"
+  local -a service_compose=(docker compose --project-directory "$ROOT" -f "$ROOT/$dir/deploy/homeserver/docker-compose.yml" --env-file "$ROOT/.env")
   local current target changed
   current=$(git -C "$ROOT/$dir" rev-parse HEAD)
   target=$(git -C "$ROOT/$dir" rev-parse "origin/$branch")
@@ -41,12 +42,12 @@ deploy() {
   # 빌드가 실패하면 set -e로 여기서 멈추고, 돌던 컨테이너는 이전 이미지로 계속 돈다
   if [ "$need_backend" = 1 ]; then
     docker build --quiet -t "devcookie-backend:$tag" "$ROOT/$dir/backend"
-    "${COMPOSE[@]}" up -d --no-deps "backend-$tag"
+    "${service_compose[@]}" up -d --no-deps "backend-$tag"
   fi
   if [ "$need_frontend" = 1 ]; then
     docker build --quiet -t "devcookie-frontend:$tag" \
       --build-arg VITE_DEPLOY_ENV="$env" --build-arg GIT_COMMIT="$target" "$ROOT/$dir/frontend"
-    "${COMPOSE[@]}" up -d --no-deps "frontend-$tag"
+    "${service_compose[@]}" up -d --no-deps "frontend-$tag"
   fi
 }
 
@@ -57,7 +58,8 @@ deploy app "$PROD_BRANCH" prod production
 deploy staging "$STAGING_BRANCH" staging preview
 # 터널 토큰을 넣기 전에는 그램 안(localhost:8080)에서만 확인한다
 if grep -qE '^TUNNEL_TOKEN=.+' "$ROOT/.env"; then
-  "${COMPOSE[@]}" up -d cloudflared
+  # 화면과 백엔드는 각 브랜치 설정으로 이미 배포했다.
+  "${COMPOSE[@]}" up -d --no-deps cloudflared
 else
   echo "TUNNEL_TOKEN이 비어 있어 터널은 띄우지 않았습니다. 확인: http://localhost:8080"
 fi

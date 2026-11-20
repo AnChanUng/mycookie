@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { linkedProviders, OAUTH_LABELS, oauthProviders, startOAuth } from '../sync';
 
 // 제공자 표시 글자. 로고 이미지 대신 각 회사 색 위에 한 글자를 얹는다
-const MARKS = { google: 'G', naver: 'N', kakao: 'K', github: 'GH' };
+const MARKS = { google: 'G', naver: 'N', kakao: 'K', github: 'GH', ssafy: 'S' };
 
 // 소셜(구글 · 네이버 · 카카오) · 깃허브 로그인 버튼. 서버에 키가 등록된 제공자만 보인다.
 // 로그아웃 상태: 로그인 카드 맨 위에 꽉 찬 버튼을 세로로 쌓고 "또는" 구분선을 붙인다.
@@ -32,7 +32,7 @@ export default function SocialLogin({ user }) {
         ? <span key={p} className={`social-btn ${p} linked`}><i className="social-mark" aria-hidden="true">✓</i>{OAUTH_LABELS[p]} 연결됨</span>
         : <button key={p} type="button" className={`social-btn ${p}`} disabled={!!busy} onClick={() => go(p)}>
           <i className="social-mark" aria-hidden="true">{MARKS[p]}</i>
-          {busy === p ? '이동 중…' : `${OAUTH_LABELS[p]}${user ? ' 연결하기' : '로 계속하기'}`}
+          {busy === p ? '이동 중…' : `${OAUTH_LABELS[p]}${user ? ' 연결하기' : p === 'ssafy' ? ' 계정으로 계속하기' : '로 계속하기'}`}
         </button>)}
     </div>
     {message && <p className="auth-message" role="alert">{message}</p>}
