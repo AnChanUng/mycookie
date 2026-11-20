@@ -76,7 +76,7 @@
 
 /* 간편 로그인 버튼. 제공자 안내 색이라 화면 모드와 상관없이 같다 */
 .social-login-buttons { display: flex; gap: var(--ds-s2); flex-wrap: wrap; }
-.social-login--stack .social-login-buttons { flex-direction: column; }
+.social-login--row .social-login-buttons { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .social-btn {
   position: relative;
   display: inline-flex;
@@ -92,8 +92,8 @@
   cursor: pointer;
   transition: filter var(--ds-fast) var(--ds-ease);
 }
-.social-login--stack .social-btn { width: 100%; height: 46px; font-size: var(--ds-fs-body); }
-.social-login--stack .social-mark { position: absolute; left: var(--ds-s4); }
+.social-login--row .social-btn { width: 100%; min-width: 0; height: 46px; padding: 0 6px; gap: 4px; font-size: 12px; }
+.social-login--row .social-mark { min-width: 14px; }
 .social-btn:hover:not(:disabled) { filter: brightness(.97); }
 .social-btn:disabled { opacity: .6; cursor: default; }
 .social-mark { font-style: normal; font-weight: 800; font-size: 13px; min-width: 20px; text-align: center; }
