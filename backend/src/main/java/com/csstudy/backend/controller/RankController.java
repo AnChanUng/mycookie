@@ -34,7 +34,8 @@ public class RankController {
     // account: 동기화 계정으로 묶인 줄이면 그 계정의 닉네임, 아니면 null
     private record Solver(String visitorId, long count, String account, UserTier baseTier, String subjectKey) {}
 
-    private record Board(List<Solver> ranked, Map<String, Integer> rankOf, Instant at) {}
+    // hiddenSolvers, hiddenSolved: 순위표에는 나오지 않지만 합계에는 넣는 관리자 계정의 풀이
+    private record Board(List<Solver> ranked, Map<String, Integer> rankOf, Instant at, long hiddenSolvers, long hiddenSolved) {}
 
     private final UsageEventRepository usageEventRepository;
     private final VisitorSolvedRepository solvedRepository;
@@ -99,8 +100,9 @@ public class RankController {
 
         Map<String, Object> out = new LinkedHashMap<>();
         out.put("top", rows);
-        out.put("totalSolved", board.ranked().stream().mapToLong(Solver::count).sum());
-        out.put("totalSolvers", board.ranked().size());
+        // 합계는 문제를 한 문제 이상 푼 사람과 그들이 푼 문제 수다. 관리자도 풀었으면 합계에는 들어간다(순위표에는 나오지 않음)
+        out.put("totalSolved", board.ranked().stream().mapToLong(Solver::count).sum() + board.hiddenSolved());
+        out.put("totalSolvers", board.ranked().size() + board.hiddenSolvers());
         Solver mine = myRank == null ? null : board.ranked().get(myRank - 1);
         out.put("me", mine == null ? null : row(mine, myRank, nicknames.get(visitorId)));
         // 직접 정한 닉네임만 돌려준다. 정한 적이 없으면 null. 계정으로 묶인 기기는 계정 닉네임이 나간다
@@ -196,10 +198,13 @@ public class RankController {
         Set<Long> admins = new HashSet<>();
         accountRoles.findAll().stream().filter(r -> r.getRole() == com.csstudy.backend.entity.AccountRole.Role.ADMIN)
                 .forEach(r -> admins.add(r.getUserId()));
+        long[] hidden = new long[2];   // [사람 수, 문제 수]
         devices.forEach((userId, ids) -> {
             if (!accounts.containsKey(userId)) return;   // 지워진 계정의 기기는 따로 센다
             User rankedUser = accounts.get(userId);
             if (admins.contains(userId) || com.csstudy.backend.service.NicknameService.isReserved(rankedUser.getNickname())) {
+                long adminBest = Math.max(saved.getOrDefault(userId, 0L), ids.stream().mapToLong(counts::get).max().orElse(0));
+                if (adminBest > 0) { hidden[0]++; hidden[1] += adminBest; }
                 ids.forEach(counts::remove);
                 return;
             }
@@ -222,7 +227,7 @@ public class RankController {
         for (int i = 0; i < ranked.size(); i++) place.put(ranked.get(i), i + 1);
         Map<String, Integer> rankOf = new HashMap<>();
         solverOf.forEach((visitorId, s) -> { if (place.containsKey(s)) rankOf.put(visitorId, place.get(s)); });
-        board = new Board(ranked, rankOf, Instant.now());
+        board = new Board(ranked, rankOf, Instant.now(), hidden[0], hidden[1]);
         cached = board;
         return board;
     }
