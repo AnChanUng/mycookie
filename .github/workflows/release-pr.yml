@@ -1,0 +1,84 @@
+# 운영 배포 PR 자동 준비: dev에 새 커밋이 들어오면 dev → master PR을 열어 두거나, 열린 PR의 목록을 갱신한다.
+#   - 열린 dev → master PR이 없으면 "release: 운영 배포 YYYY-MM-DD"로 새로 연다
+#   - 있으면 본문의 "포함된 변경" 칸만 다시 쓴다(사람이 쓴 제목과 나머지 본문은 그대로 둔다)
+#   - 새 환경변수(deploy/homeserver/.env.example에 추가된 이름)가 있으면 "배포 주의"에 적는다
+#   - 병합은 지금처럼 관리자만 한다(master 브랜치 규칙). 이 워크플로는 병합하지 않는다
+# 필요한 설정(한 번만): Settings → Actions → General → Workflow permissions →
+#   "Allow GitHub Actions to create and approve pull requests" 체크
+# 유료 API 없이 gh와 git만 쓴다.
+name: 운영 배포 PR
+
+on:
+  push:
+    branches: [dev]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: release-pr
+  cancel-in-progress: true
+
+jobs:
+  release-pr:
+    name: 운영 배포 PR 준비
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      GH_TOKEN: ${{ github.token }}
+      REPO: ${{ github.repository }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: dev → master PR 열기 또는 갱신
+        run: |
+          set -euo pipefail
+          git fetch -q origin master dev
+          ahead=$(git rev-list --count origin/master..origin/dev)
+          if [ "$ahead" = 0 ]; then echo "master와 dev가 같아요. 할 일 없음"; exit 0; fi
+
+          # dev에 들어왔지만 master에는 없는 PR 번호(병합 커밋 "Merge pull request #N", 스쿼시 커밋 "… (#N)")
+          nums=$(git log --first-parent --format=%s origin/master..origin/dev \
+            | sed -nE 's/^Merge pull request #([0-9]+).*/\1/p; s/.*\(#([0-9]+)\)$/\1/p' | awk '!seen[$0]++')
+
+          list=""
+          for n in $nums; do
+            info=$(gh pr view "$n" --repo "$REPO" --json title,labels,baseRefName \
+              --jq '[.baseRefName, .title, ([.labels[].name | select(startswith("위험도"))] | join(", "))] | @tsv' 2>/dev/null || true)
+            [ -n "$info" ] || continue
+            base=$(printf '%s' "$info" | cut -f1); title=$(printf '%s' "$info" | cut -f2); risk=$(printf '%s' "$info" | cut -f3)
+            [ "$base" = dev ] || continue   # 예전 운영 배포 PR 등은 뺀다
+            list+="- #$n $title${risk:+ ($risk)}"$'\n'
+          done
+          [ -n "$list" ] || list="- (PR 없이 들어온 커밋 ${ahead}개)"$'\n'
+
+          # 새 환경변수: master에 없고 dev에 새로 생긴 이름
+          envs=$(git diff origin/master origin/dev -- deploy/homeserver/.env.example \
+            | sed -nE 's/^\+([A-Z][A-Z0-9_]*)=.*/\1/p' | sort -u || true)
+          caution=""
+          if [ -n "$envs" ]; then
+            caution=$'\n'"### 배포 주의: 새 환경변수"$'\n'"병합 전에 홈서버 /srv/devcookie/.env에 넣어 주세요(비우면 그 기능만 꺼지는지 PR에서 확인)."$'\n'
+            for e in $envs; do caution+="- \`$e\`"$'\n'; done
+          fi
+
+          section="<!-- release-list:start -->"$'\n'"### 포함된 변경 (dev에만 있는 커밋 ${ahead}개)"$'\n'"$list$caution"$'\n'"_dev에 새 커밋이 들어오면 이 칸은 자동으로 갱신돼요. 병합은 관리자만 할 수 있어요._"$'\n'"<!-- release-list:end -->"
+
+          pr=$(gh pr list --repo "$REPO" --base master --head dev --state open --json number --jq '.[0].number // empty')
+          if [ -z "$pr" ]; then
+            body=$'## 요약\n\ndev에서 확인한 변경을 운영(master)에 배포합니다. 병합하면 5분 안에 홈서버가 운영에 자동 배포합니다.\n\n## 관련 이슈\n\n위 PR들의 이슈를 따릅니다.\n\n## 확인 결과\n\n스테이징(staging.mycookie.dev)에서 확인 후 병합해 주세요.\n\n'"$section"
+            gh pr create --repo "$REPO" --base master --head dev \
+              --title "release: 운영 배포 $(TZ=Asia/Seoul date +%Y-%m-%d)" --body "$body"
+          else
+            old=$(gh pr view "$pr" --repo "$REPO" --json body --jq .body)
+            if printf '%s' "$old" | grep -q '<!-- release-list:start -->'; then
+              new=$(OLD="$old" SECTION="$section" python3 -c 'import os,re; print(re.sub(r"<!-- release-list:start -->.*?<!-- release-list:end -->", lambda m: os.environ["SECTION"], os.environ["OLD"], flags=re.S))')
+            else
+              new="$old"$'\n\n'"$section"
+            fi
+            gh pr edit "$pr" --repo "$REPO" --body "$new"
+            echo "운영 배포 PR #$pr 목록 갱신"
+          fi

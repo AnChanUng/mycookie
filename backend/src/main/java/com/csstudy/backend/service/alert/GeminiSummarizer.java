@@ -37,7 +37,7 @@ public class GeminiSummarizer {
     private final RestTemplate http;
 
     public GeminiSummarizer(ObjectMapper json, @Value("${gemini.api-key:}") String key,
-                            @Value("${app.alert.gemini-model:gemini-2.5-flash}") String model) {
+                            @Value("${app.alert.gemini-model:gemini-flash-lite-latest}") String model) {
         this.json = json;
         this.key = key == null ? "" : key.trim();
         this.model = model;

@@ -88,7 +88,7 @@ def summarize(evidence):
     key = env("GEMINI_API_KEY")
     if not key:
         return ""
-    model = env("ALERT_GEMINI_MODEL") or "gemini-2.5-flash"
+    model = env("ALERT_GEMINI_MODEL") or "gemini-flash-lite-latest"
     try:
         raw = post(f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent",
                    {"systemInstruction": {"parts": [{"text": PROMPT}]},

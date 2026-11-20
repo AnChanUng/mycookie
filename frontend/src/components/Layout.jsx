@@ -58,12 +58,12 @@ const APTITUDE_SITES = [
 
 // "소개"를 누르면 펼쳐지는 사이트 안내
 const ABOUT_LINKS = [
-  { to: '/intro#story', name: '만든 이야기', desc: '어디까지 공부해야 할지 고민하다 만든 이유' },
-  { to: '/intro#team', name: '만든 사람들', desc: 'SSAFY에서 시작한 2인 개발팀' },
-  { to: '/intro', name: '서비스 소개', desc: '나의쿠키로 무엇을 공부할 수 있는지' },
-  { to: '/intro#how', name: '공부하는 법', desc: '처음이라면 이 순서로 공부해 보세요' },
-  { to: '/feedback', name: '건의 · 제보', desc: '원하는 기능이나 버그를 바로 알려 주세요' },
-  { to: '/changelog', name: '패치노트', desc: '언제 무엇이 바뀌었는지' },
+  { to: '/intro#story', name: '만든 이야기' },
+  { to: '/intro#team', name: '만든 사람들' },
+  { to: '/intro', name: '서비스 소개' },
+  { to: '/intro#how', name: '공부하는 법' },
+  { to: '/feedback', name: '건의 · 제보' },
+  { to: '/changelog', name: '패치노트' },
 ];
 
 // "코테"를 누르면 헤더 아래에 펼쳐지는 코딩테스트 사이트 바로가기(새 탭)
@@ -80,6 +80,7 @@ export default function Layout() {
   // 로그인하지 않았을 때만 머리말에 로그인 버튼을 보여 준다
   const signedIn = !!useSyncExternalStore(onAccountChange, tokenSnapshot, () => '');
   const location = useLocation();
+  const loginOnly = !signedIn && location.pathname === "/account";
   // 화면 모드는 index.html에서 먼저 적용해 두고, 여기서는 바꿀 때만 반영하고 기억한다
   const [theme, setThemeState] = useState(() => (THEMES.some(t => t.key === document.documentElement.dataset.theme) ? document.documentElement.dataset.theme : 'light'));
   const [picking, setPicking] = useState(false);
@@ -172,7 +173,6 @@ export default function Layout() {
                   {ABOUT_LINKS.map(item => (
                     <Link key={item.name} to={item.to} className="ct-site" onClick={() => setOpenMenu(null)}>
                       <b>{item.name}</b>
-                      <small>{item.desc}</small>
                     </Link>
                   ))}
                 </div>
@@ -198,11 +198,11 @@ export default function Layout() {
           <Outlet />
         </Suspense>
       </main>
-      <SiteFooter />
+      {!loginOnly && <SiteFooter />}
 
-      <PromotionAnnouncements />
-      {!location.pathname.startsWith('/admin') && !location.pathname.startsWith('/private') && <RankWelcome />}
-      <StudyAmbience />
+      {!loginOnly && <PromotionAnnouncements />}
+      {!loginOnly && !location.pathname.startsWith('/admin') && !location.pathname.startsWith('/private') && <RankWelcome />}
+      {!loginOnly && <StudyAmbience />}
       {SHOW_CHAOS_CHAT && <ChaosChat />}
     </>
   );

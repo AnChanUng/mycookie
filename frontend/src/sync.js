@@ -45,7 +45,7 @@ export async function signIn(mode, nickname, password) {
 
 // ===== 소셜(구글 · 카카오) · 깃허브 로그인 =====
 // 처음 들어온 소셜 계정은 기존 닉네임 + 비밀번호를 한 번 입력해 연결하면, 그 계정의 학습 기록을 그대로 쓴다
-export const OAUTH_LABELS = { google: '구글', naver: '네이버', kakao: '카카오', github: '깃허브' };
+export const OAUTH_LABELS = { google: '구글', naver: '네이버', kakao: '카카오', github: '깃허브', ssafy: 'SSAFY GitLab' };
 const OAUTH_STATE = 'oauth:state';
 const callbackUri = () => `${window.location.origin}/auth/callback`;
 

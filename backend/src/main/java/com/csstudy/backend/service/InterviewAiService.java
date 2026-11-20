@@ -25,7 +25,7 @@ public class InterviewAiService {
     private final Map<Long, Deque<Long>> calls = new HashMap<>();
 
     public InterviewAiService(ObjectMapper json, @Value("${gemini.api-key:}") String key,
-            @Value("${INTERVIEW_GEMINI_MODEL:gemini-2.5-flash}") String model) throws IOException {
+            @Value("${INTERVIEW_GEMINI_MODEL:gemini-flash-lite-latest}") String model) throws IOException {
         this.json = json; this.key = key; this.model = model;
         var factory = new SimpleClientHttpRequestFactory();
         factory.setConnectTimeout(10000); factory.setReadTimeout(60000);

@@ -94,6 +94,41 @@ class AccountRoleTest {
     }
 
     @Test
+    void adminSolvesCountInTotalsButNotInTheBoard() throws Exception {
+        var before = json.readTree(mvc.perform(get("/api/v1/rank/solved")).andReturn().getResponse().getContentAsString());
+        postJson("/api/v1/admin/accounts", Map.of("nickname", "admin11", "password", "rank-total-pass", "roles", List.of("ADMIN")), KEY, null)
+                .andExpect(status().isOk());
+        String admin = login("admin11", "rank-total-pass");
+        mvc.perform(put("/api/v1/rank/solved").header("Authorization", "Bearer " + admin).contentType(MediaType.APPLICATION_JSON)
+                .content(json.writeValueAsString(Map.of("visitorId", "admin-total-device", "count", 41)))).andExpect(status().isOk());
+        // 순위표에는 나오지 않고, 참여자 수와 함께 푼 문제 수에는 들어간다
+        mvc.perform(get("/api/v1/rank/solved").param("all", "true"))
+                .andExpect(jsonPath("$.top[*].nickname", not(hasItem("admin11"))))
+                .andExpect(jsonPath("$.totalSolvers").value(before.get("totalSolvers").asInt() + 1))
+                .andExpect(jsonPath("$.totalSolved").value(before.get("totalSolved").asLong() + 41));
+        // 문제를 풀지 않은 관리자는 참여자로 세지 않는다
+        postJson("/api/v1/admin/accounts", Map.of("nickname", "admin12", "password", "rank-total-pass", "roles", List.of("ADMIN")), KEY, null)
+                .andExpect(status().isOk());
+        mvc.perform(put("/api/v1/rank/solved").header("Authorization", "Bearer " + login("admin12", "rank-total-pass"))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json.writeValueAsString(Map.of("visitorId", "admin-zero-device", "count", 0)))).andExpect(status().isOk());
+        mvc.perform(get("/api/v1/rank/solved"))
+                .andExpect(jsonPath("$.totalSolvers").value(before.get("totalSolvers").asInt() + 1));
+    }
+
+    @Test
+    void ownerWithAdminRoleAndANormalNameStaysOnTheBoard() throws Exception {
+        String token = register("순위주인");
+        postJson("/api/v1/admin/roles", Map.of("nickname", "순위주인", "role", "ADMIN"), KEY, null).andExpect(status().isOk());
+        postJson("/api/v1/admin/roles", Map.of("nickname", "순위주인", "role", "OWNER"), KEY, null).andExpect(status().isOk());
+        mvc.perform(put("/api/v1/rank/solved").header("Authorization", "Bearer " + token).contentType(MediaType.APPLICATION_JSON)
+                .content(json.writeValueAsString(Map.of("visitorId", "owner-board-device", "count", 77)))).andExpect(status().isOk());
+        // 관리 권한이 있어도 일반 닉네임이면 순위에 나온다(admin으로 시작하는 계정만 빠진다)
+        mvc.perform(get("/api/v1/rank/solved").param("all", "true"))
+                .andExpect(jsonPath("$.top[*].nickname", hasItem("순위주인")));
+    }
+
+    @Test
     void rolesAreGrantedAndRevokedWithTheKey() throws Exception {
         String token = register("권한받을사람");
         mvc.perform(get("/api/v1/auth/me").header("Authorization", "Bearer " + token)).andExpect(jsonPath("$.roles").isEmpty());

@@ -5,7 +5,6 @@ import { account } from '../sync';
 import { DEV_LOG } from '../data/devLog';
 import './TeamCalendar.css';
 
-const CS_DAY = '2026-11-23';
 const weekdays = ['일', '월', '화', '수', '목', '금', '토'];
 const todayKst = () => new Date(Date.now() + 9 * 3600000).toISOString().slice(0, 10);
 
@@ -68,7 +67,6 @@ export default function TeamCalendar() {
             aria-current={date === today ? 'date' : undefined} onClick={() => setSelected(date)}>
             <span>{Number(date.slice(-2))}</span>
             {state.entries.some(entry => entry.date === date) && <small>개발 일지</small>}
-            {date === CS_DAY && <small>CS 채널</small>}
           </button>}
         </td>)}
       </tr>)}</tbody>
@@ -82,13 +80,7 @@ export default function TeamCalendar() {
         {current.owner && ` · ${current.owner}`}
         {current.complete && ' · 완료'}
       </p>}
-      {selected === CS_DAY && <p>
-        <a href="https://github.com/AnChanUng/mycookie/issues/102" target="_blank" rel="noopener noreferrer">
-          CS 구독 채널·관리자 기능 개발
-        </a> · 보민 · 개발 예정<br />
-        채널 준비, 웹 필수지식 선정, 관리자 미리보기와 발송 관리, 권한·재시도 검증
-      </p>}
-      {!current && selected !== CS_DAY && <p>등록된 일정이 없습니다.</p>}
+      {!current && <p>등록된 일정이 없습니다.</p>}
       <p><Link to={current ? `/x/f9aa1502c8/log?d=${selected}` : '/x/f9aa1502c8/log'}>
         {current ? '개발 일지에서 일정 확인·수정' : '개발 일지에서 새 날짜 추가'}
       </Link></p>

@@ -84,13 +84,10 @@ app:
     keywords: ${BLOG_KEYWORDS:나의쿠키,홈서버}
   # 메일 링크(비밀번호 재설정, 이메일 인증)가 가리키는 사이트 주소
   base-url: ${APP_BASE_URL:http://localhost:3000}
-  # Mattermost 채널에 오늘의 CS 질문 올리기. 웹훅 URL이 비면 꺼진다(스테이징에는 넣지 않는다)
+  # 장애·제보 운영 알림. 웹훅이 비어 있으면 꺼진다.
   mattermost:
     webhook-url: ${MATTERMOST_WEBHOOK_URL:}
-    cron: ${MATTERMOST_CRON:0 30 8 * * MON-FRI}
   # 학습 메일 구독(웹 필수지식). 메일 서버(MAIL_HOST)가 있어야 켜진다
-  cs-channel:
-    webhook-url: ${CS_CHANNEL_WEBHOOK_URL:}
   newsletter:
     cron: ${NEWSLETTER_CRON:0 30 8 * * MON-FRI}
     # 무료 SMTP 하루 한도보다 낮게(비밀번호 재설정 메일 몫을 남긴다). 못 보낸 사람은 다음 발송 때 먼저 보낸다
@@ -132,7 +129,7 @@ app:
     enabled: ${ALERT_ENABLED:true}
     error-threshold: ${ALERT_ERROR_THRESHOLD:10}
     cooldown-minutes: ${ALERT_COOLDOWN_MINUTES:30}
-    gemini-model: ${ALERT_GEMINI_MODEL:gemini-2.5-flash}
+    gemini-model: ${ALERT_GEMINI_MODEL:gemini-flash-lite-latest}
     # 알림에 붙일 Grafana 주소(팀원이 Tailscale로 여는 주소). 비우면 링크를 붙이지 않는다
     grafana-url: ${GRAFANA_URL:}
   # 제보가 들어오면 이벤트를 Kafka에 넣고, 받는 쪽에서 GitHub 이슈와 Mattermost 알림을 처리한다
@@ -157,6 +154,9 @@ app:
     github:
       client-id: ${OAUTH_GITHUB_CLIENT_ID:}
       client-secret: ${OAUTH_GITHUB_CLIENT_SECRET:}
+    ssafy:
+      client-id: ${OAUTH_SSAFY_CLIENT_ID:}
+      client-secret: ${OAUTH_SSAFY_CLIENT_SECRET:}
 
 gemini:
   api-key: ${GEMINI_API_KEY:}

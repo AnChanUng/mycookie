@@ -11,6 +11,7 @@ feature/xxx ──PR──▶ dev (스테이징 staging.mycookie.dev) ──PR�
 - 같은 기능이나 개선 묶음은 **최신 `dev`에서 작업 브랜치 하나**를 만들어 진행하고, **`dev`로 PR 하나**를 올립니다. 해당 묶음의 PR이 열려 있으면 후속 수정도 같은 브랜치에 추가합니다.
 - `dev`나 `master`에 직접 커밋, 푸시하지 않습니다.
 - `master`에는 `dev` → `master` PR만 올리고, **운영 병합은 관리자(찬웅님)만** 합니다.
+- `dev` → `master` PR은 손으로 만들지 않아도 됩니다. `dev`에 커밋이 들어오면 `운영 배포 PR` 워크플로(`.github/workflows/release-pr.yml`)가 열어 두고, 포함된 PR 목록과 새 환경변수를 본문에 갱신합니다.
 - 핫픽스로 `master`가 먼저 바뀌었다면 바로 `master` → `dev` PR로 맞춥니다.
 
 ## 2. 브랜치 이름
