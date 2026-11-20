@@ -2,7 +2,6 @@ import { lazy, Suspense, useEffect, useState } from 'react';
 import { Link, Navigate, useParams } from 'react-router-dom';
 import { decodePrivateId, privatePath } from '../privatePath';
 import { CompanyExam } from './ExamCompanyPage';
-import RagAssistant from './RagAssistant';
 import RoleGate from '../components/RoleGate';
 import './CsNotesPage.css';
 
@@ -26,23 +25,21 @@ function PrivateChanung() {
   const [loadError, setLoadError] = useState(false);
 
   const trouble = id === 'trouble';
-  const assistant = id === 'assistant';
   const patches = id === 'patch-notes';
   const admin = id === 'admin';
   const banks = id === 'banks';
   const interviews = id === 'interviews';
 
   useEffect(() => {
-    if (data || trouble || assistant || patches || admin || interviews) return;
+    if (data || trouble || patches || admin || interviews) return;
     let alive = true;
     import('../data/privateBanks')
       .then(m => { if (alive) setData(m); })
       .catch(() => { if (alive) setLoadError(true); });
     return () => { alive = false; };
-  }, [data, trouble, assistant, patches, admin, interviews]);
+  }, [data, trouble, patches, admin, interviews]);
 
   if (trouble) return <TroubleLog />;
-  if (assistant) return <RagAssistant />;
   if (patches) return <PatchNotes />;
   if (interviews) return <Suspense fallback={<p role="status">면접 자료를 불러오는 중…</p>}><OthersInterviews back={{ to: BASE, label: '← 찬웅 전용 페이지' }} /></Suspense>;
   // 관리자 모니터링은 /admin(관리자 계정)으로 옮겼다
@@ -185,6 +182,16 @@ function TroubleLog() {
                           <dd style={{ margin: 0, wordBreak: 'keep-all' }}>{v}</dd>
                         </div>
                       ))}
+                    {!!t.links?.length && <div>
+                      <dt style={{ fontWeight: 700, fontSize: 13, color: 'var(--accent-blue)' }}>관련 자료</dt>
+                      <dd style={{ margin: 0 }}>
+                        <ul style={{ margin: '4px 0 0', paddingLeft: 18, display: 'grid', gap: 4 }}>
+                          {t.links.map(l => <li key={l.url}>{l.url.startsWith('/')
+                            ? <Link to={l.url}>{l.label}</Link>
+                            : <a href={l.url} target="_blank" rel="noopener noreferrer">{l.label} ↗</a>}</li>)}
+                        </ul>
+                      </dd>
+                    </div>}
                   </dl>
                 </article>
               ))}
@@ -228,11 +235,6 @@ function PrivateList({ data }) {
             <span className="exam-company-abbr">면접</span>
             <span className="exam-company-name">다른 사람 면접</span>
             <span className="exam-company-meta">AWS · 현대오토에버 면접 복기 질문과 예시 답변 · 꼬리질문</span>
-          </Link>
-          <Link to={privatePath("assistant")} className="exam-company-card">
-            <span className="exam-company-abbr">RAG</span>
-            <span className="exam-company-name">RAG 학습 도우미</span>
-            <span className="exam-company-meta">학습 자료 근거로만 답하고, 근거 없는 질문은 거부</span>
           </Link>
         </div>
       </section>

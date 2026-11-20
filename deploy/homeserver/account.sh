@@ -22,14 +22,17 @@ call() { # $1=메서드 $2=경로 $3=JSON
 json() { python3 -c 'import json,sys; print(json.dumps(dict(zip(sys.argv[1::2], sys.argv[2::2]))))' "$@"; }
 
 case "${1:-}" in
-  create)
+  create|test-account)
+    action=$1
     name=${2:?닉네임을 적어 주세요(예: admin1)}; roles=${3:-ADMIN,TEAM}
     read -rsp "$name 비밀번호(아이디 포함 금지): " pw; echo
     read -rsp "한 번 더: " pw2; echo
     [ "$pw" = "$pw2" ] || { echo "두 비밀번호가 달라요."; exit 1; }
     body=$(python3 -c 'import json,sys; print(json.dumps({"nickname":sys.argv[1],"password":sys.argv[2],"roles":sys.argv[3].split(",")}))' "$name" "$pw" "$roles")
     unset pw pw2
-    call POST accounts "$body" ;;
+    if [ "$action" = test-account ]; then call POST test-accounts "$body"
+    else call POST accounts "$body"; fi ;;
+  test-profile) call POST test-accounts/profile "$(json nickname "${2:?닉네임}")" ;;
   grant)  call POST roles "$(json nickname "${2:?닉네임}" role "${3:?권한}")" ;;
   revoke) call POST roles "$(python3 -c 'import json,sys; print(json.dumps({"nickname":sys.argv[1],"role":sys.argv[2],"grant":False}))' "${2:?닉네임}" "${3:?권한}")" ;;
   list)   call GET roles ;;

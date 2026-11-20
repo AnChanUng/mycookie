@@ -198,7 +198,7 @@ class LoungeAndRankTest {
 
         // 같은 계정으로 로그인한 폰과 PC는 한 줄로 합쳐지고, 더 큰 쪽 숫자와 계정 닉네임이 나간다
         String token = json.readTree(mvc.perform(post("/api/v1/auth/register").contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"nickname\":\"rank-account\",\"password\":\"pw1234\"}"))
+                        .content("{\"nickname\":\"rank-account\",\"password\":\"pw123456\"}"))
                 .andExpect(status().isOk()).andReturn().getResponse().getContentAsString()).get("token").asText();
         mvc.perform(put("/api/v1/rank/solved").contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + token)

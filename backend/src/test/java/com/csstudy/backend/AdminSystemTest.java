@@ -37,7 +37,7 @@ class AdminSystemTest {
     @Test
     void accountsGradingAndHealthShowUp() throws Exception {
         String registered = mvc.perform(post("/api/v1/auth/register").contentType(MediaType.APPLICATION_JSON)
-                        .content(json.writeValueAsString(Map.of("nickname", "monitored-user", "password", "pw1234"))))
+                        .content(json.writeValueAsString(Map.of("nickname", "monitored-user", "password", "pw123456"))))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
         String bearer = "Bearer " + json.readTree(registered).get("token").asText();

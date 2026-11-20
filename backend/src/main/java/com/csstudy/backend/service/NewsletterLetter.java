@@ -34,6 +34,8 @@ public class NewsletterLetter {
         if (items.isEmpty()) throw new IllegalStateException("newsletter/web-essentials.json이 비어 있습니다");
     }
 
+    public List<Item> catalog() { return items; }
+
     public int size() {
         return items.size();
     }

@@ -18,7 +18,7 @@ class DirectChatTest {
     @Autowired ObjectMapper json;
     String register(String name) throws Exception {
         var result = mvc.perform(post("/api/v1/auth/register").contentType(MediaType.APPLICATION_JSON)
-            .content(json.writeValueAsString(Map.of("nickname", name, "password", "testpw"))))
+            .content(json.writeValueAsString(Map.of("nickname", name, "password", "test-password"))))
             .andExpect(status().isOk()).andReturn();
         return "Bearer " + json.readTree(result.getResponse().getContentAsString()).get("token").asText();
     }

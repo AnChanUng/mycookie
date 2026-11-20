@@ -72,7 +72,7 @@ class EmailPasswordResetTest {
 
     @Test
     void forgotPasswordSendsOneTimeLinkToVerifiedEmail() throws Exception {
-        String session = verifiedAccount("mail-user", "old-pw", "mail-user@example.com");
+        String session = verifiedAccount("mail-user", "old-password", "mail-user@example.com");
         mvc.perform(get("/api/v1/auth/email").header("Authorization", "Bearer " + session))
                 .andExpect(jsonPath("$.email").value("mail-user@example.com"));
 
@@ -82,7 +82,7 @@ class EmailPasswordResetTest {
 
         // 로그인은 모두 끊기고, 옛 비밀번호는 거절, 새 비밀번호는 통과
         mvc.perform(get("/api/v1/auth/me").header("Authorization", "Bearer " + session)).andExpect(status().isUnauthorized());
-        postJson("login", Map.of("nickname", "mail-user", "password", "old-pw"), null).andExpect(status().isBadRequest());
+        postJson("login", Map.of("nickname", "mail-user", "password", "old-password"), null).andExpect(status().isBadRequest());
         postJson("login", Map.of("nickname", "mail-user", "password", "new-pw"), null).andExpect(status().isOk());
         // 같은 링크는 두 번 쓸 수 없다
         postJson("password/reset", Map.of("token", link, "password", "again"), null).andExpect(status().isBadRequest());
@@ -90,7 +90,7 @@ class EmailPasswordResetTest {
 
     @Test
     void forgotPasswordDoesNotRevealWhetherAnAccountExists() throws Exception {
-        register("no-mail-user", "pw");
+        register("no-mail-user", "password-for-tests");
         clearInvocations(mail);
         postJson("password/forgot", Map.of("email", "nobody@example.com"), null)
                 .andExpect(status().isOk()).andExpect(jsonPath("$.ok").value(true));
@@ -126,9 +126,9 @@ class EmailPasswordResetTest {
 
     @Test
     void verifiedEmailBelongsToOneAccountAndExpiredLinksFail() throws Exception {
-        verifiedAccount("owner-a", "pw-a", "shared@example.com");
-        String other = register("owner-b", "pw-b");
-        postJson("email", Map.of("email", "shared@example.com", "currentPassword", "pw-b"), other).andExpect(status().isBadRequest());
+        verifiedAccount("owner-a", "password-a", "shared@example.com");
+        String other = register("owner-b", "password-b");
+        postJson("email", Map.of("email", "shared@example.com", "currentPassword", "password-b"), other).andExpect(status().isBadRequest());
 
         postJson("password/forgot", Map.of("email", "shared@example.com"), null).andExpect(status().isOk());
         String link = lastLinkTo("shared@example.com");
@@ -137,12 +137,12 @@ class EmailPasswordResetTest {
         saved.setExpiresAt(LocalDateTime.now().minusMinutes(1));
         tokens.saveAndFlush(saved);
         postJson("password/reset", Map.of("token", link, "password", "late"), null).andExpect(status().isBadRequest());
-        postJson("login", Map.of("nickname", "owner-a", "password", "pw-a"), null).andExpect(status().isOk());
+        postJson("login", Map.of("nickname", "owner-a", "password", "password-a"), null).andExpect(status().isOk());
     }
 
     @Test
     void tokensAreStoredOnlyAsHashes() throws Exception {
-        verifiedAccount("hash-mail", "pw", "hash@example.com");
+        verifiedAccount("hash-mail", "password-for-tests", "hash@example.com");
         postJson("password/forgot", Map.of("email", "hash@example.com"), null).andExpect(status().isOk());
         String link = lastLinkTo("hash@example.com");
         assertThat(tokens.findAll()).allSatisfy(t -> assertThat(t.getTokenHash()).hasSize(64).isNotEqualTo(link));

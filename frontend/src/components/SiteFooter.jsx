@@ -1,5 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 import NewsletterSubscribe from './NewsletterSubscribe';
+import CsChannelJoin from './CsChannelJoin';
 import './SiteFooter.css';
 
 const GITHUB = 'https://github.com/AnChanUng/mycookie';
@@ -14,6 +15,7 @@ export default function SiteFooter() {
     <footer className="site-footer">
       <div className="site-footer-inner">
         <NewsletterSubscribe />
+        <CsChannelJoin />
         <div className="site-footer-top">
           <p className="site-footer-tagline">개발자 취업 준비,<br />이제 쿠키 하나로.</p>
           <nav className="site-footer-links" aria-label="사이트 안내">

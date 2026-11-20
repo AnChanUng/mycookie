@@ -22,7 +22,7 @@ class CrossDeviceProgressTest {
 
     private String token(String mode, String nickname) throws Exception {
         String response = mvc.perform(post("/api/v1/auth/" + mode).contentType(MediaType.APPLICATION_JSON)
-                .content(json.writeValueAsString(Map.of("nickname",nickname,"password","test-pw"))))
+                .content(json.writeValueAsString(Map.of("nickname",nickname,"password","test-password"))))
                 .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
         return "Bearer " + json.readTree(response).path("token").asText();
     }

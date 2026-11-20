@@ -166,3 +166,7 @@
   .dl-dates button { flex: none; }
   .dl-entry { padding: 20px 18px; }
 }
+.bomin-work-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.bomin-work-grid article { padding: 20px; border: 1px solid var(--ds-line-strong); border-radius: 12px; background: var(--ds-surface); }
+.bomin-work-grid h3 { margin-top: 0; }
+@media (max-width: 760px) { .bomin-work-grid { grid-template-columns: 1fr; } }

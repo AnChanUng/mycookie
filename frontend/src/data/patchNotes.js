@@ -3,6 +3,15 @@
 // status: 'released' 배포됨(master) | 'dev' 개발 브랜치에만 있음 | 'wip' 작업 중
 export const PATCH_NOTES = [
   {
+    version: '0.25.1', date: '2026-11-20', title: '계정 설정과 CS 구독 채널 운영', status: 'dev',
+    summary: '가입과 비밀번호 변경 확인을 보강하고 CS 채널 운영 화면을 추가했습니다.',
+    items: [
+      { type: 'improve', text: '가입 비밀번호 규칙과 재입력 확인, 비밀번호 변경 확인 입력을 추가하고 계정 화면을 정리했습니다.' },
+      { type: 'feature', text: 'CS 채널 콘텐츠 선정, 미리보기, 테스트 발송과 발송 결과·재시도를 관리자 화면에서 관리합니다.' },
+      { type: 'fix', text: '관리자와 등급별 테스트 계정은 순위에 포함하지 않습니다.' },
+    ],
+  },
+  {
     version: '0.25.0',
     date: '2026-11-20',
     title: '메뉴별 공부 안내, 웹 필수지식 레벨, 쿠키 메달',

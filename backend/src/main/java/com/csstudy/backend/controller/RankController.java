@@ -40,6 +40,7 @@ public class RankController {
     private final VisitorSolvedRepository solvedRepository;
     private final VisitorProfileService profileService;
     private final UserRepository userRepository;
+    private final com.csstudy.backend.repository.AccountRoleRepository accountRoles;
     private final AuthService authService;
     private final MembershipService membershipService;
     private final VisitorTierGrantRepository grants;
@@ -192,8 +193,16 @@ public class RankController {
 
         List<Solver> ranked = new ArrayList<>();
         Map<String, Solver> solverOf = new HashMap<>();
+        Set<Long> admins = new HashSet<>();
+        accountRoles.findAll().stream().filter(r -> r.getRole() == com.csstudy.backend.entity.AccountRole.Role.ADMIN)
+                .forEach(r -> admins.add(r.getUserId()));
         devices.forEach((userId, ids) -> {
             if (!accounts.containsKey(userId)) return;   // 지워진 계정의 기기는 따로 센다
+            User rankedUser = accounts.get(userId);
+            if (admins.contains(userId) || com.csstudy.backend.service.NicknameService.isReserved(rankedUser.getNickname())) {
+                ids.forEach(counts::remove);
+                return;
+            }
             ids.sort(Comparator.naturalOrder());
             long best = Math.max(saved.getOrDefault(userId, 0L), ids.stream().mapToLong(counts::get).max().orElse(0));
             User user = accounts.get(userId);

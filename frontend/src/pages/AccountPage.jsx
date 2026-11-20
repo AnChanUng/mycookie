@@ -29,8 +29,9 @@ export default function AccountPage() {
   return <AccountDashboard key={`${token ? account()?.id : ''}:${openForgot}`} user={token ? account() : null} openForgot={openForgot} />;
 }
 function AccountDashboard({ user, openForgot }) {
-  const [form, setForm] = useState({ nickname: '', password: '' });
-  const [passwords, setPasswords] = useState({ current: '', next: '' });
+  const [form, setForm] = useState({ nickname: '', password: '', confirm: '' });
+  const [passwords, setPasswords] = useState({ current: '', next: '', confirm: '' });
+  const signupValid = form.password.trim().length >= 8 && new TextEncoder().encode(form.password.trim()).length <= 72 && form.password === form.confirm;
   const [hasPassword, setHasPassword] = useState(true);
   const [emailInfo, setEmailInfo] = useState({ email: '', mailEnabled: true });
   const [emailForm, setEmailForm] = useState({ email: '', current: '' });
@@ -62,6 +63,7 @@ function AccountDashboard({ user, openForgot }) {
     return () => controller.abort();
   }, [user, revision]);
   async function authenticate(mode) {
+    if (mode === 'register' && !signupValid) return;
     setAuthBusy(true); setMessage('');
     try { await signIn(mode, form.nickname.trim(), form.password); }
     catch (error) { setMessage(error?.response?.data?.error || '로그인하지 못했습니다. 입력 내용과 서버 연결을 확인해 주세요.'); }
@@ -81,10 +83,11 @@ function AccountDashboard({ user, openForgot }) {
     finally { setAuthBusy(false); }
   }
   async function submitPassword() {
+    if (!passwords.next.trim() || passwords.next !== passwords.confirm) return;
     setAuthBusy(true); setMessage('');
     try {
       await changePassword(passwords.current, passwords.next);
-      setPasswords({ current: '', next: '' });
+      setPasswords({ current: '', next: '', confirm: '' });
       setMessage('비밀번호를 변경했습니다. 다른 기기에서는 다시 로그인해 주세요.');
     } catch (error) {
       setMessage(error?.response?.data?.error || '비밀번호를 변경하지 못했습니다. 잠시 후 다시 시도해 주세요.');
@@ -111,11 +114,13 @@ function AccountDashboard({ user, openForgot }) {
           <button className="exam-btn sm" disabled={authBusy || !nicknameDraft.trim() || nicknameDraft.trim() === user.nickname}>닉네임 변경</button>
         </form>
         <h3 className="acc-label">비밀번호</h3>
-        <form onSubmit={e => { e.preventDefault(); submitPassword(); }}>
+        <form className="account-password-form" onSubmit={e => { e.preventDefault(); submitPassword(); }}>
           <input type="text" hidden readOnly autoComplete="username" value={user.nickname} />
           {hasPassword && <input aria-label="현재 비밀번호" type="password" placeholder="현재 비밀번호" autoComplete="current-password" maxLength={72} disabled={authBusy} value={passwords.current} onChange={e => setPasswords({ ...passwords, current: e.target.value })} />}
           <input aria-label="새 비밀번호" type="password" placeholder={hasPassword ? '새 비밀번호' : '로그인용 비밀번호 정하기'} autoComplete="new-password" maxLength={72} disabled={authBusy} value={passwords.next} onChange={e => setPasswords({ ...passwords, next: e.target.value })} />
-          <button className="exam-btn sm" disabled={authBusy || (hasPassword && !passwords.current) || !passwords.next.trim()}>비밀번호 변경</button>
+          <input aria-label="새 비밀번호 확인" type="password" placeholder="새 비밀번호 한 번 더" autoComplete="new-password" maxLength={72} disabled={authBusy} value={passwords.confirm} onChange={e => setPasswords({ ...passwords, confirm: e.target.value })} />
+          {passwords.confirm && passwords.next !== passwords.confirm && <p role="alert" className="account-hint">두 비밀번호가 다릅니다.</p>}
+          <button className="exam-btn sm" disabled={authBusy || (hasPassword && !passwords.current) || !passwords.next.trim() || passwords.next !== passwords.confirm}>비밀번호 변경</button>
         </form>
         <h3 className="acc-label">비밀번호 찾기 이메일</h3>
         <p className="account-hint">{emailInfo.email ? `등록된 이메일: ${emailInfo.email}` : '이메일을 등록해 두면 비밀번호를 잊었을 때 재설정 메일을 받을 수 있어요.'}</p>
@@ -152,12 +157,17 @@ function AccountDashboard({ user, openForgot }) {
           {!registering && <SocialLogin user={null} />}
           <form className="auth-form" onSubmit={e => { e.preventDefault(); authenticate(registering ? 'register' : 'login'); }}>
             <label className="auth-field"><span>닉네임</span>
-              <input autoComplete="username" maxLength={20} value={form.nickname} onChange={e => setForm({ ...form, nickname: e.target.value })} />
+              <input aria-label={registering ? '가입 닉네임' : '로그인 닉네임'} autoComplete="username" maxLength={20} value={form.nickname} onChange={e => setForm({ ...form, nickname: e.target.value })} />
             </label>
             <label className="auth-field"><span>비밀번호</span>
-              <input type="password" autoComplete={registering ? 'new-password' : 'current-password'} maxLength={72} value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} />
+              <input aria-label={registering ? '가입 비밀번호' : '로그인 비밀번호'} type="password" autoComplete={registering ? 'new-password' : 'current-password'} maxLength={72} value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} />
             </label>
-            <button className="auth-submit" disabled={authBusy || !form.nickname.trim() || !form.password}>{authBusy ? '잠시만요…' : registering ? '가입하기' : '로그인'}</button>
+            {registering && <>
+              <label className="auth-field"><span>비밀번호 확인</span><input aria-label="가입 비밀번호 확인" type="password" autoComplete="new-password" maxLength={72} value={form.confirm} onChange={e => setForm({ ...form, confirm: e.target.value })} /></label>
+              <p className="account-hint">닉네임 1~20자 · 비밀번호 8자 이상, 최대 72바이트. 이메일은 가입 후 계정 복구용으로 등록할 수 있어요.</p>
+              {form.confirm && form.password !== form.confirm && <p role="alert">두 비밀번호가 다릅니다.</p>}
+            </>}
+            <button className="auth-submit" disabled={authBusy || !form.nickname.trim() || !form.password || (registering && !signupValid)}>{authBusy ? '잠시만요…' : registering ? '가입하기' : '로그인'}</button>
           </form>
           <div className="auth-links">
             <button type="button" onClick={() => { setRegistering(!registering); setMessage(''); }}>{registering ? '이미 계정이 있어요' : '새 계정 만들기'}</button>

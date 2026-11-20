@@ -34,7 +34,7 @@ class TierPaymentClosedTest {
         when(toss.enabled()).thenReturn(true);
         when(toss.clientKey()).thenReturn("test_gck_dummy");
         String token = json.readTree(mvc.perform(post("/api/v1/auth/register").contentType(MediaType.APPLICATION_JSON)
-                        .content(json.writeValueAsString(Map.of("nickname", "pay-closed", "password", "pw-1234"))))
+                        .content(json.writeValueAsString(Map.of("nickname", "pay-closed", "password", "pw-123456"))))
                 .andReturn().getResponse().getContentAsString()).path("token").asText();
 
         mvc.perform(get("/api/v1/payments/tier/products"))
