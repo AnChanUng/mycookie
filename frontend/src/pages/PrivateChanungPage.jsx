@@ -8,13 +8,13 @@ import './CsNotesPage.css';
 // AWS · 현대오토에버 면접 복기 자료(다른 사람이 본 면접). 공개 메뉴에서 빼고 여기서만 연다
 const OthersInterviews = lazy(() => import('./TechnicalInterviewPage'));
 
-// 찬웅 전용 페이지(/private/chanung). OWNER 권한 계정으로 로그인해야 열린다(예전 화면 비밀번호 대신).
+// 찬웅 전용 페이지(/private/chanung). 서버가 확인한 쿠우키 계정으로 로그인해야 열린다.
 // 문제 데이터는 권한을 확인한 뒤에만 따로 불러와 공개 화면 번들과 분리한다
 // 화면 안 링크는 알아보기 어려운 주소로 만든다(privatePath.js)
 const BASE = privatePath();
 
 export default function PrivateChanungPage() {
-  return <RoleGate role="OWNER" nickname="쿠우키" title="찬웅 전용 페이지"><PrivateChanung /></RoleGate>;
+  return <RoleGate nickname="쿠우키" title="찬웅 전용 페이지"><PrivateChanung /></RoleGate>;
 }
 
 function PrivateChanung() {
