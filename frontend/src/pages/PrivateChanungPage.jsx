@@ -182,6 +182,16 @@ function TroubleLog() {
                           <dd style={{ margin: 0, wordBreak: 'keep-all' }}>{v}</dd>
                         </div>
                       ))}
+                    {!!t.links?.length && <div>
+                      <dt style={{ fontWeight: 700, fontSize: 13, color: 'var(--accent-blue)' }}>관련 자료</dt>
+                      <dd style={{ margin: 0 }}>
+                        <ul style={{ margin: '4px 0 0', paddingLeft: 18, display: 'grid', gap: 4 }}>
+                          {t.links.map(l => <li key={l.url}>{l.url.startsWith('/')
+                            ? <Link to={l.url}>{l.label}</Link>
+                            : <a href={l.url} target="_blank" rel="noopener noreferrer">{l.label} ↗</a>}</li>)}
+                        </ul>
+                      </dd>
+                    </div>}
                   </dl>
                 </article>
               ))}
