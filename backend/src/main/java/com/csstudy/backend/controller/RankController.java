@@ -34,8 +34,7 @@ public class RankController {
     // account: 동기화 계정으로 묶인 줄이면 그 계정의 닉네임, 아니면 null
     private record Solver(String visitorId, long count, String account, UserTier baseTier, String subjectKey) {}
 
-    // hiddenSolvers, hiddenSolved: 순위표에는 나오지 않지만 합계에는 넣는 관리자 계정의 풀이
-    private record Board(List<Solver> ranked, Map<String, Integer> rankOf, Instant at, long hiddenSolvers, long hiddenSolved) {}
+    private record Board(List<Solver> ranked, Map<String, Integer> rankOf, Instant at) {}
 
     private final UsageEventRepository usageEventRepository;
     private final VisitorSolvedRepository solvedRepository;
@@ -82,7 +81,10 @@ public class RankController {
         }
         Board board = board();
         List<Solver> top = all ? board.ranked() : board.ranked().subList(0, Math.min(TOP, board.ranked().size()));
-        Integer myRank = visitorId == null ? null : board.rankOf().get(visitorId);
+        User currentUser = authService.currentUser(request).orElse(null);
+        Integer myRank = currentUser == null
+                ? (visitorId == null ? null : board.rankOf().get(visitorId))
+                : board.rankOf().get("user:" + currentUser.getId());
 
         Set<String> ids = new HashSet<>();
         top.forEach(s -> ids.add(s.visitorId()));
@@ -99,9 +101,9 @@ public class RankController {
 
         Map<String, Object> out = new LinkedHashMap<>();
         out.put("top", rows);
-        // 합계는 문제를 한 문제 이상 푼 사람과 그들이 푼 문제 수다. 관리자도 풀었으면 합계에는 들어간다(순위표에는 나오지 않음)
-        out.put("totalSolved", board.ranked().stream().mapToLong(Solver::count).sum() + board.hiddenSolved());
-        out.put("totalSolvers", board.ranked().size() + board.hiddenSolvers());
+        // 한 문제 이상 푼 모든 계정을 순위와 합계에 포함한다. 같은 계정의 여러 기기는 한 명으로 센다.
+        out.put("totalSolved", board.ranked().stream().mapToLong(Solver::count).sum());
+        out.put("totalSolvers", board.ranked().size());
         Solver mine = myRank == null ? null : board.ranked().get(myRank - 1);
         out.put("me", mine == null ? null : row(mine, myRank, nicknames.get(visitorId)));
         // 직접 정한 닉네임만 돌려준다. 정한 적이 없으면 null. 계정으로 묶인 기기는 계정 닉네임이 나간다
@@ -186,30 +188,23 @@ public class RankController {
             counts.put(v.getVisitorId(), (long) v.getCount());
             if (v.getUserId() != null) devices.computeIfAbsent(v.getUserId(), k -> new ArrayList<>()).add(v.getVisitorId());
         });
+        Map<Long, Long> saved = membershipService.savedCounts();
+        // 기기 보고가 없어도 계정에 저장된 풀이 기록이 있으면 순위에 포함한다.
+        saved.keySet().forEach(id -> devices.computeIfAbsent(id, key -> new ArrayList<>()));
         Map<Long, User> accounts = new HashMap<>();
         userRepository.findAllById(devices.keySet()).forEach(u -> accounts.put(u.getId(), u));
-        Map<Long, Long> saved = membershipService.savedCounts();
         Map<String, UserTier> visitorTiers = new HashMap<>();
         grants.findAll().forEach(g -> visitorTiers.put(g.getVisitorId(), g.getTier()));
 
         List<Solver> ranked = new ArrayList<>();
         Map<String, Solver> solverOf = new HashMap<>();
-        // 순위표에서는 관리용 이름(admin1~admin5처럼 admin, 관리자, 운영자로 시작)의 계정만 뺀다.
-        // ADMIN 권한이 있어도 일반 닉네임(예: 쿠우키)이면 순위에 나온다
-        long[] hidden = new long[2];   // [사람 수, 문제 수]
         devices.forEach((userId, ids) -> {
             if (!accounts.containsKey(userId)) return;   // 지워진 계정의 기기는 따로 센다
-            User rankedUser = accounts.get(userId);
-            if (com.csstudy.backend.service.NicknameService.isReserved(rankedUser.getNickname())) {
-                long adminBest = Math.max(saved.getOrDefault(userId, 0L), ids.stream().mapToLong(counts::get).max().orElse(0));
-                if (adminBest > 0) { hidden[0]++; hidden[1] += adminBest; }
-                ids.forEach(counts::remove);
-                return;
-            }
             ids.sort(Comparator.naturalOrder());
             long best = Math.max(saved.getOrDefault(userId, 0L), ids.stream().mapToLong(counts::get).max().orElse(0));
             User user = accounts.get(userId);
-            Solver s = new Solver(ids.get(0), best, user.getNickname(), MembershipService.baseTier(user), "user:" + userId);
+            Solver s = new Solver(ids.isEmpty() ? "user:" + userId : ids.get(0), best, user.getNickname(), MembershipService.baseTier(user), "user:" + userId);
+            solverOf.put("user:" + userId, s);
             ids.forEach(id -> { solverOf.put(id, s); counts.remove(id); });
             if (best > 0) ranked.add(s);
         });
@@ -219,13 +214,14 @@ public class RankController {
             solverOf.put(visitorId, s);
             ranked.add(s);
         });
+        // 티어와 권한은 정렬에 관여하지 않는다. 문제 수가 같으면 방문자 ID로 순서를 고정한다.
         ranked.sort(Comparator.comparingLong(Solver::count).reversed().thenComparing(Solver::visitorId));
 
         Map<Solver, Integer> place = new IdentityHashMap<>();
         for (int i = 0; i < ranked.size(); i++) place.put(ranked.get(i), i + 1);
         Map<String, Integer> rankOf = new HashMap<>();
         solverOf.forEach((visitorId, s) -> { if (place.containsKey(s)) rankOf.put(visitorId, place.get(s)); });
-        board = new Board(ranked, rankOf, Instant.now(), hidden[0], hidden[1]);
+        board = new Board(ranked, rankOf, Instant.now());
         cached = board;
         return board;
     }

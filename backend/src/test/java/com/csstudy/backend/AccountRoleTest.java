@@ -28,6 +28,9 @@ class AccountRoleTest {
     static final String KEY = "test-admin-key-0123456789abcdef-xyz";
     @Autowired MockMvc mvc;
     @Autowired ObjectMapper json;
+    @Autowired com.csstudy.backend.repository.UserRepository users;
+    @Autowired com.csstudy.backend.repository.ExamProgressRepository progress;
+    @Autowired com.csstudy.backend.controller.RankController ranks;
 
     private ResultActions postJson(String path, Object body, String key, String token) throws Exception {
         var req = post(path).contentType(MediaType.APPLICATION_JSON).content(json.writeValueAsString(body));
@@ -94,18 +97,27 @@ class AccountRoleTest {
     }
 
     @Test
-    void adminSolvesCountInTotalsButNotInTheBoard() throws Exception {
+    void adminSolvesCountInTotalsAndInTheBoard() throws Exception {
+        ranks.profileChanged(null);
         var before = json.readTree(mvc.perform(get("/api/v1/rank/solved")).andReturn().getResponse().getContentAsString());
         postJson("/api/v1/admin/accounts", Map.of("nickname", "admin11", "password", "rank-total-pass", "roles", List.of("ADMIN")), KEY, null)
                 .andExpect(status().isOk());
         String admin = login("admin11", "rank-total-pass");
         mvc.perform(put("/api/v1/rank/solved").header("Authorization", "Bearer " + admin).contentType(MediaType.APPLICATION_JSON)
                 .content(json.writeValueAsString(Map.of("visitorId", "admin-total-device", "count", 41)))).andExpect(status().isOk());
-        // 순위표에는 나오지 않고, 참여자 수와 함께 푼 문제 수에는 들어간다
+        // 관리자도 순위표와 참여자 수·전체 문제 수에 포함한다
         mvc.perform(get("/api/v1/rank/solved").param("all", "true"))
-                .andExpect(jsonPath("$.top[*].nickname", not(hasItem("admin11"))))
+                .andExpect(jsonPath("$.top[*].nickname", hasItem("admin11")))
                 .andExpect(jsonPath("$.totalSolvers").value(before.get("totalSolvers").asInt() + 1))
                 .andExpect(jsonPath("$.totalSolved").value(before.get("totalSolved").asLong() + 41));
+        var board = json.readTree(mvc.perform(get("/api/v1/rank/solved").param("all", "true")
+                .header("X-Visitor-Id", "admin-total-device")).andReturn().getResponse().getContentAsString());
+        long previous = Long.MAX_VALUE;
+        for (var row : board.path("top")) {
+            org.junit.jupiter.api.Assertions.assertTrue(row.path("count").asLong() <= previous);
+            previous = row.path("count").asLong();
+        }
+        org.junit.jupiter.api.Assertions.assertEquals("admin11", board.path("me").path("nickname").asText());
         // 문제를 풀지 않은 관리자는 참여자로 세지 않는다
         postJson("/api/v1/admin/accounts", Map.of("nickname", "admin12", "password", "rank-total-pass", "roles", List.of("ADMIN")), KEY, null)
                 .andExpect(status().isOk());
@@ -117,13 +129,28 @@ class AccountRoleTest {
     }
 
     @Test
+    void savedAccountProgressAppearsWithoutADeviceReport() throws Exception {
+        String token = register("기기보고없는쿠키");
+        var user = users.findByNickname("기기보고없는쿠키").orElseThrow();
+        progress.saveAndFlush(com.csstudy.backend.entity.ExamProgress.builder().user(user)
+                .company("spring").data("{\"stats\":{\"q1\":{\"c\":1},\"q2\":{\"w\":1}}}").build());
+        ranks.profileChanged(null);
+        mvc.perform(get("/api/v1/rank/solved").param("all", "true")
+                .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.top[*].nickname", hasItem("기기보고없는쿠키")))
+                .andExpect(jsonPath("$.me.nickname").value("기기보고없는쿠키"))
+                .andExpect(jsonPath("$.me.count").value(2));
+    }
+
+    @Test
     void ownerWithAdminRoleAndANormalNameStaysOnTheBoard() throws Exception {
         String token = register("순위주인");
         postJson("/api/v1/admin/roles", Map.of("nickname", "순위주인", "role", "ADMIN"), KEY, null).andExpect(status().isOk());
         postJson("/api/v1/admin/roles", Map.of("nickname", "순위주인", "role", "OWNER"), KEY, null).andExpect(status().isOk());
         mvc.perform(put("/api/v1/rank/solved").header("Authorization", "Bearer " + token).contentType(MediaType.APPLICATION_JSON)
                 .content(json.writeValueAsString(Map.of("visitorId", "owner-board-device", "count", 77)))).andExpect(status().isOk());
-        // 관리 권한이 있어도 일반 닉네임이면 순위에 나온다(admin으로 시작하는 계정만 빠진다)
+        // 관리 권한과 관계없이 문제 수 기준으로 순위에 나온다
         mvc.perform(get("/api/v1/rank/solved").param("all", "true"))
                 .andExpect(jsonPath("$.top[*].nickname", hasItem("순위주인")));
     }

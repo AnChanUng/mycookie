@@ -51,7 +51,7 @@ export default function HomeRank() {
   return <section className="hr" aria-labelledby="hr-title">
     <header className="hr-head">
       <h2 id="hr-title"><i className="hr-live" aria-hidden="true" />실시간 순위</h2>
-      {rank && <span className="hr-total">{(rank.totalSolvers || 0).toLocaleString()}명 참여 · 함께 {(rank.totalSolved || 0).toLocaleString()}문제</span>}
+      {rank && <span className="hr-total">함께 {(rank.totalSolved || 0).toLocaleString()}문제</span>}
       <Link to="/rank" className="hr-more">전체 보기</Link>
     </header>
 
