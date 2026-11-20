@@ -48,7 +48,7 @@ class AccountOperationsTest {
                 .contentType(MediaType.APPLICATION_JSON).content("{\"nickname\":\"변경된테스트이름\"}"))
                 .andExpect(status().isBadRequest());
             mvc.perform(get("/api/v1/rank/solved").param("all", "true").header("X-Visitor-Id", "test-profile-" + i))
-                .andExpect(jsonPath("$.top[*].nickname", not(hasItem(name)))).andExpect(jsonPath("$.me").doesNotExist());
+                .andExpect(jsonPath("$.top[*].nickname", hasItem(name))).andExpect(jsonPath("$.me.nickname").value(name));
         }
         mvc.perform(post("/api/v1/admin/test-accounts").header("X-Admin-Key", KEY).contentType(MediaType.APPLICATION_JSON)
             .content("{\"nickname\":\"admin1\",\"password\":\"other\"}" )).andExpect(status().isConflict());

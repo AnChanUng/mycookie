@@ -6,6 +6,7 @@ const GROUPS = [
   {
     title: '백엔드',
     items: [
+      { to: '/web/spring-practice', t: 'Spring 핵심 실전', d: 'IoC·DI · Boot · AOP · MVC · MyBatis · Security', m: '새 문제집 · 4지선다 40문제 · 정답과 해설' },
       { to: '/web/spring', t: 'Spring · JPA', d: '스프링 코어 · 웹 MVC · JPA · 부트', m: '60문제 · 풀이 기록 저장' },
       { to: '/ssafy/ssafydb', t: 'DB · Servlet · JSP', d: 'SQL · 트랜잭션 · 정규화 · 인덱스 · Servlet 생명주기', m: '30문제 · 정답과 해설' },
     ],
