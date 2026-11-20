@@ -22,9 +22,9 @@ class TrafficGuardTest {
     }
     @Test void absentAdminConfigurationNeverOpensAdministratorAccess() {
         var exception=assertThrows(org.springframework.web.server.ResponseStatusException.class,
-                () -> new com.csstudy.backend.service.AdminAuth().require("any-key"));
+                () -> new com.csstudy.backend.service.AdminAuth(null, null).require("any-key"));
         assertEquals(503,exception.getStatusCode().value());
-        var configured=new com.csstudy.backend.service.AdminAuth();
+        var configured=new com.csstudy.backend.service.AdminAuth(null, null);
         org.springframework.test.util.ReflectionTestUtils.setField(configured,"adminKey","short-key");
         var weak=assertThrows(org.springframework.web.server.ResponseStatusException.class,()->configured.require("short-key"));
         assertEquals(503,weak.getStatusCode().value());

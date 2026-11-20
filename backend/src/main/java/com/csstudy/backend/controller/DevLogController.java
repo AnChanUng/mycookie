@@ -14,7 +14,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.Map;
 
-// 팀 개발 일지 API. 팀 내부 페이지라 누구나 읽고 쓴다(DevLogService)
+// 팀 개발 일지 API. TEAM 권한 계정(보민, 찬웅, 관리자)만 읽고 쓴다(DevLogService)
 @RestController
 @RequestMapping("/api/v1/devlog")
 @RequiredArgsConstructor
@@ -22,19 +22,23 @@ public class DevLogController {
 
     private final DevLogService devLog;
     private final AuthService auth;
+    private final com.csstudy.backend.service.RoleService roles;
 
     @GetMapping
     public Map<String, Object> list(HttpServletRequest request) {
+        roles.require(request, com.csstudy.backend.entity.AccountRole.Role.TEAM);
         return Map.of("canEdit", true, "entries", devLog.list());
     }
 
     @PutMapping("/{date}")
     public Map<String, Object> save(@PathVariable String date, @RequestBody Map<String, Object> body, HttpServletRequest request) {
-        return devLog.save(parse(date), body, auth.currentUser(request));
+        var user = roles.require(request, com.csstudy.backend.entity.AccountRole.Role.TEAM);
+        return devLog.save(parse(date), body, java.util.Optional.of(user));
     }
 
     @DeleteMapping("/{date}")
-    public Map<String, Object> delete(@PathVariable String date) {
+    public Map<String, Object> delete(@PathVariable String date, HttpServletRequest request) {
+        roles.require(request, com.csstudy.backend.entity.AccountRole.Role.TEAM);
         devLog.delete(parse(date));
         return Map.of("ok", true);
     }

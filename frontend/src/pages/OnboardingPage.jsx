@@ -4,6 +4,7 @@ import api from '../api';
 import OnboardingTabs from '../components/OnboardingTabs';
 import './OnboardingPage.css';
 import archImg from '../assets/architecture.webp';
+import RoleGate from '../components/RoleGate';
 
 // 신입 개발자 온보딩 페이지. 들어오는 주소는 /private/bomin, 화면에서는 알아보기 어려운 주소(ONBOARDING_PATH)로 바꿔 보여 준다.
 // 주소를 숨기는 것일 뿐 보안 장치는 아니다. 비밀번호, 키, 연결 주소 같은 비밀값은 이 페이지에 적지 않는다.
@@ -11,7 +12,12 @@ export const ONBOARDING_PATH = '/x/f9aa1502c8';
 const REPO = 'https://github.com/AnChanUng/mycookie';
 const doc = path => `${REPO}/blob/master/${path}`;
 
+// 보민, 찬웅, 관리자(TEAM 권한)만 볼 수 있다. 서버의 개발 일지 API도 같은 권한으로 막는다
 export default function OnboardingPage() {
+  return <RoleGate role="TEAM" title="신입 개발자 온보딩"><Onboarding /></RoleGate>;
+}
+
+function Onboarding() {
   return (
     <div className="ob">
       <header className="ob-hero">

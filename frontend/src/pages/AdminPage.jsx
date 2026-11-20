@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../api';
 import { COMPANIES, EXAM_CATEGORIES, companyPath } from '../data/examQuestions';
+import { account } from '../sync';
 
 const KEY = 'admin-key';
 const RANGES = [7, 30, 90];
@@ -48,10 +49,13 @@ const pct = (score, total) => (total ? Math.round(score / total * 100) : null);
 const savedKey = () => { try { return localStorage.getItem(KEY) || sessionStorage.getItem(KEY) || ''; } catch { return ''; } };
 const storeKey = (v) => { try { localStorage.setItem(KEY, v); } catch { /* 저장소를 못 쓰면 이번 화면에서만 쓴다 */ } };
 const forgetKey = () => { try { localStorage.removeItem(KEY); sessionStorage.removeItem(KEY); } catch { /* 무시 */ } };
+// /admin은 ADMIN 권한 계정으로 로그인해서 연다(키 대신 로그인 토큰). 홈서버 스크립트처럼 키를 쓰는 길도 남겨 둔다
+const LOGIN = '__login__';
+const adminHeaders = key => (key === LOGIN ? (account()?.token ? { Authorization: `Bearer ${account().token}` } : {}) : { 'X-Admin-Key': key });
 
 const HOME = { to: '/', label: '← 홈으로' };
 
-export default function AdminPage({ back = HOME }) {
+export default function AdminPage({ back = HOME, viaLogin = false }) {
   const [metrics, setMetrics] = useState(null);
   const [metricsError, setMetricsError] = useState('');
   useEffect(() => {
@@ -79,12 +83,12 @@ export default function AdminPage({ back = HOME }) {
         <p className="exam-note">{metrics.from} ~ {metrics.through} · {new Date(metrics.asOf).toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' })} KST 기준. 방문자는 페이지를 조회한 익명 브라우저 ID 기준으로, 가입자 수와 다릅니다. 기기 변경·브라우저 초기화 시 중복될 수 있으며 자동화 방문이 포함될 수 있습니다.</p>
       </> : <p role="status">{metricsError || '이용 통계를 불러오는 중입니다. 서버 시작에 1~2분 걸릴 수 있습니다.'}</p>}
     </section>
-    <AdminControls back={back} />
+    <AdminControls back={back} viaLogin={viaLogin} />
   </>;
 }
 
-function AdminControls({ back }) {
-  const [key, setKey] = useState(savedKey);
+function AdminControls({ back, viaLogin }) {
+  const [key, setKey] = useState(() => (viaLogin ? LOGIN : savedKey()));
   const [input, setInput] = useState('');
   const [days, setDays] = useState(30);
   const [tab, setTab] = useState('overview');
@@ -96,13 +100,13 @@ function AdminControls({ back }) {
   const [chat, setChat] = useState(null);
   const [updatedAt, setUpdatedAt] = useState(null);
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(() => !!savedKey());
+  const [loading, setLoading] = useState(() => viaLogin || !!savedKey());
 
   useEffect(() => {
     if (!key) return;
     let stale = false;
     // 잠든 서버가 깨어나는 데 1~2분 걸릴 수 있다
-    const options = { headers: { 'X-Admin-Key': key }, timeout: 180000 };
+    const options = { headers: adminHeaders(key), timeout: 180000 };
     // 계정·시스템 조회는 실패해도 이용 현황은 그대로 보여 준다
     api.get('/admin/system', options)
       .then(res => { if (!stale) setSys(res.data); })
@@ -118,7 +122,9 @@ function AdminControls({ back }) {
       .catch(err => {
         if (stale) return;
         const status = err.response?.status;
-        if (status === 401) {
+        if (status === 401 && key === LOGIN) {
+          setError('관리자 권한이 없거나 로그인이 만료되었어요. 관리자 계정으로 다시 로그인해 주세요.');
+        } else if (status === 401) {
           forgetKey();
           setKey('');
           setData(null);
@@ -189,7 +195,7 @@ function AdminControls({ back }) {
           {RANGES.map(r => <button key={r} type="button" className={days === r ? 'on' : ''} onClick={() => { if (r !== days) { begin(); setDays(r); } }}>최근 {r}일</button>)}
           <button type="button" onClick={() => { begin(); setTick(t => t + 1); }}>{loading ? '불러오는 중' : '새로고침'}</button>
           <button type="button" className={auto ? 'on' : ''} onClick={() => setAuto(a => !a)}>자동 {auto ? '켜짐' : '꺼짐'}</button>
-          <button type="button" onClick={logout}>이 기기에서 키 지우기</button>
+          {key !== LOGIN && <button type="button" onClick={logout}>이 기기에서 키 지우기</button>}
         </div>
         <h1>관리자 모니터링</h1>
         <p>
@@ -235,7 +241,7 @@ function SecurityPanel({ adminKey, revision }) {
   const [error, setError] = useState(false);
   useEffect(() => {
     const controller = new AbortController();
-    api.get('/admin/security', { headers: { 'X-Admin-Key': adminKey }, signal: controller.signal, timeout: 90000 })
+    api.get('/admin/security', { headers: adminHeaders(adminKey), signal: controller.signal, timeout: 90000 })
       .then(({ data }) => { if (!controller.signal.aborted) { setEvents(data); setError(false); } })
       .catch(() => { if (!controller.signal.aborted) setError(true); });
     return () => controller.abort();
@@ -490,7 +496,7 @@ function Reports({ reports, adminKey, onChange }) {
 
   const mark = (item) => {
     setBusy(item.id);
-    api.post(`/admin/reports/${item.id}`, { handled: !item.handled }, { headers: { 'X-Admin-Key': adminKey }, timeout: 60000 })
+    api.post(`/admin/reports/${item.id}`, { handled: !item.handled }, { headers: adminHeaders(adminKey), timeout: 60000 })
       .then(res => onChange({
         ...reports,
         open: reports.open + (res.data.handled ? -1 : 1),
@@ -563,7 +569,7 @@ function Chat({ chat, adminKey, onChange }) {
 
   const remove = (item) => {
     setBusy(item.id);
-    api.delete(`/admin/lounge/messages/${item.id}`, { headers: { 'X-Admin-Key': adminKey }, timeout: 60000 })
+    api.delete(`/admin/lounge/messages/${item.id}`, { headers: adminHeaders(adminKey), timeout: 60000 })
       .then(() => onChange(chat.filter(m => m.id !== item.id)))
       .catch(() => {})
       .finally(() => setBusy(0));

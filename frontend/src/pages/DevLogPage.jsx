@@ -5,6 +5,7 @@ import { account } from '../sync';
 import OnboardingTabs from '../components/OnboardingTabs';
 import { DEV_LOG } from '../data/devLog';
 import './OnboardingPage.css';
+import RoleGate from '../components/RoleGate';
 
 const WEEK = ['일', '월', '화', '수', '목', '금', '토'];
 const label = date => {
@@ -41,7 +42,12 @@ const fromSeed = e => ({
 
 // 개발 일지. 왼쪽 날짜를 누르면 그날 할 일이 열린다(?d=2026-11-20으로 바로 열기).
 // 체크하자마자 저장되고(팀 내부 페이지라 로그인 없이도 된다), "수정"으로 제목과 할 일을 고치거나 "새 날짜"로 하루를 더할 수 있다.
+// 보민, 찬웅, 관리자(TEAM 권한)만 볼 수 있다. 서버의 개발 일지 API도 같은 권한으로 막는다
 export default function DevLogPage() {
+  return <RoleGate role="TEAM" title="개발 일지"><DevLog /></RoleGate>;
+}
+
+function DevLog() {
   const [params, setParams] = useSearchParams();
   const [state, setState] = useState({ loading: true, offline: false, canEdit: false, entries: DEV_LOG.map(fromSeed) });
   const [draft, setDraft] = useState(null);   // 수정 중인 하루(새 날짜 포함)

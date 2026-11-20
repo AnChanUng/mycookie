@@ -29,13 +29,18 @@ class DevLogTest {
     @Autowired MockMvc mvc;
     @Autowired ObjectMapper json;
     @Autowired DevLogEntryRepository entries;
+    @Autowired com.csstudy.backend.service.RoleService roles;
 
-    private static String editor;
+    private static String editor, stranger;
 
     @BeforeEach
     void setUp() throws Exception {
         entries.deleteAll();
-        if (editor == null) editor = register("일지보민");
+        if (editor == null) {
+            editor = register("일지보민");
+            roles.grant("일지보민", com.csstudy.backend.entity.AccountRole.Role.TEAM);
+            stranger = register("지나가는사람");
+        }
     }
 
     private String register(String name) throws Exception {
@@ -66,22 +71,23 @@ class DevLogTest {
     }
 
     @Test
-    void anyoneReadsAndWrites() throws Exception {
-        mvc.perform(get("/api/v1/devlog")).andExpect(status().isOk())
+    void onlyTeamReadsAndWrites() throws Exception {
+        // 로그인 안 했으면 401, TEAM 권한이 없으면 403
+        mvc.perform(get("/api/v1/devlog")).andExpect(status().isUnauthorized()).andExpect(jsonPath("$.code").value("UNAUTHORIZED"));
+        mvc.perform(get("/api/v1/devlog").header("Authorization", "Bearer " + stranger)).andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("ROLE_REQUIRED"));
+        put(null, "2026-11-20", day(null, true, false)).andExpect(status().isUnauthorized());
+        put(stranger, "2026-11-20", day(null, true, false)).andExpect(status().isForbidden());
+        mvc.perform(delete("/api/v1/devlog/2026-11-20").header("Authorization", "Bearer " + stranger)).andExpect(status().isForbidden());
+        assertThat(entries.count()).isZero();
+
+        mvc.perform(get("/api/v1/devlog").header("Authorization", "Bearer " + editor)).andExpect(status().isOk())
                 .andExpect(jsonPath("$.canEdit").value(true)).andExpect(jsonPath("$.entries").isEmpty());
-
-        // 로그인하지 않아도 저장된다(수정한 사람은 비어 있음)
-        JsonNode anon = read(put(null, "2026-11-20", day(null, true, false)).andExpect(status().isOk()));
-        assertThat(anon.get("complete").asBoolean()).isFalse();
-        assertThat(anon.get("updatedBy").isNull()).isTrue();
-        assertThat(anon.at("/items/1/sub/1").has("extra")).as("unknown fields are dropped").isFalse();
-
-        // 로그인했으면 닉네임을 남긴다
-        JsonNode signed = read(put(editor, "2026-11-20", day(anon.get("version").asLong(), true, true)).andExpect(status().isOk()));
-        assertThat(signed.get("updatedBy").asText()).isEqualTo("일지보민");
-        mvc.perform(get("/api/v1/devlog")).andExpect(jsonPath("$.entries[0].items[0].note").value("온보딩 읽기"));
-
-        mvc.perform(delete("/api/v1/devlog/2026-11-20")).andExpect(status().isOk());
+        JsonNode saved = read(put(editor, "2026-11-20", day(null, true, false)).andExpect(status().isOk()));
+        assertThat(saved.get("updatedBy").asText()).isEqualTo("일지보민");
+        assertThat(saved.at("/items/1/sub/1").has("extra")).as("unknown fields are dropped").isFalse();
+        mvc.perform(get("/api/v1/devlog").header("Authorization", "Bearer " + editor)).andExpect(jsonPath("$.entries[0].items[0].note").value("온보딩 읽기"));
+        mvc.perform(delete("/api/v1/devlog/2026-11-20").header("Authorization", "Bearer " + editor)).andExpect(status().isOk());
         assertThat(entries.count()).isZero();
     }
 

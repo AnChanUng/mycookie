@@ -32,7 +32,13 @@ public enum CookieErrorCode {
     SERVICE_UNAVAILABLE(HttpStatus.SERVICE_UNAVAILABLE, "지금은 이 기능을 쓸 수 없어요. 잠시 후 다시 시도해 주세요."),
 
     // 계정
-    NICKNAME_DUPLICATED(HttpStatus.CONFLICT, "이미 사용 중인 닉네임입니다. 다른 이름을 사용해 주세요.");
+    NICKNAME_DUPLICATED(HttpStatus.CONFLICT, "이미 사용 중인 닉네임입니다. 다른 이름을 사용해 주세요."),
+    NICKNAME_RESERVED(HttpStatus.BAD_REQUEST, "관리용으로 예약된 닉네임이에요. 다른 이름을 사용해 주세요."),
+
+    // 권한
+    ADMIN_REQUIRED(HttpStatus.UNAUTHORIZED, "관리자만 볼 수 있어요. 관리자 계정으로 로그인해 주세요."),
+    ROLE_REQUIRED(HttpStatus.FORBIDDEN, "이 페이지를 볼 권한이 없어요."),
+    WEAK_ADMIN_PASSWORD(HttpStatus.BAD_REQUEST, "관리자 비밀번호는 12자 이상이고, 아이디와 같거나 아이디를 포함하면 안 돼요.");
 
     private final HttpStatus status;
     private final String message;

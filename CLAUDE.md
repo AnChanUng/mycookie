@@ -17,6 +17,11 @@
 - 문구에는 내부 정보(SQL, 클래스 이름, 개인정보)를 넣지 않는다. 예상 못 한 예외는 500으로 감추고 ERROR 로그로 남긴다(긴급 알림이 이 로그를 센다).
 - 기존 `ResponseStatusException`도 같은 모양으로 나가니, 그 코드를 고칠 때 `CookieException`으로 바꿔 나간다.
 
+## 비공개 페이지와 권한
+- 비공개 페이지는 주소를 숨기지 않고 계정 권한으로 막는다. 화면은 `RoleGate`(ADMIN, OWNER, TEAM)로, 서버 API는 `RoleService.require`로 같은 권한을 확인한다.
+- 권한 부여와 관리자 계정 생성은 홈서버의 관리자 키로만 한다(`deploy/homeserver/account.sh`, 문서 `docs/homeserver.md`). 인터넷 쪽 화면에 이 기능을 만들지 않는다.
+- 찬웅 전용(OWNER) 자료 중 민감한 것(자소서, 면접 기록)은 화면 코드에 넣지 말고 서버에 저장해 권한으로 내려준다.
+
 ## 패치노트 (frontend/src/data/patchNotes.js, frontend/src/data/changelog.js)
 - 사용자가 체감하는 기능 변화만 적는다. 부하 테스트, 성능 측정, 인프라, 문서, 리팩터링 같은 비기능 항목은 넣지 않는다.
 - 핵심만 짧게. 버전당 항목 3~4개 이내, 자잘한 수정은 생략한다.

@@ -1,36 +1,27 @@
 import { lazy, Suspense, useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, Navigate, useParams } from 'react-router-dom';
 import { decodePrivateId, privatePath } from '../privatePath';
 import { CompanyExam } from './ExamCompanyPage';
 import RagAssistant from './RagAssistant';
+import RoleGate from '../components/RoleGate';
 import './CsNotesPage.css';
 
-const AdminPage = lazy(() => import('./AdminPage'));
 // AWS · 현대오토에버 면접 복기 자료(다른 사람이 본 면접). 공개 메뉴에서 빼고 여기서만 연다
 const OthersInterviews = lazy(() => import('./TechnicalInterviewPage'));
 
-// 비공개 문제집 입구. 비밀번호는 저장소에 원문으로 두지 않고 해시만 비교한다.
-// 화면 잠금일 뿐 서버 인증이 아니므로, 문제 데이터는 잠금을 푼 뒤에만 따로 불러와 공개 화면 번들과 분리한다.
-const SALT = 'cs-study:private-chanung:';
-const HASH = 'f213708a8ac885488c9d63259093a953f3820b9fed68fd452c10758ce8a285a4';
-const STORE = 'private-chanung-unlocked';
+// 찬웅 전용 페이지(/private/chanung). OWNER 권한 계정으로 로그인해야 열린다(예전 화면 비밀번호 대신).
+// 문제 데이터는 권한을 확인한 뒤에만 따로 불러와 공개 화면 번들과 분리한다
 // 화면 안 링크는 알아보기 어려운 주소로 만든다(privatePath.js)
 const BASE = privatePath();
 
-async function sha256(text) {
-  const bytes = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
-  return [...new Uint8Array(bytes)].map(b => b.toString(16).padStart(2, '0')).join('');
-}
-
-function readUnlocked() {
-  try { return sessionStorage.getItem(STORE) === HASH; } catch { return false; }
-}
-
 export default function PrivateChanungPage() {
+  return <RoleGate role="OWNER" title="찬웅 전용 페이지"><PrivateChanung /></RoleGate>;
+}
+
+function PrivateChanung() {
   // 주소에는 메뉴 이름을 base64url로 바꿔 둔다(/x/…/YWRtaW4 → admin)
   const { code } = useParams();
   const id = code ? decodePrivateId(code) : undefined;
-  const [unlocked, setUnlocked] = useState(readUnlocked);
   const [data, setData] = useState(null);
   const [loadError, setLoadError] = useState(false);
 
@@ -38,32 +29,34 @@ export default function PrivateChanungPage() {
   const assistant = id === 'assistant';
   const patches = id === 'patch-notes';
   const admin = id === 'admin';
+  const banks = id === 'banks';
   const interviews = id === 'interviews';
 
   useEffect(() => {
-    if (!unlocked || data || trouble || assistant || patches || admin || interviews) return;
+    if (data || trouble || assistant || patches || admin || interviews) return;
     let alive = true;
     import('../data/privateBanks')
       .then(m => { if (alive) setData(m); })
       .catch(() => { if (alive) setLoadError(true); });
     return () => { alive = false; };
-  }, [unlocked, data, trouble, assistant, patches, admin, interviews]);
+  }, [data, trouble, assistant, patches, admin, interviews]);
 
-  if (!unlocked) return <Gate onUnlock={() => setUnlocked(true)} />;
   if (trouble) return <TroubleLog />;
   if (assistant) return <RagAssistant />;
   if (patches) return <PatchNotes />;
-  if (interviews) return <Suspense fallback={<p role="status">면접 자료를 불러오는 중…</p>}><OthersInterviews back={{ to: BASE, label: '← 관리자 페이지' }} /></Suspense>;
-  if (admin) return <Suspense fallback={<p role="status">관리자 화면을 불러오는 중…</p>}><AdminPage back={{ to: BASE, label: '← 관리자 페이지' }} /></Suspense>;
+  if (interviews) return <Suspense fallback={<p role="status">면접 자료를 불러오는 중…</p>}><OthersInterviews back={{ to: BASE, label: '← 찬웅 전용 페이지' }} /></Suspense>;
+  // 관리자 모니터링은 /admin(관리자 계정)으로 옮겼다
+  if (admin) return <Navigate to="/admin" replace />;
   if (loadError) return <div className="fade-in"><p role="alert">문제집을 불러오지 못했습니다. 새로고침해 주세요.</p></div>;
   if (!data) return <div className="fade-in"><p role="status">문제집을 불러오는 중…</p></div>;
 
+  if (banks) return <PrivateBanks data={data} />;
   if (id) {
     const found = data.findPrivateBank(id);
-    if (!found) return <div className="fade-in"><p role="alert">찾을 수 없는 문제집입니다. <Link to={BASE}>비공개 문제집 목록</Link></p></div>;
-    return <CompanyExam company={found.bank} back={{ to: BASE, label: '← 관리자 페이지' }} />;
+    if (!found) return <div className="fade-in"><p role="alert">찾을 수 없는 문제집입니다. <Link to={privatePath('banks')}>비공개 문제집 목록</Link></p></div>;
+    return <CompanyExam company={found.bank} back={{ to: privatePath('banks'), label: '← 비공개 문제집' }} />;
   }
-  return <PrivateList data={data} onLock={() => { try { sessionStorage.removeItem(STORE); } catch { /* 저장소를 못 쓰면 새로고침으로 잠긴다 */ } setUnlocked(false); }} />;
+  return <PrivateList data={data} />;
 }
 
 const STATUS = { solved: '해결', open: '진행 중', note: '관찰' };
@@ -204,53 +197,14 @@ function TroubleLog() {
   );
 }
 
-function Gate({ onUnlock }) {
-  const [value, setValue] = useState('');
-  const [error, setError] = useState(false);
-  const [busy, setBusy] = useState(false);
-
-  const submit = async (event) => {
-    event.preventDefault();
-    if (busy) return;
-    setBusy(true);
-    const ok = (await sha256(SALT + value.trim())) === HASH;
-    setBusy(false);
-    if (!ok) { setError(true); setValue(''); return; }
-    try { sessionStorage.setItem(STORE, HASH); } catch { /* 이번 화면에서만 열어 둔다 */ }
-    onUnlock();
-  };
-
-  return (
-    <div className="fade-in">
-      <div className="page-header">
-        <Link to="/" className="back-link">← 홈으로</Link>
-        <h1>관리자 페이지</h1>
-        <p>비밀번호를 입력해야 볼 수 있습니다.</p>
-      </div>
-      <form onSubmit={submit} style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
-        <input
-          id="private-password" type="password" inputMode="numeric" autoComplete="off" autoFocus
-          value={value} onChange={e => { setValue(e.target.value); setError(false); }}
-          placeholder="비밀번호" aria-label="비밀번호" aria-invalid={error} aria-describedby={error ? 'private-password-error' : undefined}
-          style={{ padding: '10px 12px', fontSize: 16, minWidth: 0, flex: '1 1 160px', maxWidth: 240 }}
-        />
-        <button type="submit" className="exam-btn" disabled={busy || !value.trim()}>열기</button>
-      </form>
-      {error && <p id="private-password-error" role="alert" style={{ marginTop: 8 }}>비밀번호가 맞지 않습니다.</p>}
-    </div>
-  );
-}
-
-function PrivateList({ data, onLock }) {
-  const [banksOpen, setBanksOpen] = useState(false);
+function PrivateList({ data }) {
   const bankCount = data.PRIVATE_GROUPS.reduce((n, g) => n + g.banks.length, 0);
   return (
     <div className="fade-in">
       <div className="page-header">
         <Link to="/" className="back-link">← 홈으로</Link>
-        <h1>관리자 페이지</h1>
-        <p>개발 기록과 운영 지표, 비공개 학습 자료를 모아 둔 곳입니다. 공개 메뉴에는 나오지 않습니다.</p>
-        <button type="button" className="exam-btn" onClick={onLock}>잠그기</button>
+        <h1>찬웅 전용 페이지</h1>
+        <p>개발 기록과 비공개 학습 자료를 모아 둔 곳입니다. 찬웅 계정만 볼 수 있습니다.</p>
       </div>
       <section style={{ marginTop: 24 }}>
         <div className="section-title">개발 기록</div>
@@ -260,7 +214,7 @@ function PrivateList({ data, onLock }) {
             <span className="exam-company-name">트러블슈팅 기록</span>
             <span className="exam-company-meta">개발하면서 겪은 기술 문제 · 원인 · 해결 · 측정 결과</span>
           </Link>
-          <Link to={privatePath("admin")} className="exam-company-card">
+          <Link to="/admin" className="exam-company-card">
             <span className="exam-company-abbr">ADMIN</span>
             <span className="exam-company-name">관리자 모니터링</span>
             <span className="exam-company-meta">이용 현황 · 풀이 · 방문자 · 보안 · 제보 · 채팅 · 계정 · 시스템</span>
@@ -283,13 +237,28 @@ function PrivateList({ data, onLock }) {
         </div>
       </section>
       <section style={{ marginTop: 32 }}>
-        <button type="button" className="exam-btn" aria-expanded={banksOpen} aria-controls="private-banks" onClick={() => setBanksOpen(o => !o)}
-          style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px', fontSize: 16 }}>
-          <span><strong>비공개 문제집</strong> <span style={{ opacity: 0.7, fontWeight: 400 }}>· 복기 문제집 · SSAFY · 컴퓨터일반 {bankCount}개</span></span>
-          <span aria-hidden="true">{banksOpen ? '접기 ▲' : '펼치기 ▼'}</span>
-        </button>
-        <div id="private-banks" hidden={!banksOpen}>
-      {banksOpen && data.PRIVATE_GROUPS.map(group => (
+        <div className="section-title">학습 자료</div>
+        <div className="exam-company-grid">
+          <Link to={privatePath('banks')} className="exam-company-card">
+            <span className="exam-company-abbr">문제집</span>
+            <span className="exam-company-name">비공개 문제집</span>
+            <span className="exam-company-meta">복기 문제집 · SSAFY · 컴퓨터일반 {bankCount}개</span>
+          </Link>
+        </div>
+      </section>
+    </div>
+  );
+}
+
+// 비공개 문제집 목록(첫 화면의 카드 한 칸에서 들어온다)
+function PrivateBanks({ data }) {
+  return (
+    <div className="fade-in">
+      <div className="page-header">
+        <Link to={BASE} className="back-link">← 찬웅 전용 페이지</Link>
+        <h1>비공개 문제집</h1>
+      </div>
+      {data.PRIVATE_GROUPS.map(group => (
         <section key={group.key} style={{ marginTop: 24 }}>
           <div className="section-title">{group.name}</div>
           <p className="exam-lede">{group.desc}</p>
@@ -305,8 +274,6 @@ function PrivateList({ data, onLock }) {
           </div>
         </section>
       ))}
-        </div>
-      </section>
     </div>
   );
 }
