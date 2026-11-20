@@ -34,7 +34,8 @@
     "check:bug-hunt": "node --import ./scripts/extensionless-loader.mjs scripts/check-bug-hunt.mjs",
     "check:technical-interview": "node --import ./scripts/extensionless-loader.mjs scripts/check-technical-interview.mjs",
     "check:cross-device-sync": "node scripts/check-cross-device-sync.mjs",
-    "check:chanung-completion": "node scripts/check-chanung-completion.mjs"
+    "check:chanung-completion": "node scripts/check-chanung-completion.mjs",
+    "check:onboarding-calendar": "node --import ./scripts/extensionless-loader.mjs scripts/check-onboarding-calendar.mjs"
   },
   "dependencies": {
     "axios": "^1.14.0",
