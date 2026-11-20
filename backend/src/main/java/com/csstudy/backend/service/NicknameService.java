@@ -19,13 +19,23 @@ public class NicknameService {
     private final CohortService cohort;
     private final TierAwardService tierAwards;
     public record Changed(Long userId) {}
+    public static UserTier testTier(String name) {
+        return switch (key(name)) {
+            case "admin1" -> UserTier.BRONZE;
+            case "admin2" -> UserTier.SILVER;
+            case "admin3" -> UserTier.GOLD;
+            case "admin4" -> UserTier.DIAMOND;
+            case "admin5" -> UserTier.RUBY;
+            default -> null;
+        };
+    }
     public static String key(String name) { return java.text.Normalizer.normalize(name,java.text.Normalizer.Form.NFKC).replaceAll("\\s+"," ").trim().toLowerCase(Locale.ROOT); }
     // 관리용 이름(admin…, 관리자, 운영자)은 일반 가입, 닉네임 변경, 방문자 이름으로 쓸 수 없다(관리자 계정은 홈서버에서만 만든다)
     public static boolean isReserved(String name) {
         String k = key(name == null ? "" : name).replace(" ", "");
         return k.startsWith("admin") || k.startsWith("관리자") || k.startsWith("운영자");
     }
-    private static void rejectReserved(String name) {
+    public static void rejectReserved(String name) {
         if (isReserved(name)) throw new com.csstudy.backend.exception.CookieException(com.csstudy.backend.exception.CookieErrorCode.NICKNAME_RESERVED);
     }
     public static String validate(String name) {
@@ -55,6 +65,8 @@ public class NicknameService {
     public User rename(User existing,String name,String visitorId) {
         User user=users.findForUpdate(existing.getId()).orElseThrow();
         String clean=validate(name),owner="u:"+user.getId(),old=user.getNickname();
+        if (testTier(old) != null && !clean.equals(old)) throw new com.csstudy.backend.exception.CookieException(
+                com.csstudy.backend.exception.CookieErrorCode.INVALID_REQUEST, "등급별 테스트 계정의 닉네임은 변경할 수 없습니다.");
         if(!key(clean).equals(key(old))) rejectReserved(clean);
         claim(clean,owner,visitorId);
         user.setNickname(clean);users.saveAndFlush(user);

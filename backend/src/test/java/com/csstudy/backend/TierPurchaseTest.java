@@ -57,7 +57,7 @@ class TierPurchaseTest {
 
     // 새로 가입한 계정은 동 쿠키에서 시작한다
     private String register(String name) throws Exception {
-        return read(postJson("/api/v1/auth/register", Map.of("nickname", name, "password", "pw-1234"), null).andExpect(status().isOk()))
+        return read(postJson("/api/v1/auth/register", Map.of("nickname", name, "password", "pw-123456"), null).andExpect(status().isOk()))
                 .path("token").asText();
     }
 

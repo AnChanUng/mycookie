@@ -157,6 +157,7 @@ services:
       KAFKA_TOPIC_PREFIX: prod
       KAFKA_GROUP_ID: cookie-prod
       # 오늘의 CS를 Mattermost 채널에 올린다(운영에만. 스테이징까지 넣으면 두 번 올라간다)
+      CS_CHANNEL_WEBHOOK_URL: ${CS_CHANNEL_WEBHOOK_URL:-}
       MATTERMOST_WEBHOOK_URL: ${MATTERMOST_WEBHOOK_URL:-}
       MATTERMOST_CRON: ${MATTERMOST_CRON:-0 30 8 * * MON-FRI}
       # 긴급 알림에 붙일 Grafana 로그 링크(docs/monitoring.md)
@@ -175,6 +176,7 @@ services:
       REDIS_KEY_PREFIX: "staging:"
       KAFKA_TOPIC_PREFIX: staging
       KAFKA_GROUP_ID: cookie-staging
+      CS_CHANNEL_WEBHOOK_URL: ${STAGING_CS_CHANNEL_WEBHOOK_URL:-}
       # 스테이징에서는 학습 메일을 보내지 않는다
       NEWSLETTER_DAILY_LIMIT: "0"
 

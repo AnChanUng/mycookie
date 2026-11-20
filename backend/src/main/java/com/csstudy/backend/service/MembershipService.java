@@ -70,6 +70,9 @@ public class MembershipService {
                 + progressRepository.findByUserIdAndSolvedCountIsNull(user.getId()).stream().mapToLong(p -> solvedIn(p.getData())).sum();
         // Reuse the existing rank count for historical/coding progress; devices are merged by max, not sum.
         long reported = solvedRepository.findByUserId(user.getId()).stream().mapToLong(v -> v.getCount()).max().orElse(0);
+        UserTier fixed = NicknameService.testTier(user.getNickname());
+        if (fixed != null) return new Membership(fixed, fixed.displayName(5), Math.max(saved, reported),
+                null, null, 0, user.getNickname(), 5, null, null, fixed.thresholds()[0]);
         return describe(baseTier(user), Math.max(saved, reported), "user:" + user.getId()).withNickname(user.getNickname());
     }
 

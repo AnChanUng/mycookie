@@ -46,6 +46,12 @@ public class AuthController {
             return ResponseEntity.badRequest().body(Map.of("error", "닉네임과 비밀번호를 입력해주세요."));
         }
 
+        if (password.length() < 8 || password.getBytes(StandardCharsets.UTF_8).length > 72) {
+            throw new com.csstudy.backend.exception.CookieException(com.csstudy.backend.exception.CookieErrorCode.INVALID_REQUEST,
+                    "비밀번호는 8자 이상, UTF-8 기준 72바이트 이하로 입력해 주세요.");
+        }
+
+        NicknameService.rejectReserved(nickname);
         if (userRepository.existsByNickname(nickname)) {
             return ResponseEntity.badRequest().body(Map.of("error", "이미 사용 중인 닉네임입니다."));
         }

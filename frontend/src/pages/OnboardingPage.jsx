@@ -39,6 +39,16 @@ function Onboarding() {
 
       <TeamCalendar />
 
+      <section className="ob-section" aria-labelledby="bomin-work-title">
+        <h2 id="bomin-work-title">보민의 담당업무</h2>
+        <p>매일 아래 세 영역을 확인하고, 발견한 문제는 개발 일지에 기록합니다. 11월 23일에 채널을 준비하고, 관리자 화면의 CS 채널 탭에서 운영합니다.</p>
+        <div className="bomin-work-grid">
+          <article><h3>01 · CS 콘텐츠와 채널</h3><p>웹 필수지식에서 다음 콘텐츠를 선정하고 설명·질문·원문 링크를 검수합니다. 채널 준비 후 미리보기와 테스트 발송까지 담당합니다.</p><a href="https://github.com/AnChanUng/mycookie/issues/102">11/23 개발 과제 확인</a></article>
+          <article><h3>02 · 메일과 발송 상태</h3><p>누락·오류 제보와 발송 로그를 확인합니다. 실패 원인을 조사하고 수정 후 테스트 수신으로 확인합니다.</p><a href="https://grafana.mycookie.dev">Grafana에서 로그 확인</a></article>
+          <article><h3>03 · 공개 전 품질 점검</h3><p>가입·로그인·비밀번호 변경·구독을 스테이징에서 확인하고, 테스트 계정의 등급별 화면과 권한을 점검합니다.</p><a href="https://staging.mycookie.dev/account">스테이징 계정 화면</a></article>
+        </div>
+      </section>
+
       <Section id="about" no="01" title="나의쿠키 한눈에 보기">
         <p>
           나의쿠키(<a href="https://mycookie.dev">mycookie.dev</a>)는 개발자 취업 준비생을 위한 학습 사이트입니다.

@@ -45,11 +45,11 @@ class AccountRecordsTest {
 
     @Test
     void passwordIsStoredHashedAndLoginStillWorks() throws Exception {
-        auth("register", "hash-user", "pw1234");
+        auth("register", "hash-user", "pw123456");
         assertThat(userRepository.findByNickname("hash-user").orElseThrow().getPassword())
-                .startsWith("$2").doesNotContain("pw1234");
+                .startsWith("$2").doesNotContain("pw123456");
 
-        assertThat(auth("login", "hash-user", "pw1234").get("token").asText()).isNotBlank();
+        assertThat(auth("login", "hash-user", "pw123456").get("token").asText()).isNotBlank();
         mvc.perform(post("/api/v1/auth/login").contentType(MediaType.APPLICATION_JSON)
                         .content(json.writeValueAsString(Map.of("nickname", "hash-user", "password", "wrong"))))
                 .andExpect(status().isBadRequest());
@@ -120,8 +120,8 @@ class AccountRecordsTest {
 
     @Test
     void examProgressIsSavedPerAccountAndNeedsLogin() throws Exception {
-        String tokenA = auth("register", "exam-a", "pw").get("token").asText();
-        String tokenB = auth("register", "exam-b", "pw").get("token").asText();
+        String tokenA = auth("register", "exam-a", "password-for-tests").get("token").asText();
+        String tokenB = auth("register", "exam-b", "password-for-tests").get("token").asText();
         String data = "{\"stats\":{\"q1\":{\"c\":0,\"w\":1,\"last\":\"w\"}},\"history\":[],\"updatedAt\":1}";
 
         mvc.perform(put("/api/v1/exam/progress/ibk").header("Authorization", bearer(tokenA))
@@ -143,7 +143,7 @@ class AccountRecordsTest {
 
     @Test
     void logoutRevokesToken() throws Exception {
-        String token = auth("register", "logout-user", "pw").get("token").asText();
+        String token = auth("register", "logout-user", "password-for-tests").get("token").asText();
         mvc.perform(post("/api/v1/auth/logout").header("Authorization", bearer(token)))
                 .andExpect(status().isOk());
         mvc.perform(get("/api/v1/exam/progress/ibk").header("Authorization", bearer(token)))
@@ -152,8 +152,8 @@ class AccountRecordsTest {
 
     @Test
     void studyBookmarkAndGradesAreTrackedPerAccount() throws Exception {
-        String tokenA = auth("register", "study-a", "pw").get("token").asText();
-        String tokenB = auth("register", "study-b", "pw").get("token").asText();
+        String tokenA = auth("register", "study-a", "password-for-tests").get("token").asText();
+        String tokenB = auth("register", "study-b", "password-for-tests").get("token").asText();
         JsonNode questions = json.readTree(mvc.perform(get("/api/v1/questions"))
                 .andReturn().getResponse().getContentAsString());
         assertThat(questions.size()).isGreaterThan(0);

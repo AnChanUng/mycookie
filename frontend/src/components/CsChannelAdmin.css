@@ -1,0 +1,11 @@
+.cs-channel-admin { padding: 24px; border: 1px solid var(--ds-line-strong); border-radius: 16px; background: var(--ds-surface); }
+.cs-channel-admin form { display: grid; gap: 16px; max-width: 720px; }
+.cs-channel-admin label { display: grid; gap: 8px; }
+.cs-channel-admin input:not([type=checkbox]), .cs-channel-admin select { width: 100%; padding: 12px; color: var(--ds-text); background: var(--ds-surface); border: 1px solid var(--ds-line-strong); border-radius: 8px; }
+.cs-channel-admin .cs-enabled { display: flex; gap: 8px; align-items: center; }
+.cs-channel-admin button { padding: 10px 16px; border-radius: 8px; border: 1px solid var(--ds-line-strong); color: var(--ds-text); background: var(--ds-surface-2); cursor: pointer; }
+.cs-channel-admin button:disabled { opacity: .5; cursor: default; }
+.cs-channel-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.cs-preview { white-space: pre-wrap; overflow-wrap: anywhere; padding: 20px; background: var(--ds-surface-2); border-radius: 12px; line-height: 1.8; }
+.cs-deliveries { padding: 0; list-style: none; }
+.cs-deliveries li { padding: 16px 0; border-top: 1px solid var(--ds-line-strong); }

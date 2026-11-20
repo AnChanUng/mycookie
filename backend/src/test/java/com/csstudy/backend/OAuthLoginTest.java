@@ -47,7 +47,7 @@ class OAuthLoginTest {
         return json.readTree(r.andReturn().getResponse().getContentAsString());
     }
     private JsonNode register(String name) throws Exception {
-        return read(postJson("/api/v1/auth/register", Map.of("nickname", name, "password", "pw-1234"), null).andExpect(status().isOk()));
+        return read(postJson("/api/v1/auth/register", Map.of("nickname", name, "password", "pw-123456"), null).andExpect(status().isOk()));
     }
     private String state(String provider) throws Exception {
         return read(mvc.perform(get("/api/v1/auth/oauth/" + provider + "/authorize").param("redirectUri", REDIRECT))
@@ -87,7 +87,7 @@ class OAuthLoginTest {
 
         postJson("/api/v1/auth/oauth/link", Map.of("ticket", ticket, "nickname", "기존회원", "password", "wrong"), null)
                 .andExpect(status().isBadRequest()).andExpect(jsonPath("$.error").value("비밀번호가 틀렸습니다."));
-        JsonNode linked = read(postJson("/api/v1/auth/oauth/link", Map.of("ticket", ticket, "nickname", "기존회원", "password", "pw-1234"), null)
+        JsonNode linked = read(postJson("/api/v1/auth/oauth/link", Map.of("ticket", ticket, "nickname", "기존회원", "password", "pw-123456"), null)
                 .andExpect(status().isOk()));
         assertEquals(id, linked.path("id").asLong());
         assertFalse(linked.path("token").asText().isBlank());
@@ -99,11 +99,11 @@ class OAuthLoginTest {
 
         // 같은 깃허브 계정을 다른 닉네임에 또 연결할 수 없다
         register("다른회원");
-        postJson("/api/v1/auth/oauth/link", Map.of("ticket", ticket, "nickname", "다른회원", "password", "pw-1234"), null)
+        postJson("/api/v1/auth/oauth/link", Map.of("ticket", ticket, "nickname", "다른회원", "password", "pw-123456"), null)
                 .andExpect(status().isConflict());
         // 한 닉네임에는 제공자마다 계정 하나만 연결한다
         String other = callback("github", "2002").path("ticket").asText();
-        postJson("/api/v1/auth/oauth/link", Map.of("ticket", other, "nickname", "기존회원", "password", "pw-1234"), null)
+        postJson("/api/v1/auth/oauth/link", Map.of("ticket", other, "nickname", "기존회원", "password", "pw-123456"), null)
                 .andExpect(status().isConflict());
     }
 
@@ -155,7 +155,7 @@ class OAuthLoginTest {
 
     @Test void plainLoginStillWorks() throws Exception {
         register("일반회원");
-        postJson("/api/v1/auth/login", Map.of("nickname", "일반회원", "password", "pw-1234"), null).andExpect(status().isOk());
+        postJson("/api/v1/auth/login", Map.of("nickname", "일반회원", "password", "pw-123456"), null).andExpect(status().isOk());
         postJson("/api/v1/auth/login", Map.of("nickname", "없는회원", "password", "x"), null)
                 .andExpect(status().isBadRequest()).andExpect(jsonPath("$.error").value("존재하지 않는 닉네임입니다."));
     }

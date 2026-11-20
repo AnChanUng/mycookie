@@ -35,7 +35,9 @@
     "check:technical-interview": "node --import ./scripts/extensionless-loader.mjs scripts/check-technical-interview.mjs",
     "check:cross-device-sync": "node scripts/check-cross-device-sync.mjs",
     "check:chanung-completion": "node scripts/check-chanung-completion.mjs",
-    "check:onboarding-calendar": "node --import ./scripts/extensionless-loader.mjs scripts/check-onboarding-calendar.mjs"
+    "check:onboarding-calendar": "node --import ./scripts/extensionless-loader.mjs scripts/check-onboarding-calendar.mjs",
+    "check:account-forms": "node --import ./scripts/extensionless-loader.mjs scripts/check-account-forms.mjs",
+    "check:cs-channel": "node --import ./scripts/extensionless-loader.mjs scripts/check-cs-channel.mjs"
   },
   "dependencies": {
     "axios": "^1.14.0",

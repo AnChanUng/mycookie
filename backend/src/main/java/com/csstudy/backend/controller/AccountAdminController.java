@@ -34,12 +34,26 @@ public class AccountAdminController {
         return roles.list();
     }
 
+    @PostMapping("/test-accounts")
+    public Map<String, Object> createTest(@RequestHeader(value = "X-Admin-Key", required = false) String key, @RequestBody Map<String, Object> body) {
+        adminAuth.requireKey(key);
+        User user = roles.createTestAccount(str(body.get("nickname")), str(body.get("password")));
+        return Map.of("nickname", user.getNickname(), "roles", roles.rolesOf(user), "tier", user.getBaseTier());
+    }
+
     @PostMapping("/roles")
     public Map<String, Object> grant(@RequestHeader(value = "X-Admin-Key", required = false) String key, @RequestBody Map<String, Object> body) {
         adminAuth.requireKey(key);
         String nickname = str(body.get("nickname"));
         Role role = parseRole(body.get("role"));
         return Map.of("nickname", nickname, "roles", Boolean.FALSE.equals(body.get("grant")) ? roles.revoke(nickname, role) : roles.grant(nickname, role));
+    }
+
+    @PostMapping("/test-accounts/profile")
+    public Map<String, Object> applyTest(@RequestHeader(value = "X-Admin-Key", required = false) String key, @RequestBody Map<String, Object> body) {
+        adminAuth.requireKey(key);
+        User user = roles.applyTestProfile(str(body.get("nickname")));
+        return Map.of("nickname", user.getNickname(), "roles", roles.rolesOf(user), "tier", user.getBaseTier());
     }
 
     private static String str(Object v) { return v instanceof String s ? s.trim() : ""; }
