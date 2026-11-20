@@ -41,7 +41,6 @@ public class RankController {
     private final VisitorSolvedRepository solvedRepository;
     private final VisitorProfileService profileService;
     private final UserRepository userRepository;
-    private final com.csstudy.backend.repository.AccountRoleRepository accountRoles;
     private final AuthService authService;
     private final MembershipService membershipService;
     private final VisitorTierGrantRepository grants;
@@ -195,14 +194,13 @@ public class RankController {
 
         List<Solver> ranked = new ArrayList<>();
         Map<String, Solver> solverOf = new HashMap<>();
-        Set<Long> admins = new HashSet<>();
-        accountRoles.findAll().stream().filter(r -> r.getRole() == com.csstudy.backend.entity.AccountRole.Role.ADMIN)
-                .forEach(r -> admins.add(r.getUserId()));
+        // 순위표에서는 관리용 이름(admin1~admin5처럼 admin, 관리자, 운영자로 시작)의 계정만 뺀다.
+        // ADMIN 권한이 있어도 일반 닉네임(예: 쿠우키)이면 순위에 나온다
         long[] hidden = new long[2];   // [사람 수, 문제 수]
         devices.forEach((userId, ids) -> {
             if (!accounts.containsKey(userId)) return;   // 지워진 계정의 기기는 따로 센다
             User rankedUser = accounts.get(userId);
-            if (admins.contains(userId) || com.csstudy.backend.service.NicknameService.isReserved(rankedUser.getNickname())) {
+            if (com.csstudy.backend.service.NicknameService.isReserved(rankedUser.getNickname())) {
                 long adminBest = Math.max(saved.getOrDefault(userId, 0L), ids.stream().mapToLong(counts::get).max().orElse(0));
                 if (adminBest > 0) { hidden[0]++; hidden[1] += adminBest; }
                 ids.forEach(counts::remove);
