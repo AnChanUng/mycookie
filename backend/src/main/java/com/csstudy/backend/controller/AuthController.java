@@ -31,6 +31,7 @@ public class AuthController {
     private final AuthService authService;
     private final MembershipService membershipService;
     private final NicknameService nicknames;
+    private final com.csstudy.backend.service.RoleService roleService;
     private final CredentialService credentials;
     private final EmailAccountService emailAccounts;
     private final MailService mail;
@@ -129,7 +130,7 @@ public class AuthController {
     public ResponseEntity<?> me(HttpServletRequest request) {
         User user = authService.requireUser(request);
         return ResponseEntity.ok(Map.of("id", user.getId(), "nickname", user.getNickname(),
-                "membership", membershipService.membership(user)));
+                "membership", membershipService.membership(user), "roles", roleService.rolesOf(user)));
     }
 
     @PutMapping("/nickname")

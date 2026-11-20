@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import TrackIntro from '../components/TrackIntro';
 
 // 웹 개발 공부 첫 화면. 분야(백엔드 · 웹 기본기)별로 문제집과 정리 글을 고른다
 const GROUPS = [
@@ -25,6 +26,7 @@ export default function WebPage() {
       <h1>웹 개발</h1>
       <p>백엔드 문제풀이와 웹 필수지식을 한곳에서 공부하세요.</p>
     </div>
+    <TrackIntro track="web" />
     {GROUPS.map(g => <section key={g.title} className="web-group" aria-label={g.title}>
       <h2 className="web-group-title">{g.title}</h2>
       <div className="exam-sections">

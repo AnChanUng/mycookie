@@ -59,7 +59,9 @@ const APTITUDE_SITES = [
 // "소개"를 누르면 펼쳐지는 사이트 안내
 const ABOUT_LINKS = [
   { to: '/intro#story', name: '만든 이야기', desc: '어디까지 공부해야 할지 고민하다 만든 이유' },
+  { to: '/intro#team', name: '만든 사람들', desc: 'SSAFY에서 시작한 2인 개발팀' },
   { to: '/intro', name: '서비스 소개', desc: '나의쿠키로 무엇을 공부할 수 있는지' },
+  { to: '/intro#how', name: '공부하는 법', desc: '처음이라면 이 순서로 공부해 보세요' },
   { to: '/feedback', name: '건의 · 제보', desc: '원하는 기능이나 버그를 바로 알려 주세요' },
   { to: '/changelog', name: '패치노트', desc: '언제 무엇이 바뀌었는지' },
 ];

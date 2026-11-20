@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import api from '../api';
+import api, { recentFailures } from '../api';
+import { BUG_FIELDS, EMPTY, bugContent, failureTime } from '../feedbackForm';
 import { account } from '../sync';
 import { visitorId } from '../track';
 import './FeedbackPage.css';
@@ -8,15 +9,19 @@ import './FeedbackPage.css';
 // 건의사항 · 버그 제보. 보내면 운영자의 GitHub 저장소에 [기능개발] · [버그] 이슈로 올라간다
 const KINDS = [
   { key: 'feature', name: '기능 제안', desc: '있으면 좋겠는 기능, 바꾸면 좋을 점', placeholder: '어떤 기능이 있으면 좋을까요? 어떤 상황에서 쓰고 싶은지 함께 적어 주시면 좋아요.' },
-  { key: 'bug', name: '버그 제보', desc: '안 되거나 이상하게 보이는 곳', placeholder: '어느 화면에서 무엇을 했을 때 어떻게 되었나요? 기대한 결과도 함께 적어 주세요.' },
+  { key: 'bug', name: '버그 제보', desc: '안 되거나 이상하게 보이는 곳' },
 ];
-
 export default function FeedbackPage() {
   const location = useLocation();
   // 다른 화면에서 들어왔으면 그 화면 주소를 함께 보낸다(버그 재현용)
   const from = typeof location.state?.from === 'string' ? location.state.from : null;
   const [kind, setKind] = useState(new URLSearchParams(location.search).get('kind') === 'bug' ? 'bug' : 'feature');
-  const [form, setForm] = useState({ title: '', content: '' });
+  const [form, setForm] = useState(EMPTY);
+  const [attach, setAttach] = useState(true);
+  const failures = kind === 'bug' ? recentFailures() : [];
+  const bug = kind === 'bug';
+  const filled = form.title.trim() && (bug ? BUG_FIELDS.every(f => form[f.key].trim()) : form.content.trim());
+  const content = bug ? bugContent(form, attach ? failures : []) : form.content.trim();
   const [state, setState] = useState({ busy: false, done: false, error: '' });
   const current = KINDS.find(k => k.key === kind);
 
@@ -25,9 +30,9 @@ export default function FeedbackPage() {
     setState({ busy: true, done: false, error: '' });
     try {
       const headers = account() ? { Authorization: `Bearer ${account().token}` } : {};
-      await api.post('/feedback', { kind, title: form.title.trim(), content: form.content.trim(), visitorId: visitorId(), path: from }, { headers, timeout: 90000 });
+      await api.post('/feedback', { kind, title: form.title.trim(), content, visitorId: visitorId(), path: from }, { headers, timeout: 90000 });
       setState({ busy: false, done: true, error: '' });
-      setForm({ title: '', content: '' });
+      setForm(EMPTY);
     } catch (error) {
       setState({ busy: false, done: false, error: error?.response?.data?.error || '보내지 못했습니다. 잠시 후 다시 시도해 주세요.' });
     }
@@ -58,14 +63,21 @@ export default function FeedbackPage() {
         <input maxLength={80} required value={form.title} placeholder={kind === 'bug' ? '예: 모의고사 채점 결과가 0점으로 나와요' : '예: 오답만 모아 시험 보기'}
           onChange={e => setForm({ ...form, title: e.target.value })} />
       </label>
-      <label className="fb-field"><span>내용</span>
+      {bug ? BUG_FIELDS.map(f => <label key={f.key} className="fb-field"><span>{f.label}</span>
+        <textarea className="fb-short" rows={f.rows} maxLength={600} required value={form[f.key]} placeholder={f.placeholder}
+          onChange={e => setForm({ ...form, [f.key]: e.target.value })} />
+      </label>) : <label className="fb-field"><span>내용</span>
         <textarea rows={7} maxLength={2000} required value={form.content} placeholder={current.placeholder}
           onChange={e => setForm({ ...form, content: e.target.value })} />
         <small className="fb-count">{form.content.length} / 2000</small>
-      </label>
+      </label>}
+      {bug && failures.length > 0 && <div className="fb-attach">
+        <label><input type="checkbox" checked={attach} onChange={e => setAttach(e.target.checked)} /> 최근 30분 동안 이 기기에서 실패한 요청 {failures.length}개를 함께 보내기</label>
+        {attach && <ul aria-label="함께 보낼 요청 오류">{failures.map((f, i) => <li key={i}><code>{f.method} {f.path}</code> → {f.status} <span>{failureTime(f.at)}</span></li>)}</ul>}
+      </div>}
       <p className="fb-note">이 내용은 운영자의 GitHub 저장소에 이슈로 등록돼요. 이름, 연락처 같은 개인정보는 적지 말아 주세요.{from && <> 보던 화면 주소(<code>{from}</code>)가 함께 전달돼요.</>}</p>
       {state.error && <p className="fb-error" role="alert">{state.error}</p>}
-      <button className="fb-submit" disabled={state.busy || !form.title.trim() || !form.content.trim()}>{state.busy ? '보내는 중…' : '보내기'}</button>
+      <button className="fb-submit" disabled={state.busy || !filled}>{state.busy ? '보내는 중…' : '보내기'}</button>
     </form>}
   </div>;
 }

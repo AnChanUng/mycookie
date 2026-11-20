@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { CodeTokens } from '../components/Code';
 import { tokenLines } from '../codeTokens';
+import TrackIntro from '../components/TrackIntro';
 
 // 반에서 같이 푼 알고리즘 문제의 풀이를 문제별로 모아 본다.
 // 풀이 묶음은 크기가 커서 번들에 넣지 않고 public/algo/algo100.json 을 화면을 열 때 받아 온다.
@@ -60,6 +61,8 @@ export default function AlgoPage() {
         <h1>코테 풀이 모아보기</h1>
         <p>같은 문제를 여러 사람이 어떻게 풀었는지 한 화면에서 비교합니다 · {data.length}문제 · 풀이 {total}개 · Java</p>
       </div>
+
+      <TrackIntro track="algo" />
 
       <div className="algo-body">
         <aside className="algo-side">

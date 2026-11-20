@@ -1,7 +1,7 @@
 # 할 일이 생기는 개발 소식만 Mattermost 채널로 보낸다(오늘의 CS와 같은 수신 웹훅을 쓴다).
 #   - 이슈: 새로 열렸을 때 (사이트 제보로 만든 이슈는 백엔드가 이미 알리므로 건너뛴다)
-#   - PR: 열렸을 때(리뷰 요청)
-#   - CI: 실패했을 때만
+#   - PR: 리뷰 준비 완료 시(개인 기록만 바뀐 PR 제외)
+#   - CI: dev, master 실패 시
 #   PR 병합, 이슈 닫힘처럼 이미 끝난 일은 알리지 않는다(GitHub에 기록이 남는다)
 #   - 수동 실행(workflow_dispatch): 연결 시험(PoC) 메시지
 # 저장소 Settings → Secrets and variables → Actions에 MATTERMOST_WEBHOOK_URL이 있어야 보낸다. 없으면 조용히 건너뛴다.
@@ -12,7 +12,7 @@ on:
   issues:
     types: [opened]
   pull_request:
-    types: [opened]
+    types: [opened, ready_for_review]
   workflow_run:
     workflows: [CI]
     types: [completed]
@@ -20,16 +20,40 @@ on:
 
 permissions:
   contents: read
+  pull-requests: read
 
 jobs:
   notify:
     runs-on: ubuntu-latest
     timeout-minutes: 3
-    # CI는 실패했을 때만 알린다
-    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'failure'
+    if: >-
+      (github.event_name != 'pull_request' || !github.event.pull_request.draft) &&
+      (github.event_name != 'workflow_run' ||
+        (github.event.workflow_run.conclusion == 'failure' &&
+          (github.event.workflow_run.head_branch == 'dev' || github.event.workflow_run.head_branch == 'master')))
     steps:
+      - name: 리뷰 알림 대상 확인
+        id: review
+        if: github.event_name == 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          changed=$(gh api "repos/$REPO/pulls/$PR/files" --paginate --jq '.[].filename')
+          notify=false
+          while IFS= read -r path; do
+            [ -n "$path" ] || continue
+            case "$path" in
+              docs/blog/*|frontend/src/data/devLog.js|frontend/src/pages/DevLogPage.jsx) ;;
+              *) notify=true; break ;;
+            esac
+          done <<< "$changed"
+          echo "notify=$notify" >> "$GITHUB_OUTPUT"
+
       - name: 메시지 만들기
         id: msg
+        if: github.event_name != 'pull_request' || steps.review.outputs.notify == 'true'
         env:
           EVENT: ${{ github.event_name }}
           ACTION: ${{ github.event.action }}

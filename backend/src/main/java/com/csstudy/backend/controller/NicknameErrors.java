@@ -1,17 +1,22 @@
 package com.csstudy.backend.controller;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
-import org.springframework.http.ResponseEntity;
+
+import com.csstudy.backend.exception.CookieErrorCode;
+import com.csstudy.backend.exception.ErrorResponse;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.dao.DataIntegrityViolationException;
-import java.util.Map;
-@RestControllerAdvice(assignableTypes={AuthController.class,OAuthController.class,RankController.class,LoungeController.class})
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+// 닉네임을 저장하는 컨트롤러에서 유일 제약 위반은 "닉네임 중복"으로 알려 준다.
+// 나머지 오류는 전체 예외 처리(CookieExceptionHandler)가 맡는다
+@Order(Ordered.HIGHEST_PRECEDENCE)
+@RestControllerAdvice(assignableTypes = {AuthController.class, OAuthController.class, RankController.class, LoungeController.class})
 public class NicknameErrors {
-    @ExceptionHandler(ResponseStatusException.class)
-    public ResponseEntity<?> status(ResponseStatusException e) {
-        return ResponseEntity.status(e.getStatusCode()).body(Map.of("error",e.getReason()==null?"요청을 처리하지 못했습니다.":e.getReason()));
-    }
     @ExceptionHandler(DataIntegrityViolationException.class)
-    public ResponseEntity<?> duplicate(DataIntegrityViolationException e) {
-        return ResponseEntity.status(409).body(Map.of("error","이미 사용 중인 닉네임입니다. 다른 이름을 사용해 주세요."));
+    public ResponseEntity<ErrorResponse> duplicate(DataIntegrityViolationException e) {
+        CookieErrorCode code = CookieErrorCode.NICKNAME_DUPLICATED;
+        return ResponseEntity.status(code.status()).body(ErrorResponse.of(code));
     }
 }

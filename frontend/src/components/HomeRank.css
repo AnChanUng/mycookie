@@ -18,10 +18,8 @@
 .hr-step.me { outline: 2px solid var(--ds-brand); outline-offset: -2px; }
 .hr-step .tier-badge { width: 40px; height: 40px; }
 .hr-step.p1 .tier-badge { width: 52px; height: 52px; }
-.hr-medal { position: absolute; top: -10px; display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; color: #fff; font-size: 12px; font-weight: 800; box-shadow: 0 0 0 2px var(--ds-surface); }
-.p1 .hr-medal { background: #d9a227; }
-.p2 .hr-medal { background: #8b98a8; }
-.p3 .hr-medal { background: #b8733f; }
+/* 시상대 위 순위 배지: 1위 금, 2위 은, 3위 동 색 숫자(RankMedal) */
+.hr-medal.rank-medal { position: absolute; top: -12px; box-shadow: 0 0 0 2px var(--ds-surface), inset 0 -2px 0 rgb(0 0 0 / .18); }
 .hr-pname { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--ds-fs-small); }
 .hr-pcount { font-size: var(--ds-fs-caption); color: var(--ds-text-2); font-variant-numeric: tabular-nums; }
 

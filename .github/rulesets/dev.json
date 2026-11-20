@@ -26,7 +26,8 @@
         "required_status_checks": [
           { "context": "백엔드 테스트" },
           { "context": "화면 린트, 빌드, 데이터 검사" },
-          { "context": "위험도 검사" }
+          { "context": "위험도 검사" },
+          { "context": "PR 규칙 검사" }
         ]
       }
     }

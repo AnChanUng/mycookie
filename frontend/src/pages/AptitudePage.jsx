@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { COMPANIES, allQuestions, companyPath } from '../data/examQuestions';
+import TrackIntro from '../components/TrackIntro';
 
 // 기업별 인적성검사 문제은행. 기업마다 큰 카드 하나씩 보여 준다
 const BANKS = COMPANIES.filter(c => c.category === 'aptitude' && c.ready);
@@ -61,6 +62,8 @@ export default function AptitudePage() {
           <div className="ssafy-stat"><b>GSAT</b><span>삼성</span></div>
         </div>
       </section>
+
+      <TrackIntro track="aptitude" />
 
       <div className="apt-areas">
         {AREAS.map(a => (

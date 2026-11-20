@@ -48,8 +48,10 @@ public class SecurityRequestFilter extends OncePerRequestFilter {
         boolean admin=path.startsWith("/api/v1/admin/") || path.equals("/api/v1/admin")
                 || path.startsWith("/api/v1/slack/") || path.equals("/api/v1/sync")
                 || mutation && (path.matches("/api/v1/questions(?:/[^/]+)?/?") || path.matches("/api/v1/categories/?"));
+        // 관리자 계정 생성과 권한 부여는 홈서버의 관리자 키로만(로그인한 관리자도 인터넷에서는 못 한다)
+        boolean keyOnly=path.startsWith("/api/v1/admin/accounts") || path.startsWith("/api/v1/admin/roles");
         if (admin) {
-            try { admins.require(request.getHeader("X-Admin-Key")); }
+            try { if (keyOnly) admins.requireKey(request.getHeader("X-Admin-Key")); else admins.require(request.getHeader("X-Admin-Key"),request); }
             catch (ResponseStatusException ex) {
                 deny(request,response,ip,"ADMIN_DENIED",ex.getStatusCode().value(),decision.count(),ex.getReason());return;
             }

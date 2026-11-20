@@ -163,15 +163,16 @@ sudo -u devcookie /srv/devcookie/app/deploy/homeserver/deploy.sh
 
 # 5분마다 master · dev에 새 커밋이 있는지 보고 바뀐 쪽만 다시 배포
 # 매일 새벽 4시 DB 백업
+# 1분마다 상태 확인: 3분 넘게 응답이 없으면 Mattermost 긴급 알림(Gemini 요약), 되살아나면 복구 알림
 sudo cp /srv/devcookie/app/deploy/homeserver/systemd/devcookie-*.{service,timer} /etc/systemd/system/
 sudo systemctl daemon-reload
-sudo systemctl enable --now devcookie-deploy.timer devcookie-backup.timer
+sudo systemctl enable --now devcookie-deploy.timer devcookie-backup.timer devcookie-health.timer
 ```
 
 확인:
 
 ```bash
-docker ps                                                   # 6개 컨테이너가 Up (healthy)
+docker ps                                                   # 8개 컨테이너가 Up (healthy)
 curl -s https://staging.mycookie.dev/api/v1/categories | head -c 200
 sudo -u devcookie /srv/devcookie/app/deploy/homeserver/backup.sh   # 백업이 만들어지는지 한 번 확인
 ```
@@ -220,3 +221,31 @@ sudo -u devcookie /srv/devcookie/app/deploy/homeserver/backup.sh   # 백업이 �
 - DB도 노트북에 있으므로 **외장 디스크 백업이 유일한 안전장치**입니다. 한 달에 한 번 `restore.sh`로 스테이징에 되살려 백업이 정말 쓸 수 있는지 확인합니다.
 - 정전 · 공유기 재부팅 · 노트북 고장 동안은 사이트가 멈춥니다. 집 인터넷 업로드 속도와 통신사 약관(가정용 회선의 서버 운영 제한)도 한 번 확인해 두세요.
 - RAG 스택(ChromaDB · 임베딩 · 재정렬 모델)은 RAM 8GB에서 백엔드 두 개와 함께 돌리기 어려워 넣지 않았습니다.
+
+## 관리자 계정과 권한
+
+비공개 페이지는 로그인한 계정의 권한으로 막습니다(주소를 숨기는 방식이 아님).
+
+| 권한 | 들어갈 수 있는 곳 | 줄 계정 |
+| --- | --- | --- |
+| `ADMIN` | `/admin` 관리자 모니터링, 관리자 API | admin1, admin2 |
+| `OWNER` | `/private/chanung` 찬웅 전용 페이지 | 찬웅 계정 |
+| `TEAM` | `/private/bomin` 온보딩, 개발 일지 | 보민, 찬웅, admin1, admin2 |
+
+- `admin`, `관리자`, `운영자`로 시작하는 닉네임은 일반 가입과 닉네임 변경에서 막혀 있어, 다른 사람이 먼저 가져갈 수 없습니다.
+- 관리자 계정 생성과 권한 부여는 **홈서버의 관리자 키로만** 됩니다(인터넷 쪽 화면에는 없음). 관리자 비밀번호는 12자 이상이고 아이디를 포함하면 안 됩니다.
+
+```bash
+cd /srv/devcookie/app/deploy/homeserver
+sudo ./account.sh create admin1 ADMIN,TEAM   # 비밀번호는 화면에 안 보이게 두 번 입력
+sudo ./account.sh create admin2 ADMIN,TEAM
+sudo ./account.sh grant <찬웅 닉네임> OWNER
+sudo ./account.sh grant <찬웅 닉네임> TEAM
+sudo ./account.sh grant <보민 닉네임> TEAM
+sudo ./account.sh list                       # 확인
+sudo ./account.sh --staging create admin1 ADMIN,TEAM   # 스테이징은 DB와 계정이 따로라 따로 만든다
+```
+
+## 로그 보기
+
+운영, 스테이징 로그는 Grafana에서 봅니다. 띄우는 법과 접속, 계정은 [monitoring.md](monitoring.md)를 참고하세요.

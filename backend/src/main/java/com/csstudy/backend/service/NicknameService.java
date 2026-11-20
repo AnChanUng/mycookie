@@ -20,6 +20,14 @@ public class NicknameService {
     private final TierAwardService tierAwards;
     public record Changed(Long userId) {}
     public static String key(String name) { return java.text.Normalizer.normalize(name,java.text.Normalizer.Form.NFKC).replaceAll("\\s+"," ").trim().toLowerCase(Locale.ROOT); }
+    // 관리용 이름(admin…, 관리자, 운영자)은 일반 가입, 닉네임 변경, 방문자 이름으로 쓸 수 없다(관리자 계정은 홈서버에서만 만든다)
+    public static boolean isReserved(String name) {
+        String k = key(name == null ? "" : name).replace(" ", "");
+        return k.startsWith("admin") || k.startsWith("관리자") || k.startsWith("운영자");
+    }
+    private static void rejectReserved(String name) {
+        if (isReserved(name)) throw new com.csstudy.backend.exception.CookieException(com.csstudy.backend.exception.CookieErrorCode.NICKNAME_RESERVED);
+    }
     public static String validate(String name) {
         String clean=name==null?"":name.replaceAll("[\\p{Cntrl}<>]","").replaceAll("\\s+"," ").trim();
         if(clean.isBlank() || clean.length()>20) throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"닉네임은 1~20자로 입력해 주세요.");
@@ -28,16 +36,26 @@ public class NicknameService {
     @Transactional
     public User register(String name,String password,UserTier base,String visitorId) {
         String clean=validate(name);
+        rejectReserved(clean);
         User user=users.saveAndFlush(User.builder().nickname(clean).password(password).baseTier(base).build());
         claim(clean,"u:"+user.getId(),visitorId);
         cohort.attachVisitorAccount(visitorId,user.getId());
         tierAwards.attachVisitorAccount(visitorId,user.getId());
         return user;
     }
+    /** 관리자 계정 전용(RoleService). 예약된 이름도 쓸 수 있다 */
+    @Transactional
+    public User registerReserved(String name,String password) {
+        String clean=validate(name);
+        User user=users.saveAndFlush(User.builder().nickname(clean).password(password).baseTier(UserTier.BRONZE).build());
+        claim(clean,"u:"+user.getId(),null);
+        return user;
+    }
     @Transactional
     public User rename(User existing,String name,String visitorId) {
         User user=users.findForUpdate(existing.getId()).orElseThrow();
         String clean=validate(name),owner="u:"+user.getId(),old=user.getNickname();
+        if(!key(clean).equals(key(old))) rejectReserved(clean);
         claim(clean,owner,visitorId);
         user.setNickname(clean);users.saveAndFlush(user);
         release(old,clean,owner);
@@ -51,6 +69,7 @@ public class NicknameService {
     }
     @Transactional
     public void visitor(String visitorId,String name,Long userId) {
+        rejectReserved(name);
         String owner=userId==null?"v:"+visitorId:"u:"+userId;
         String old=profiles.findByVisitorId(visitorId).map(VisitorProfile::getNickname).orElse(null);
         claim(name,owner,visitorId);release(old,name,owner);

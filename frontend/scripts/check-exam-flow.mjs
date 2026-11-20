@@ -86,12 +86,11 @@ try {
  assert.equal(stored().history[0].score,0);assert.equal(stored().history[0].total,2);
  assert.equal(stored().stats.pa41.last,'w');assert.equal(localStorage.getItem('exam-resume:pearl'),null);
  await act(()=>view.unmount());
- // Category routing renders the new bank and correct entry URL.
+ // 서비스기업 분류는 기업별 목록에서 숨겼으므로 /exam으로 돌려보낸다(문제집은 /exam/pearl로 바로 열 수 있다).
  const {default:ExamList}=await server.ssrLoadModule('/src/pages/ExamListPage.jsx');
  const {Routes,Route}=await import('react-router-dom');
- await act(()=>{view=TestRenderer.create(React.createElement(MemoryRouter,{initialEntries:['/exam/category/tech']},React.createElement(Routes,null,React.createElement(Route,{path:'/exam/category/:category',element:React.createElement(ExamList)}))));});
- assert.ok(text(view.toJSON()).includes(bank.name));
- assert.ok(view.root.findAllByType('a').some(a=>a.props.href==='/exam/pearl'));
+ await act(()=>{view=TestRenderer.create(React.createElement(MemoryRouter,{initialEntries:['/exam/category/tech']},React.createElement(Routes,null,React.createElement(Route,{path:'/exam/category/:category',element:React.createElement(ExamList)}),React.createElement(Route,{path:'/exam',element:'exam-home'}))));});
+ assert.equal(text(view.toJSON()),'exam-home');
  await act(()=>view.unmount());
  // Review states: right, wrong, unanswered for all 50 questions.
  for(const q of bank.questions) for(const a of [undefined,q.kind?'r':q.a,q.kind?'w':(q.a+1)%5]) {
@@ -106,12 +105,14 @@ try {
  await click(view.root.findByType('button'));
  let opts=view.root.findAllByType('button').filter(b=>(b.props.className||'').includes('exam-opt'));
  assert.ok(opts.length>=4);await click(opts[0]);
- assert.ok(text(view.toJSON()).includes('풀이 과정 · 헷갈리기 쉬운 점'));
+ // 해설은 항상 보이고, 상세 해설은 있는 문제만 붙는다(상세 해설이 없는 문제은행도 있다)
+ const similarEx=view.root.findByProps({className:'exam-similar-ex'});
+ assert.ok(text(similarEx).trim().length>10,'similar question shows its explanation');
  if(button('하나 더')) {await click(button('하나 더'));opts=view.root.findAllByType('button').filter(b=>(b.props.className||'').includes('exam-opt'));assert.ok(opts.every(b=>!b.props.disabled));}
  await act(()=>view.unmount());view=null;
  assert.ok(requests.every(url=>url==='/track'),'Unexpected backend API invocation');
  assert.deepEqual(errors,[],'React errors');
- console.log('Interaction tests passed: 50 answers, resume, result/25 wrong retry, deferred exam scoring, timeout/unanswered, bookmarks, category routing, 150 review states, similar-question retry. Live network disabled.');
+ console.log('Interaction tests passed: 50 answers, resume, result/25 wrong retry, deferred exam scoring, timeout/unanswered, bookmarks, hidden service category redirect, 150 review states, similar-question retry. Live network disabled.');
 } finally {
  if(view)await act(()=>view.unmount());
  await server.close();console.error=originalError;

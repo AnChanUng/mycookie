@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { account } from '../sync';
+import { STUDY_PATH } from '../data/trackIntros';
 import './Landing.css';
 
 // 리뉴얼 홈. 큰 문구로 시작해 스크롤하면 기능을 하나씩 소개한다(토스 스타일).
@@ -140,11 +141,11 @@ function Visual({ kind }) {
 
 export default function Landing() {
   const ref = useReveal();
-  // 메뉴의 "만든 이야기"(/intro#story)로 오면 그 이야기로 바로 내려간다
+  // 메뉴의 "만든 이야기"(#story), "만든 사람들"(#team), "공부하는 법"(#how)으로 오면 그 구역으로 바로 내려간다
   const { hash, key } = useLocation();
   useEffect(() => {
-    if (hash !== "#story") return;
-    const id = requestAnimationFrame(() => document.getElementById("story")?.scrollIntoView({ block: "start" }));
+    if (!["#story", "#team", "#how"].includes(hash)) return;
+    const id = requestAnimationFrame(() => document.getElementById(hash.slice(1))?.scrollIntoView({ block: "start" }));
     return () => cancelAnimationFrame(id);
   }, [hash, key]);
   const signedIn = !!account()?.token;
@@ -195,6 +196,44 @@ export default function Landing() {
             <li data-reveal><b>하나는 깊게</b><span>내가 고른 분야는 면접에서 막히지 않을 만큼</span></li>
             <li data-reveal><b>매일 조금씩</b><span>하루 한 문제라도 꾸준히 쌓기</span></li>
           </ul>
+        </div>
+      </section>
+
+      {/* 만든 사람들: SSAFY에서 시작해 개인 사이트에서 팀으로 */}
+      <section id="team" className="l-story l-team" aria-labelledby="l-team-title">
+        <div className="l-wrap l-story-wrap">
+          <p className="l-eyebrow" data-reveal>만든 사람들</p>
+          <h2 id="l-team-title" data-reveal>SSAFY에서<br />시작한 팀이에요</h2>
+          <div className="l-story-body">
+            <p data-reveal>
+              나의쿠키는 <b>삼성 청년 SW·AI 아카데미(SSAFY)</b>에서 시작했어요.
+              처음에는 전공시험을 준비하면서 <b>친한 형과 같이 공부하려고 만든 개인 사이트</b>였어요.
+            </p>
+            <p data-reveal>
+              그러다 반 친구들에게도 공유하게 되었고, 우리 서비스를 더 잘 만들어 줄 <b>멋진 팀원</b>을 만나
+              지금은 <b>2명이 함께 개발</b>하고 있어요.
+            </p>
+          </div>
+          <ul className="l-story-points">
+            <li data-reveal><b>둘이 공부하던 사이트</b><span>전공시험 준비를 친한 형과 함께</span></li>
+            <li data-reveal><b>우리 반에 공유</b><span>SSAFY 16기 대전 4반 친구들이 첫 사용자로</span></li>
+            <li data-reveal><b>2인 개발팀</b><span>서비스를 더 잘 만들어 줄 팀원과 함께</span></li>
+          </ul>
+        </div>
+      </section>
+
+      {/* 공부하는 법: 사이트 전체를 어떤 순서로 쓰면 좋은지(메뉴마다의 본질은 각 메뉴 첫 화면의 TrackIntro) */}
+      <section id="how" className="l-story l-how" aria-labelledby="l-how-title">
+        <div className="l-wrap l-story-wrap">
+          <p className="l-eyebrow" data-reveal>공부하는 법</p>
+          <h2 id="l-how-title" data-reveal>나의쿠키,<br />이렇게 공부하세요</h2>
+          <p className="l-how-lead" data-reveal>처음이라 어디서부터 할지 모르겠다면 이 순서를 따라 해 보세요. 메뉴마다 첫 화면에 그 분야를 왜, 어떻게 공부하면 좋은지도 적어 두었어요.</p>
+          <ol className="l-how-steps">
+            {STUDY_PATH.map((step, i) => <li key={step.title} data-reveal>
+              <span className="l-how-no" aria-hidden="true">{i + 1}</span>
+              <div><b>{step.title}</b><p>{step.body}</p><Link to={step.to} className="l-link">바로 가기 <span aria-hidden="true">→</span></Link></div>
+            </li>)}
+          </ol>
         </div>
       </section>
 

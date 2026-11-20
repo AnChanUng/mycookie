@@ -43,6 +43,7 @@ const ExamListPage = lazy(() => import('./pages/ExamListPage'));
 const ExamCompanyPage = lazy(() => import('./pages/ExamCompanyPage'));
 const PrivateChanungPage = lazy(() => import('./pages/PrivateChanungPage'));
 const PrivateRedirect = lazy(() => import('./pages/PrivateRedirect'));
+const AdminRoute = lazy(() => import('./pages/AdminRoute'));
 const TopicPage = lazy(() => import('./pages/TopicPage'));
 const AlgoPage = lazy(() => import('./pages/AlgoPage'));
 const DuelPage = lazy(() => import('./pages/DuelPage'));
@@ -75,7 +76,8 @@ function App() {
         </Route>
         <Route path="private/chanung" element={<PrivateRedirect />} />
         <Route path="private/chanung/:id" element={<PrivateRedirect />} />
-        <Route path="admin/cu" element={<Navigate to="/private/chanung/admin" replace />} />
+        <Route path="admin/cu" element={<Navigate to="/admin" replace />} />
+        <Route path="admin" element={<RenewalShell />}><Route index element={<AdminRoute />} /></Route>
         {/* 리뉴얼 기간에도 패치노트 · 약관은 공개한다 */}
         <Route element={<RenewalShell footer />}>
           <Route path="changelog" element={<ChangelogPage />} />
@@ -145,8 +147,8 @@ function App() {
           <Route path="aptitude/:company" element={<ExamCompanyPage />} />
           <Route path="computer-general" element={<Navigate to="/private/chanung" replace />} />
           {/* 관리자: 들어오는 주소는 /private/chanung, 화면 안에서는 메뉴 이름이 안 보이는 주소(privatePath.js) */}
-          {/* 신규 개발자 안내: 들어오는 주소는 /private/bomin, 화면에서는 알아보기 어려운 주소 */}
-          <Route path="private/bomin" element={<Navigate to="/x/f9aa1502c8" replace />} />
+          {/* 신규 개발자 안내: 들어오는 주소는 /private/bomin(개발 일지가 먼저), 화면에서는 알아보기 어려운 주소 */}
+          <Route path="private/bomin" element={<Navigate to="/x/f9aa1502c8/log" replace />} />
           <Route path="x/f9aa1502c8" element={<OnboardingPage />} />
           <Route path="private/bomin/log" element={<Navigate to="/x/f9aa1502c8/log" replace />} />
           <Route path="x/f9aa1502c8/log" element={<DevLogPage />} />
@@ -164,7 +166,9 @@ function App() {
           <Route path="ncs" element={<NcsPage />} />
           <Route path="search" element={<SearchPage />} />
           <Route path="weak" element={<WeakPage />} />
-          <Route path="admin/cu" element={<Navigate to="/private/chanung/admin" replace />} />
+          <Route path="admin/cu" element={<Navigate to="/admin" replace />} />
+          {/* 관리자 모니터링: ADMIN 권한 계정으로 로그인해야 열린다 */}
+          <Route path="admin" element={<AdminRoute />} />
           <Route path="changelog" element={<ChangelogPage />} />
           <Route path="terms" element={<LegalPage kind="terms" />} />
           <Route path="privacy" element={<LegalPage kind="privacy" />} />

@@ -81,14 +81,15 @@ CS 전공지식, 기술면접, 코딩테스트, 실전 대결, 학습 기록을 
 | [클라우드에서 홈서버로](docs/homeserver.md) | Vercel, Render, Neon에서 노트북 홈서버로 옮긴 과정(DB 이전, 터널 전환, 백업) |
 | [대결 동시성](docs/duel-concurrency.md) | 두 사람이 동시에 답을 낼 때 점수가 꼬이지 않게 처리 |
 | [커넥션 풀](docs/hikaricp-pool.md) | 부하 테스트로 HikariCP 풀 크기 정하기 |
+| [모니터링](docs/monitoring.md) | Grafana, Loki, Prometheus로 로그와 서버 상태 보기(개인정보 가림, 팀원 보기 전용 계정) |
 | [보안 설계](docs/security.md) | 비밀번호 재설정 메일 인증, 요청 제한, 크롤링 대응, 보안 헤더 |
 | [검색 노출](docs/seo.md) | SPA를 미리 렌더링해 검색엔진에 노출 |
 
 ## 개발 흐름
 
 1. 작업마다 GitHub 이슈를 한글로 등록합니다(기능, 버그 템플릿).
-2. `feature/*`, `fix/*` 브랜치에서 작업하고, 이슈를 연결한 PR을 `dev`로 올립니다.
-3. PR마다 **GitHub Actions**가 백엔드 테스트, 화면 린트와 빌드, 데이터 검사를 실행합니다.
+2. 최신 `dev`에서 `feature/*`, `fix/*` 같은 브랜치를 따서 작업하고, 이슈를 연결한 PR을 `dev`로 올립니다. 커밋과 PR 제목은 `타입: 요약`(Conventional Commits), 본문은 PR 양식을 따르고, 리뷰어는 자동으로 요청됩니다([CONTRIBUTING.md](CONTRIBUTING.md)).
+3. PR마다 **GitHub Actions**가 백엔드 테스트, 화면 린트와 빌드, 데이터 검사, 위험도 판정, PR 규칙(제목, 브랜치) 검사를 실행합니다.
 4. `dev`에 병합되면 스테이징(staging.mycookie.dev)에 자동 배포되어 확인합니다.
 5. `dev` → `master` PR로 운영에 배포하고, 바뀐 내용은 [패치노트](https://mycookie.dev/changelog)와 GitHub Release(`vX.Y.Z` 태그)에 기록합니다.
 

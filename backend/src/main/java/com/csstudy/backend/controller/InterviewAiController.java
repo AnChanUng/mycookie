@@ -27,7 +27,4 @@ public class InterviewAiController {
     @PostMapping("/grade") public Map<String, Object> grade(@RequestBody GradeRequest body, HttpServletRequest request) {
         return ai.grade(auth.requireUser(request).getId(), body.questionId(), body.transcript());
     }
-    @ExceptionHandler(ResponseStatusException.class) public ResponseEntity<?> failure(ResponseStatusException ex) {
-        return ResponseEntity.status(ex.getStatusCode()).body(Map.of("error", ex.getReason() == null ? "요청 처리에 실패했습니다." : ex.getReason()));
-    }
 }

@@ -1,3 +1,5 @@
 .rank-welcome { position: fixed; right: 16px; bottom: 20px; z-index: 1200; width: min(360px, calc(100vw - 32px)); display: grid; gap: 8px; pointer-events: none; }
 .rank-welcome-item { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border: 1px solid #c7d2fe; border-radius: 12px; background: #eef2ff; color: #312e81; box-shadow: 0 4px 20px #0002; font-size: 13px; pointer-events: auto; overflow-wrap: anywhere; }
 .rank-welcome-item button { margin-left: auto; border: 0; background: transparent; color: inherit; font-size: 22px; cursor: pointer; padding: 4px; }
+.rank-welcome-text { display: inline-flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.rank-welcome-text .rank-medal { width: 20px; height: 20px; font-size: 11px; }

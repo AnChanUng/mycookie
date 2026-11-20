@@ -1,0 +1,33 @@
+/* 메뉴 첫 화면의 "이 메뉴의 본질" 안내: 얇은 테두리 + 옅은 브랜드 배경 */
+.track-intro {
+  margin: 0 0 var(--ds-s6, 24px);
+  padding: 20px 22px;
+  border: 1px solid var(--ds-line-strong);
+  border-radius: var(--ds-r-xl, 14px);
+  background: var(--ds-brand-soft);
+}
+.track-intro.closed { padding-bottom: 16px; }
+.track-intro-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.track-intro-eyebrow { margin: 0; font-size: 13px; font-weight: 700; color: var(--ds-brand); }
+.track-intro-toggle {
+  padding: 4px 10px; border: 1px solid var(--ds-line-strong); border-radius: 999px;
+  background: var(--ds-surface); color: var(--ds-text-2); font: inherit; font-size: 13px; cursor: pointer;
+}
+.track-intro-toggle:hover { border-color: var(--ds-brand); color: var(--ds-brand); }
+.track-intro-title { margin: 6px 0 0; font-size: 20px; line-height: 1.4; letter-spacing: -0.02em; word-break: keep-all; }
+.track-intro-essence { margin: 10px 0 0; font-size: 15px; line-height: 1.75; color: var(--ds-text-2); word-break: keep-all; }
+.track-intro-label { margin: 16px 0 8px; font-size: 13px; font-weight: 700; color: var(--ds-text-3); }
+.track-intro-steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.track-intro-steps li { display: flex; gap: 10px; align-items: flex-start; font-size: 15px; line-height: 1.6; word-break: keep-all; }
+.track-intro-steps a { color: var(--ds-text); text-decoration: none; }
+.track-intro-steps a:hover { color: var(--ds-brand); text-decoration: underline; }
+.track-intro-no {
+  flex: none; display: grid; place-items: center; width: 22px; height: 22px; margin-top: 1px;
+  border-radius: 50%; background: var(--ds-brand); color: #fff; font-size: 12px; font-weight: 800;
+}
+.track-intro-all { display: inline-block; margin-top: 14px; font-size: 14px; font-weight: 600; color: var(--ds-brand); text-decoration: none; }
+.track-intro-all:hover { text-decoration: underline; }
+@media (max-width: 640px) {
+  .track-intro { padding: 16px; }
+  .track-intro-title { font-size: 18px; }
+}

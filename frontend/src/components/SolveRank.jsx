@@ -6,10 +6,10 @@ import { NICKNAME_MAX, cleanNickname, saveNickname, savedNickname } from '../nic
 import { BANKS, PRIVATE_BANK_KEYS } from '../data/examQuestions';
 import { syncAllProgress } from '../hooks/useExamProgress';
 import { account, onAccountChange } from '../sync';
-import TierBadge from './TierBadge';
+import TierBadge, { CookieIcon } from './TierBadge';
+import RankMedal from './RankMedal';
 import TierGuide from './TierGuide';
 
-const MEDALS = ['🥇', '🥈', '🥉'];
 const MAX_RETRIES = 10;
 const RETRY_DELAY_MS = 5000;
 const identitySnapshot = () => `${account()?.token || ''}:${account()?.nickname || ''}`;
@@ -136,7 +136,7 @@ function SolveRankContent({ cacheKey }) {
   return (
     <aside className="solve-rank">
       <div className="solve-rank-head">
-        <div className="solve-rank-title"><h2><button className="solve-rank-toggle" type="button" aria-expanded={expanded} aria-controls="solve-rank-results" onClick={() => setExpanded(value => !value)}>🏆 {expanded ? '전체 순위' : '순위'} <small>{expanded ? '접기 ↑' : '전체 보기 ↓'}</small></button></h2><TierGuide /></div>
+        <div className="solve-rank-title"><h2><button className="solve-rank-toggle" type="button" aria-expanded={expanded} aria-controls="solve-rank-results" onClick={() => setExpanded(value => !value)}><span className="solve-rank-icon"><CookieIcon tier="GOLD" /></span> {expanded ? '전체 순위' : '순위'} <small>{expanded ? '접기 ↑' : '전체 보기 ↓'}</small></button></h2><TierGuide /></div>
         {rank && Number.isFinite(rank.totalSolved) && <p className="solve-rank-total" aria-label={`전체 총 ${rank.totalSolved.toLocaleString()}문제 풀이 완료`}>전체 <strong>{rank.totalSolved.toLocaleString()}</strong>문제</p>}
       </div>
 
@@ -148,7 +148,7 @@ function SolveRankContent({ cacheKey }) {
         <ol className="solve-rank-list">
           {rows.map(r => (
             <li key={r.rank} className={r.me ? 'me' : ''}>
-              <span className="solve-rank-no">{MEDALS[r.rank - 1] || r.rank}</span>
+              <span className="solve-rank-no"><RankMedal rank={r.rank} /></span>
               <span className="solve-rank-name"><span className="solve-rank-nickname" title={r.nickname}>{r.nickname}</span><TierBadge tier={r.tier} division={r.division} />{r.me && <em>나</em>}</span>
               <span className="solve-rank-count">{r.count.toLocaleString()}문제</span>
             </li>

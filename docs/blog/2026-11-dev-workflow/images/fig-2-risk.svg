@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1360 530" width="1360" height="530" font-family="Pretendard, sans-serif">
+<defs>
+  <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="context-stroke"/></marker>
+  <filter id="sh" x="-20%" y="-20%" width="140%" height="150%"><feDropShadow dx="0" dy="2" stdDeviation="2.5" flood-color="#0F172A" flood-opacity=".08"/></filter>
+</defs>
+<rect width="1360" height="530" fill="#FFFFFF"/>
+<g transform="translate(0,-20)">
+<rect x="66" y="236" width="68" height="68" rx="14" fill="#fff" stroke="#E2E8F0" stroke-width="1.5" filter="url(#sh)"/>
+<g transform="translate(82.0 252.0) scale(1.5)"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="#181717"/></g>
+<text x="100" y="326" font-size="14" font-weight="700" fill="#1E293B" text-anchor="middle">PR</text>
+<rect x="236" y="236" width="68" height="68" rx="14" fill="#fff" stroke="#E2E8F0" stroke-width="1.5" filter="url(#sh)"/>
+<g transform="translate(252.0 252.0) scale(1.5)" fill="none" stroke="#334155" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5c0 4.5-3 8.2-7 10-4-1.8-7-5.5-7-10V6z"/><path d="M9 12l2 2 4-4"/></g>
+<text x="270" y="326" font-size="14" font-weight="700" fill="#1E293B" text-anchor="middle">위험도 검사</text>
+<text x="270" y="360" font-size="12" font-weight="600" fill="#64748B" text-anchor="middle">바뀐 파일 경로로 판정</text>
+<polyline points="136,270 234,270" fill="none" stroke="#64748B" stroke-width="1.8" marker-end="url(#ah)"/>
+<rect x="420" y="90" width="420" height="76" rx="10" fill="#fff" stroke="#E2E8F0" stroke-width="1.5" filter="url(#sh)"/>
+<rect x="420" y="90" width="8" height="76" rx="4" fill="#16A34A"/>
+<text x="444" y="122.0" font-size="15" font-weight="700" fill="#1E293B" text-anchor="start">낮음</text>
+<text x="444" y="143.0" font-size="13" font-weight="500" fill="#64748B" text-anchor="start">문서, 문제 데이터, 테스트</text>
+<rect x="940" y="90" width="380" height="76" rx="10" fill="#fff" stroke="#E2E8F0" stroke-width="1.5" filter="url(#sh)"/>
+<rect x="940" y="90" width="8" height="76" rx="4" fill="#16A34A"/>
+<text x="964" y="133.0" font-size="15" font-weight="700" fill="#1E293B" text-anchor="start">CI 통과하면 자동 병합</text>
+<polyline points="306,270 370,270 370,128 418,128" fill="none" stroke="#94A3B8" stroke-width="1.8" marker-end="url(#ah)"/>
+<polyline points="842,128 938,128" fill="none" stroke="#64748B" stroke-width="1.8" marker-end="url(#ah)"/>
+<rect x="420" y="200" width="420" height="76" rx="10" fill="#fff" stroke="#E2E8F0" stroke-width="1.5" filter="url(#sh)"/>
+<rect x="420" y="200" width="8" height="76" rx="4" fill="#CA8A04"/>
+<text x="444" y="232.0" font-size="15" font-weight="700" fill="#1E293B" text-anchor="start">중간</text>
+<text x="444" y="253.0" font-size="13" font-weight="500" fill="#64748B" text-anchor="start">그 외 백엔드, 화면 코드</text>
+<rect x="940" y="200" width="380" height="76" rx="10" fill="#fff" stroke="#E2E8F0" stroke-width="1.5" filter="url(#sh)"/>
+<rect x="940" y="200" width="8" height="76" rx="4" fill="#CA8A04"/>
+<text x="964" y="232.0" font-size="15" font-weight="700" fill="#1E293B" text-anchor="start">관리자 승인</text>
+<text x="964" y="253.0" font-size="13" font-weight="500" fill="#64748B" text-anchor="start">관리자가 올린 PR은 바로 병합 가능</text>
+<polyline points="306,270 370,270 370,238 418,238" fill="none" stroke="#94A3B8" stroke-width="1.8" marker-end="url(#ah)"/>
+<polyline points="842,238 938,238" fill="none" stroke="#64748B" stroke-width="1.8" marker-end="url(#ah)"/>
+<rect x="420" y="310" width="420" height="76" rx="10" fill="#fff" stroke="#E2E8F0" stroke-width="1.5" filter="url(#sh)"/>
+<rect x="420" y="310" width="8" height="76" rx="4" fill="#DC2626"/>
+<text x="444" y="342.0" font-size="15" font-weight="700" fill="#1E293B" text-anchor="start">높음</text>
+<text x="444" y="363.0" font-size="13" font-weight="500" fill="#64748B" text-anchor="start">로그인, 보안, 결제, DB 엔티티, 설정, 배포, CI</text>
+<rect x="940" y="310" width="380" height="76" rx="10" fill="#fff" stroke="#E2E8F0" stroke-width="1.5" filter="url(#sh)"/>
+<rect x="940" y="310" width="8" height="76" rx="4" fill="#DC2626"/>
+<text x="964" y="342.0" font-size="15" font-weight="700" fill="#1E293B" text-anchor="start">작성자가 아닌 1명 승인</text>
+<text x="964" y="363.0" font-size="13" font-weight="500" fill="#64748B" text-anchor="start">승인이 들어오면 검사가 다시 돌아 통과</text>
+<polyline points="306,270 370,270 370,348 418,348" fill="none" stroke="#94A3B8" stroke-width="1.8" marker-end="url(#ah)"/>
+<polyline points="842,348 938,348" fill="none" stroke="#64748B" stroke-width="1.8" marker-end="url(#ah)"/>
+<rect x="420" y="420" width="420" height="76" rx="10" fill="#fff" stroke="#E2E8F0" stroke-width="1.5" filter="url(#sh)"/>
+<rect x="420" y="420" width="8" height="76" rx="4" fill="#475569"/>
+<text x="444" y="452.0" font-size="15" font-weight="700" fill="#1E293B" text-anchor="start">운영</text>
+<text x="444" y="473.0" font-size="13" font-weight="500" fill="#64748B" text-anchor="start">dev → master</text>
+<rect x="940" y="420" width="380" height="76" rx="10" fill="#fff" stroke="#E2E8F0" stroke-width="1.5" filter="url(#sh)"/>
+<rect x="940" y="420" width="8" height="76" rx="4" fill="#475569"/>
+<text x="964" y="452.0" font-size="15" font-weight="700" fill="#1E293B" text-anchor="start">관리자만 병합</text>
+<text x="964" y="473.0" font-size="13" font-weight="500" fill="#64748B" text-anchor="start">브랜치 규칙의 업데이트 제한</text>
+<polyline points="306,270 370,270 370,458 418,458" fill="none" stroke="#94A3B8" stroke-width="1.8" marker-end="url(#ah)"/>
+<polyline points="842,458 938,458" fill="none" stroke="#64748B" stroke-width="1.8" marker-end="url(#ah)"/>
+</g>
+</svg>

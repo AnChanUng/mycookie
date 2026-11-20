@@ -1,12 +1,14 @@
-# 새 PR과 이슈의 담당자(Assignees)에 저장소 주인을 자동으로 넣는다.
+# 새 PR과 이슈의 담당자(Assignees)에 저장소 주인을 자동으로 넣고, PR에는 리뷰어를 자동으로 요청한다.
 # 사이트 제보로 백엔드가 만든 이슈도 포함된다(제보용 토큰으로 만든 이슈도 이 이벤트를 일으킨다).
-name: 담당자 자동 지정
+# 리뷰어는 REVIEWERS에 적은 사람 모두다. GitHub은 작성자 본인을 리뷰어로 둘 수 없어서 작성자만 빼고 요청한다
+# (찬웅님 PR → 보민님, 보민님 PR → 찬웅님, 그 밖의 사람 PR → 두 사람 모두).
+name: 담당자, 리뷰어 자동 지정
 
 on:
   issues:
     types: [opened, reopened]
   pull_request:
-    types: [opened, reopened]
+    types: [opened, reopened, ready_for_review]
 
 permissions:
   issues: write
@@ -27,3 +29,21 @@ jobs:
           # 이슈와 PR은 같은 번호 체계라 issues API 하나로 둘 다 지정된다
           gh api -X POST "repos/$REPO/issues/$NUMBER/assignees" -f "assignees[]=$OWNER" --silent \
             || echo "::warning::담당자를 지정하지 못했어요(포크 PR이면 권한이 없어 건너뜁니다)"
+
+      - name: 리뷰어 요청
+        if: github.event_name == 'pull_request' && !github.event.pull_request.draft
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          NUMBER: ${{ github.event.pull_request.number }}
+          AUTHOR: ${{ github.event.pull_request.user.login }}
+          # 찬웅(AnChanUng), 보민(hiu001045). 팀원이 바뀌면 여기만 고친다
+          REVIEWERS: AnChanUng hiu001045
+        run: |
+          args=()
+          for r in $REVIEWERS; do
+            [ "${r,,}" = "${AUTHOR,,}" ] || args+=(-f "reviewers[]=$r")
+          done
+          [ ${#args[@]} -gt 0 ] || exit 0
+          gh api -X POST "repos/$REPO/pulls/$NUMBER/requested_reviewers" "${args[@]}" --silent \
+            || echo "::warning::리뷰어를 요청하지 못했어요(저장소 쓰기 권한이 없는 사람이거나 포크 PR)"

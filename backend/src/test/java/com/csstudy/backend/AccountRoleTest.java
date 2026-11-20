@@ -1,0 +1,106 @@
+package com.csstudy.backend;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
+
+import java.util.List;
+import java.util.Map;
+
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.not;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+// 관리자 계정과 권한: 예약 이름, 키로만 만드는 관리자 계정, 비밀번호 규칙, 관리자 로그인으로 관리자 API 열기
+@SpringBootTest(properties = "app.admin-key=test-admin-key-0123456789abcdef-xyz")
+@AutoConfigureMockMvc
+@ActiveProfiles("test")
+class AccountRoleTest {
+
+    static final String KEY = "test-admin-key-0123456789abcdef-xyz";
+    @Autowired MockMvc mvc;
+    @Autowired ObjectMapper json;
+
+    private ResultActions postJson(String path, Object body, String key, String token) throws Exception {
+        var req = post(path).contentType(MediaType.APPLICATION_JSON).content(json.writeValueAsString(body));
+        if (key != null) req.header("X-Admin-Key", key);
+        if (token != null) req.header("Authorization", "Bearer " + token);
+        return mvc.perform(req);
+    }
+
+    private String login(String nickname, String password) throws Exception {
+        return json.readTree(postJson("/api/v1/auth/login", Map.of("nickname", nickname, "password", password), null, null)
+                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString()).get("token").asText();
+    }
+
+    private String register(String nickname) throws Exception {
+        return json.readTree(postJson("/api/v1/auth/register", Map.of("nickname", nickname, "password", "test-password"), null, null)
+                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString()).get("token").asText();
+    }
+
+    @Test
+    void reservedNamesCannotBeTakenByNormalSignupOrRename() throws Exception {
+        for (String name : List.of("admin1", "Admin2", "ADMIN", "admin 3", "관리자", "운영자님")) {
+            postJson("/api/v1/auth/register", Map.of("nickname", name, "password", "test-password"), null, null)
+                    .andExpect(status().isBadRequest()).andExpect(jsonPath("$.code").value("NICKNAME_RESERVED"));
+        }
+        String token = register("평범한사용자");
+        mvc.perform(put("/api/v1/auth/nickname").header("Authorization", "Bearer " + token).contentType(MediaType.APPLICATION_JSON)
+                .content(json.writeValueAsString(Map.of("nickname", "admin1")))).andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("NICKNAME_RESERVED"));
+    }
+
+    @Test
+    void adminAccountsAreCreatedOnlyWithTheKeyAndAStrongPassword() throws Exception {
+        Map<String, Object> body = Map.of("nickname", "admin7", "password", "a-long-and-random-passphrase", "roles", List.of("ADMIN", "TEAM"));
+        // 키 없이, 틀린 키로, 로그인한 일반 사용자로는 만들 수 없다
+        postJson("/api/v1/admin/accounts", body, null, null).andExpect(status().isUnauthorized());
+        postJson("/api/v1/admin/accounts", body, "wrong-key-wrong-key-wrong-key-wrong", null).andExpect(status().isUnauthorized());
+        postJson("/api/v1/admin/accounts", body, null, register("키없는사용자")).andExpect(status().isUnauthorized());
+        // 약한 비밀번호(짧거나 아이디를 포함)는 거절
+        postJson("/api/v1/admin/accounts", Map.of("nickname", "admin8", "password", "short1!", "roles", "ADMIN"), KEY, null)
+                .andExpect(status().isBadRequest()).andExpect(jsonPath("$.code").value("WEAK_ADMIN_PASSWORD"));
+        postJson("/api/v1/admin/accounts", Map.of("nickname", "admin8", "password", "admin8admin8admin8", "roles", "ADMIN"), KEY, null)
+                .andExpect(status().isBadRequest()).andExpect(jsonPath("$.code").value("WEAK_ADMIN_PASSWORD"));
+        // 관리자 계정 이름은 admin으로 시작해야 한다
+        postJson("/api/v1/admin/accounts", Map.of("nickname", "그냥이름", "password", "a-long-and-random-passphrase", "roles", "ADMIN"), KEY, null)
+                .andExpect(status().isBadRequest());
+
+        postJson("/api/v1/admin/accounts", body, KEY, null).andExpect(status().isOk())
+                .andExpect(jsonPath("$.nickname").value("admin7")).andExpect(jsonPath("$.roles", hasItem("ADMIN")));
+        postJson("/api/v1/admin/accounts", body, KEY, null).andExpect(status().isConflict());
+
+        String admin = login("admin7", "a-long-and-random-passphrase");
+        mvc.perform(get("/api/v1/auth/me").header("Authorization", "Bearer " + admin)).andExpect(jsonPath("$.roles", hasItem("TEAM")));
+        // 관리자 로그인으로 관리자 API가 열리고, 일반 사용자는 막힌다
+        mvc.perform(get("/api/v1/admin/system").header("Authorization", "Bearer " + admin)).andExpect(status().isOk());
+        mvc.perform(get("/api/v1/admin/system").header("Authorization", "Bearer " + register("일반사용자2"))).andExpect(status().isUnauthorized());
+        // 관리자로 로그인해도 계정 생성과 권한 부여는 키 없이는 못 한다
+        postJson("/api/v1/admin/accounts", Map.of("nickname", "admin9", "password", "a-long-and-random-passphrase", "roles", "ADMIN"), null, admin)
+                .andExpect(status().isUnauthorized());
+        postJson("/api/v1/admin/roles", Map.of("nickname", "admin7", "role", "OWNER"), null, admin).andExpect(status().isUnauthorized());
+        // 키가 맞으면 여전히 관리자 API를 쓸 수 있다(홈서버 스크립트)
+        mvc.perform(get("/api/v1/admin/system").header("X-Admin-Key", KEY)).andExpect(status().isOk());
+    }
+
+    @Test
+    void rolesAreGrantedAndRevokedWithTheKey() throws Exception {
+        String token = register("권한받을사람");
+        mvc.perform(get("/api/v1/auth/me").header("Authorization", "Bearer " + token)).andExpect(jsonPath("$.roles").isEmpty());
+        postJson("/api/v1/admin/roles", Map.of("nickname", "권한받을사람", "role", "OWNER"), KEY, null)
+                .andExpect(status().isOk()).andExpect(jsonPath("$.roles", hasItem("OWNER")));
+        mvc.perform(get("/api/v1/auth/me").header("Authorization", "Bearer " + token)).andExpect(jsonPath("$.roles", hasItem("OWNER")));
+        postJson("/api/v1/admin/roles", Map.of("nickname", "권한받을사람", "role", "OWNER", "grant", false), KEY, null)
+                .andExpect(status().isOk()).andExpect(jsonPath("$.roles", not(hasItem("OWNER"))));
+        postJson("/api/v1/admin/roles", Map.of("nickname", "권한받을사람", "role", "KING"), KEY, null).andExpect(status().isBadRequest());
+        postJson("/api/v1/admin/roles", Map.of("nickname", "없는사람", "role", "TEAM"), KEY, null).andExpect(status().isNotFound());
+    }
+}

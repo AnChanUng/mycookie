@@ -37,3 +37,6 @@ export function useMembership(revision = 0) {
   }, [token, revision, version]);
   return state.token === token && state.revision === revision && state.version === version ? state : { loading: true, membership: null, error: false };
 }
+
+// "금 쿠키 Ⅲ" 같은 이름으로 등급 키(GOLD)를 찾는다(승급 알림처럼 이름만 받을 때)
+export const tierFromName = name => Object.keys(TIER_NAMES).find(key => String(name || '').startsWith(TIER_NAMES[key]));

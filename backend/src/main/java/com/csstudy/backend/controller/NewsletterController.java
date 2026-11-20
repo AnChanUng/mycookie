@@ -2,9 +2,7 @@ package com.csstudy.backend.controller;
 
 import com.csstudy.backend.service.NewsletterService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Map;
 
@@ -38,8 +36,4 @@ public class NewsletterController {
         return Map.of("ok", true);
     }
 
-    @ExceptionHandler(ResponseStatusException.class)
-    public ResponseEntity<?> error(ResponseStatusException e) {
-        return ResponseEntity.status(e.getStatusCode()).body(Map.of("error", e.getReason() == null ? "요청을 처리하지 못했습니다." : e.getReason()));
-    }
 }

@@ -2,6 +2,8 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import api from '../api';
 import { refreshMembership } from '../membership';
 import './PromotionAnnouncements.css';
+import { CookieIcon } from './TierBadge';
+import { tierFromName } from '../membership';
 
 const CONFETTI = Array.from({ length: 96 }, (_, i) => ({
   left: `${(i * 37) % 100}%`, delay: `${(i % 16) * -0.27}s`,
@@ -34,7 +36,7 @@ function Celebration({ notice, dismiss }) {
     <div className="promotion-halo" aria-hidden="true" />
     <section className="promotion-stage">
       <div className="promotion-eyebrow">A NEW LEVEL UNLOCKED</div>
-      <div className="promotion-medal" aria-hidden="true">🍪</div>
+      <div className="promotion-medal" aria-hidden="true"><CookieIcon tier={tierFromName(notice.tierName) || 'GOLD'} /></div>
       <h2 id="promotion-title">쿠키 티어 승급!</h2>
       <div className="promotion-tier">{notice.tierName}</div>
       <p id="promotion-description"><strong>{notice.nickname}</strong>님이 <strong>{notice.tierName}</strong>로 승급했습니다!</p>
