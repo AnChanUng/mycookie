@@ -72,7 +72,10 @@ function WebChannel({ user }) {
       {section.items.map(entry => <article key={entry.id} id={entry.id} className="notes-detail-card">
         <div className="notes-detail-top"><span>Q{numbers.get(entry.id)} <em className={`web-level-badge lv${levelOf(entry.id)}`}>Lv.{levelOf(entry.id)} {LEVELS[levelOf(entry.id) - 1].name}</em></span><label><input type="checkbox" aria-label={`${entry.title} 학습 완료`} checked={!!data[entry.id]?.done} disabled={disabled} onChange={() => toggle(entry.id)} /> 학습 완료</label></div>
         <h3 className="notes-question">{entry.question}</h3>
-        <NoteAnswer entry={entry} />
+        <details className="web-answer-toggle">
+          <summary>모범답안 보기</summary>
+          <NoteAnswer entry={entry} />
+        </details>
       </article>)}
     </section>)}
     </div>
