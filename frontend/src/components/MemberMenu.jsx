@@ -4,6 +4,7 @@ import { account, onAccountChange, signOut } from '../sync';
 import { onNicknameChange, savedNickname } from '../nickname';
 import { useMembership } from '../membership';
 import TierBadge from './TierBadge';
+import useRoles from '../useRoles';
 
 const snapshot = () => `${account()?.token || ''}:${account()?.nickname || ''}:${savedNickname()}`;
 const subscribe = listener => {
@@ -23,6 +24,8 @@ export default function MemberMenu() {
   const location = useLocation();
   const { membership, loading, error } = useMembership(`${identity}:${location.pathname}`);
   const signedIn = !!account()?.token;
+  const access = useRoles();
+  const showCareer = access.nickname === '쿠우키' && access.roles.includes('OWNER');
   const nickname = membership?.nickname || account()?.nickname || savedNickname() || '방문자';
   const [open, setOpen] = useState(false);
   const [learning, setLearning] = useState(null);
@@ -93,6 +96,7 @@ export default function MemberMenu() {
       {learning?.weak?.[0] && <p className="member-panel-weak">약한 주제: <b>{learning.weak[0].name}</b> {learning.weak[0].rate}%</p>}
 
       <nav className="member-panel-links">
+        {showCareer && <Link to="/private/chanung" role="menuitem" onClick={() => setOpen(false)}>[취업] 안찬웅<span aria-hidden="true">›</span></Link>}
         {LINKS.map(l => <Link key={l.to} to={l.to} role="menuitem" onClick={() => setOpen(false)}>{l.label}<span aria-hidden="true">›</span></Link>)}
       </nav>
 
