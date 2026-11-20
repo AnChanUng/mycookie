@@ -14,7 +14,7 @@ const OthersInterviews = lazy(() => import('./TechnicalInterviewPage'));
 const BASE = privatePath();
 
 export default function PrivateChanungPage() {
-  return <RoleGate role="OWNER" title="찬웅 전용 페이지"><PrivateChanung /></RoleGate>;
+  return <RoleGate role="OWNER" nickname="쿠우키" title="찬웅 전용 페이지"><PrivateChanung /></RoleGate>;
 }
 
 function PrivateChanung() {
@@ -210,9 +210,19 @@ function PrivateList({ data }) {
     <div className="fade-in">
       <div className="page-header">
         <Link to="/" className="back-link">← 홈으로</Link>
-        <h1>찬웅 전용 페이지</h1>
-        <p>개발 기록과 비공개 학습 자료를 모아 둔 곳입니다. 찬웅 계정만 볼 수 있습니다.</p>
+        <h1>[취업] 안찬웅</h1>
+        <p>면접 준비와 취업 관련 자료를 정리하는 개인 공간입니다.</p>
       </div>
+      <section style={{ marginTop: 24 }} aria-label="취업 준비">
+        <div className="section-title">취업 준비</div>
+        <div className="exam-company-grid">
+          <Link to="/chanung/deloitte" className="exam-company-card">
+            <span className="exam-company-abbr">면접</span>
+            <span className="exam-company-name">면접준비하기</span>
+            <span className="exam-company-meta">딜로이트 면접 예상질문 · 내 답변 · 녹음 연습</span>
+          </Link>
+        </div>
+      </section>
       <section style={{ marginTop: 24 }}>
         <div className="section-title">개발 기록</div>
         <div className="exam-company-grid">

@@ -3,10 +3,10 @@ import useRoles from '../useRoles';
 
 // 권한이 있는 계정에게만 children을 보여 준다(ADMIN: 관리자, OWNER: 찬웅 전용, TEAM: 신입 온보딩).
 // 화면만 가리는 것이고, 서버 API도 같은 권한으로 막는다
-export default function RoleGate({ role, title, children }) {
-  const { signedIn, loading, roles, error } = useRoles();
+export default function RoleGate({ role, nickname, title, children }) {
+  const { signedIn, loading, roles, nickname: verifiedNickname, error } = useRoles();
   const { pathname } = useLocation();
-  if (signedIn && !loading && roles.includes(role)) return children;
+  if (signedIn && !loading && roles.includes(role) && (!nickname || verifiedNickname === nickname)) return children;
   return <div className="fade-in role-gate">
     <div className="page-header">
       <Link to="/" className="back-link">← 홈으로</Link>

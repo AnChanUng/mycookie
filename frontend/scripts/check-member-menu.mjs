@@ -32,6 +32,10 @@ try {
     if (config.url === '/membership') data = checkingAccount
       ? { tier: 'GOLD', division: 2, nickname: guestName, solvedCount: 125, nextTier: 'GOLD', nextTierName: '금 쿠키 Ⅰ', nextThreshold: 200, remaining: 75 }
       : { tier: config.headers.Authorization ? 'GOLD' : 'SILVER', nickname: config.headers.Authorization ? JSON.parse(localStorage.getItem('sync:account')).nickname : guestName, solvedCount: 50 };
+    else if (config.url === '/auth/me') {
+      const user = JSON.parse(localStorage.getItem('sync:account') || 'null');
+      data = { nickname: user?.nickname, roles: user?.token === 'cookie-owner' ? ['OWNER'] : [] };
+    }
     else if (config.url === '/profile/badges') data = [{ name: '16기 대전 4반' }];
     else if (config.url === '/auth/nickname') data = { nickname: JSON.parse(config.data).nickname };
     else if (config.url === '/auth/password/forgot') { resetRequest = JSON.parse(config.data); data = { ok: true }; }
@@ -117,6 +121,18 @@ try {
   assert.ok(text(view.toJSON()).includes('누적 125문제'));
   assert.ok(text(view.root.findByProps({ 'aria-label': '내 교육생 배지' })).includes('16기 대전 4반'));
   assert.ok(text(view.toJSON()).includes('풀었던 문제'));
-  await unmount(); assert.deepEqual(errors, []);
+  await unmount();
+  const { default: Gate } = await server.ssrLoadModule('/src/components/RoleGate.jsx');
+  for (const [nickname, token, allowed] of [['쿠우키', 'cookie-owner', true], ['쿠우키', 'ordinary-user', false], ['다른계정', 'other-user', false], ['다른OWNER', 'cookie-owner', false]]) {
+    localStorage.setItem('sync:account', JSON.stringify({ id: token, token, nickname }));
+    await mount(Menu);
+    await act(() => view.root.findAllByType('button').find(b => b.props['aria-haspopup'] === 'menu').props.onClick());
+    assert.equal(view.root.findAll(n => n.props.role === 'menuitem' && n.props.to === '/private/chanung').length, allowed ? 1 : 0);
+    await unmount();
+    await mount(() => React.createElement(Gate, { role: 'OWNER', nickname: '쿠우키', title: '개인 공간' }, React.createElement('p', null, '개인 면접 자료')));
+    assert.equal(text(view.toJSON()).includes('개인 면접 자료'), allowed);
+    await unmount();
+  }
+  assert.deepEqual(errors, []);
   console.log('Member menu passed: nickname/tier, settings link, guest/member renames, account switching/offline state, logout, email password reset, five rank tiers, tier guide toggle/Escape/close. No live network.');
 } finally { if (view) await unmount(); await server.close(); console.error = originalError; }
