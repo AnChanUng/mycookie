@@ -4,6 +4,18 @@
 //   goals: { title, lead, list: [{ key, text, note }] }  우선순위를 직접 매겨 보는 목표 목록(순서는 그 기기에만 저장)
 export const DEV_LOG = [
   {
+    date: '2026-11-21',
+    day: 2,
+    title: '개발 2일차',
+    owner: '보민',
+    items: [
+      {
+        text: '학습 플랫폼에 맞는 신규 기능 하나',
+        note: '관심 있는 분야(예: AICE Associate, AWS)의 자료를 충분히 학습해 시험 문제를 출제합니다.',
+      },
+    ],
+  },
+  {
     date: '2026-11-20',
     day: 1,
     title: '개발 1일차',
@@ -17,7 +29,6 @@ export const DEV_LOG = [
         text: '필수 기능',
         sub: [
           { text: 'SSAFY 계정 소셜 로그인', note: '세션, JWT, Spring Security의 차이를 알아보며 OAuth를 공부합니다.' },
-          { text: '학습 플랫폼에 맞는 신규 기능 하나', note: '관심 있는 분야(예: AICE Associate, AWS)의 자료를 충분히 학습해 시험 문제를 출제합니다.' },
           { text: '유지보수와 신규 개발', note: '새로 들어오는 버그나 개발 건을 보고, 처리할 수 있는 것을 처리하고 정리합니다. 논의: 일감 관리에 Jira를 쓸 것인가?' },
         ],
       },
