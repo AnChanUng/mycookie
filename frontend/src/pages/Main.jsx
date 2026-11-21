@@ -6,6 +6,7 @@ import { useMembership, TIER_NAMES } from '../membership';
 import { factForDay, koreanDay } from '../data/todayCs';
 import TierBadge from '../components/TierBadge';
 import LineIcon from '../components/LineIcon';
+import StudyCoachEntry from '../components/StudyCoachEntry';
 import HomeRank from '../components/HomeRank';
 import { quoteForVisit, rememberQuote } from '../data/quotes';
 import './Main.css';
@@ -146,6 +147,8 @@ export default function Main() {
           <LineIcon name="chevron" size={18} className="mn-chev" />
         </Link>}
       </section>
+
+      <StudyCoachEntry />
 
       {/* 오늘의 학습: 쓰임새를 다시 정할 때까지 숨겨 둔다(SHOW_TODAY_STUDY) */}
       {SHOW_TODAY_STUDY && <Section id="mn-today" title="오늘의 학습">
