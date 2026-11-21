@@ -144,10 +144,8 @@ function DevLog() {
     <div className="ob">
       <header className="ob-hero ob-hero--slim">
         <OnboardingTabs />
-        <p className="ob-eyebrow">나의쿠키</p>
-        <h1>개발 일지</h1>
-        <p className="ob-lead">Grafana (서버 상태 및 로그): https://grafana.mycookie.dev</p>
-        <p className="ob-lead">홈서버 ssh@ip</p>
+        <p className="ob-lead">Grafana: https://grafana.mycookie.dev</p>
+        <p className="ob-lead">홈서버: ssh@ip</p>
       </header>
 
       <div className="dl">
