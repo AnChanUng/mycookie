@@ -4,6 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "check:study-coach": "node --import ./scripts/extensionless-loader.mjs scripts/check-study-coach.mjs",
     "check:feedback": "node --import ./scripts/extensionless-loader.mjs scripts/check-feedback.mjs",
     "check:interview-audio": "node scripts/check-interview-audio.mjs",
     "check:chanung": "node scripts/check-chanung.mjs",

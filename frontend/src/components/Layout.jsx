@@ -18,6 +18,7 @@ const SHOW_CHAOS_CHAT = false;
 // 주 메뉴. 하위 화면에 있어도 해당 메뉴가 켜져 보이게 경로 묶음으로 판단한다
 const startsWithAny = (p, list) => list.some(x => p === x || p.startsWith(x + '/'));
 const NAV = [
+  { to: '/study-coach', label: 'AI 학습 코치', match: p => startsWithAny(p, ['/study-coach']) },
   { to: '/cs', label: '컴퓨터공학', match: p => startsWithAny(p, ['/cs', '/notes', '/category', '/question', '/search', '/interview', '/technical-interview']) },
   { to: '/web', label: '웹 개발', match: p => startsWithAny(p, ['/web', '/web-essentials', '/tech-blogs']) },
   { to: '/ai', label: 'AI', match: p => startsWithAny(p, ['/ai']) },

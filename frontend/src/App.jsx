@@ -38,6 +38,7 @@ const TierShopPage = lazy(() => import('./pages/TierShopPage'));
 const PaymentResultPage = lazy(() => import('./pages/PaymentResultPage'));
 const RankPage = lazy(() => import('./pages/RankPage'));
 const TechBlogsPage = lazy(() => import('./pages/TechBlogsPage'));
+const StudyCoachPage = lazy(() => import('./pages/StudyCoachPage'));
 const CertificationsPage = lazy(() => import('./pages/CertificationsPage'));
 const MajorPage = lazy(() => import('./pages/MajorPage'));
 const MajorExamPage = lazy(() => import('./pages/MajorExamPage'));
@@ -95,6 +96,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Layout />}>
           <Route index element={<Main />} />
+          <Route path="study-coach" element={<StudyCoachPage />} />
           <Route path="intro" element={<Landing />} />
           <Route path="all" element={<Home />} />
           <Route path="category/:slug" element={<CategoryPage />} />

@@ -1,0 +1,32 @@
+import assert from 'node:assert/strict';
+import { TOPICS } from '../src/data/topicBank.js';
+import { makePlan, SCOPES, today, readPlan, storePlan, taskDone } from '../src/studyCoach.js';
+const mem = new Map();
+globalThis.localStorage = { getItem: k => mem.get(k), setItem: (k, v) => mem.set(k, v) };
+for (const exam of Object.keys(SCOPES)) for (const minutes of [15, 30, 45, 60, 90, 120, 180]) {
+  const p = makePlan({ exam, minutes, date: today(), weak: [] }, TOPICS.questions);
+  assert.equal(p.tasks.reduce((n, t) => n + t.minutes, 0), minutes);
+  assert(p.tasks.every(t => SCOPES[exam].includes(t.subject) && t.ids.length >= 2));
+  assert(p.tasks.flatMap(t => t.ids).every(id => TOPICS.questions.some(q => q.id === id)));
+  assert.equal(new Set(p.tasks.flatMap(t => t.ids)).size, p.tasks.flatMap(t => t.ids).length);
+}
+const form = { exam: 'backend', minutes: 30, date: today(), weak: ['db'] };
+const db = TOPICS.questions.find(q => q.sec === 'db');
+const stats = { [db.id]: { c: 0, w: 4, last: 'w', at: Date.now() } };
+const plan = makePlan(form, TOPICS.questions, stats);
+assert.equal(plan.tasks[0].subject, 'db');
+assert.equal(plan.tasks[0].ids[0], db.id);
+assert.equal(taskDone(plan.tasks[0]), false);
+assert.equal(taskDone({ ...plan.tasks[0], answers: plan.tasks[0].ids.map(id => ({ id })), reviewed: true }), true);
+assert.throws(() => makePlan({ ...form, date: 'bad' }, TOPICS.questions));
+assert.throws(() => makePlan({ ...form, minutes: 0 }, TOPICS.questions));
+assert.throws(() => makePlan({ ...form, date: '2000-01-01' }, TOPICS.questions));
+assert.throws(() => makePlan({ ...form, exam: 'fake' }, TOPICS.questions));
+storePlan({ id: 1 }, plan);
+assert.deepEqual(readPlan({ id: 1 }), plan);
+assert.equal(readPlan({ id: 2 }), null);
+assert.equal(readPlan(null), null);
+const ai = makePlan(form, TOPICS.questions, {}, { subjects: SCOPES.backend, summary: '기본 개념을 복습하세요.' });
+assert.equal(ai.source, 'ai');
+assert.equal(plan.source, 'basic');
+console.log('Study coach: scope, time budget, weak subjects, question IDs, completion, invalid input and account isolation passed.');
