@@ -222,7 +222,7 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* 공부하는 법: 사이트 전체를 어떤 순서로 쓰면 좋은지(메뉴마다의 본질은 각 메뉴 첫 화면의 TrackIntro) */}
+      {/* 공부하는 법: 사이트 전체를 어떤 순서로 쓰면 좋은지*/}
       <section id="how" className="l-story l-how" aria-labelledby="l-how-title">
         <div className="l-wrap l-story-wrap">
           <p className="l-eyebrow" data-reveal>공부하는 법</p>

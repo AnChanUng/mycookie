@@ -1,12 +1,11 @@
 import { Link } from 'react-router-dom';
-import TrackIntro from '../components/TrackIntro';
 
 // 웹 개발 공부 첫 화면. 분야(백엔드 · 웹 기본기)별로 문제집과 정리 글을 고른다
 const GROUPS = [
   {
     title: '백엔드',
     items: [
-      { to: '/web/spring-practice', t: 'Spring 핵심 실전', d: 'IoC·DI · Boot · AOP · MVC · MyBatis · Security', m: '새 문제집 · 4지선다 40문제 · 정답과 해설' },
+      { to: '/web/spring-practice', t: 'Spring 핵심 실전', d: 'IoC·DI · Boot · AOP · MVC · MyBatis · Security', m: '4지선다 53문제 · 정답과 해설' },
       { to: '/web/spring', t: 'Spring · JPA', d: '스프링 코어 · 웹 MVC · JPA · 부트', m: '60문제 · 풀이 기록 저장' },
       { to: '/ssafy/ssafydb', t: 'DB · Servlet · JSP', d: 'SQL · 트랜잭션 · 정규화 · 인덱스 · Servlet 생명주기', m: '30문제 · 정답과 해설' },
     ],
@@ -27,7 +26,6 @@ export default function WebPage() {
       <h1>웹 개발</h1>
       <p>백엔드 문제풀이와 웹 필수지식을 한곳에서 공부하세요.</p>
     </div>
-    <TrackIntro track="web" />
     {GROUPS.map(g => <section key={g.title} className="web-group" aria-label={g.title}>
       <h2 className="web-group-title">{g.title}</h2>
       <div className="exam-sections">

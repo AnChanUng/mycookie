@@ -179,7 +179,7 @@ export function CompanyExamWithProgress({ company, back, progress, initialIds })
 
   const recordPractice = (qid, correct) => save(prev => ({ ...prev, stats: recordAnswer(prev.stats, qid, correct) }));
 
-  const header = (title, links = true) => (
+  const header = (title, links = true, sub = '') => (
     <div className="page-header exam-page-header">
       <Link to={back.to} className="back-link">{back.label}</Link>
       {links && (
@@ -207,7 +207,7 @@ export function CompanyExamWithProgress({ company, back, progress, initialIds })
         </div>
       )}
       <h1>{title}</h1>
-      {account()
+      {sub ? <p className="exam-sub">{sub}</p> : account()
         ? <div className="exam-sync cloud"><i />{account().nickname} 계정에 동기화됨 · 다른 기기에서도 같은 기록을 봅니다</div>
         : <div className="exam-sync local"><i />이 브라우저에 저장됨 · 기업별 기출문제 목록에서 로그인하면 다른 기기와 동기화됩니다</div>}
     </div>
@@ -319,7 +319,7 @@ export function CompanyExamWithProgress({ company, back, progress, initialIds })
 
   return (
     <div className="fade-in">
-      {header(company.name)}
+      {lean ? header(company.name, false, `${Q.length}문제 · 4지선다 · 정답과 해설`) : header(company.name)}
       {plan && (
         <div className="exam-plan">
           <b>{plan.name} {plan.left === 0 ? 'D-DAY' : `D-${plan.left}`}</b>
@@ -375,14 +375,19 @@ export function CompanyExamWithProgress({ company, back, progress, initialIds })
         </>
       )}
 
-      {setsBlock}
+      {lean ? (
+        <button type="button" className="exam-start" onClick={() => start('exam', examIds())}>
+          <span className="exam-start-text"><b>모의고사 시작</b><span>{examCount}문제 · 시간 제한 없음 · 한 번에 채점</span></span>
+          <span className="exam-start-go" aria-hidden="true">→</span>
+        </button>
+      ) : setsBlock}
 
-      <div className="exam-stats">
+      {!lean && <div className="exam-stats">
         <StatTile k="모의고사 응시" v={exams.length} unit="회" />
         <StatTile k="최고 점수" v={best?.score ?? '–'} of={best?.total ?? examCount} />
         <StatTile k="최근 점수" v={last?.score ?? '–'} of={last?.total ?? examCount} />
         <StatTile k="현재 오답" v={wrongIds.length} unit="문제" />
-      </div>
+      </div>}
 
       <div className={`exam-modes${lean ? ' compact' : ''}`}>
         <button className={`exam-mode wrong${wrongIds.length ? '' : ' empty'}`} disabled={!wrongIds.length} onClick={() => start('wrong', shuffle(wrongIds))}>

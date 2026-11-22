@@ -7,7 +7,6 @@ import { WEB_ESSENTIALS } from '../data/webEssentials';
 import TodayCs from '../components/TodayCs';
 import './MyLearning.css';
 import './CsHub.css';
-import TrackIntro from '../components/TrackIntro';
 
 // CS · 면접: 흩어져 있던 기술면접 · 전공노트 · 웹 필수지식 · 면접 연습을 한곳에서 고른다.
 // 진도는 각 화면이 쓰던 저장 위치를 그대로 읽기만 한다(저장 형식은 바꾸지 않음)
@@ -51,7 +50,6 @@ export default function CsHubPage() {
         <h1>면접에서 막힘없이<br />설명할 수 있게</h1>
         <p className="ml-sub">개념을 읽고, 내 말로 말해 보고, 꼬리질문까지. 오늘 할 것을 골라 보세요.</p>
       </header>
-      <TrackIntro track="cs" />
 
       <section className="cs-tracks" aria-label="학습 메뉴">
         {tracks.map(t => {
