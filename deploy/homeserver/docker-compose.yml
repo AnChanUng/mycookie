@@ -14,6 +14,8 @@ x-backend: &backend
   restart: unless-stopped
   # RAM 8GB 노트북에서 모두 함께 돌도록 컨테이너마다 메모리를 묶고, JVM 힙은 그 75%까지만 쓴다
   mem_limit: 1g
+  # 제출 코드 채점 프로세스가 권한을 다시 얻지 못하게 한다(이미지는 root가 아닌 app 사용자로 돈다)
+  security_opt: ["no-new-privileges:true"]
   depends_on:
     postgres:
       condition: service_healthy
@@ -27,6 +29,8 @@ x-backend: &backend
     SLACK_ENABLED: "false"
     TRUST_FORWARDED_FOR: "true"
     SPRING_JPA_SHOW_SQL: "false"
+    # 로그인 토큰 유효 기간(일). 지나면 다시 로그인해야 한다
+    TOKEN_MAX_AGE_DAYS: ${TOKEN_MAX_AGE_DAYS:-90}
     # 소셜 · 깃허브 로그인 키. 비어 있으면 그 로그인 버튼만 숨겨진다
     OAUTH_STATE_SECRET: ${OAUTH_STATE_SECRET:-}
     OAUTH_GOOGLE_CLIENT_ID: ${OAUTH_GOOGLE_CLIENT_ID:-}
