@@ -107,8 +107,17 @@ public class NewsletterService {
     public void unsubscribe(String key) {
         if (key == null || key.isBlank()) throw bad("수신 거부 링크가 올바르지 않습니다.");
         NewsletterSubscriber s = subscribers.findByUnsubscribeKey(key.trim()).orElseThrow(() -> bad("수신 거부 링크가 올바르지 않습니다."));
-        s.setStatus(Status.UNSUBSCRIBED);
-        s.setConfirmHash(null);
+        // 개인정보는 필요한 동안만: 수신 거부하면 이메일을 포함한 구독 기록을 바로 지운다
+        subscribers.delete(s);
+    }
+
+    // 확인 링크를 누르지 않은 신청(이메일 주소)은 링크가 만료되면 지운다. 매일 새벽에 정리
+    @Scheduled(cron = "0 40 4 * * *", zone = "Asia/Seoul")
+    @Transactional
+    public int purgeUnconfirmed() {
+        int removed = subscribers.deleteUnconfirmedBefore(LocalDateTime.now(SEOUL).minus(CONFIRM_TTL));
+        if (removed > 0) log.info("확인되지 않은 학습 메일 신청 {}건 삭제", removed);
+        return removed;
     }
 
     // 매일 아침 8시 30분(한국 시간). 야간(21시~8시) 발송은 별도 동의가 필요해 피한다

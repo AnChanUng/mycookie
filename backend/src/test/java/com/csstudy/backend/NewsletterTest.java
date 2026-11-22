@@ -164,6 +164,28 @@ class NewsletterTest {
     }
 
     @Test
+    void unsubscribingDeletesTheEmailAndUnconfirmedSignupsAreCleanedUp() throws Exception {
+        subscribed("bye@example.com");
+        String key = subscriber("bye@example.com").getUnsubscribeKey();
+        postJson("unsubscribe", Map.of("key", key)).andExpect(status().isOk());
+        assertThat(subscribers.findAll()).noneMatch(x -> x.getEmail().equals("bye@example.com"));
+        // 지운 뒤에도 다시 구독할 수 있다
+        subscribed("bye@example.com");
+        assertThat(subscriber("bye@example.com").getStatus()).isEqualTo(NewsletterSubscriber.Status.ACTIVE);
+
+        // 확인하지 않은 신청은 링크가 만료되면 지운다. 막 신청한 것과 구독 중인 사람은 남긴다
+        postJson("subscribe", Map.of("email", "fresh@example.com")).andExpect(status().isOk());
+        postJson("subscribe", Map.of("email", "stale@example.com")).andExpect(status().isOk());
+        NewsletterSubscriber stale = subscriber("stale@example.com");
+        stale.setConfirmSentAt(java.time.LocalDateTime.now().minusDays(3));
+        subscribers.save(stale);
+        newsletter.purgeUnconfirmed();
+        assertThat(subscribers.findAll()).noneMatch(x -> x.getEmail().equals("stale@example.com"));
+        assertThat(subscriber("fresh@example.com").getStatus()).isEqualTo(NewsletterSubscriber.Status.PENDING);
+        assertThat(subscriber("bye@example.com").getStatus()).isEqualTo(NewsletterSubscriber.Status.ACTIVE);
+    }
+
+    @Test
     void seedingTwiceKeepsOneRowPerDay() throws Exception {
         long before = dailySetRows.count();
         dailySets.seed();

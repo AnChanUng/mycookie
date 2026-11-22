@@ -41,7 +41,8 @@
     "check:cross-device-sync": "node scripts/check-cross-device-sync.mjs",
     "check:chanung-completion": "node scripts/check-chanung-completion.mjs",
     "check:onboarding-calendar": "node --import ./scripts/extensionless-loader.mjs scripts/check-onboarding-calendar.mjs",
-    "check:account-forms": "node --import ./scripts/extensionless-loader.mjs scripts/check-account-forms.mjs"
+    "check:account-forms": "node --import ./scripts/extensionless-loader.mjs scripts/check-account-forms.mjs",
+    "check:header-subscribe": "node --import ./scripts/extensionless-loader.mjs scripts/check-header-subscribe.mjs"
   },
   "dependencies": {
     "axios": "^1.14.0",
