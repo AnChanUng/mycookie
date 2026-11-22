@@ -21,9 +21,6 @@ const CODING_SITES = [
   { name: '코드트리', sub: '유형별 커리큘럼', href: 'https://www.codetree.ai/' },
   { name: '리트코드', sub: '해외 기업 대비', href: 'https://leetcode.com/problemset/' },
 ];
-const CS_STUDY = [
-  { to: '/notes', icon: 'book', name: '전공노트', sub: '운영체제 · 네트워크 · 데이터베이스' },
-];
 const AI_STUDY = [
   { to: '/ai', icon: 'brain', name: 'AI', sub: '딥러닝 · 머신러닝 · 빅데이터 AI' },
 ];
@@ -35,6 +32,7 @@ const WEB_STUDY = [
 const SHOW_TODAY_STUDY = false;
 const SHOW_COACH_ENTRY = false;
 const PRACTICE = [
+  { to: '/notes', icon: 'book', name: '전공노트', sub: '개념 정리 · 운영체제 · 네트워크 · 데이터베이스' },
   { to: '/exam', icon: 'building', name: '기업별 전공필기', sub: '금융공기업 · 공기업 전산직' },
   { to: '/topics', icon: 'puzzle', name: '주제별 통합 문제집', sub: '과목별로 모아 풀기' },
   { to: '/aptitude', icon: 'brain', name: 'NCS · 인적성', sub: '언어 · 수리 · 추리' },
@@ -179,10 +177,6 @@ export default function Main() {
         </div>
       </Section>}
 
-      <Section id="mn-cs" title="전공노트">
-        <div className="mn-cards mn-cards--single">{CS_STUDY.map(item => <Category key={item.to} {...item} />)}</div>
-      </Section>
-
       <Section id="mn-ai" title="AI">
         <div className="mn-cards mn-cards--single">{AI_STUDY.map(item => <Category key={item.to} {...item} />)}</div>
       </Section>
@@ -191,7 +185,7 @@ export default function Main() {
         <div className="mn-cards mn-cards--2">{WEB_STUDY.map(item => <Category key={item.to} {...item} />)}</div>
       </Section>
 
-      <Section id="mn-practice" title="전공필기" note={<>개념은 <Link to="/notes">전공노트</Link>에서 먼저 보세요</>} more={{ to: '/exam', label: '전체 보기' }}>
+      <Section id="mn-practice" title="전공필기" more={{ to: '/exam', label: '전체 보기' }}>
         <div className="mn-cards">{PRACTICE.map(item => <Category key={item.to} {...item} />)}</div>
       </Section>
 
