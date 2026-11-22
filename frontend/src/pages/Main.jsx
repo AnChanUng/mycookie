@@ -22,7 +22,7 @@ const CODING_SITES = [
   { name: '리트코드', sub: '해외 기업 대비', href: 'https://leetcode.com/problemset/' },
 ];
 const WEB_STUDY = [
-  { to: '/web-essentials', icon: 'globe', name: '웹 필수지식', sub: 'HTTP · 쿠키와 세션 · CORS' },
+  { to: '/web-essentials', icon: 'globe', name: '웹노트', sub: 'HTTP · 쿠키와 세션 · CORS' },
   { to: '/web', icon: 'code', name: '웹', sub: 'Spring · JPA · DB · Servlet' },
   // AI는 문제집을 다듬는 중이라 웹과 한 구역에 둔다(다듬은 뒤 과목별 카드로 나눠 따로 뺀다)
   { to: '/ai', icon: 'brain', name: 'AI', sub: '딥러닝 · 머신러닝 · 빅데이터 AI' },

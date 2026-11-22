@@ -13,7 +13,7 @@ const GROUPS = [
   {
     title: '웹 기본기',
     items: [
-      { to: '/web-essentials', t: '웹 필수지식', d: 'HTTP · 쿠키와 세션 · CORS · 인증 등 핵심 질문', m: '57문답' },
+      { to: '/web-essentials', t: '웹노트', d: 'HTTP · 쿠키와 세션 · CORS · 인증 등 핵심 질문', m: '57문답' },
       { to: '/tech-blogs', t: '기업 기술 블로그', d: '실무에서 쓰는 기술을 회사 블로그로 읽기' },
     ],
   },
