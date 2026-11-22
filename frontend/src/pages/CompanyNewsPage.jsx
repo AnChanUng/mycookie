@@ -84,7 +84,7 @@ export default function CompanyNewsPage() {
       {more.error && <p className="cn-state" role="alert">더 불러오지 못했어요. <button type="button" className="cn-retry" onClick={loadMore}>다시 시도</button></p>}
       {!loading && !error && hasMore && !more.error && <div className="cn-more"><button type="button" className="exam-btn" disabled={more.loading} onClick={loadMore}>{more.loading ? '불러오는 중…' : '더 보기'}</button></div>}
 
-      <p className="cn-note">글의 저작권은 각 회사에 있고, 나의쿠키는 제목과 짧은 요약만 보여 드려요.</p>
+      <p className="cn-note">글의 저작권은 각 회사에 있고, 나의쿠키는 제목과 짧은 요약만 보여 드려요. 각 회사와 제휴하거나 보증하는 관계가 아니며, 삭제를 원하시면 <Link to="/feedback">건의 · 제보</Link>로 알려 주세요.</p>
     </div>
   );
 }

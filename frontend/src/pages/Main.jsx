@@ -8,7 +8,6 @@ import TierBadge from '../components/TierBadge';
 import LineIcon from '../components/LineIcon';
 import StudyCoachEntry from '../components/StudyCoachEntry';
 import HomeRank from '../components/HomeRank';
-import CompanyNewsPreview from '../components/CompanyNewsPreview';
 import { quoteForVisit, rememberQuote } from '../data/quotes';
 import './Main.css';
 
@@ -22,15 +21,17 @@ const CODING_SITES = [
   { name: '코드트리', sub: '유형별 커리큘럼', href: 'https://www.codetree.ai/' },
   { name: '리트코드', sub: '해외 기업 대비', href: 'https://leetcode.com/problemset/' },
 ];
-// AI 과목 세 개. 모두 AI 화면(/ai)에서 과목을 골라 푼다
-const AI_STUDY = [
-  { to: '/ai', icon: 'brain', name: '딥러닝 기초', sub: '신경망 · 최적화 · Transformer' },
-  { to: '/ai', icon: 'chart', name: '머신러닝 · 모델링', sub: '회귀 · 분류 · 군집 · 평가 지표' },
-  { to: '/ai', icon: 'bolt', name: '빅데이터 · AI 실무', sub: '분석 기법 · 실무 적용' },
-];
 const WEB_STUDY = [
-  { to: '/web', icon: 'code', name: '웹', sub: 'Spring · JPA · DB · Servlet' },
   { to: '/web-essentials', icon: 'globe', name: '웹 필수지식', sub: 'HTTP · 쿠키와 세션 · CORS' },
+  { to: '/web', icon: 'code', name: '웹', sub: 'Spring · JPA · DB · Servlet' },
+  // AI는 문제집을 다듬는 중이라 웹과 한 구역에 둔다(다듬은 뒤 과목별 카드로 나눠 따로 뺀다)
+  { to: '/ai', icon: 'brain', name: 'AI', sub: '딥러닝 · 머신러닝 · 빅데이터 AI' },
+];
+// 취업 준비 카드(첫 화면 구역마다 카드가 3개 이상 되게 맞춘다)
+const CAREER_STUDY = [
+  { to: '/interview', icon: 'video', name: '면접 공통질문 연습', sub: '카메라로 실전처럼' },
+  { to: '/certifications', icon: 'book', name: '추천 자격증', sub: '개발 · 데이터 · AI · 클라우드' },
+  { to: '/news', icon: 'chart', name: '기업 소식', sub: '기술 블로그 · 뉴스룸 새 글' },
 ];
 // 오늘의 CS · 대결 · 이어서 하기 카드 묶음. 쓰임새를 다시 정할 때까지 숨긴다
 const SHOW_TODAY_STUDY = false;
@@ -181,12 +182,8 @@ export default function Main() {
         </div>
       </Section>}
 
-      <Section id="mn-ai" title="AI">
-        <div className="mn-cards">{AI_STUDY.map(item => <Category key={item.name} {...item} />)}</div>
-      </Section>
-
-      <Section id="mn-web" title="웹">
-        <div className="mn-cards mn-cards--2">{WEB_STUDY.map(item => <Category key={item.to} {...item} />)}</div>
+      <Section id="mn-web" title="웹 & AI">
+        <div className="mn-cards">{WEB_STUDY.map(item => <Category key={item.to} {...item} />)}</div>
       </Section>
 
       <Section id="mn-practice" title="전공필기" more={{ to: '/exam', label: '전체 보기' }}>
@@ -206,13 +203,9 @@ export default function Main() {
         </div>
       </Section>
 
-      <Section id="mn-interview" title="면접 연습">
-        <div className="mn-cards mn-cards--single">
-          <Category to="/interview" icon="video" name="면접 공통질문 연습" sub="카메라로 실전처럼" />
-        </div>
+      <Section id="mn-career" title="취업 준비">
+        <div className="mn-cards">{CAREER_STUDY.map(item => <Category key={item.to} {...item} />)}</div>
       </Section>
-
-      <CompanyNewsPreview />
 
     </div>
   );
