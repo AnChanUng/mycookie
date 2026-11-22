@@ -17,6 +17,7 @@
     "check:exam-flow": "node --import ./scripts/extensionless-loader.mjs scripts/check-exam-flow.mjs",
     "check:account-retry": "node --import ./scripts/extensionless-loader.mjs scripts/check-account-retry.mjs",
     "check:membership": "node --import ./scripts/extensionless-loader.mjs scripts/check-membership.mjs",
+    "check:company-news": "node --import ./scripts/extensionless-loader.mjs scripts/check-company-news.mjs",
     "check:member-menu": "node --import ./scripts/extensionless-loader.mjs scripts/check-member-menu.mjs",
     "check:lounge-chat": "node --import ./scripts/extensionless-loader.mjs scripts/check-lounge-chat.mjs",
     "check:pearl-answers": "node scripts/check-pearl-answers.mjs",

@@ -1,0 +1,33 @@
+.cn { max-width: 860px; margin: 0 auto; padding-bottom: 72px; }
+.cn-filter { display: flex; flex-wrap: wrap; gap: 8px; margin: 24px 0 8px; }
+.cn-filter button { padding: 7px 14px; border: 1px solid var(--ds-line-strong); border-radius: 999px; background: var(--ds-surface); color: var(--ds-text-2); font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; }
+.cn-filter button:hover { border-color: var(--ds-brand); color: var(--ds-text); }
+.cn-filter button.on { border-color: var(--ds-brand); background: var(--ds-brand-soft); color: var(--ds-brand); }
+.cn-filter button:focus-visible, .cn-retry:focus-visible { outline: 2px solid var(--ds-brand); outline-offset: 2px; }
+.cn-count { margin: 12px 0 0; font-size: 13px; color: var(--ds-text-3); }
+.cn-list { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 10px; }
+.cn-item { padding: 16px 18px; border: 1px solid var(--ds-line-strong); border-radius: 12px; background: var(--ds-surface); }
+.cn-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 13px; color: var(--ds-text-3); }
+.cn-company { padding: 2px 8px; border-radius: 6px; background: var(--ds-brand-soft); color: var(--ds-brand); font-weight: 700; }
+.cn-meta time { margin-left: auto; font-variant-numeric: tabular-nums; }
+.cn-title { display: block; margin-top: 8px; color: var(--ds-text); font-size: 17px; font-weight: 700; line-height: 1.5; letter-spacing: -0.02em; text-decoration: none; word-break: keep-all; }
+.cn-title:hover { color: var(--ds-brand); text-decoration: underline; text-underline-offset: 3px; }
+.cn-summary { margin: 6px 0 0; font-size: 14px; line-height: 1.65; color: var(--ds-text-2); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; word-break: keep-all; }
+.cn-state { margin: 24px 0; text-align: center; color: var(--ds-text-2); }
+.cn-retry { border: 0; background: none; color: var(--ds-brand); font: inherit; font-weight: 700; text-decoration: underline; cursor: pointer; }
+.cn-more { display: flex; justify-content: center; margin-top: 20px; }
+.cn-note { margin: 28px 0 0; font-size: 12px; color: var(--ds-text-3); text-align: center; }
+
+/* 첫 화면의 기업 소식 구역 */
+.cn-home { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.cn-home li a { display: flex; align-items: baseline; gap: 10px; padding: 12px 14px; border: 1px solid var(--ds-line-strong); border-radius: 10px; background: var(--ds-surface); color: var(--ds-text); text-decoration: none; }
+.cn-home li a:hover { border-color: var(--ds-brand); }
+.cn-home .cn-company { flex: none; font-size: 12px; }
+.cn-home .cn-home-title { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 15px; font-weight: 600; }
+.cn-home time { flex: none; margin-left: auto; font-size: 12px; color: var(--ds-text-3); font-variant-numeric: tabular-nums; }
+@media (max-width: 640px) {
+  .cn-item { padding: 14px; }
+  .cn-title { font-size: 16px; }
+  .cn-home li a { flex-wrap: wrap; }
+  .cn-home .cn-home-title { white-space: normal; flex-basis: 100%; order: 3; }
+}
