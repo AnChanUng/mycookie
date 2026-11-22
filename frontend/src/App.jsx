@@ -45,6 +45,7 @@ const MajorExamPage = lazy(() => import('./pages/MajorExamPage'));
 const ExamListPage = lazy(() => import('./pages/ExamListPage'));
 const ExamCompanyPage = lazy(() => import('./pages/ExamCompanyPage'));
 const PrivateChanungPage = lazy(() => import('./pages/PrivateChanungPage'));
+const PrivateBanksPage = lazy(() => import('./pages/PrivateBanksPage'));
 const PrivateRedirect = lazy(() => import('./pages/PrivateRedirect'));
 const AdminRoute = lazy(() => import('./pages/AdminRoute'));
 const TopicPage = lazy(() => import('./pages/TopicPage'));
@@ -159,6 +160,9 @@ function App() {
           <Route path="x/f9aa1502c8" element={<OnboardingPage />} />
           <Route path="private/bomin/log" element={<Navigate to="/x/f9aa1502c8/log" replace />} />
           <Route path="x/f9aa1502c8/log" element={<DevLogPage />} />
+          {/* 비공개 문제집: BANK 권한 + 다이아 쿠키 이상(찬웅은 OWNER로 열린다) */}
+          <Route path="private/banks" element={<PrivateBanksPage />} />
+          <Route path="private/banks/:id" element={<PrivateBanksPage />} />
           <Route path="x/c7e19b4f2d" element={<PrivateChanungPage />} />
           <Route path="x/c7e19b4f2d/:code" element={<PrivateChanungPage />} />
           <Route path="private/chanung" element={<PrivateRedirect />} />

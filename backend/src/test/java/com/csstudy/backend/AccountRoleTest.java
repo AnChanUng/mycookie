@@ -129,6 +129,22 @@ class AccountRoleTest {
     }
 
     @Test
+    void admin1To5StayOffTheBoardButCountInTotals() throws Exception {
+        ranks.profileChanged(null);
+        var before = json.readTree(mvc.perform(get("/api/v1/rank/solved")).andReturn().getResponse().getContentAsString());
+        postJson("/api/v1/admin/accounts", Map.of("nickname", "admin4", "password", "hidden-rank-pass", "roles", List.of("ADMIN")), KEY, null)
+                .andExpect(status().isOk());
+        mvc.perform(put("/api/v1/rank/solved").header("Authorization", "Bearer " + login("admin4", "hidden-rank-pass"))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json.writeValueAsString(Map.of("visitorId", "admin4-device", "count", 2900)))).andExpect(status().isOk());
+        // 문제 수가 가장 많아도 순위표와 내 순위에는 나오지 않고, 합계에만 더해진다
+        mvc.perform(get("/api/v1/rank/solved").param("all", "true").header("X-Visitor-Id", "admin4-device"))
+                .andExpect(jsonPath("$.top[*].nickname", not(hasItem("admin4"))))
+                .andExpect(jsonPath("$.me").isEmpty())
+                .andExpect(jsonPath("$.totalSolved").value(before.get("totalSolved").asLong() + 2900));
+    }
+
+    @Test
     void savedAccountProgressAppearsWithoutADeviceReport() throws Exception {
         String token = register("기기보고없는쿠키");
         var user = users.findByNickname("기기보고없는쿠키").orElseThrow();
