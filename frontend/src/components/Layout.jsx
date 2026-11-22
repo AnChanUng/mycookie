@@ -40,8 +40,6 @@ const APTITUDE_SITES = [
 
 // "소개"를 누르면 펼쳐지는 사이트 안내
 const ABOUT_LINKS = [
-  { to: '/intro#story', name: '만든 이야기' },
-  { to: '/intro#team', name: '만든 사람들' },
   { to: '/intro', name: '서비스 소개' },
   { to: '/intro#how', name: '공부하는 법' },
   { to: '/feedback', name: '건의 · 제보' },
