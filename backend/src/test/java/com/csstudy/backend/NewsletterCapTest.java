@@ -49,19 +49,23 @@ class NewsletterCapTest {
         return mvc.perform(post("/api/v1/newsletter/" + path).contentType(MediaType.APPLICATION_JSON).content(json.writeValueAsString(body)));
     }
 
-    private String tokenFor(String email) {
+    private String codeFor(String email) {
         ArgumentCaptor<String> body = ArgumentCaptor.forClass(String.class);
-        verify(mail, atLeastOnce()).send(eq(email), contains("구독을 확인"), body.capture());
-        Matcher m = Pattern.compile("token=([A-Za-z0-9_-]+)").matcher(body.getValue());
+        verify(mail, atLeastOnce()).send(eq(email), contains("인증 번호"), body.capture());
+        Matcher m = Pattern.compile("인증 번호: (\\d{6})").matcher(body.getValue());
         assertThat(m.find()).isTrue();
         return m.group(1);
+    }
+
+    private void verified(String email) throws Exception {
+        postJson("verify", Map.of("email", email, "code", codeFor(email))).andExpect(status().isOk());
     }
 
     @Test
     void newSignupsAreRefusedOnceSeatsAreTaken() throws Exception {
         for (String e : new String[]{"a@example.com", "b@example.com"}) {
             postJson("subscribe", Map.of("email", e)).andExpect(status().isOk());
-            postJson("confirm", Map.of("token", tokenFor(e))).andExpect(status().isOk());
+            verified(e);
         }
         // 세 번째 자리는 확인 대기도 자리를 차지한다
         postJson("subscribe", Map.of("email", "c@example.com")).andExpect(status().isOk());
@@ -77,7 +81,7 @@ class NewsletterCapTest {
         postJson("subscribe", Map.of("email", "c@example.com")).andExpect(status().isOk());
 
         // 확인을 마치면 정원이 다 찬다
-        postJson("confirm", Map.of("token", tokenFor("c@example.com"))).andExpect(status().isOk());
+        verified("c@example.com");
         assertThat(subscribers.countByStatus(NewsletterSubscriber.Status.ACTIVE)).isEqualTo(3);
         postJson("subscribe", Map.of("email", "d@example.com")).andExpect(status().isConflict());
     }
@@ -86,7 +90,7 @@ class NewsletterCapTest {
     void aSeatOpensUpWhenSomeoneUnsubscribes() throws Exception {
         for (String e : new String[]{"a@example.com", "b@example.com", "c@example.com"}) {
             postJson("subscribe", Map.of("email", e)).andExpect(status().isOk());
-            postJson("confirm", Map.of("token", tokenFor(e))).andExpect(status().isOk());
+            verified(e);
         }
         postJson("subscribe", Map.of("email", "d@example.com")).andExpect(status().isConflict());
         String key = subscribers.findAll().stream().filter(x -> x.getEmail().equals("a@example.com")).findFirst().orElseThrow().getUnsubscribeKey();
