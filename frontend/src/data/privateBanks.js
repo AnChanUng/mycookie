@@ -95,8 +95,7 @@ export const COMIL = {
 
 // 화면에서 묶어 보여 줄 순서
 export const PRIVATE_GROUPS = [
-  { key: 'recall', name: '복기 문제집', desc: '실제 응시 후기·복기 자료를 바탕으로 만든 문제집', banks: [...MOVED.filter(b => b.category !== 'major' && b.category !== 'monthly'), ...SPLIT_RECALL, HF_RECALL_BANK] },
-  { key: 'ssafy', name: 'SSAFY 복기', desc: 'SSAFY 과목평가 · 월말평가 복기', banks: MOVED.filter(b => b.category === 'major' || b.category === 'monthly') },
+  { key: 'recall', name: '복기 문제집', banks: [...MOVED.filter(b => b.category !== 'major' && b.category !== 'monthly'), ...SPLIT_RECALL, HF_RECALL_BANK] },
   { key: 'comil', name: '컴퓨터일반', desc: '전산직 9급 컴퓨터일반 모의고사 · 단원별 문제집', banks: [COMIL] },
 ];
 
