@@ -1,6 +1,5 @@
 import { Link, Navigate, useParams } from 'react-router-dom';
 import { COMPANIES, EXAM_CATEGORIES, SOURCE_KINDS, allQuestions, companyPath } from '../data/examQuestions';
-import ProgressBackup from '../components/ProgressBackup';
 import TrackIntro from '../components/TrackIntro';
 
 function summary(company) {
@@ -57,8 +56,6 @@ function CategoryPicker() {
           <span className="exam-category-count">스케줄링 · 페이지 교체 · 서브넷 등 19종</span>
         </Link>
       </div>
-
-      <ProgressBackup />
     </div>
   );
 }
