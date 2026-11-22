@@ -30,6 +30,7 @@ const StatsPage = lazy(() => import('./pages/StatsPage'));
 const CsHubPage = lazy(() => import('./pages/CsHubPage'));
 const InterviewPracticePage = lazy(() => import('./pages/InterviewPracticePage'));
 const CsNotesPage = lazy(() => import('./pages/CsNotesPage'));
+const CompanyNewsPage = lazy(() => import('./pages/CompanyNewsPage'));
 const WebEssentialsPage = lazy(() => import('./pages/WebEssentialsPage'));
 const WebPage = lazy(() => import('./pages/WebPage'));
 const AiPage = lazy(() => import('./pages/AiPage'));
@@ -130,6 +131,7 @@ function App() {
           </Route>
           <Route path="ai-interview" element={<Navigate to="/" replace />} />
           <Route path="notes" element={<CsNotesPage />} />
+          <Route path="news" element={<CompanyNewsPage />} />
           <Route path="web-essentials" element={<WebEssentialsPage />} />
           <Route path="notes/web-essentials" element={<WebEssentialsRedirect />} />
           <Route path="web" element={<WebPage />} />

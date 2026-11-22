@@ -82,6 +82,10 @@ app:
   blog:
     rss-url: ${BLOG_RSS_URL:https://cookie.tistory.com/rss}
     keywords: ${BLOG_KEYWORDS:나의쿠키,홈서버}
+  # 기업 소식(대기업 기술 블로그 · 뉴스룸 RSS). 일주일에 한 번 모아 최신순으로 보여 준다. 꺼져 있으면 외부 요청을 하지 않는다
+  news:
+    enabled: ${NEWS_ENABLED:false}
+    cron: ${NEWS_CRON:0 0 7 * * MON}
   # 메일 링크(비밀번호 재설정, 이메일 인증)가 가리키는 사이트 주소
   base-url: ${APP_BASE_URL:http://localhost:3000}
   # 장애·제보 운영 알림. 웹훅이 비어 있으면 꺼진다.

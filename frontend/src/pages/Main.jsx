@@ -8,6 +8,7 @@ import TierBadge from '../components/TierBadge';
 import LineIcon from '../components/LineIcon';
 import StudyCoachEntry from '../components/StudyCoachEntry';
 import HomeRank from '../components/HomeRank';
+import CompanyNewsPreview from '../components/CompanyNewsPreview';
 import { quoteForVisit, rememberQuote } from '../data/quotes';
 import './Main.css';
 
@@ -213,6 +214,8 @@ export default function Main() {
           <Category to="/interview" icon="video" name="면접 공통질문 연습" sub="카메라로 실전처럼" />
         </div>
       </Section>
+
+      <CompanyNewsPreview />
 
     </div>
   );
