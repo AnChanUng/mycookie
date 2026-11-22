@@ -24,8 +24,10 @@ const CODING_SITES = [
 const CS_STUDY = [
   { to: '/notes', icon: 'book', name: '전공노트', sub: '운영체제 · 네트워크 · 데이터베이스' },
 ];
-const DEV_STUDY = [
+const AI_STUDY = [
   { to: '/ai', icon: 'brain', name: 'AI', sub: '딥러닝 · 머신러닝 · 빅데이터 AI' },
+];
+const WEB_STUDY = [
   { to: '/web', icon: 'code', name: '웹', sub: 'Spring · JPA · DB · Servlet' },
   { to: '/web-essentials', icon: 'globe', name: '웹 필수지식', sub: 'HTTP · 쿠키와 세션 · CORS' },
 ];
@@ -177,16 +179,20 @@ export default function Main() {
         </div>
       </Section>}
 
-      <Section id="mn-dev" title="AI · 웹">
-        <div className="mn-cards">{DEV_STUDY.map(item => <Category key={item.to} {...item} />)}</div>
+      <Section id="mn-ai" title="AI">
+        <div className="mn-cards mn-cards--single">{AI_STUDY.map(item => <Category key={item.to} {...item} />)}</div>
       </Section>
 
-      <Section id="mn-cs" title="컴퓨터공학" more={{ to: '/cs', label: '전체 보기' }}>
-        <div className="mn-cards mn-cards--single">{CS_STUDY.map(item => <Category key={item.to} {...item} />)}</div>
+      <Section id="mn-web" title="웹">
+        <div className="mn-cards mn-cards--2">{WEB_STUDY.map(item => <Category key={item.to} {...item} />)}</div>
       </Section>
 
       <Section id="mn-practice" title="전공필기" more={{ to: '/exam', label: '전체 보기' }}>
         <div className="mn-cards">{PRACTICE.map(item => <Category key={item.to} {...item} />)}</div>
+      </Section>
+
+      <Section id="mn-cs" title="전공노트">
+        <div className="mn-cards mn-cards--single">{CS_STUDY.map(item => <Category key={item.to} {...item} />)}</div>
       </Section>
 
       <Section id="mn-coding" title="코딩테스트" note="외부 사이트로 새 탭에서 열려요">
