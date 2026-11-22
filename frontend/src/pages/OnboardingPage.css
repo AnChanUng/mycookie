@@ -170,3 +170,26 @@
 .bomin-work-grid article { padding: 20px; border: 1px solid var(--ds-line-strong); border-radius: 12px; background: var(--ds-surface); }
 .bomin-work-grid h3 { margin-top: 0; }
 @media (max-width: 760px) { .bomin-work-grid { grid-template-columns: 1fr; } }
+
+/* 개발 일지: 오른쪽에 작은 캘린더를 고정해 둔다(스크롤해도 따라온다) */
+.dl-layout { display: grid; grid-template-columns: minmax(0, 1fr) 264px; gap: 28px; max-width: 1240px; margin: 0 auto; align-items: start; }
+.dl-layout > .ob { max-width: none; margin: 0; }
+.dl-cal { position: sticky; top: 90px; margin-top: 48px; padding: 14px; border: 1px solid var(--ds-line-strong); border-radius: 12px; background: var(--ds-surface); }
+.dl-cal-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; font-size: 15px; }
+.dl-cal-nav button, .dl-cal-today { font: inherit; font-size: 13px; color: var(--ds-text); border: 1px solid var(--ds-line-strong); border-radius: 6px; padding: 3px 9px; background: var(--ds-surface); cursor: pointer; }
+.dl-cal-nav button:hover, .dl-cal-today:hover { border-color: var(--ds-brand); }
+.dl-cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; text-align: center; }
+.dl-cal-week { padding: 4px 0; font-size: 12px; font-weight: 600; color: var(--ds-text-3); }
+.dl-cal-day { display: flex; align-items: center; justify-content: center; position: relative; height: 32px; border: 0; border-radius: 8px; background: none; font: inherit; font-size: 13px; line-height: 1; color: var(--ds-text-3); font-variant-numeric: tabular-nums; }
+.dl-cal-day.has { color: var(--ds-text); font-weight: 700; cursor: pointer; }
+.dl-cal-day.has::after { content: ''; position: absolute; bottom: 4px; width: 4px; height: 4px; border-radius: 50%; background: var(--ds-brand); }
+.dl-cal-day.done::after { background: var(--ds-text-3); }
+.dl-cal-day.has:hover { background: var(--ds-surface-2); }
+.dl-cal-day.today { text-decoration: underline; text-underline-offset: 4px; }
+.dl-cal-day.on { background: var(--ds-brand-soft); color: var(--ds-brand); }
+.dl-cal button:focus-visible { outline: 2px solid var(--ds-brand); outline-offset: 2px; }
+.dl-cal-today { width: 100%; margin-top: 10px; }
+@media (max-width: 1100px) {
+  .dl-layout { grid-template-columns: minmax(0, 1fr); gap: 0; }
+  .dl-cal { position: static; order: -1; margin: 24px auto 0; width: min(100%, 320px); }
+}
