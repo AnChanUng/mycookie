@@ -423,6 +423,8 @@
   transition: var(--transition);
 }
 
+.exam-sections.wide { grid-template-columns: 1fr; margin-top: 4px; }
+
 /* 작은 문제집: 오답·북마크 버튼을 한 줄짜리로 줄인다 */
 .exam-modes.compact { gap: 8px; margin-bottom: 20px; }
 .exam-modes.compact .exam-mode { min-height: 0; flex-direction: row; align-items: center; gap: 10px; padding: 10px 14px; border-radius: var(--radius-md, 12px); box-shadow: none; }
