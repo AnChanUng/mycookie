@@ -27,7 +27,7 @@ export default function NewsletterSubscribe() {
   }
   return <form className="newsletter-subscribe" onSubmit={submit}>
     <h2>학습 메일 구독</h2>
-    <p>평일 아침 8시 30분, 웹 필수지식 한 주제를 꼼꼼한 정리와 꼬리질문까지 담아 보내 드려요. 무료이고 언제든 수신 거부할 수 있어요.</p>
+    <p>매일 아침 8시 30분, 오늘의 문제 · 오늘의 CS · 기술블로그를 한 통에 담아 보내 드려요. 무료이고 언제든 수신 거부할 수 있어요.</p>
     <div className="newsletter-row">
       <input type="email" aria-label="구독할 이메일" placeholder="이메일 주소" autoComplete="email" maxLength={254} required disabled={busy} value={email} onChange={e => setEmail(e.target.value)} />
       <button disabled={busy || !agree || !email.trim()}>구독하기</button>

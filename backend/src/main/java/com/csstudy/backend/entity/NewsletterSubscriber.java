@@ -45,6 +45,15 @@ public class NewsletterSubscriber {
     @Column(name = "next_index", nullable = false)
     private int nextIndex;
 
+    // 지금까지 받은 오늘의 학습 세트 수. 다음에 보낼 세트는 sets_sent + 1번이다.
+    // 기존 구독자 행이 있어도 열을 추가할 수 있게 비워 둘 수 있고, 비어 있으면 0으로 본다
+    @Column(name = "sets_sent")
+    private Integer setsSent;
+
+    // 마지막으로 받은 기술블로그 글(news_articles.id). 다음에는 이보다 뒤에 수집된 글을 보낸다
+    @Column(name = "last_blog_article_id")
+    private Long lastBlogArticleId;
+
     @Column(name = "last_sent_on")
     private LocalDate lastSentOn;
 
