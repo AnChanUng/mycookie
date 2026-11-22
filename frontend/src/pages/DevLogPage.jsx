@@ -140,7 +140,10 @@ function DevLog() {
     save(draft);
   };
 
+  const pick = date => { setDraft(null); setMessage(''); setParams({ d: date }, { replace: true }); };
+
   return (
+    <div className="dl-layout">
     <div className="ob">
       <header className="ob-hero ob-hero--slim">
         <OnboardingTabs />
@@ -193,7 +196,45 @@ function DevLog() {
           </article>)}
       </div>
     </div>
+    <DevLogCalendar entries={entries} selected={draft ? null : current?.date} onPick={pick} />
+    </div>
   );
+}
+
+// 제목 오른쪽에 고정해 두는 작은 캘린더. 일지가 있는 날은 점으로 보이고, 누르면 그날 일지가 열린다
+function DevLogCalendar({ entries, selected, onPick }) {
+  const today = todayKst();
+  const [month, setMonth] = useState(null);
+  useEffect(() => { setMonth(null); }, [selected]);
+  const shown = month || (selected || today).slice(0, 7);
+  const [year, monthNumber] = shown.split('-').map(Number);
+  const firstWeekday = new Date(Date.UTC(year, monthNumber - 1, 1)).getUTCDay();
+  const days = new Date(Date.UTC(year, monthNumber, 0)).getUTCDate();
+  const cells = Array.from({ length: Math.ceil((firstWeekday + days) / 7) * 7 }, (_, i) => {
+    const day = i - firstWeekday + 1;
+    return day > 0 && day <= days ? `${shown}-${String(day).padStart(2, '0')}` : null;
+  });
+  const logged = new Map(entries.map(e => [e.date, e]));
+  const move = offset => setMonth(new Date(Date.UTC(year, monthNumber - 1 + offset, 1)).toISOString().slice(0, 7));
+  return <aside className="dl-cal" aria-label="일정 캘린더">
+    <div className="dl-cal-nav">
+      <button type="button" aria-label="이전 달" onClick={() => move(-1)}>←</button>
+      <b aria-live="polite">{year}년 {monthNumber}월</b>
+      <button type="button" aria-label="다음 달" onClick={() => move(1)}>→</button>
+    </div>
+    <div className="dl-cal-grid" role="grid" aria-label={`${year}년 ${monthNumber}월`}>
+      {WEEK.map(w => <span key={w} className="dl-cal-week" role="columnheader">{w}</span>)}
+      {cells.map((date, i) => {
+        if (!date) return <span key={`e${i}`} />;
+        const day = Number(date.slice(-2)), entry = logged.get(date);
+        const cls = `dl-cal-day${date === today ? ' today' : ''}${date === selected ? ' on' : ''}${entry ? ' has' : ''}${entry && isComplete(entry.items) ? ' done' : ''}`;
+        return entry
+          ? <button key={date} type="button" className={cls} aria-pressed={date === selected} aria-label={`${label(date).long} 일지 보기`} onClick={() => onPick(date)}>{day}</button>
+          : <span key={date} className={cls} aria-label={label(date).long}>{day}</span>;
+      })}
+    </div>
+    <button type="button" className="dl-cal-today" onClick={() => { setMonth(today.slice(0, 7)); if (logged.has(today)) onPick(today); }}>오늘</button>
+  </aside>;
 }
 
 function MoveButton({ date, busy, onMove }) {
