@@ -12,7 +12,9 @@ const accountSnapshot = () => `${account()?.token || ''}:${account()?.nickname |
 const POLL_OPEN = 3000;
 const POLL_CLOSED = 30000;
 const TEXT_MAX = 200;
-const koreanDay = (at = Date.now()) => new Date(new Date(at).getTime() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10);
+// 대화 기록은 2026년 11월 22일(한국 시간) 0시부터 계속 보여 준다. 날이 바뀌어도 지우지 않는다
+const HISTORY_START = Date.parse('2026-11-22T00:00:00+09:00');
+const inHistory = m => new Date(m.at).getTime() >= HISTORY_START;
 
 // 대결 초대 글에 든 /duel/방번호 는 누르면 바로 들어가는 참가 버튼으로 보여 준다
 function ChatText({ text }) {
@@ -77,7 +79,7 @@ export default function LoungeChat({ open, online, onClose, onOnline, onUnread, 
     setMessages(prev => {
       const have = new Set(replace ? [] : prev.map(m => m.id));
       return [...(replace ? [] : prev), ...rows.filter(m => !have.has(m.id))]
-        .filter(m => koreanDay(m.at) === koreanDay()).sort((a, b) => a.id - b.id).slice(-KEEP);
+        .filter(inHistory).sort((a, b) => a.id - b.id).slice(-KEEP);
     });
     if (openRef.current) {
       writeSeen(lastId.current);
@@ -155,17 +157,6 @@ export default function LoungeChat({ open, online, onClose, onOnline, onUnread, 
       // Expire on the server so closing one tab does not remove another active tab.
     };
   }, [nickname, identity]);
-
-  // Clear yesterday's messages at Korean midnight, even with a disconnected server.
-  useEffect(() => {
-    const nextMidnight = new Date(`${koreanDay()}T00:00:00+09:00`).getTime() + 86400000;
-    const timer = setTimeout(() => {
-      setMessages(prev => prev.filter(m => koreanDay(m.at) === koreanDay()));
-      setPending(prev => prev.filter(m => koreanDay(m.at) === koreanDay()));
-      poll();
-    }, Math.max(1, nextMidnight - Date.now()));
-    return () => clearTimeout(timer);
-  }, [messages, pending, poll]);
 
   // 맨 아래를 보고 있을 때만 새 글을 따라 내려간다
   useEffect(() => {
