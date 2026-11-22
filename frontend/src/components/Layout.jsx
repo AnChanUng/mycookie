@@ -16,12 +16,9 @@ import PromotionAnnouncements from './PromotionAnnouncements';
 // 카오스 고양이 챗봇은 잠시 숨겨 둔다. true로 바꾸면 다시 나온다
 const SHOW_CHAOS_CHAT = false;
 
-// 문제 푸는 화면: 문제집(/web/spring 등, 목록인 /exam/category/... 제외), 문제 한 개, 오답 다시 풀기, 대결, 승급 시험 등
-const SOLVING_PATHS = [
-  /^\/(web|ai|major|exam|ssafy|aptitude)\/(?!category\/)[^/]+/,
-  /^\/(question|private\/banks)\/[^/]+/,
-  /^\/(account\/retry|topics|calc|promotion-exam|bug-hunt|duel|ncs|weak|major-exam)(\/|$)/,
-];
+// 큰 푸터(소개, 약관 링크)는 이 화면들에서만 보인다. 문제를 풀거나 노트를 읽는 공부 화면에서는 어디서든 숨기고,
+// 새 공부 화면이 생겨도 따로 고치지 않아도 되게 "보일 화면"만 적는다
+const FOOTER_PATHS = [/^\/$/, /^\/(intro|changelog|terms|privacy|feedback)(\/|$)/];
 
 // 주 메뉴. 하위 화면에 있어도 해당 메뉴가 켜져 보이게 경로 묶음으로 판단한다
 const startsWithAny = (p, list) => list.some(x => p === x || p.startsWith(x + '/'));
@@ -68,8 +65,7 @@ export default function Layout() {
   const signedIn = !!useSyncExternalStore(onAccountChange, tokenSnapshot, () => '');
   const location = useLocation();
   const loginOnly = !signedIn && location.pathname === "/account";
-  // 문제를 푸는 화면에서는 아래 큰 푸터를 띄우지 않는다(문제집 목록 화면에는 그대로 둔다)
-  const solving = SOLVING_PATHS.some(re => re.test(location.pathname));
+  const showFooter = FOOTER_PATHS.some(re => re.test(location.pathname));
   // 펼친 메뉴: null | 'coding'(코테) | 'about'(소개). 한 번에 하나만 연다
   const [openMenu, setOpenMenu] = useState(null);
   const menuRef = useRef(null);
@@ -163,7 +159,7 @@ export default function Layout() {
           <Outlet />
         </Suspense>
       </main>
-      {!loginOnly && !solving && <SiteFooter />}
+      {!loginOnly && showFooter && <SiteFooter />}
 
       {!loginOnly && <PromotionAnnouncements />}
       {!loginOnly && !location.pathname.startsWith('/admin') && !location.pathname.startsWith('/private') && <RankWelcome />}
