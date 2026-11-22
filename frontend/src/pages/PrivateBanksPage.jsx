@@ -46,12 +46,12 @@ function PrivateBanks() {
       <div className="page-header">
         <Link to="/" className="back-link">← 홈으로</Link>
         <h1>비공개 문제집</h1>
-        <p>복기 기반 문제집, SSAFY, 컴퓨터일반 문제집을 모았습니다.</p>
+        <p>복기 문제집과 컴퓨터일반 문제집을 모았습니다.</p>
       </div>
       {data.PRIVATE_GROUPS.map(group => (
         <section key={group.key} style={{ marginTop: 24 }}>
           <div className="section-title">{group.name}</div>
-          <p className="exam-lede">{group.desc}</p>
+          {group.desc && <p className="exam-lede">{group.desc}</p>}
           <div className="exam-company-grid">
             {group.banks.map(bank => {
               const bankId = data.privateBankId(group, bank);
