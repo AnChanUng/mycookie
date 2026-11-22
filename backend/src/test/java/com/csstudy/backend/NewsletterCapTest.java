@@ -73,8 +73,9 @@ class NewsletterCapTest {
                 .andExpect(jsonPath("$.code").value("NEWSLETTER_FULL"));
         assertThat(subscribers.findAll()).noneMatch(x -> x.getEmail().equals("d@example.com"));
 
-        // 이미 구독 중인 사람의 재신청은 오류 없이 넘어가고, 자리를 잡은 신청은 다시 보낼 수 있다
-        postJson("subscribe", Map.of("email", "a@example.com")).andExpect(status().isOk());
+        // 이미 구독 중인 사람의 재신청은 "이미 등록된 메일"로 알려 주고, 자리를 잡은 신청은 다시 보낼 수 있다
+        postJson("subscribe", Map.of("email", "a@example.com")).andExpect(status().isConflict())
+                .andExpect(jsonPath("$.code").value("NEWSLETTER_ALREADY"));
         NewsletterSubscriber c = subscribers.findAll().stream().filter(x -> x.getEmail().equals("c@example.com")).findFirst().orElseThrow();
         c.setConfirmSentAt(c.getConfirmSentAt().minusMinutes(5));
         subscribers.save(c);

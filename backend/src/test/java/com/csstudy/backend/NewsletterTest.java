@@ -132,7 +132,7 @@ class NewsletterTest {
     }
 
     @Test
-    void codeCanBeResentOnlyAfterAMinuteAndAnActiveAddressGetsANoticeInstead() throws Exception {
+    void codeCanBeResentOnlyAfterAMinuteAndAnActiveAddressIsToldItIsAlreadyRegistered() throws Exception {
         postJson("subscribe", Map.of("email", "resend@example.com")).andExpect(status().isOk());
         postJson("subscribe", Map.of("email", "resend@example.com")).andExpect(status().isOk());
         verify(mail, times(1)).send(eq("resend@example.com"), contains("인증 번호"), anyString());
@@ -144,14 +144,12 @@ class NewsletterTest {
         verify(mail, times(2)).send(eq("resend@example.com"), contains("인증 번호"), anyString());
         postJson("verify", Map.of("email", "resend@example.com", "code", codeFor("resend@example.com"))).andExpect(status().isOk());
 
-        // 이미 구독 중이면 번호 대신 "이미 구독 중" 안내만 간다
-        s = subscriber("resend@example.com");
-        s.setConfirmSentAt(java.time.LocalDateTime.now().minusMinutes(2));
-        subscribers.save(s);
+        // 이미 구독 중이면 번호를 보내지 않고 "이미 등록된 메일입니다"로 알려 준다
         clearInvocations(mail);
-        postJson("subscribe", Map.of("email", "resend@example.com")).andExpect(status().isOk());
-        verify(mail, never()).send(eq("resend@example.com"), contains("인증 번호"), anyString());
-        verify(mail).send(eq("resend@example.com"), contains("이미 학습 메일을 구독 중"), anyString());
+        postJson("subscribe", Map.of("email", "resend@example.com")).andExpect(status().isConflict())
+                .andExpect(jsonPath("$.code").value("NEWSLETTER_ALREADY"))
+                .andExpect(jsonPath("$.error").value("이미 등록된 메일입니다."));
+        verify(mail, never()).send(eq("resend@example.com"), anyString(), anyString());
     }
 
     @Test

@@ -23,7 +23,7 @@ try {
     const ok = data => ({ data, status: 200, statusText: 'OK', headers: {}, config });
     const bad = error => Object.assign(new Error('bad'), { response: { status: 400, data: { error } } });
     if (config.method === 'post' && config.url.endsWith('/newsletter/subscribe')) {
-      if (failSend) throw bad('이메일 형식이 올바르지 않아요.');
+      if (failSend) throw bad(failSend === 'already' ? '이미 등록된 메일입니다.' : '이메일 형식이 올바르지 않아요.');
       sent.push(JSON.parse(config.data)); return ok({ ok: true });
     }
     if (config.method === 'post' && config.url.endsWith('/newsletter/verify')) {
@@ -42,13 +42,17 @@ try {
   await act(() => button('구독').props.onClick());
 
   // 1) 이메일 + 동의 → 인증 번호 받기
-  assert.ok(text(view.toJSON()).includes('인증 번호 받기'));
+  assert.ok(text(view.toJSON()).includes('인증 번호 받기') && text(view.toJSON()).includes('정답과 해설'), '받는 내용을 먼저 보여 준다');
   assert.equal(view.root.findAll(n => n.props?.['aria-label'] === '인증 번호 6자리').length, 0, '번호 입력 칸은 번호를 받은 뒤에 나온다');
   await act(() => view.root.findByProps({ 'aria-label': '구독할 이메일' }).props.onChange({ target: { value: ' me@example.com ' } }));
   assert.equal(button('인증 번호 받기').props.disabled, true, '동의하기 전에는 받을 수 없다');
   await act(() => view.root.findAll(n => n.type === 'input' && n.props.type === 'checkbox')[0].props.onChange({ target: { checked: true } }));
   assert.equal(button('인증 번호 받기').props.disabled, false);
 
+  failSend = 'already';
+  await act(async () => { await view.root.findByType('form').props.onSubmit({ preventDefault() {} }); });
+  assert.ok(text(view.toJSON()).includes('이미 등록된 메일입니다.'), '이미 등록된 메일이면 그대로 알려 준다');
+  assert.equal(view.root.findAll(n => n.props?.['aria-label'] === '인증 번호 6자리').length, 0, '번호 입력 단계로 넘어가지 않는다');
   failSend = true;
   await act(async () => { await view.root.findByType('form').props.onSubmit({ preventDefault() {} }); });
   assert.ok(text(view.toJSON()).includes('이메일 형식이 올바르지 않아요.'));
