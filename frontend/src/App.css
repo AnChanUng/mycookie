@@ -4279,7 +4279,6 @@ button.member-menu:hover { background: var(--ds-surface-2); }
 .member-panel-stat span { font-size: 11px; color: var(--ds-text-3); white-space: nowrap; }
 .member-panel-stat b { font-size: 17px; font-weight: 800; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
 .member-panel-empty { grid-column: 1 / -1; margin: 0; padding: 14px 12px; font-size: 13px; color: var(--ds-text-2); text-align: center; }
-.member-panel-weak { margin: 8px 2px 0; font-size: 12.5px; color: var(--ds-text-2); }
 .member-panel-links { display: grid; margin-top: 12px; padding-top: 8px; border-top: 1px solid var(--ds-line); }
 .member-panel-links a { display: flex; justify-content: space-between; align-items: center; padding: 10px 8px; border-radius: var(--ds-r-sm); color: var(--ds-text); font-size: 14px; font-weight: 600; text-decoration: none; }
 .member-panel-links a span { color: var(--ds-text-3); font-size: 18px; line-height: 1; }
