@@ -20,11 +20,13 @@ public class AccountAdminController {
 
     private final AdminAuth adminAuth;
     private final RoleService roles;
+    private final com.csstudy.backend.service.AdminAudit audit;
 
     @PostMapping("/accounts")
     public Map<String, Object> create(@RequestHeader(value = "X-Admin-Key", required = false) String key, @RequestBody Map<String, Object> body) {
         adminAuth.requireKey(key);
         User user = roles.createReservedAccount(str(body.get("nickname")), str(body.get("password")), parseRoles(body.get("roles")));
+        audit.record(com.csstudy.backend.service.AdminAudit.KEY_ACTOR, "계정 생성", user.getNickname() + " · " + roles.rolesOf(user));
         return Map.of("nickname", user.getNickname(), "roles", roles.rolesOf(user));
     }
 
@@ -38,6 +40,7 @@ public class AccountAdminController {
     public Map<String, Object> createTest(@RequestHeader(value = "X-Admin-Key", required = false) String key, @RequestBody Map<String, Object> body) {
         adminAuth.requireKey(key);
         User user = roles.createTestAccount(str(body.get("nickname")), str(body.get("password")));
+        audit.record(com.csstudy.backend.service.AdminAudit.KEY_ACTOR, "테스트 계정 생성", user.getNickname());
         return Map.of("nickname", user.getNickname(), "roles", roles.rolesOf(user), "tier", user.getBaseTier());
     }
 
@@ -46,13 +49,17 @@ public class AccountAdminController {
         adminAuth.requireKey(key);
         String nickname = str(body.get("nickname"));
         Role role = parseRole(body.get("role"));
-        return Map.of("nickname", nickname, "roles", Boolean.FALSE.equals(body.get("grant")) ? roles.revoke(nickname, role) : roles.grant(nickname, role));
+        boolean revoke = Boolean.FALSE.equals(body.get("grant"));
+        var result = revoke ? roles.revoke(nickname, role) : roles.grant(nickname, role);
+        audit.record(com.csstudy.backend.service.AdminAudit.KEY_ACTOR, revoke ? "권한 회수" : "권한 부여", nickname + " · " + role);
+        return Map.of("nickname", nickname, "roles", result);
     }
 
     @PostMapping("/test-accounts/profile")
     public Map<String, Object> applyTest(@RequestHeader(value = "X-Admin-Key", required = false) String key, @RequestBody Map<String, Object> body) {
         adminAuth.requireKey(key);
         User user = roles.applyTestProfile(str(body.get("nickname")));
+        audit.record(com.csstudy.backend.service.AdminAudit.KEY_ACTOR, "테스트 계정 프로필 적용", user.getNickname());
         return Map.of("nickname", user.getNickname(), "roles", roles.rolesOf(user), "tier", user.getBaseTier());
     }
 
