@@ -7,7 +7,9 @@ import org.hibernate.annotations.CreationTimestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-// 학습 메일 구독자. 확인 링크를 눌러야 ACTIVE가 되고(이중 동의), 수신 거부하면 UNSUBSCRIBED로 남긴다
+// 학습 메일 구독자. 확인 링크를 눌러야 ACTIVE가 되고(이중 동의), 수신 거부하면 행을 지운다.
+// 개인정보는 이메일 주소와 신청·확인 시각만 저장한다. 확인하지 않은 신청은 링크가 만료되면 지운다
+// (UNSUBSCRIBED는 예전에 남긴 행을 읽기 위해서만 남겨 둔 값)
 @Entity
 @Table(name = "newsletter_subscribers")
 @Getter

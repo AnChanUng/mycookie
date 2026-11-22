@@ -9,6 +9,7 @@ import StudyAmbience from './StudyAmbience';
 import StudyCount from './StudyCount';
 import RankWelcome from './RankWelcome';
 import MemberMenu from './MemberMenu';
+import HeaderSubscribe from './HeaderSubscribe';
 import { account, onAccountChange } from '../sync';
 import PromotionAnnouncements from './PromotionAnnouncements';
 
@@ -108,6 +109,7 @@ export default function Layout() {
                 </Link>
               ))}
             </nav>
+            <HeaderSubscribe />
             {!signedIn && <Link to="/account#settings" className="header-login">로그인</Link>}
             <StudyCount />
             <MemberMenu />
