@@ -39,26 +39,35 @@ try {
   const tab = d => view.root.findAll(n => n.type === 'button' && n.props.role === 'tab' && text(n) === `${d}단계`)[0];
 
   await mount();
-  assert.ok(text(view.toJSON()).includes('주제 A') && text(view.toJSON()).includes('이력서 문장 A'));
-  assert.ok(text(view.toJSON()).includes('A 기본 질문'), '처음에는 첫 주제의 1단계');
-  assert.equal(tab(3).props.disabled, true, '없는 단계는 누를 수 없다');
-  assert.equal(tab(2).props.disabled, false);
+  const all = () => text(view.toJSON());
+  assert.ok(all().includes('주제 A') && all().includes('주제 B') && all().includes('이력서: 이력서 문장 A'), '주제마다 묶어 보여 준다');
+  assert.ok(all().includes('A 기본 질문') && all().includes('A 꼬리질문') && all().includes('A 한계 질문') && all().includes('B 기본 질문'), '모든 단계 질문이 한 화면에 나온다');
+  assert.ok(all().includes('1단계 · 기본 질문') && all().includes('4단계 · 한계까지'));
+  assert.ok(all().includes('4문항 · 작성 0/4'));
+  assert.equal(view.root.findAll(n => /camera|카메라/i.test(String(n.props?.className || '') + (typeof n.children?.[0] === 'string' ? n.children[0] : ''))).length, 0, '카메라 기능은 없다');
 
   // 답변 포인트는 눌러야 보인다
-  assert.ok(!text(view.toJSON()).includes('포인트 1'));
-  await act(() => buttons('답변 포인트 보기')[0].props.onClick());
-  assert.ok(text(view.toJSON()).includes('포인트 1') && text(view.toJSON()).includes('의도 A'));
+  assert.ok(!all().includes('포인트 1'));
+  await act(() => buttons('기억 안 나요 · 답변 포인트 보기')[0].props.onClick());
+  assert.ok(all().includes('포인트 1') && all().includes('의도 A'));
 
-  // 꼬리질문: 다음 단계로, 건너뛴 단계(3)는 넘어가 4단계로 간다
-  await act(() => buttons('꼬리질문 2단계로 →')[0].props.onClick());
-  assert.ok(text(view.toJSON()).includes('A 꼬리질문') && !text(view.toJSON()).includes('포인트 1'));
-  await act(() => buttons('꼬리질문 4단계로 →')[0].props.onClick());
-  assert.ok(text(view.toJSON()).includes('A 한계 질문'));
-  assert.equal(buttons('꼬리질문 4단계로 →').length, 0, '마지막 단계에는 다음 버튼이 없다');
+  // 직접 적어보기는 이 브라우저에 저장된다
+  const box = view.root.findAllByType('textarea').find(n => String(n.props.id).startsWith('draft-a-1-0'));
+  await act(() => box.props.onChange({ target: { value: '내 답변' } }));
+  assert.ok(all().includes('작성 1/4'));
+  assert.ok([...values.keys()].some(k => k.startsWith('tech-interview:drafts:v1:')));
 
-  // 주제를 바꾸면 1단계로 돌아간다
-  await act(() => view.root.findAll(n => n.type === 'button' && text(n).startsWith('주제 B'))[0].props.onClick());
-  assert.ok(text(view.toJSON()).includes('B 기본 질문'));
+  // 학습 완료하면 목록에서 빠지고, 완료 표시를 켜면 다시 보인다
+  const check = view.root.findAll(n => n.type === 'input' && n.props.type === 'checkbox' && n.props['aria-label'] === 'A 기본 질문 학습 완료')[0];
+  await act(() => check.props.onChange());
+  assert.ok(!all().includes('A 기본 질문') && all().includes('A 꼬리질문'));
+  const showDone = view.root.findAll(n => n.type === 'input' && n.props.type === 'checkbox' && !n.props['aria-label'])[0];
+  await act(() => showDone.props.onChange({ target: { checked: true } }));
+  assert.ok(all().includes('A 기본 질문'));
+
+  // 주제를 고르면 그 주제만 남는다
+  await act(() => view.root.findByProps({ 'aria-label': '기술면접 주제' }).props.onChange({ target: { value: 'b' } }));
+  assert.ok(all().includes('B 기본 질문') && !all().includes('A 꼬리질문'));
 
   // 질문 등록: 잘못된 JSON과 모양은 막고, 맞으면 소유자 토큰으로 저장한다
   const area = view.root.findByProps({ 'aria-label': '질문 JSON' });
@@ -87,7 +96,7 @@ try {
   await act(() => view.unmount());
 
   assert.deepEqual(errors, []);
-  console.log('Tech interview passed: topics, depth 1-4 follow-ups, answer points, skip missing depth, registration with owner token, empty and error states.');
+  console.log('Tech interview passed: practice layout without camera, topics with depth 1-4, answer points, drafts and completion saved locally, topic filter, registration with owner token, empty and error states.');
 } finally {
   console.error = originalError;
   await server.close();

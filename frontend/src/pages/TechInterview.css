@@ -32,3 +32,10 @@
   .ti-topics { position: static; }
   .ti-main { padding: 16px; }
 }
+
+/* 면접 준비 화면과 같은 틀에서 카메라 칸만 뺀 2단 배치 */
+.chanung-page.ti-page .notes-layout { grid-template-columns: 310px minmax(0, 1fr); }
+.ti-page .ti-source { margin: 0 0 var(--ds-s3, 12px); font-size: .85rem; color: var(--text-secondary); }
+.ti-page .ti-edit { margin-top: 28px; }
+@media (max-width: 900px) { .chanung-page.ti-page .notes-layout { grid-template-columns: 230px minmax(0, 1fr); } }
+@media (max-width: 640px) { .chanung-page.ti-page .notes-layout { grid-template-columns: minmax(0, 1fr); } }

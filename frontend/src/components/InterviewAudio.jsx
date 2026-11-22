@@ -3,7 +3,7 @@ import api from '../api';
 import { account } from '../sync';
 import { InterviewRecorder, toWav } from '../interviewAudio';
 
-export default function InterviewAudio({ questionId, recording, saveRecording, gradingDisabled = false }) {
+export default function InterviewAudio({ questionId, recording, saveRecording, gradingDisabled = false, gradingHint = '' }) {
   const [phase, setPhase] = useState('idle');
   const [seconds, setSeconds] = useState(0);
   const [error, setError] = useState('');
@@ -85,7 +85,8 @@ export default function InterviewAudio({ questionId, recording, saveRecording, g
       <textarea id="audio-transcript" rows={5} maxLength={12000} disabled={busy} value={recording.transcript} onChange={e => update({ transcript: e.target.value, result: null })} />
       <button type="button" className="exam-btn sm" disabled={aiDisabled || gradingDisabled || !recording.transcript.trim()} onClick={() => request('grading')}>확인한 답변으로 채점</button>
     </>}
-    {gradingDisabled && <p className="audio-hint">저장된 버전에서는 녹음·재생·음성 인식을 사용할 수 있습니다. AI 채점은 최신 답변 기준이므로 최신 버전에서 이용하세요.</p>}
+    {gradingDisabled && gradingHint && <p className="audio-hint">{gradingHint}</p>}
+    {gradingDisabled && !gradingHint && <p className="audio-hint">저장된 버전에서는 녹음·재생·음성 인식을 사용할 수 있습니다. AI 채점은 최신 답변 기준이므로 최신 버전에서 이용하세요.</p>}
     {error && <p role="alert" className="audio-error">{error}</p>}
     {result && <section className="audio-result" aria-label="음성 답변 채점 결과"><h3>연습 점수 {result.total} / 100</h3>
       <ul><li>핵심 내용 {result.relevance}/40</li><li>정확성 {result.accuracy}/30</li><li>구성 {result.structure}/20</li><li>명료성 {result.clarity}/10</li></ul>
