@@ -13,7 +13,7 @@ export default function AiPage() {
       <Link to="/ai/ai" className="exam-section">
         <span className="t">AI 전체 문제집</span>
         <span className="d">세 과목을 섞어 풀거나 과목별로 골라 풀기</span>
-        <span className="d">{AI_QUESTIONS.length}문제 · 풀이 기록 저장 →</span>
+        <span className="d">{AI_QUESTIONS.length}문제 →</span>
       </Link>
       {Object.entries(AI_SECTIONS).map(([key, s]) => (
         <Link key={key} to="/ai/ai" className="exam-section">
