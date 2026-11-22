@@ -60,6 +60,10 @@ public class NewsletterSubscriber {
     @Column(name = "last_blog_article_id")
     private Long lastBlogArticleId;
 
+    // 학습 메일 발송이 이어서 실패한 횟수(성공하면 0으로 돌린다)
+    @Column(name = "delivery_failures")
+    private Integer deliveryFailures;
+
     @Column(name = "last_sent_on")
     private LocalDate lastSentOn;
 

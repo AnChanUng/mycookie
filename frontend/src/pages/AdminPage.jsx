@@ -7,7 +7,7 @@ import { account } from '../sync';
 const KEY = 'admin-key';
 const RANGES = [7, 30, 90];
 const AUTO_SECONDS = 60;
-const TABS = [['overview', '개요'], ['solves', '풀이'], ['visitors', '방문자'], ['security', '보안 · 크롤링'], ['reports', '제보'], ['chat', '채팅'], ['accounts', '계정 · 채점'], ['audit', '작업 기록'], ['system', '시스템']];
+const TABS = [['overview', '개요'], ['solves', '풀이'], ['visitors', '방문자'], ['security', '보안 · 크롤링'], ['reports', '제보'], ['chat', '채팅'], ['accounts', '계정 · 채점'], ['audit', '작업 기록'], ['mail', '메일'], ['system', '시스템']];
 const REPORT_KINDS = { answer: '정답 오류', typo: '오타', explain: '해설 문제', etc: '기타' };
 const MODES = { exam: '모의고사', set: '회차별 모의고사', unit: '단원별 문제집', practice: '영역별 연습', wrong: '오답 다시 풀기', marked: '북마크 다시 풀기', cpp: 'C++ 문제집', recall: '응시 후기 복원 문제' };
 
@@ -99,6 +99,7 @@ function AdminControls({ back, viaLogin }) {
   const [reports, setReports] = useState(null);
   const [chat, setChat] = useState(null);
   const [audit, setAudit] = useState(null);
+  const [mailFailures, setMailFailures] = useState(null);
   const [updatedAt, setUpdatedAt] = useState(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(() => viaLogin || !!savedKey());
@@ -118,6 +119,9 @@ function AdminControls({ back, viaLogin }) {
     api.get('/admin/audit', options)
       .then(res => { if (!stale) setAudit(res.data); })
       .catch(() => { if (!stale) setAudit(null); });
+    api.get('/admin/mail-failures', options)
+      .then(res => { if (!stale) setMailFailures(res.data); })
+      .catch(() => { if (!stale) setMailFailures(null); });
     api.get('/admin/lounge/messages', options)
       .then(res => { if (!stale) setChat(res.data); })
       .catch(() => { if (!stale) setChat(null); });
@@ -217,7 +221,7 @@ function AdminControls({ back, viaLogin }) {
           <div className="major-tabs">
             {TABS.map(([k, name]) => (
               <button key={k} type="button" className={`major-tab${tab === k ? ' active' : ''}`} onClick={() => setTab(k)}>
-                {name}{k === 'reports' && reports?.open ? ` ${reports.open}` : ''}
+                {name}{k === 'reports' && reports?.open ? ` ${reports.open}` : ''}{k === 'mail' && mailFailures?.last24h ? ` ${mailFailures.last24h}` : ''}
               </button>
             ))}
           </div>
@@ -235,6 +239,7 @@ function AdminControls({ back, viaLogin }) {
             : <p className="exam-note">채팅 글을 불러오지 못했습니다. 백엔드 배포가 끝난 뒤 새로고침해 주세요.</p>)}
           {tab === 'accounts' && (sys ? <Accounts sys={sys} /> : <SysMissing />)}
           {tab === 'audit' && (audit ? <AuditLog rows={audit} /> : <p className="exam-note">작업 기록을 불러오지 못했습니다. 백엔드 배포가 끝난 뒤 새로고침해 주세요.</p>)}
+          {tab === 'mail' && (mailFailures ? <MailFailures data={mailFailures} /> : <p className="exam-note">메일 발송 현황을 불러오지 못했습니다. 백엔드 배포가 끝난 뒤 새로고침해 주세요.</p>)}
           {tab === 'system' && (sys ? <System sys={sys} events={data.server.events} /> : <SysMissing />)}
         </>
       )}
@@ -646,6 +651,32 @@ function AuditLog({ rows }) {
         </div>
       ) : <p className="exam-note">아직 기록된 작업이 없습니다.</p>}
       <p className="exam-note">최근 100개까지 보여 줍니다. 계정 생성과 권한 부여·회수가 기록됩니다.</p>
+    </>
+  );
+}
+
+// 메일 발송 실패 현황: 최근 실패 건수와 어떤 메일(받는 주소 · 종류 · 제목)이 왜 실패했는지
+function MailFailures({ data }) {
+  const kinds = Object.entries(data.byKind || {});
+  return (
+    <>
+      <div className="section-title">메일 발송 실패</div>
+      <div className="exam-stats">
+        <Tile k="최근 24시간" v={data.last24h} unit=" 건" sub="실패한 메일 수" />
+        <Tile k="최근 7일" v={data.last7d} unit=" 건" sub="실패한 메일 수" />
+        <Tile k="최근 30일" v={data.last30d} unit=" 건" sub={kinds.length ? kinds.map(([kind, n]) => `${kind} ${n}`).join(' · ') : '실패 없음'} />
+      </div>
+      {data.recent.length ? (
+        <div className="exam-table-wrap">
+          <table className="exam-table admin-table">
+            <thead><tr><th>시각</th><th>종류</th><th>받는 주소</th><th>제목</th><th>원인</th></tr></thead>
+            <tbody>
+              {data.recent.map((r, i) => <tr key={i}><td>{fmtAt(r.at)}</td><td>{r.kind}</td><td>{r.to}</td><td>{r.subject}</td><td>{r.reason}</td></tr>)}
+            </tbody>
+          </table>
+        </div>
+      ) : <p className="exam-note">최근 30일 동안 발송에 실패한 메일이 없습니다.</p>}
+      <p className="exam-note">최근 100건까지 보여 줍니다. 실패한 학습 메일은 보낸 것으로 치지 않고 같은 날 10시에 한 번 더 시도하며, 3번 연속 실패하면 그날은 쉬고 다음 평일에 다시 시도합니다. 실패 기록은 30일 뒤 지워집니다.</p>
     </>
   );
 }

@@ -179,9 +179,43 @@ public class NewsletterService {
         if (enabled()) sendDue(LocalDate.now(SEOUL));
     }
 
+    // 아침 발송에서 실패해 되감긴 학습 메일을 한 번 더 시도한다(평일 10시)
+    @Scheduled(cron = "${app.newsletter.retry-cron:0 0 10 * * MON-FRI}", zone = "Asia/Seoul")
+    public void retryFailed() {
+        if (enabled()) sendDue(LocalDate.now(SEOUL));
+    }
+
+    // 학습 메일 발송 결과를 받는다. 성공하면 연속 실패 횟수를 0으로, 실패하면 보낸 것으로 처리하지 않고 되감아 다시 보낼 수 있게 한다
+    @org.springframework.context.event.EventListener
+    public void onMailDelivery(MailDelivery delivery) {
+        String subject = delivery.subject();
+        boolean daily = subject.startsWith("[나의쿠키] 오늘의 학습 #");
+        boolean fallback = subject.contains("웹 필수지식") && subject.startsWith("[나의쿠키]");
+        if (!daily && !fallback) return;
+        try {
+            tx.executeWithoutResult(status -> subscribers.findByEmailForUpdate(delivery.to()).ifPresent(s -> {
+                if (s.getStatus() != Status.ACTIVE) return;
+                if (!delivery.failed()) { s.setDeliveryFailures(null); return; }
+                int failures = (s.getDeliveryFailures() == null ? 0 : s.getDeliveryFailures()) + 1;
+                s.setDeliveryFailures(failures);
+                // 되감기: 못 받은 세트(또는 웹 필수지식 순번)를 그대로 두고, 3번 연속 실패하면 오늘은 더 시도하지 않는다
+                if (daily) {
+                    java.util.regex.Matcher m = java.util.regex.Pattern.compile("#(\\d+)").matcher(subject);
+                    if (m.find()) s.setSetsSent(Integer.parseInt(m.group(1)) - 1);
+                } else {
+                    s.setNextIndex(Math.floorMod(s.getNextIndex() - 1, letters.size()));
+                }
+                if (failures < 3) s.setLastSentOn(null);
+            }));
+        } catch (RuntimeException e) {
+            log.warn("학습 메일 발송 결과를 반영하지 못했습니다: {}", e.getClass().getSimpleName());
+        }
+    }
+
     /** 오늘 받을 차례인 구독자에게 보낸다. 보낸 수를 돌려준다. */
     public int sendDue(LocalDate today) {
         int sent = 0;
+        java.util.Set<Long> handled = new java.util.HashSet<>();
         while (sent < dailyLimit) {
             int batch = Math.min(50, dailyLimit - sent);
             // 한 명씩 잠그고 처리해 서버가 여러 대여도 같은 사람에게 두 번 보내지 않는다
@@ -190,7 +224,7 @@ public class NewsletterService {
                 int n = 0;
                 for (NewsletterSubscriber candidate : due) {
                     NewsletterSubscriber s = subscribers.findByEmailForUpdate(candidate.getEmail()).orElse(null);
-                    if (s == null || s.getStatus() != Status.ACTIVE || today.equals(s.getLastSentOn())) continue;
+                    if (s == null || s.getStatus() != Status.ACTIVE || today.equals(s.getLastSentOn()) || !handled.add(s.getId())) continue;
                     deliver(s, today);
                     n++;
                 }

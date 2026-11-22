@@ -3,6 +3,7 @@ package com.csstudy.backend.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
 import jakarta.mail.internet.MimeMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -18,6 +19,8 @@ import java.util.concurrent.Executors;
 public class MailService {
 
     private final ObjectProvider<JavaMailSender> sender;
+    private final MailFailures failures;
+    private final ApplicationEventPublisher events;
     private final String from;
     private final boolean logLinks;
     private final boolean hostSet;
@@ -27,12 +30,14 @@ public class MailService {
         return t;
     });
 
-    public MailService(ObjectProvider<JavaMailSender> sender,
+    public MailService(ObjectProvider<JavaMailSender> sender, MailFailures failures, ApplicationEventPublisher events,
                        @Value("${app.mail.from:}") String from,
                        @Value("${app.mail.log-links:false}") boolean logLinks,
                        @Value("${spring.mail.host:}") String host) {
         this.hostSet = !host.isBlank();
         this.sender = sender;
+        this.failures = failures;
+        this.events = events;
         this.from = from;
         this.logLinks = logLinks;
     }
@@ -68,8 +73,12 @@ public class MailService {
                     message.setHeader("List-Unsubscribe", "<" + unsubscribeUrl + ">");
                 }
                 mail.send(message);
+                events.publishEvent(new MailDelivery(to, subject, null));
             } catch (Exception e) {
-                log.warn("메일 발송 실패: subject={} reason={}", subject, e.getMessage());
+                // 받는 주소는 로그에 쓰지 않고, 실패 기록(30일 보관)에만 남긴다
+                log.warn("메일 발송 실패: subject={} reason={}", subject, MailFailures.reasonOf(e));
+                failures.record(to, subject, e);
+                events.publishEvent(new MailDelivery(to, subject, e));
             }
         });
     }
