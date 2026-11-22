@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../api';
 import LineIcon from './LineIcon';
-import { formatNewsDate } from '../pages/CompanyNewsPage';
+import { formatNewsDate } from '../newsFormat';
 import '../pages/CompanyNews.css';
 
 // 첫 화면의 "기업 소식": 가장 최근 글 5개만 보여 주고, 더 보려면 전체 보기(/news)로 간다.

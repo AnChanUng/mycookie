@@ -18,7 +18,8 @@ const unmount = async () => { await act(() => view.unmount()); view = null; };
 
 try {
   const { default: api } = await server.ssrLoadModule('/src/api.js');
-  const { default: Page, formatNewsDate } = await server.ssrLoadModule('/src/pages/CompanyNewsPage.jsx');
+  const { default: Page } = await server.ssrLoadModule('/src/pages/CompanyNewsPage.jsx');
+  const { formatNewsDate } = await server.ssrLoadModule('/src/newsFormat.js');
   const { default: Preview } = await server.ssrLoadModule('/src/components/CompanyNewsPreview.jsx');
 
   const COMPANIES = ['네이버', '카카오', '토스'];
