@@ -26,7 +26,7 @@ export default function MemberMenu() {
   const { membership, loading, error } = useMembership(`${identity}:${location.pathname}`);
   const signedIn = !!account()?.token;
   const access = useRoles();
-  const showCareer = access.signedIn && !access.loading && access.nickname === '쿠우키';
+  const showCareer = access.signedIn && !access.loading && access.roles.includes('OWNER');
   // 비공개 문제집을 볼 수 있는 계정에게만 바로가기를 보여 준다(찬웅은 [취업] 안찬웅 안에서 들어간다)
   const showBanks = access.signedIn && !access.loading && !showCareer && canOpenPrivateBanks(access);
   const nickname = membership?.nickname || account()?.nickname || savedNickname() || '방문자';

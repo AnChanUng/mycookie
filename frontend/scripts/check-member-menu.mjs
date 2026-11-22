@@ -125,13 +125,13 @@ try {
   assert.ok(text(view.toJSON()).includes('풀었던 문제'));
   await unmount();
   const { default: Gate } = await server.ssrLoadModule('/src/components/RoleGate.jsx');
-  for (const [nickname, token, allowed] of [['쿠우키', 'cookie-owner', true], ['쿠우키', 'ordinary-user', true], ['다른계정', 'other-user', false], ['다른OWNER', 'cookie-owner', false]]) {
+  for (const [nickname, token, allowed] of [['소유자', 'cookie-owner', true], ['다른이름', 'cookie-owner', true], ['일반', 'ordinary-user', false], ['일반2', 'other-user', false]]) {
     localStorage.setItem('sync:account', JSON.stringify({ id: token, token, nickname }));
     await mount(Menu);
     await act(() => view.root.findAllByType('button').find(b => b.props['aria-haspopup'] === 'menu').props.onClick());
     assert.equal(view.root.findAll(n => n.props.role === 'menuitem' && n.props.to === '/private/chanung').length, allowed ? 1 : 0);
     await unmount();
-    await mount(() => React.createElement(Gate, { nickname: '쿠우키', title: '개인 공간' }, React.createElement('p', null, '개인 면접 자료')));
+    await mount(() => React.createElement(Gate, { role: 'OWNER', title: '전용 페이지' }, React.createElement('p', null, '개인 면접 자료')));
     assert.equal(text(view.toJSON()).includes('개인 면접 자료'), allowed);
     await unmount();
   }
