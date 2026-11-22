@@ -14,11 +14,11 @@ export default function ChangelogPage() {
         <section key={y.year} className="changelog-year" aria-labelledby={`year-${y.year}`}>
           <h2 id={`year-${y.year}`}>{y.year}년</h2>
           <ol className="changelog-months">
-            {y.months.map(m => (
-              <li key={m.month} className="changelog-month">
+            {y.months.map((m, i) => (
+              <li key={`${m.month}-${m.version || i}`} className="changelog-month">
                 <div className="changelog-when">{m.month}월</div>
                 <div className="changelog-body">
-                  <h3>{m.title}</h3>
+                  <h3>{m.version && <span className="changelog-version">v{m.version}</span>}{m.title}</h3>
                   <ul>{m.items.map((it, i) => <li key={i}>{it}</li>)}</ul>
                 </div>
               </li>
