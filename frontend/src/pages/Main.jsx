@@ -21,8 +21,11 @@ const CODING_SITES = [
   { name: '코드트리', sub: '유형별 커리큘럼', href: 'https://www.codetree.ai/' },
   { name: '리트코드', sub: '해외 기업 대비', href: 'https://leetcode.com/problemset/' },
 ];
+// AI 과목 세 개. 모두 AI 화면(/ai)에서 과목을 골라 푼다
 const AI_STUDY = [
-  { to: '/ai', icon: 'brain', name: 'AI', sub: '딥러닝 · 머신러닝 · 빅데이터 AI' },
+  { to: '/ai', icon: 'brain', name: '딥러닝 기초', sub: '신경망 · 최적화 · Transformer' },
+  { to: '/ai', icon: 'chart', name: '머신러닝 · 모델링', sub: '회귀 · 분류 · 군집 · 평가 지표' },
+  { to: '/ai', icon: 'bolt', name: '빅데이터 · AI 실무', sub: '분석 기법 · 실무 적용' },
 ];
 const WEB_STUDY = [
   { to: '/web', icon: 'code', name: '웹', sub: 'Spring · JPA · DB · Servlet' },
@@ -178,7 +181,7 @@ export default function Main() {
       </Section>}
 
       <Section id="mn-ai" title="AI">
-        <div className="mn-cards mn-cards--single">{AI_STUDY.map(item => <Category key={item.to} {...item} />)}</div>
+        <div className="mn-cards">{AI_STUDY.map(item => <Category key={item.name} {...item} />)}</div>
       </Section>
 
       <Section id="mn-web" title="웹">
