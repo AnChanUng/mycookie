@@ -68,6 +68,8 @@ export default function MemberMenu() {
   };
 
   const status = membership ? null : loading ? '등급 확인 중' : error ? '등급 확인 필요' : '내 계정';
+  // 로그인하지 않았으면 익명 닉네임과 등급을 보여 주지 않는다(헤더의 로그인 버튼으로 로그인을 이끈다). 방금 로그아웃한 안내만 남긴다
+  if (!signedIn) return notice ? <div className="member-menu-actions"><p className="member-notice" role="status">{notice}</p></div> : null;
   return <div className="member-menu-actions" ref={boxRef}>
     <button type="button" ref={buttonRef} onClick={() => setOpen(o => !o)}
       className={`account-nav-link member-menu${open || location.pathname.startsWith('/account') ? ' active' : ''}`}

@@ -32,6 +32,8 @@ try {
   };
   const mount=async()=>{await act(async()=>{view=TestRenderer.create(React.createElement(MemoryRouter,null,React.createElement(React.Fragment,null,React.createElement(Menu),React.createElement(Page))));});};
   const button=label=>view.root.findAllByType('button').find(b=>text(b).includes(label));
+  // 계정 메뉴의 등급 배지는 로그인한 계정에만 보인다
+  localStorage.setItem('sync:account',JSON.stringify({token:'exam-user',nickname:'시험응시자'}));
   await mount();await act(async()=>{await button('시험 시작').props.onClick();});
   assert.equal(view.root.findAllByProps({'aria-label':'등급 금 쿠키 Ⅴ'}).length,1);
   assert.equal(starts,1);assert.equal(view.root.findAllByType('fieldset').length,30);
