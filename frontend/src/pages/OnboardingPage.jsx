@@ -5,7 +5,6 @@ import OnboardingTabs from '../components/OnboardingTabs';
 import './OnboardingPage.css';
 import archImg from '../assets/architecture.webp';
 import RoleGate from '../components/RoleGate';
-import TeamCalendar from '../components/TeamCalendar';
 
 // 신입 개발자 온보딩 페이지. 들어오는 주소는 /private/bomin, 화면에서는 알아보기 어려운 주소(ONBOARDING_PATH)로 바꿔 보여 준다.
 // 주소를 숨기는 것일 뿐 보안 장치는 아니다. 비밀번호, 키, 연결 주소 같은 비밀값은 이 페이지에 적지 않는다.
@@ -30,14 +29,12 @@ function Onboarding() {
           위에서부터 순서대로 읽되, 모르는 부분은 넘어가도 괜찮습니다.
         </p>
         <nav className="ob-toc" aria-label="목차">
-          {[['calendar', '팀 일정'], ['about', '한눈에 보기'], ['arch', '아키텍처'], ['flow', '요청 흐름'], ['stack', '기술 스택'], ['tools', '설치할 도구'], ['repo', '저장소 구조'],
+          {[['about', '한눈에 보기'], ['arch', '아키텍처'], ['flow', '요청 흐름'], ['stack', '기술 스택'], ['tools', '설치할 도구'], ['repo', '저장소 구조'],
             ['local', '로컬 실행'], ['env', '환경과 브랜치'], ['github', 'GitHub 작업 순서'], ['ops', '운영과 장애 대응'], ['release', '버전과 릴리스'], ['ai', 'AI와 함께 일하기'],
             ['rules', '작업 규칙'], ['blog', '기술 블로그'], ['docs', '더 읽을 문서']]
             .map(([id, label]) => <a key={id} href={`#${id}`}>{label}</a>)}
         </nav>
       </header>
-
-      <TeamCalendar />
 
       <section className="ob-section" aria-labelledby="bomin-work-title">
         <h2 id="bomin-work-title">보민의 담당업무</h2>
