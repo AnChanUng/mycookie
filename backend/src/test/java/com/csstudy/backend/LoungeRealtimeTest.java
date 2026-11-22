@@ -14,22 +14,23 @@ import static org.mockito.Mockito.*;
 
 class LoungeRealtimeTest {
     @Test
-    void hidesPreviousKoreanDayButRetainsDatabaseArchive() {
+    void keepsHistoryAcrossDaysButStartsAtTheHistoryStartDate() {
         var repo = mock(LoungeMessageRepository.class);
         var stream = mock(LoungeStreamService.class);
         var controller = new LoungeController(repo, mock(VisitorProfileService.class),
                 mock(PresenceService.class), mock(AdminAuth.class), stream, mock(AuthService.class));
-        Instant midnight = LocalDate.now(ZoneId.of("Asia/Seoul")).atStartOfDay(ZoneId.of("Asia/Seoul")).toInstant();
-        var yesterday = message(1L, midnight.minusMillis(1), "yesterday");
-        var today = message(2L, midnight, "today");
-        when(repo.findByOrderByIdDesc(any(Pageable.class))).thenReturn(List.of(today, yesterday));
+        // 기록 시작일(2026-11-22 0시, 한국 시간) 이후 글은 날이 바뀌어도 계속 보이고, 그 이전 글은 목록에 올리지 않는다
+        Instant start = LocalDate.of(2026, 11, 22).atStartOfDay(ZoneId.of("Asia/Seoul")).toInstant();
+        var beforeStart = message(1L, start.minusMillis(1), "before");
+        var firstDay = message(2L, start, "first day");
+        var laterDay = message(3L, start.plusSeconds(3 * 86400L), "later day");
+        when(repo.findByOrderByIdDesc(any(Pageable.class))).thenReturn(List.of(laterDay, firstDay, beforeStart));
         var rows = (List<?>)controller.messages(null).get("messages");
-        assertEquals(1, rows.size());
-        assertEquals("today", ((Map<?,?>)rows.get(0)).get("text"));
-        controller.newDay();
-        verify(stream).publish(anyMap());
-        // Admin still sees both days, and a day transition never deletes database rows.
-        assertEquals(2, controller.adminList("admin").size());
+        assertEquals(2, rows.size());
+        assertEquals("first day", ((Map<?,?>)rows.get(0)).get("text"));
+        assertEquals("later day", ((Map<?,?>)rows.get(1)).get("text"));
+        // Admin still sees every row, and nothing is ever deleted from the database.
+        assertEquals(3, controller.adminList("admin").size());
         verify(repo, never()).deleteByCreatedAtBefore(any());
         verify(repo, never()).deleteById(any());
     }

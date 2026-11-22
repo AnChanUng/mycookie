@@ -9,7 +9,7 @@ globalThis.localStorage=memory();globalThis.sessionStorage=memory();
 globalThis.window=Object.assign(new EventTarget(),{location:{host:'test.invalid'}});
 globalThis.document=Object.assign(new EventTarget(),{hidden:false,referrer:''});
 const RealDate=Date;
-let now=RealDate.parse('2026-10-16T14:59:59Z');
+let now=RealDate.parse('2026-11-23T14:59:59Z');
 globalThis.Date=class extends RealDate {constructor(...args){super(...(args.length?args:[now]));}static now(){return now;}};
 class Stream {
  static instances=[];
@@ -73,10 +73,12 @@ try {
  await act(()=>stream.emit({messages:[],epoch:2,online:2}));
  assert.equal(view.root.findAllByProps({className:'lounge-bubble'}).length,0);
  await act(()=>stream.emit({messages:[confirmed],epoch:3,online:2}));
- assert.ok(midnight,'midnight timer scheduled in Korean time');
- clearTimeout(midnight.id);now+=2000;
- await act(()=>midnight.fn());
- assert.equal(view.root.findAllByProps({className:'lounge-bubble'}).length,0,'yesterday disappears at midnight without waiting for server');
+ assert.ok(!midnight,'no midnight clearing timer: history stays after the day changes');
+ assert.equal(view.root.findAllByProps({className:'lounge-bubble'}).length,1,'conversation history keeps showing');
+ // 기록 시작일(2026-11-22) 이전 글은 목록에 올리지 않는다
+ await act(()=>stream.emit({messages:[{...confirmed,id:90,text:'기록 시작 전',at:'2026-11-21T14:59:59.000Z'}],epoch:3,online:2}));
+ assert.equal(view.root.findAllByProps({className:'lounge-bubble'}).length,0,'messages before the history start are not shown');
+ await act(()=>stream.emit({messages:[confirmed],epoch:4,online:2}));
  const beforeChallenge=posts.length;
  await act(async()=>{
   view.root.findAllByType('button').find(b=>text(b)==='대결 신청').props.onClick();
@@ -90,7 +92,7 @@ try {
  await act(()=>stream.onerror());
  await act(()=>view.unmount());view=null;assert.ok(stream.closed);
  assert.deepEqual(errors,[]);
- console.log('Lounge passed: immediate pending display, failure/retry, idempotency key reuse, SSE/HTTP deduplication, draft preservation, live deletion, Korean midnight, disconnect cleanup. No live network.');
+ console.log('Lounge passed: immediate pending display, failure/retry, idempotency key reuse, SSE/HTTP deduplication, draft preservation, live deletion, history kept across days, history start, disconnect cleanup. No live network.');
 } finally {
  if(view)await act(()=>view.unmount());
  await server.close();console.error=originalError;globalThis.Date=RealDate;globalThis.setTimeout=originalTimeout;
