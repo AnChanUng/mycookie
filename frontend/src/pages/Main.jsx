@@ -32,6 +32,7 @@ const DEV_STUDY = [
 ];
 // 오늘의 CS · 대결 · 이어서 하기 카드 묶음. 쓰임새를 다시 정할 때까지 숨긴다
 const SHOW_TODAY_STUDY = false;
+const SHOW_COACH_ENTRY = false;
 const PRACTICE = [
   { to: '/exam', icon: 'building', name: '기업별 전공필기', sub: '금융공기업 · 공기업 전산직' },
   { to: '/topics', icon: 'puzzle', name: '주제별 통합 문제집', sub: '과목별로 모아 풀기' },
@@ -148,7 +149,8 @@ export default function Main() {
         </Link>}
       </section>
 
-      <StudyCoachEntry />
+      {/* AI 학습 코치 바로가기: 첫 화면에서는 숨긴다(상단 메뉴 /study-coach로 들어간다) */}
+      {SHOW_COACH_ENTRY && <StudyCoachEntry />}
 
       {/* 오늘의 학습: 쓰임새를 다시 정할 때까지 숨겨 둔다(SHOW_TODAY_STUDY) */}
       {SHOW_TODAY_STUDY && <Section id="mn-today" title="오늘의 학습">

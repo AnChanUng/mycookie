@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # 관리자 계정 만들기와 권한 주기(홈서버에서만). 관리자 키(/srv/devcookie/.env의 PROD_ADMIN_KEY, STAGING_ADMIN_KEY)로 백엔드를 부른다.
 #   sudo ./account.sh create admin1 ADMIN,TEAM     관리자 계정 만들기(비밀번호는 화면에 안 보이게 두 번 입력)
-#   sudo ./account.sh grant 쿠우키 OWNER            기존 계정에 권한 주기(ADMIN, OWNER, TEAM)
+#   sudo ./account.sh grant 쿠우키 OWNER            기존 계정에 권한 주기(ADMIN, OWNER, TEAM, BANK=비공개 문제집)
 #   sudo ./account.sh revoke 쿠우키 OWNER           권한 빼기
 #   sudo ./account.sh list                         권한 있는 계정 보기
 # 기본은 운영(127.0.0.1:8080). 스테이징은 맨 앞에 --staging을 붙인다(운영과 DB, 계정이 따로다)
