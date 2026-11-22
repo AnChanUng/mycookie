@@ -191,9 +191,11 @@ function AccountDashboard({ user, openForgot }) {
         누적 {tierStatus.membership.solvedCount.toLocaleString()}문제
         {tierStatus.membership.nextTier ? ` · ${tierStatus.membership.nextTierName || TIER_NAMES[tierStatus.membership.nextTier]} 승급 기준: 누적 ${tierStatus.membership.nextThreshold.toLocaleString()}문제 이상 · 앞으로 ${tierStatus.membership.remaining.toLocaleString()}문제` : ' · 최고 등급입니다!'}
       </p>}
+      <details className="account-fold"><summary>등급 기준 보기</summary>
       <p>동 쿠키: 기본 방문자 · 은 쿠키: 50문제 · 금 쿠키: SSAFY 16기 교육생 · 다이아 쿠키: 300문제 · 루비 쿠키: 1,000문제</p>
       <p>같은 문제의 반복 풀이는 1문제로 집계합니다.</p>
       <p>금 쿠키 Ⅴ·Ⅳ·Ⅲ·Ⅱ·Ⅰ은 각각 누적 0·30·60·100·200문제부터입니다. 금 쿠키를 부여받아도 기존 풀이 수를 그대로 사용합니다. 시험 승급으로 획득한 최소 등급은 유지됩니다.</p>
+      </details>
     </section>
     <div className="account-record-heading"><p>{user ? '계정에 저장된 기록' : '현재 브라우저의 비로그인 풀이 기록'} · 문제집별 문항 기준</p><button className="exam-btn sm" disabled={loading} onClick={() => { setLoading(true); setRevision(v => v + 1); }}>새로고침</button></div>
     {loading && <p role="status">학습 기록을 불러오는 중… 서버가 깨어나는 데 시간이 걸릴 수 있습니다.</p>}
@@ -201,15 +203,16 @@ function AccountDashboard({ user, openForgot }) {
     <div className="account-metrics">
       {[[rows.length, '풀어본 문항'], [attempts, '총 풀이 횟수'], [attempts ? `${Math.round(correct / attempts * 100)}%` : '—', '누적 정답률'], [wrong, '최근 오답 문항'], [completed.length, '전공노트 완료']].map(([value, label]) => <div key={label}><strong>{loading ? '…' : value}</strong><span>{label}</span></div>)}
     </div>
-    <section className="account-history"><h2>풀었던 문제</h2>
+    <section className="account-history">
       {!loading && !result.failed.length && retryCount > 0 && <p><Link className="exam-btn primary" to="/account/retry">오답 전체 다시 풀기 ({retryCount}문제)</Link></p>}
-      <p>기업·문제집 구분 없이 한 번이라도 틀린 문제를 모두 다시 풀 수 있습니다.</p>
+      <details className="account-fold"><summary>풀었던 문제 {!loading && `(${rows.length})`}</summary>
       <div className="account-filters"><input aria-label="풀이 기록 검색" placeholder="문제 또는 문제집 검색" value={query} onChange={e => { setQuery(e.target.value); setLimit(20); }} /><label><input type="checkbox" checked={wrongOnly} onChange={e => { setWrongOnly(e.target.checked); setLimit(20); }} /> 최근 오답만</label></div>
       {!loading && !filtered.length && <p>표시할 풀이 기록이 없습니다.</p>}
       {filtered.slice(0, limit).map(row => <details className="account-question" key={row.key}><summary><span className="account-result">{row.last === 'r' ? '정답' : '오답'}</span><span>{row.bank} · {row.title}</span></summary><div><p>총 {row.c + row.w}회 · 정답 {row.c}회 / 오답 {row.w}회{row.at > 0 && ` · 최근 풀이 ${new Date(row.at).toLocaleString('ko-KR')}`}</p>{row.question && <QuestionExplanation q={row.question} />}<Link to={row.path}>해당 문제집 열기 →</Link></div></details>)}
       {filtered.length > limit && <button className="exam-btn" onClick={() => setLimit(n => n + 20)}>20개 더 보기 ({Math.min(limit, filtered.length)}/{filtered.length})</button>}
+      </details>
     </section>
-    <section className="account-notes"><h2>학습 완료한 전공노트</h2>{completed.length ? <ul>{completed.map(entry => <li key={entry.id}><Link to={`${entry.id.startsWith('web-') ? '/web-essentials' : '/notes'}#${entry.id}`}>✓ {entry.title}</Link></li>)}</ul> : <p>아직 완료한 지식이 없습니다.</p>}<Link to="/notes">전공노트 공부하기 →</Link></section>
+    <section className="account-notes"><details className="account-fold"><summary>학습 완료한 전공노트 ({completed.length})</summary>{completed.length ? <ul>{completed.map(entry => <li key={entry.id}><Link to={`${entry.id.startsWith('web-') ? '/web-essentials' : '/notes'}#${entry.id}`}>✓ {entry.title}</Link></li>)}</ul> : <p>아직 완료한 지식이 없습니다.</p>}<Link to="/notes">전공노트 공부하기 →</Link></details></section>
     </>}
   </div>;
 }
