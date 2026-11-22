@@ -18,16 +18,8 @@
 .cn-more { display: flex; justify-content: center; margin-top: 20px; }
 .cn-note { margin: 28px 0 0; font-size: 12px; color: var(--ds-text-3); text-align: center; }
 
-/* 첫 화면의 기업 소식 구역 */
-.cn-home { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
-.cn-home li a { display: flex; align-items: baseline; gap: 10px; padding: 12px 14px; border: 1px solid var(--ds-line-strong); border-radius: 10px; background: var(--ds-surface); color: var(--ds-text); text-decoration: none; }
-.cn-home li a:hover { border-color: var(--ds-brand); }
-.cn-home .cn-company { flex: none; font-size: 12px; }
-.cn-home .cn-home-title { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 15px; font-weight: 600; }
-.cn-home time { flex: none; margin-left: auto; font-size: 12px; color: var(--ds-text-3); font-variant-numeric: tabular-nums; }
 @media (max-width: 640px) {
   .cn-item { padding: 14px; }
   .cn-title { font-size: 16px; }
-  .cn-home li a { flex-wrap: wrap; }
-  .cn-home .cn-home-title { white-space: normal; flex-basis: 100%; order: 3; }
 }
+.cn-note a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }

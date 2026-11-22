@@ -20,7 +20,6 @@ try {
   const { default: api } = await server.ssrLoadModule('/src/api.js');
   const { default: Page } = await server.ssrLoadModule('/src/pages/CompanyNewsPage.jsx');
   const { formatNewsDate } = await server.ssrLoadModule('/src/newsFormat.js');
-  const { default: Preview } = await server.ssrLoadModule('/src/components/CompanyNewsPreview.jsx');
 
   const COMPANIES = ['네이버', '카카오', '토스'];
   const make = (company, n, from = 1) => Array.from({ length: n }, (_, i) => ({
@@ -81,20 +80,8 @@ try {
   assert.ok(text(view.toJSON()).includes('불러오지 못했어요'));
   await unmount();
 
-  // 첫 화면 구역: 글이 있으면 5개를 보이고, 실패하거나 비어 있으면 구역을 그리지 않는다
-  fail = false;
-  await mount(Preview, '/');
-  assert.equal(view.root.findAll(n => n.type === 'li').length, 5);
-  assert.ok(text(view.toJSON()).includes('기업 소식'));
-  assert.equal(view.root.findAll(n => n.type === 'a' && n.props.href === '/news').length, 1, '전체 보기 링크');
-  await unmount();
-  fail = true;
-  await mount(Preview, '/');
-  assert.equal(view.toJSON(), null, '실패하면 구역을 숨긴다');
-  await unmount();
-
   assert.deepEqual(errors, []);
-  console.log('Company news passed: 20 per page, load more, per-company filter and URL, unsafe company fallback, error state, home preview hides when empty. No live network.');
+  console.log('Company news passed: 20 per page, load more, per-company filter and URL, unsafe company fallback, error state. No live network.');
 } finally {
   console.error = originalError;
   await server.close();
