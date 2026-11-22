@@ -45,7 +45,12 @@ try {
     return { data, status: 200, statusText: 'OK', headers: {}, config };
   };
   await mount(Menu);
-  assert.equal(view.root.findAllByProps({ 'aria-label': '등급 은 쿠키 Ⅴ' }).length, 1); assert.ok(text(view.toJSON()).includes('기존방문자'));
+  // 로그인하지 않았으면 익명 닉네임과 등급을 보여 주지 않는다(헤더의 로그인 버튼이 대신한다)
+  const menuButtons = () => view.root.findAll(n => n.type === 'button' && String(n.props.className || '').includes('member-menu'));
+  assert.equal(menuButtons().length, 0, '방문자에게는 계정 메뉴를 보여 주지 않는다');
+  assert.ok(!text(view.toJSON()).includes('기존방문자'));
+  assert.equal(view.root.findAllByProps({ 'aria-label': '등급 은 쿠키 Ⅴ' }).length, 0);
+  await act(() => { localStorage.setItem('sync:account', JSON.stringify({ token: 'test-account', nickname: '회원닉네임' })); window.dispatchEvent(new Event('sync:change')); });
   // 헤더의 내 계정은 누르면 열리는 메뉴다(등급, 학습 현황, 바로가기, 로그아웃). 비밀번호 찾기는 계정 페이지로 옮겼다
   const menuButton = () => view.root.find(n => n.type === 'button' && String(n.props.className || '').includes('member-menu'));
   const menuLink = label => view.root.findAllByType('a').find(link => text(link).startsWith(label));
@@ -55,11 +60,8 @@ try {
   assert.equal(menuButton().props['aria-expanded'], true);
   assert.equal(menuLink('계정 설정')?.props.href, '/account#settings');
   assert.equal(menuLink('내 학습 자세히 보기')?.props.href, '/stats');
-  assert.ok(menuLink('로그인하고 기록 지키기'), '방문자는 로그아웃 대신 로그인 안내');
-  assert.equal(logoutButton().length, 0);
+  assert.equal(logoutButton().length, 1, '로그인한 계정은 메뉴 맨 아래에 로그아웃');
   assert.equal(view.root.findAllByType('a').filter(link => text(link) === '비밀번호 찾기').length, 0);
-  guestName = '변경한방문자'; await act(() => saveNickname(guestName));
-  assert.ok(text(view.toJSON()).includes(guestName));
   await act(() => { localStorage.setItem('sync:account',JSON.stringify({ token: 'test-account', nickname: '회원닉네임' })); window.dispatchEvent(new Event('sync:change')); });
   assert.equal(logoutButton().length, 1, '로그인하면 메뉴 맨 아래에 로그아웃');
   assert.equal(view.root.findAllByProps({ 'aria-label': '등급 금 쿠키 Ⅴ' }).length, 2, '메뉴가 열려 있으면 버튼과 메뉴에 배지가 하나씩'); assert.ok(text(view.toJSON()).includes('회원닉네임'));
@@ -67,7 +69,7 @@ try {
   assert.ok(text(view.toJSON()).includes('바꾼회원'));
   fail = true;
   await act(() => { localStorage.removeItem('sync:account'); window.dispatchEvent(new Event('sync:change')); });
-  assert.ok(text(view.toJSON()).includes('등급 확인 필요')); assert.equal(view.root.findAllByProps({ 'aria-label': '등급 금 쿠키 Ⅴ' }).length, 0);
+  assert.equal(menuButtons().length, 0, '로그아웃하면 계정 메뉴가 사라진다'); assert.equal(view.root.findAllByProps({ 'aria-label': '등급 금 쿠키 Ⅴ' }).length, 0);
   await unmount(); fail = false;
   await mount(Rank);
   assert.equal(view.root.findAll(n => n.type === 'span' && String(n.props.className || '').startsWith('tier-badge')).length, 5);
