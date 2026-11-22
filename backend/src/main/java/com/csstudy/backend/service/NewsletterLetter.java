@@ -126,38 +126,49 @@ public class NewsletterLetter {
     private static final java.time.ZoneId SEOUL = java.time.ZoneId.of("Asia/Seoul");
     private static final java.time.format.DateTimeFormatter DATE = java.time.format.DateTimeFormatter.ofPattern("yyyy.MM.dd");
 
-    /** 오늘의 학습 세트 메일: 오늘의 문제 → 오늘의 CS → 기술블로그(수집한 글, 없으면 생략) → 맨 아래 정답과 해설. */
-    public Letter buildDaily(NewsletterDailySets.DailySet set, NewsArticle blog, String baseUrl, String unsubscribeUrl) {
+    /**
+     * 오늘의 학습 세트 메일: 오늘의 문제 → (오늘의 CS, 있을 때만) → 문제와 이어지는 기술블로그 → 맨 아래 정답과 해설 → 더 공부하기.
+     * 기술블로그는 세트에 정해 둔 글을 쓰고, 없으면 발송할 때 고른 수집 글(crawled)을 쓴다. 둘 다 없으면 그 칸을 건너뛴다.
+     */
+    public Letter buildDaily(NewsletterDailySets.DailySet set, NewsArticle crawled, String baseUrl, String unsubscribeUrl) {
         NewsletterDailySets.Question q = set.question();
         NewsletterDailySets.Cs cs = set.cs();
+        int section = 1;
         Doc doc = new Doc();
         doc.title("나의쿠키 오늘의 학습 #" + set.day() + " | " + set.theme());
-        doc.line("오늘은 **" + set.theme() + "**를 문제, 개념, 실제 사례 순서로 봅니다. 10분이면 충분해요.");
+        doc.line("오늘의 주제는 **" + set.theme() + "**입니다. 문제를 먼저 풀고, 실제 기업 사례를 읽은 뒤 정답을 확인해 보세요.");
 
-        doc.heading("1. 오늘의 문제 · " + q.title());
+        doc.heading(section++ + ". 오늘의 문제 · " + q.title());
         if (q.context() != null && !q.context().isBlank()) doc.line(q.context());
         if (q.code() != null && !q.code().isBlank()) doc.code(q.code());
         doc.line("**Q. " + q.prompt() + "**");
         for (int i = 0; i < q.options().size(); i++) doc.line(MARKS[i] + " " + q.options().get(i));
         doc.note("먼저 답을 골라 보세요. 정답과 해설은 메일 맨 아래에 있어요.");
 
-        doc.heading("2. 오늘의 CS · " + cs.title());
-        for (String paragraph : cs.body()) doc.line(paragraph);
-        doc.subheading("핵심 정리");
-        for (String point : cs.points()) doc.bullet(point);
-        if (cs.followUp() != null) {
-            doc.subheading("면접 꼬리질문");
-            doc.line("**Q. " + cs.followUp().question() + "**");
-            doc.line(cs.followUp().answer());
+        if (cs != null) {
+            doc.heading(section++ + ". 오늘의 CS · " + cs.title());
+            for (String paragraph : cs.body()) doc.line(paragraph);
+            doc.subheading("핵심 정리");
+            for (String point : cs.points()) doc.bullet(point);
+            if (cs.followUp() != null) {
+                doc.subheading("면접 꼬리질문");
+                doc.line("**Q. " + cs.followUp().question() + "**");
+                doc.line(cs.followUp().answer());
+            }
         }
 
-        // 수집해 둔 기업 블로그 글. 아직 수집된 글이 없으면 이 칸은 건너뛴다
+        NewsletterDailySets.Blog blog = set.blog();
         if (blog != null) {
-            doc.heading("3. 오늘의 기술블로그 · " + blog.getCompany());
-            doc.link(blog.getTitle() + " (" + DATE.format(blog.getPublishedAt().atZone(SEOUL)) + ")", blog.getUrl());
-            String summary = blog.getSummary() == null ? "" : blog.getSummary().strip();
+            doc.heading(section + ". 이 문제와 이어지는 기술블로그 · " + blog.company());
+            doc.link(blog.title() + (blog.published() == null || blog.published().isBlank() ? "" : " (" + blog.published() + ")"), blog.url());
+            if (blog.note() != null && !blog.note().isBlank()) doc.line(blog.note());
+            doc.note("전체 내용은 원문에서 읽어 주세요.");
+        } else if (crawled != null) {
+            doc.heading(section + ". 오늘의 기술블로그 · " + crawled.getCompany());
+            doc.link(crawled.getTitle() + " (" + DATE.format(crawled.getPublishedAt().atZone(SEOUL)) + ")", crawled.getUrl());
+            String summary = crawled.getSummary() == null ? "" : crawled.getSummary().strip();
             if (!summary.isEmpty()) doc.line(summary.length() > 160 ? summary.substring(0, 159).strip() + "…" : summary);
-            doc.note(blog.getSourceName() + "에 올라온 글입니다. 전체 내용은 원문에서 읽어 주세요.");
+            doc.note(crawled.getSourceName() + "에 올라온 글입니다. 전체 내용은 원문에서 읽어 주세요.");
         }
 
         doc.heading("정답과 해설");

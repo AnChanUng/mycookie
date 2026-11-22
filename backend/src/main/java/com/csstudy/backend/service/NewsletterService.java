@@ -147,7 +147,8 @@ public class NewsletterService {
         NewsletterLetter.Letter letter = dailySets.find(sent + 1)
                 .map(set -> {
                     s.setSetsSent(sent + 1);
-                    NewsArticle blog = nextBlog(s);
+                    // 세트에 문제와 이어지는 글이 정해져 있으면 그것을 쓰고, 없을 때만 수집 글에서 고른다
+                    NewsArticle blog = set.blog() == null ? nextBlog(s) : null;
                     if (blog != null) s.setLastBlogArticleId(blog.getId());
                     return letters.buildDaily(set, blog, baseUrl, unsubscribeUrl);
                 })
