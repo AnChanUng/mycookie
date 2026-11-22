@@ -179,6 +179,10 @@ export default function Main() {
         </div>
       </Section>}
 
+      <Section id="mn-cs" title="전공노트">
+        <div className="mn-cards mn-cards--single">{CS_STUDY.map(item => <Category key={item.to} {...item} />)}</div>
+      </Section>
+
       <Section id="mn-ai" title="AI">
         <div className="mn-cards mn-cards--single">{AI_STUDY.map(item => <Category key={item.to} {...item} />)}</div>
       </Section>
@@ -187,12 +191,8 @@ export default function Main() {
         <div className="mn-cards mn-cards--2">{WEB_STUDY.map(item => <Category key={item.to} {...item} />)}</div>
       </Section>
 
-      <Section id="mn-practice" title="전공필기" more={{ to: '/exam', label: '전체 보기' }}>
+      <Section id="mn-practice" title="전공필기" note={<>개념은 <Link to="/notes">전공노트</Link>에서 먼저 보세요</>} more={{ to: '/exam', label: '전체 보기' }}>
         <div className="mn-cards">{PRACTICE.map(item => <Category key={item.to} {...item} />)}</div>
-      </Section>
-
-      <Section id="mn-cs" title="전공노트">
-        <div className="mn-cards mn-cards--single">{CS_STUDY.map(item => <Category key={item.to} {...item} />)}</div>
       </Section>
 
       <Section id="mn-coding" title="코딩테스트" note="외부 사이트로 새 탭에서 열려요">
