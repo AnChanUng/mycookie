@@ -108,11 +108,3 @@
 }
 
 /* 학습 메일 구독 */
-.newsletter-subscribe { margin: 0 0 40px; padding: 24px; border-radius: 16px; background: rgba(255, 255, 255, 0.1); }
-.newsletter-subscribe h2 { margin: 0 0 6px; font-size: 18px; color: #fff; }
-.newsletter-subscribe p { margin: 0 0 14px; font-size: 14px; line-height: 1.6; }
-.newsletter-row { display: flex; gap: 8px; flex-wrap: wrap; }
-.newsletter-row input { flex: 1 1 220px; min-width: 0; padding: 11px 14px; border: none; border-radius: 10px; font-size: 15px; }
-.newsletter-row button { padding: 11px 20px; border: none; border-radius: 10px; font-weight: 700; color: #fff; background: #6366f1; cursor: pointer; }
-.newsletter-row button:disabled { opacity: 0.55; cursor: not-allowed; }
-.newsletter-agree { display: flex; gap: 8px; align-items: flex-start; margin-top: 10px; font-size: 13px; line-height: 1.5; }
