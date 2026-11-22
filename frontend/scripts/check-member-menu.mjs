@@ -34,7 +34,7 @@ try {
       : { tier: config.headers.Authorization ? 'GOLD' : 'SILVER', nickname: config.headers.Authorization ? JSON.parse(localStorage.getItem('sync:account')).nickname : guestName, solvedCount: 50 };
     else if (config.url === '/auth/me') {
       const user = JSON.parse(localStorage.getItem('sync:account') || 'null');
-      data = { nickname: user?.nickname, roles: user?.token === 'cookie-owner' ? ['OWNER'] : [], privateBank: user?.token === 'bank-guest' };
+      data = { nickname: user?.nickname, roles: user?.token === 'cookie-owner' ? ['OWNER'] : user?.token === 'admin-user' ? ['ADMIN'] : [], privateBank: user?.token === 'bank-guest' };
     }
     else if (config.url === '/profile/badges') data = [{ name: '16기 대전 4반' }];
     else if (config.url === '/auth/nickname') data = { nickname: JSON.parse(config.data).nickname };
@@ -133,6 +133,14 @@ try {
     await unmount();
     await mount(() => React.createElement(Gate, { role: 'OWNER', title: '전용 페이지' }, React.createElement('p', null, '개인 면접 자료')));
     assert.equal(text(view.toJSON()).includes('개인 면접 자료'), allowed);
+    await unmount();
+  }
+  // 관리자 페이지 바로가기는 ADMIN 권한 계정에게만 보인다
+  for (const [token, allowed] of [['admin-user', true], ['cookie-owner', false], ['ordinary-user', false]]) {
+    localStorage.setItem('sync:account', JSON.stringify({ id: token, token, nickname: '아무개' }));
+    await mount(Menu);
+    await act(() => view.root.findAllByType('button').find(b => b.props['aria-haspopup'] === 'menu').props.onClick());
+    assert.equal(view.root.findAll(n => n.props.role === 'menuitem' && n.props.to === '/admin').length, allowed ? 1 : 0, token);
     await unmount();
   }
   // 비공개 문제집 바로가기는 서버가 열어 준 계정(privateBank)에게만 보인다. 닉네임은 화면 코드에 없다
