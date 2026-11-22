@@ -24,5 +24,5 @@ export function decodePrivateId(code) {
 /** 관리자 화면 주소. id가 없으면 첫 화면(목록). */
 export const privatePath = (id) => (id ? `${PRIVATE_BASE}/${encodePrivateId(id)}` : PRIVATE_BASE);
 
-// 비공개 문제집(BANK 권한 + 다이아 쿠키 이상). 주소는 숨기지 않고 권한으로 막는다(pages/PrivateBanksPage.jsx)
+// 비공개 문제집(찬웅과 지정한 계정만). 주소는 숨기지 않고 계정으로 막는다(pages/PrivateBanksPage.jsx)
 export const PRIVATE_BANKS_PATH = '/private/banks';

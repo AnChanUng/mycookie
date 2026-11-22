@@ -162,7 +162,7 @@ function App() {
           <Route path="x/f9aa1502c8" element={<OnboardingPage />} />
           <Route path="private/bomin/log" element={<Navigate to="/x/f9aa1502c8/log" replace />} />
           <Route path="x/f9aa1502c8/log" element={<DevLogPage />} />
-          {/* 비공개 문제집: BANK 권한 + 다이아 쿠키 이상(찬웅은 OWNER로 열린다) */}
+          {/* 비공개 문제집: 찬웅(OWNER)과 지정한 계정만(useRoles.js의 PRIVATE_BANK_NICKNAMES) */}
           <Route path="private/banks" element={<PrivateBanksPage />} />
           <Route path="private/banks/:id" element={<PrivateBanksPage />} />
           <Route path="x/c7e19b4f2d" element={<PrivateChanungPage />} />
