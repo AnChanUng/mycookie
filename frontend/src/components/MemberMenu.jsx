@@ -4,7 +4,8 @@ import { account, onAccountChange, signOut } from '../sync';
 import { onNicknameChange, savedNickname } from '../nickname';
 import { useMembership } from '../membership';
 import TierBadge from './TierBadge';
-import useRoles from '../useRoles';
+import useRoles, { canOpenPrivateBanks } from '../useRoles';
+import { PRIVATE_BANKS_PATH } from '../privatePath';
 
 const snapshot = () => `${account()?.token || ''}:${account()?.nickname || ''}:${savedNickname()}`;
 const subscribe = listener => {
@@ -26,6 +27,8 @@ export default function MemberMenu() {
   const signedIn = !!account()?.token;
   const access = useRoles();
   const showCareer = access.signedIn && !access.loading && access.nickname === '쿠우키';
+  // 비공개 문제집 권한(BANK)을 받은 다이아 쿠키 이상 계정에게만 바로가기를 보여 준다(찬웅은 [취업] 안찬웅 안에서 들어간다)
+  const showBanks = access.signedIn && !access.loading && !showCareer && canOpenPrivateBanks(access);
   const nickname = membership?.nickname || account()?.nickname || savedNickname() || '방문자';
   const [open, setOpen] = useState(false);
   const [learning, setLearning] = useState(null);
@@ -97,6 +100,7 @@ export default function MemberMenu() {
 
       <nav className="member-panel-links">
         {showCareer && <Link to="/private/chanung" role="menuitem" onClick={() => setOpen(false)}>[취업] 안찬웅<span aria-hidden="true">›</span></Link>}
+        {showBanks && <Link to={PRIVATE_BANKS_PATH} role="menuitem" onClick={() => setOpen(false)}>비공개 문제집<span aria-hidden="true">›</span></Link>}
         {LINKS.map(l => <Link key={l.to} to={l.to} role="menuitem" onClick={() => setOpen(false)}>{l.label}<span aria-hidden="true">›</span></Link>)}
       </nav>
 
