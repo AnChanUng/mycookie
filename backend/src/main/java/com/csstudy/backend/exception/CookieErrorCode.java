@@ -32,6 +32,9 @@ public enum CookieErrorCode {
     SERVICE_UNAVAILABLE(HttpStatus.SERVICE_UNAVAILABLE, "지금은 이 기능을 쓸 수 없어요. 잠시 후 다시 시도해 주세요."),
 
     // 학습 메일
+    NEWSLETTER_CODE_WRONG(HttpStatus.BAD_REQUEST, "인증 번호가 맞지 않아요. 메일의 6자리 번호를 다시 확인해 주세요."),
+    NEWSLETTER_CODE_EXPIRED(HttpStatus.BAD_REQUEST, "인증 번호가 만료되었거나 받은 적이 없어요. 새 번호를 받아 주세요."),
+    NEWSLETTER_CODE_LOCKED(HttpStatus.TOO_MANY_REQUESTS, "인증 번호를 너무 여러 번 틀렸어요. 새 번호를 받아 주세요."),
     NEWSLETTER_FULL(HttpStatus.CONFLICT, "학습 메일 구독자가 가득 찼어요. 자리가 나면 다시 열릴 테니 나중에 다시 신청해 주세요."),
 
     // 계정

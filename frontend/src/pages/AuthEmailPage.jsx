@@ -104,7 +104,7 @@ function NewsletterLinkPage({ param, path, title, loading, done, fallback }) {
 // /newsletter/confirm?token=...
 export function NewsletterConfirmPage() {
   return <NewsletterLinkPage param="token" path="/newsletter/confirm" title="학습 메일 구독" loading="구독을 확인하는 중…"
-    done="구독이 완료되었어요. 첫 학습 메일을 지금 보냈으니 메일함을 확인해 주세요. 이후에는 매일 아침 8시 30분에 도착합니다."
+    done="구독이 완료되었어요. 다음 평일 아침 8시 30분부터 학습 메일이 도착합니다(월~금)."
     fallback="구독을 확인하지 못했습니다." />;
 }
 

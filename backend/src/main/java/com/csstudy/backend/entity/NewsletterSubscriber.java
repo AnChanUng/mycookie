@@ -36,6 +36,10 @@ public class NewsletterSubscriber {
     @Column(name = "confirm_hash", length = 64)
     private String confirmHash;
 
+    // 인증 번호를 틀린 횟수(번호를 새로 받으면 0으로 돌린다)
+    @Column(name = "confirm_attempts")
+    private Integer confirmAttempts;
+
     @Column(name = "confirm_sent_at")
     private LocalDateTime confirmSentAt;
 

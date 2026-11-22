@@ -21,3 +21,10 @@
   .hs-trigger { height: 32px; padding: 0 11px; font-size: 13px; }
   .hs-panel { position: fixed; top: 56px; left: 12px; right: 12px; width: auto; }
 }
+
+/* 인증 번호 입력 */
+.hs-panel input.hs-code { height: 48px; text-align: center; font-size: 22px; font-weight: 800; letter-spacing: .4em; padding-left: .4em; }
+.hs-links { display: flex; justify-content: space-between; gap: 8px; }
+.hs-link { border: 0; background: none; padding: 4px 0; color: var(--ds-text-2); font-size: 12px; cursor: pointer; }
+.hs-link:hover:not(:disabled) { color: var(--ds-brand); }
+.hs-link:disabled { color: var(--ds-text-3); cursor: default; }
