@@ -145,3 +145,15 @@
   .auth-card { padding: 28px 20px; }
   .account-auth .account-password-form { grid-template-columns: minmax(0, 1fr); }
 }
+
+/* 계정 화면: 긴 목록은 접어 두고 요약만 먼저 보여 준다 */
+.account-fold > summary { cursor: pointer; list-style: none; font-size: var(--ds-fs-body); font-weight: 700; color: var(--ds-text); display: flex; align-items: center; justify-content: space-between; gap: var(--ds-s2); }
+.account-fold > summary::-webkit-details-marker { display: none; }
+.account-fold > summary::after { content: '▾'; color: var(--ds-text-3); transition: transform var(--ds-fast) var(--ds-ease); }
+.account-fold[open] > summary::after { transform: rotate(180deg); }
+.account-fold[open] > summary { margin-bottom: var(--ds-s4); }
+.account-fold > p { font-size: var(--ds-fs-small); color: var(--ds-text-2); line-height: 1.65; margin: 0 0 var(--ds-s2); }
+.membership-panel { border: 1px solid var(--ds-line-strong); border-radius: var(--ds-r-xl); padding: var(--ds-s5) var(--ds-s6); margin-bottom: var(--ds-s5); background: var(--ds-surface); }
+.membership-panel > p { margin: 0 0 var(--ds-s3); color: var(--ds-text-2); font-size: var(--ds-fs-small); }
+.account-metrics > div { border: 1px solid var(--ds-line); background: var(--ds-surface); border-radius: var(--ds-r-lg, 12px); padding: var(--ds-s4); }
+.account-history, .account-notes { border-color: var(--ds-line-strong); border-radius: var(--ds-r-xl); background: var(--ds-surface); }
