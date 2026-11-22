@@ -22,12 +22,11 @@ const CODING_SITES = [
   { name: '리트코드', sub: '해외 기업 대비', href: 'https://leetcode.com/problemset/' },
 ];
 const CS_STUDY = [
-  { to: '/cs', icon: 'puzzle', name: '컴퓨터공학', sub: '핵심 개념 · 과목별 학습' },
   { to: '/notes', icon: 'book', name: '전공노트', sub: '운영체제 · 네트워크 · 데이터베이스' },
 ];
 const DEV_STUDY = [
-  { to: '/web', icon: 'code', name: '웹', sub: 'Spring · JPA · DB · Servlet' },
   { to: '/ai', icon: 'brain', name: 'AI', sub: '딥러닝 · 머신러닝 · 빅데이터 AI' },
+  { to: '/web', icon: 'code', name: '웹', sub: 'Spring · JPA · DB · Servlet' },
   { to: '/web-essentials', icon: 'globe', name: '웹 필수지식', sub: 'HTTP · 쿠키와 세션 · CORS' },
 ];
 // 오늘의 CS · 대결 · 이어서 하기 카드 묶음. 쓰임새를 다시 정할 때까지 숨긴다
@@ -122,7 +121,7 @@ export default function Main() {
         <div className="mn-hello">
           <p className="ds-eyebrow">{dateLabel}</p>
           <h1 className="mn-h1">{user?.nickname ? `${user.nickname}님, 오늘은 뭘 공부해 볼까요?` : '개발자 공부, 여기 다 있어요'}</h1>
-          <p className="mn-sub">AI, 컴퓨터공학, 웹 개발 모든 공부를 한곳에서</p>
+          <p className="mn-sub">AI, 웹 개발, 컴퓨터공학 모든 공부를 한곳에서</p>
           <div className="mn-chips">
             {membership && <Link to="/account" className="ds-chip"><TierBadge tier={membership.tier} division={membership.division} />{TIER_NAMES[membership.tier]}</Link>}
             {learning?.streak > 0 && <Link to="/stats" className="ds-chip">{learning.streak}일 연속 학습</Link>}
@@ -178,12 +177,12 @@ export default function Main() {
         </div>
       </Section>}
 
-      <Section id="mn-dev" title="웹 · AI">
+      <Section id="mn-dev" title="AI · 웹">
         <div className="mn-cards">{DEV_STUDY.map(item => <Category key={item.to} {...item} />)}</div>
       </Section>
 
       <Section id="mn-cs" title="컴퓨터공학" more={{ to: '/cs', label: '전체 보기' }}>
-        <div className="mn-cards mn-cards--2">{CS_STUDY.map(item => <Category key={item.to} {...item} />)}</div>
+        <div className="mn-cards mn-cards--single">{CS_STUDY.map(item => <Category key={item.to} {...item} />)}</div>
       </Section>
 
       <Section id="mn-practice" title="전공필기" more={{ to: '/exam', label: '전체 보기' }}>
