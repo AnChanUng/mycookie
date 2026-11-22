@@ -31,6 +31,9 @@ public enum CookieErrorCode {
     INTERNAL_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버에 문제가 생겼어요. 잠시 후 다시 시도해 주세요."),
     SERVICE_UNAVAILABLE(HttpStatus.SERVICE_UNAVAILABLE, "지금은 이 기능을 쓸 수 없어요. 잠시 후 다시 시도해 주세요."),
 
+    // 학습 메일
+    NEWSLETTER_FULL(HttpStatus.CONFLICT, "학습 메일 구독자가 가득 찼어요. 자리가 나면 다시 열릴 테니 나중에 다시 신청해 주세요."),
+
     // 계정
     NICKNAME_DUPLICATED(HttpStatus.CONFLICT, "이미 사용 중인 닉네임입니다. 다른 이름을 사용해 주세요."),
     NICKNAME_RESERVED(HttpStatus.BAD_REQUEST, "관리용으로 예약된 닉네임이에요. 다른 이름을 사용해 주세요."),

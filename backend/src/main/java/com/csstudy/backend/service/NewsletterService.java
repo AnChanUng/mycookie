@@ -4,6 +4,8 @@ import com.csstudy.backend.entity.NewsletterSubscriber;
 import com.csstudy.backend.news.NewsArticle;
 import com.csstudy.backend.news.NewsArticleRepository;
 import com.csstudy.backend.entity.NewsletterSubscriber.Status;
+import com.csstudy.backend.exception.CookieErrorCode;
+import com.csstudy.backend.exception.CookieException;
 import com.csstudy.backend.repository.NewsletterSubscriberRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -45,11 +47,13 @@ public class NewsletterService {
     private final TransactionTemplate tx;
     private final String baseUrl;
     private final int dailyLimit;
+    private final int maxSubscribers;
 
     public NewsletterService(NewsletterSubscriberRepository subscribers, NewsletterLetter letters, NewsletterDailySets dailySets, NewsArticleRepository articles, MailService mail,
                              TransactionTemplate tx,
                              @Value("${app.base-url:http://localhost:3000}") String baseUrl,
-                             @Value("${app.newsletter.daily-limit:400}") int dailyLimit) {
+                             @Value("${app.newsletter.daily-limit:400}") int dailyLimit,
+                             @Value("${app.newsletter.max-subscribers:400}") int maxSubscribers) {
         this.subscribers = subscribers;
         this.letters = letters;
         this.dailySets = dailySets;
@@ -58,6 +62,7 @@ public class NewsletterService {
         this.tx = tx;
         this.baseUrl = baseUrl.replaceAll("/+$", "");
         this.dailyLimit = dailyLimit;
+        this.maxSubscribers = maxSubscribers;
     }
 
     public boolean enabled() {
@@ -73,6 +78,9 @@ public class NewsletterService {
         if (s != null && s.getStatus() == Status.ACTIVE) return;
         LocalDateTime now = LocalDateTime.now(SEOUL);
         if (s != null && s.getConfirmSentAt() != null && s.getConfirmSentAt().isAfter(now.minusMinutes(1))) return;
+        // 구독자는 최대 maxSubscribers명. 이미 자리를 잡은(확인 링크가 유효한) 신청이면 자리를 더 쓰지 않는다
+        boolean holdsSeat = s != null && s.getStatus() == Status.PENDING && s.getConfirmSentAt() != null && s.getConfirmSentAt().isAfter(now.minus(CONFIRM_TTL));
+        if (!holdsSeat && subscribers.countTaken(now.minus(CONFIRM_TTL)) >= maxSubscribers) throw new CookieException(CookieErrorCode.NEWSLETTER_FULL);
         if (s == null) {
             s = NewsletterSubscriber.builder().email(email).status(Status.PENDING).unsubscribeKey(random()).nextIndex(0).build();
         }
@@ -96,6 +104,8 @@ public class NewsletterService {
         if (s.getStatus() != Status.PENDING || s.getConfirmSentAt() == null || s.getConfirmSentAt().isBefore(now.minus(CONFIRM_TTL))) {
             throw bad(message);
         }
+        // 확인하는 순간에도 정원을 넘지 않게 다시 본다(신청해 둔 사이 다른 사람이 먼저 확인했을 수 있다)
+        if (subscribers.countByStatus(Status.ACTIVE) >= maxSubscribers) throw new CookieException(CookieErrorCode.NEWSLETTER_FULL);
         s.setStatus(Status.ACTIVE);
         s.setConfirmHash(null);
         s.setConfirmedAt(now);
