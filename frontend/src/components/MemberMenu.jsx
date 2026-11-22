@@ -4,7 +4,8 @@ import { account, onAccountChange, signOut } from '../sync';
 import { onNicknameChange, savedNickname } from '../nickname';
 import { useMembership } from '../membership';
 import TierBadge from './TierBadge';
-import useRoles from '../useRoles';
+import useRoles, { canOpenPrivateBanks } from '../useRoles';
+import { PRIVATE_BANKS_PATH } from '../privatePath';
 
 const snapshot = () => `${account()?.token || ''}:${account()?.nickname || ''}:${savedNickname()}`;
 const subscribe = listener => {
@@ -25,7 +26,9 @@ export default function MemberMenu() {
   const { membership, loading, error } = useMembership(`${identity}:${location.pathname}`);
   const signedIn = !!account()?.token;
   const access = useRoles();
-  const showCareer = access.signedIn && !access.loading && access.nickname === '쿠우키';
+  const showCareer = access.signedIn && !access.loading && access.roles.includes('OWNER');
+  // 비공개 문제집을 볼 수 있는 계정에게만 바로가기를 보여 준다(찬웅은 [취업] 안찬웅 안에서 들어간다)
+  const showBanks = access.signedIn && !access.loading && !showCareer && canOpenPrivateBanks(access);
   const nickname = membership?.nickname || account()?.nickname || savedNickname() || '방문자';
   const [open, setOpen] = useState(false);
   const [learning, setLearning] = useState(null);
@@ -65,6 +68,8 @@ export default function MemberMenu() {
   };
 
   const status = membership ? null : loading ? '등급 확인 중' : error ? '등급 확인 필요' : '내 계정';
+  // 로그인하지 않았으면 익명 닉네임과 등급을 보여 주지 않는다(헤더의 로그인 버튼으로 로그인을 이끈다). 방금 로그아웃한 안내만 남긴다
+  if (!signedIn) return notice ? <div className="member-menu-actions"><p className="member-notice" role="status">{notice}</p></div> : null;
   return <div className="member-menu-actions" ref={boxRef}>
     <button type="button" ref={buttonRef} onClick={() => setOpen(o => !o)}
       className={`account-nav-link member-menu${open || location.pathname.startsWith('/account') ? ' active' : ''}`}
@@ -97,6 +102,7 @@ export default function MemberMenu() {
 
       <nav className="member-panel-links">
         {showCareer && <Link to="/private/chanung" role="menuitem" onClick={() => setOpen(false)}>[취업] 안찬웅<span aria-hidden="true">›</span></Link>}
+        {showBanks && <Link to={PRIVATE_BANKS_PATH} role="menuitem" onClick={() => setOpen(false)}>비공개 문제집<span aria-hidden="true">›</span></Link>}
         {LINKS.map(l => <Link key={l.to} to={l.to} role="menuitem" onClick={() => setOpen(false)}>{l.label}<span aria-hidden="true">›</span></Link>)}
       </nav>
 

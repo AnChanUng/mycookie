@@ -30,6 +30,7 @@ const StatsPage = lazy(() => import('./pages/StatsPage'));
 const CsHubPage = lazy(() => import('./pages/CsHubPage'));
 const InterviewPracticePage = lazy(() => import('./pages/InterviewPracticePage'));
 const CsNotesPage = lazy(() => import('./pages/CsNotesPage'));
+const CompanyNewsPage = lazy(() => import('./pages/CompanyNewsPage'));
 const WebEssentialsPage = lazy(() => import('./pages/WebEssentialsPage'));
 const WebPage = lazy(() => import('./pages/WebPage'));
 const AiPage = lazy(() => import('./pages/AiPage'));
@@ -45,6 +46,7 @@ const MajorExamPage = lazy(() => import('./pages/MajorExamPage'));
 const ExamListPage = lazy(() => import('./pages/ExamListPage'));
 const ExamCompanyPage = lazy(() => import('./pages/ExamCompanyPage'));
 const PrivateChanungPage = lazy(() => import('./pages/PrivateChanungPage'));
+const PrivateBanksPage = lazy(() => import('./pages/PrivateBanksPage'));
 const PrivateRedirect = lazy(() => import('./pages/PrivateRedirect'));
 const AdminRoute = lazy(() => import('./pages/AdminRoute'));
 const TopicPage = lazy(() => import('./pages/TopicPage'));
@@ -114,7 +116,7 @@ function App() {
           {/* AWS · 현대오토에버 면접 자료는 관리자 페이지(다른 사람 면접)로 옮김 */}
           <Route path="technical-interview" element={<Navigate to="/cs" replace />} />
           <Route path="p/7b92e1c4-a6d8-4f03-9c51-26de8a740bf9/technical" element={<Navigate to="/private/chanung/interviews" replace />} />
-          <Route element={<RoleGate nickname="쿠우키" title="면접준비하기"><Outlet /></RoleGate>}>
+          <Route element={<RoleGate role="OWNER" title="면접준비하기"><Outlet /></RoleGate>}>
           <Route path="chanung" element={<PracticeEntry suffix="/companies" />} />
           <Route path="p/7b92e1c4-a6d8-4f03-9c51-26de8a740bf9/companies" element={<CompanyPrepPage />} />
           <Route path="p/7b92e1c4-a6d8-4f03-9c51-26de8a740bf9/ai-focus" element={<DeloitteAiFocusPage />} />
@@ -129,6 +131,7 @@ function App() {
           </Route>
           <Route path="ai-interview" element={<Navigate to="/" replace />} />
           <Route path="notes" element={<CsNotesPage />} />
+          <Route path="news" element={<CompanyNewsPage />} />
           <Route path="web-essentials" element={<WebEssentialsPage />} />
           <Route path="notes/web-essentials" element={<WebEssentialsRedirect />} />
           <Route path="web" element={<WebPage />} />
@@ -159,6 +162,9 @@ function App() {
           <Route path="x/f9aa1502c8" element={<OnboardingPage />} />
           <Route path="private/bomin/log" element={<Navigate to="/x/f9aa1502c8/log" replace />} />
           <Route path="x/f9aa1502c8/log" element={<DevLogPage />} />
+          {/* 비공개 문제집: 찬웅(OWNER)과 지정한 계정만(useRoles.js의 PRIVATE_BANK_NICKNAMES) */}
+          <Route path="private/banks" element={<PrivateBanksPage />} />
+          <Route path="private/banks/:id" element={<PrivateBanksPage />} />
           <Route path="x/c7e19b4f2d" element={<PrivateChanungPage />} />
           <Route path="x/c7e19b4f2d/:code" element={<PrivateChanungPage />} />
           <Route path="private/chanung" element={<PrivateRedirect />} />

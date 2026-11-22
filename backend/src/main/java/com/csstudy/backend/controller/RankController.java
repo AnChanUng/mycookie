@@ -34,7 +34,15 @@ public class RankController {
     // account: 동기화 계정으로 묶인 줄이면 그 계정의 닉네임, 아니면 null
     private record Solver(String visitorId, long count, String account, UserTier baseTier, String subjectKey) {}
 
-    private record Board(List<Solver> ranked, Map<String, Integer> rankOf, Instant at) {}
+    // hiddenSolved · hiddenSolvers: 순위표에서 뺀 관리 계정(admin1~admin5)의 문제 수와 인원. 합계에는 더한다
+    private record Board(List<Solver> ranked, Map<String, Integer> rankOf, long hiddenSolved, int hiddenSolvers, Instant at) {}
+
+    // 순위표에 올리지 않는 관리 계정. 이들이 푼 문제 수는 전체 합계에만 들어간다
+    private static final Set<String> RANK_HIDDEN = Set.of("admin1", "admin2", "admin3", "admin4", "admin5");
+
+    static boolean hiddenFromRank(String nickname) {
+        return nickname != null && RANK_HIDDEN.contains(com.csstudy.backend.service.NicknameService.key(nickname).replace(" ", ""));
+    }
 
     private final UsageEventRepository usageEventRepository;
     private final VisitorSolvedRepository solvedRepository;
@@ -102,8 +110,9 @@ public class RankController {
         Map<String, Object> out = new LinkedHashMap<>();
         out.put("top", rows);
         // 한 문제 이상 푼 모든 계정을 순위와 합계에 포함한다. 같은 계정의 여러 기기는 한 명으로 센다.
-        out.put("totalSolved", board.ranked().stream().mapToLong(Solver::count).sum());
-        out.put("totalSolvers", board.ranked().size());
+        // 순위표에서 뺀 관리 계정(admin1~admin5)의 문제 수도 합계에는 더한다
+        out.put("totalSolved", board.ranked().stream().mapToLong(Solver::count).sum() + board.hiddenSolved());
+        out.put("totalSolvers", board.ranked().size() + board.hiddenSolvers());
         Solver mine = myRank == null ? null : board.ranked().get(myRank - 1);
         out.put("me", mine == null ? null : row(mine, myRank, nicknames.get(visitorId)));
         // 직접 정한 닉네임만 돌려준다. 정한 적이 없으면 null. 계정으로 묶인 기기는 계정 닉네임이 나간다
@@ -197,6 +206,7 @@ public class RankController {
         grants.findAll().forEach(g -> visitorTiers.put(g.getVisitorId(), g.getTier()));
 
         List<Solver> ranked = new ArrayList<>();
+        List<Solver> hidden = new ArrayList<>();
         Map<String, Solver> solverOf = new HashMap<>();
         devices.forEach((userId, ids) -> {
             if (!accounts.containsKey(userId)) return;   // 지워진 계정의 기기는 따로 센다
@@ -206,7 +216,7 @@ public class RankController {
             Solver s = new Solver(ids.isEmpty() ? "user:" + userId : ids.get(0), best, user.getNickname(), MembershipService.baseTier(user), "user:" + userId);
             solverOf.put("user:" + userId, s);
             ids.forEach(id -> { solverOf.put(id, s); counts.remove(id); });
-            if (best > 0) ranked.add(s);
+            if (best > 0) (hiddenFromRank(user.getNickname()) ? hidden : ranked).add(s);
         });
         counts.forEach((visitorId, count) -> {
             if (count <= 0) return;
@@ -221,7 +231,7 @@ public class RankController {
         for (int i = 0; i < ranked.size(); i++) place.put(ranked.get(i), i + 1);
         Map<String, Integer> rankOf = new HashMap<>();
         solverOf.forEach((visitorId, s) -> { if (place.containsKey(s)) rankOf.put(visitorId, place.get(s)); });
-        board = new Board(ranked, rankOf, Instant.now());
+        board = new Board(ranked, rankOf, hidden.stream().mapToLong(Solver::count).sum(), hidden.size(), Instant.now());
         cached = board;
         return board;
     }

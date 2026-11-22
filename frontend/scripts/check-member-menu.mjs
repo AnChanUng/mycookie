@@ -34,7 +34,7 @@ try {
       : { tier: config.headers.Authorization ? 'GOLD' : 'SILVER', nickname: config.headers.Authorization ? JSON.parse(localStorage.getItem('sync:account')).nickname : guestName, solvedCount: 50 };
     else if (config.url === '/auth/me') {
       const user = JSON.parse(localStorage.getItem('sync:account') || 'null');
-      data = { nickname: user?.nickname, roles: user?.token === 'cookie-owner' ? ['OWNER'] : [] };
+      data = { nickname: user?.nickname, roles: user?.token === 'cookie-owner' ? ['OWNER'] : [], privateBank: user?.token === 'bank-guest' };
     }
     else if (config.url === '/profile/badges') data = [{ name: '16기 대전 4반' }];
     else if (config.url === '/auth/nickname') data = { nickname: JSON.parse(config.data).nickname };
@@ -45,7 +45,12 @@ try {
     return { data, status: 200, statusText: 'OK', headers: {}, config };
   };
   await mount(Menu);
-  assert.equal(view.root.findAllByProps({ 'aria-label': '등급 은 쿠키 Ⅴ' }).length, 1); assert.ok(text(view.toJSON()).includes('기존방문자'));
+  // 로그인하지 않았으면 익명 닉네임과 등급을 보여 주지 않는다(헤더의 로그인 버튼이 대신한다)
+  const menuButtons = () => view.root.findAll(n => n.type === 'button' && String(n.props.className || '').includes('member-menu'));
+  assert.equal(menuButtons().length, 0, '방문자에게는 계정 메뉴를 보여 주지 않는다');
+  assert.ok(!text(view.toJSON()).includes('기존방문자'));
+  assert.equal(view.root.findAllByProps({ 'aria-label': '등급 은 쿠키 Ⅴ' }).length, 0);
+  await act(() => { localStorage.setItem('sync:account', JSON.stringify({ token: 'test-account', nickname: '회원닉네임' })); window.dispatchEvent(new Event('sync:change')); });
   // 헤더의 내 계정은 누르면 열리는 메뉴다(등급, 학습 현황, 바로가기, 로그아웃). 비밀번호 찾기는 계정 페이지로 옮겼다
   const menuButton = () => view.root.find(n => n.type === 'button' && String(n.props.className || '').includes('member-menu'));
   const menuLink = label => view.root.findAllByType('a').find(link => text(link).startsWith(label));
@@ -55,11 +60,8 @@ try {
   assert.equal(menuButton().props['aria-expanded'], true);
   assert.equal(menuLink('계정 설정')?.props.href, '/account#settings');
   assert.equal(menuLink('내 학습 자세히 보기')?.props.href, '/stats');
-  assert.ok(menuLink('로그인하고 기록 지키기'), '방문자는 로그아웃 대신 로그인 안내');
-  assert.equal(logoutButton().length, 0);
+  assert.equal(logoutButton().length, 1, '로그인한 계정은 메뉴 맨 아래에 로그아웃');
   assert.equal(view.root.findAllByType('a').filter(link => text(link) === '비밀번호 찾기').length, 0);
-  guestName = '변경한방문자'; await act(() => saveNickname(guestName));
-  assert.ok(text(view.toJSON()).includes(guestName));
   await act(() => { localStorage.setItem('sync:account',JSON.stringify({ token: 'test-account', nickname: '회원닉네임' })); window.dispatchEvent(new Event('sync:change')); });
   assert.equal(logoutButton().length, 1, '로그인하면 메뉴 맨 아래에 로그아웃');
   assert.equal(view.root.findAllByProps({ 'aria-label': '등급 금 쿠키 Ⅴ' }).length, 2, '메뉴가 열려 있으면 버튼과 메뉴에 배지가 하나씩'); assert.ok(text(view.toJSON()).includes('회원닉네임'));
@@ -67,7 +69,7 @@ try {
   assert.ok(text(view.toJSON()).includes('바꾼회원'));
   fail = true;
   await act(() => { localStorage.removeItem('sync:account'); window.dispatchEvent(new Event('sync:change')); });
-  assert.ok(text(view.toJSON()).includes('등급 확인 필요')); assert.equal(view.root.findAllByProps({ 'aria-label': '등급 금 쿠키 Ⅴ' }).length, 0);
+  assert.equal(menuButtons().length, 0, '로그아웃하면 계정 메뉴가 사라진다'); assert.equal(view.root.findAllByProps({ 'aria-label': '등급 금 쿠키 Ⅴ' }).length, 0);
   await unmount(); fail = false;
   await mount(Rank);
   assert.equal(view.root.findAll(n => n.type === 'span' && String(n.props.className || '').startsWith('tier-badge')).length, 5);
@@ -123,14 +125,22 @@ try {
   assert.ok(text(view.toJSON()).includes('풀었던 문제'));
   await unmount();
   const { default: Gate } = await server.ssrLoadModule('/src/components/RoleGate.jsx');
-  for (const [nickname, token, allowed] of [['쿠우키', 'cookie-owner', true], ['쿠우키', 'ordinary-user', true], ['다른계정', 'other-user', false], ['다른OWNER', 'cookie-owner', false]]) {
+  for (const [nickname, token, allowed] of [['소유자', 'cookie-owner', true], ['다른이름', 'cookie-owner', true], ['일반', 'ordinary-user', false], ['일반2', 'other-user', false]]) {
     localStorage.setItem('sync:account', JSON.stringify({ id: token, token, nickname }));
     await mount(Menu);
     await act(() => view.root.findAllByType('button').find(b => b.props['aria-haspopup'] === 'menu').props.onClick());
     assert.equal(view.root.findAll(n => n.props.role === 'menuitem' && n.props.to === '/private/chanung').length, allowed ? 1 : 0);
     await unmount();
-    await mount(() => React.createElement(Gate, { nickname: '쿠우키', title: '개인 공간' }, React.createElement('p', null, '개인 면접 자료')));
+    await mount(() => React.createElement(Gate, { role: 'OWNER', title: '전용 페이지' }, React.createElement('p', null, '개인 면접 자료')));
     assert.equal(text(view.toJSON()).includes('개인 면접 자료'), allowed);
+    await unmount();
+  }
+  // 비공개 문제집 바로가기는 서버가 열어 준 계정(privateBank)에게만 보인다. 닉네임은 화면 코드에 없다
+  for (const [token, allowed] of [['bank-guest', true], ['ordinary-user', false]]) {
+    localStorage.setItem('sync:account', JSON.stringify({ id: token, token, nickname: '아무개' }));
+    await mount(Menu);
+    await act(() => view.root.findAllByType('button').find(b => b.props['aria-haspopup'] === 'menu').props.onClick());
+    assert.equal(view.root.findAll(n => n.props.role === 'menuitem' && n.props.to === '/private/banks').length, allowed ? 1 : 0, token);
     await unmount();
   }
   assert.deepEqual(errors, []);

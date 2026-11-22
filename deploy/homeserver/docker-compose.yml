@@ -14,6 +14,8 @@ x-backend: &backend
   restart: unless-stopped
   # RAM 8GB 노트북에서 모두 함께 돌도록 컨테이너마다 메모리를 묶고, JVM 힙은 그 75%까지만 쓴다
   mem_limit: 1g
+  # 제출 코드 채점 프로세스가 권한을 다시 얻지 못하게 한다(이미지는 root가 아닌 app 사용자로 돈다)
+  security_opt: ["no-new-privileges:true"]
   depends_on:
     postgres:
       condition: service_healthy
@@ -27,6 +29,8 @@ x-backend: &backend
     SLACK_ENABLED: "false"
     TRUST_FORWARDED_FOR: "true"
     SPRING_JPA_SHOW_SQL: "false"
+    # 로그인 토큰 유효 기간(일). 지나면 다시 로그인해야 한다
+    TOKEN_MAX_AGE_DAYS: ${TOKEN_MAX_AGE_DAYS:-90}
     # 소셜 · 깃허브 로그인 키. 비어 있으면 그 로그인 버튼만 숨겨진다
     OAUTH_STATE_SECRET: ${OAUTH_STATE_SECRET:-}
     OAUTH_GOOGLE_CLIENT_ID: ${OAUTH_GOOGLE_CLIENT_ID:-}
@@ -53,6 +57,11 @@ x-backend: &backend
     NEWSLETTER_CRON: ${NEWSLETTER_CRON:-0 30 8 * * MON-FRI}
     # 신규 개발자 안내 페이지에 보여 줄 기술 블로그 RSS
     BLOG_RSS_URL: ${BLOG_RSS_URL:-https://cookie.tistory.com/rss}
+    # 비공개 문제집을 볼 수 있는 닉네임(쉼표로 구분, 찬웅은 항상 열림). 값은 .env에만 적는다
+    PRIVATE_BANK_NICKNAMES: ${PRIVATE_BANK_NICKNAMES:-}
+    # 기업 소식(기술 블로그 · 뉴스룸 RSS)을 일주일에 한 번 모은다. false면 외부 요청을 하지 않는다
+    NEWS_ENABLED: ${NEWS_ENABLED:-true}
+    NEWS_CRON: ${NEWS_CRON:-0 0 7 * * MON}
     BLOG_KEYWORDS: ${BLOG_KEYWORDS:-나의쿠키,홈서버}
     # 접속자 수, 채팅 참여자, 요청 제한은 Redis에(운영과 스테이징은 키 앞머리로 나눈다)
     REDIS_ENABLED: ${REDIS_ENABLED:-true}

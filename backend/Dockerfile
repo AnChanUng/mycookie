@@ -22,4 +22,7 @@ COPY src/main/resources/content content
 EXPOSE 8080
 COPY entrypoint.sh .
 RUN chmod +x entrypoint.sh
+# 제출 코드를 채점하는 서버라 root로 돌리지 않는다. 쓰는 곳은 임시 폴더(/tmp)뿐이다
+RUN addgroup -S app && adduser -S -G app -H app
+USER app
 ENTRYPOINT ["./entrypoint.sh"]

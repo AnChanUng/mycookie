@@ -32,6 +32,7 @@ public class AuthController {
     private final MembershipService membershipService;
     private final NicknameService nicknames;
     private final com.csstudy.backend.service.RoleService roleService;
+    private final com.csstudy.backend.service.PrivateBankAccess privateBank;
     private final CredentialService credentials;
     private final EmailAccountService emailAccounts;
     private final MailService mail;
@@ -135,8 +136,11 @@ public class AuthController {
     @GetMapping("/me")
     public ResponseEntity<?> me(HttpServletRequest request) {
         User user = authService.requireUser(request);
+        var roles = roleService.rolesOf(user);
+        // 비공개 문제집을 볼 수 있는 계정인지(찬웅 또는 서버 환경변수에 적은 계정). 화면이 메뉴와 페이지를 여는 데 쓴다
+        boolean privateBankAllowed = roles.contains(com.csstudy.backend.entity.AccountRole.Role.OWNER) || privateBank.allows(user);
         return ResponseEntity.ok(Map.of("id", user.getId(), "nickname", user.getNickname(),
-                "membership", membershipService.membership(user), "roles", roleService.rolesOf(user)));
+                "membership", membershipService.membership(user), "roles", roles, "privateBank", privateBankAllowed));
     }
 
     @PutMapping("/nickname")

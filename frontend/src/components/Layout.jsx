@@ -19,9 +19,9 @@ const SHOW_CHAOS_CHAT = false;
 const startsWithAny = (p, list) => list.some(x => p === x || p.startsWith(x + '/'));
 const NAV = [
   { to: '/study-coach', label: 'AI 학습 코치', match: p => startsWithAny(p, ['/study-coach']) },
-  { to: '/cs', label: '컴퓨터공학', match: p => startsWithAny(p, ['/cs', '/notes', '/category', '/question', '/search', '/interview', '/technical-interview']) },
-  { to: '/web', label: '웹 개발', match: p => startsWithAny(p, ['/web', '/web-essentials', '/tech-blogs']) },
   { to: '/ai', label: 'AI', match: p => startsWithAny(p, ['/ai']) },
+  { to: '/web', label: '웹 개발', match: p => startsWithAny(p, ['/web', '/web-essentials', '/tech-blogs']) },
+  { to: '/cs', label: '컴퓨터공학', match: p => startsWithAny(p, ['/cs', '/notes', '/category', '/question', '/search', '/interview', '/technical-interview']) },
   { to: '/exam', label: '전공필기', match: p => startsWithAny(p, ['/exam', '/duel', '/topics', '/calc', '/major', '/major-exam', '/ssafy', '/promotion-exam']) },
   { to: '/aptitude', label: '인적성', menu: 'aptitude', match: p => startsWithAny(p, ['/aptitude', '/ncs']) },
   { to: '/certifications', label: '자격증', match: p => startsWithAny(p, ['/certifications']) },
@@ -40,8 +40,6 @@ const APTITUDE_SITES = [
 
 // "소개"를 누르면 펼쳐지는 사이트 안내
 const ABOUT_LINKS = [
-  { to: '/intro#story', name: '만든 이야기' },
-  { to: '/intro#team', name: '만든 사람들' },
   { to: '/intro', name: '서비스 소개' },
   { to: '/intro#how', name: '공부하는 법' },
   { to: '/feedback', name: '건의 · 제보' },
