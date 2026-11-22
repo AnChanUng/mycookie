@@ -234,6 +234,7 @@ function DevLogCalendar({ entries, selected, onPick }) {
       })}
     </div>
     <button type="button" className="dl-cal-today" onClick={() => { setMonth(today.slice(0, 7)); if (logged.has(today)) onPick(today); }}>오늘</button>
+    <p className="dl-cal-launch"><b>전체 공개 목표</b> 2026년 11월 말~12월 초 · 잠정<br />공개 대상과 기능 범위는 단계별로 협의합니다.</p>
   </aside>;
 }
 
