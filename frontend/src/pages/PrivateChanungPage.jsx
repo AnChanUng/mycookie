@@ -7,6 +7,8 @@ import './CsNotesPage.css';
 
 // AWS · 현대오토에버 면접 복기 자료(다른 사람이 본 면접). 공개 메뉴에서 빼고 여기서만 연다
 const OthersInterviews = lazy(() => import('./TechnicalInterviewPage'));
+// 기술면접: 이력서에서 뽑은 주제별 1~4단계 꼬리질문. 질문은 서버(OWNER 권한)에만 저장한다
+const TechInterview = lazy(() => import('./TechInterviewPage'));
 
 // 찬웅 전용 페이지(/private/chanung). 서버가 OWNER 권한을 확인한 계정으로 로그인해야 열린다.
 // 문제 데이터는 권한을 확인한 뒤에만 따로 불러와 공개 화면 번들과 분리한다
@@ -28,17 +30,19 @@ function PrivateChanung() {
   const admin = id === 'admin';
   const banks = id === 'banks';
   const interviews = id === 'interviews';
+  const techInterview = id === 'tech-interview';
 
   useEffect(() => {
-    if (data || trouble || admin || interviews) return;
+    if (data || trouble || admin || interviews || techInterview) return;
     let alive = true;
     import('../data/privateBanks')
       .then(m => { if (alive) setData(m); })
       .catch(() => { if (alive) setLoadError(true); });
     return () => { alive = false; };
-  }, [data, trouble, admin, interviews]);
+  }, [data, trouble, admin, interviews, techInterview]);
 
   if (trouble) return <TroubleLog />;
+  if (techInterview) return <Suspense fallback={<p role="status">기술면접을 불러오는 중…</p>}><TechInterview back={{ to: BASE, label: '← 찬웅 전용 페이지' }} /></Suspense>;
   if (interviews) return <Suspense fallback={<p role="status">면접 자료를 불러오는 중…</p>}><OthersInterviews back={{ to: BASE, label: '← 찬웅 전용 페이지' }} /></Suspense>;
   // 관리자 모니터링은 /admin(관리자 계정)으로 옮겼다
   if (admin) return <Navigate to="/admin" replace />;
@@ -174,6 +178,11 @@ function PrivateList({ data }) {
             <span className="exam-company-abbr">면접</span>
             <span className="exam-company-name">면접준비하기</span>
             <span className="exam-company-meta">딜로이트 면접 예상질문 · 내 답변 · 녹음 연습</span>
+          </Link>
+          <Link to={privatePath("tech-interview")} className="exam-company-card">
+            <span className="exam-company-abbr">기술</span>
+            <span className="exam-company-name">기술면접</span>
+            <span className="exam-company-meta">이력서 기반 질문 · 꼬리질문 1~4단계</span>
           </Link>
         </div>
       </section>
