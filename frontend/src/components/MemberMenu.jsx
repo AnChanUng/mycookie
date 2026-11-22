@@ -100,7 +100,6 @@ export default function MemberMenu() {
           <Stat label="오답" value={learning.wrongOpen || 0} />
         </> : <p className="member-panel-empty">{learning ? '첫 문제를 풀면 여기에 기록이 쌓여요' : '학습 기록을 불러오는 중…'}</p>}
       </div>
-      {learning?.weak?.[0] && <p className="member-panel-weak">약한 주제: <b>{learning.weak[0].name}</b> {learning.weak[0].rate}%</p>}
 
       <nav className="member-panel-links">
         {showCareer && <Link to="/private/chanung" role="menuitem" onClick={() => setOpen(false)}>[취업] 안찬웅<span aria-hidden="true">›</span></Link>}
