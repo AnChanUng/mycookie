@@ -423,6 +423,14 @@
   transition: var(--transition);
 }
 
+/* 작은 문제집 첫 화면: 소개 한 줄 + 시작 버튼 하나 */
+.exam-page-header .exam-sub { margin: 6px 0 0; font-size: var(--ds-fs-small, 14px); color: var(--ds-text-2, var(--text-secondary)); }
+.exam-start { display: flex; align-items: center; justify-content: space-between; gap: 16px; width: 100%; margin: 8px 0 14px; padding: 22px 24px; border: 1px solid var(--ds-line-strong, var(--border-color)); border-radius: var(--ds-r-xl, 16px); background: var(--ds-surface, var(--bg-primary)); color: var(--ds-text, var(--text-primary)); text-align: left; cursor: pointer; transition: border-color var(--ds-fast, .15s) ease, box-shadow var(--ds-fast, .15s) ease; }
+.exam-start:hover { border-color: var(--ds-brand, var(--accent-blue)); box-shadow: 0 0 0 3px var(--ds-brand-soft, rgba(99, 102, 241, .12)); }
+.exam-start-text { display: grid; gap: 4px; }
+.exam-start-text b { font-size: var(--ds-fs-lead, 18px); font-weight: 800; }
+.exam-start-text span { font-size: var(--ds-fs-small, 14px); color: var(--ds-text-2, var(--text-secondary)); }
+.exam-start-go { display: grid; place-items: center; flex: none; width: 40px; height: 40px; border-radius: 50%; background: var(--ds-brand, var(--accent-blue)); color: #fff; font-weight: 700; }
 .exam-sections.wide { grid-template-columns: 1fr; margin-top: 4px; }
 
 /* 작은 문제집: 오답·북마크 버튼을 한 줄짜리로 줄인다 */
