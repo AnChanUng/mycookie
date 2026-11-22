@@ -290,6 +290,7 @@ export function CompanyExamWithProgress({ company, back, progress, initialIds })
   const unseen = ALL.filter(q => !data.stats[q.id]).length;
   const plan = goal && { ...goal, unseen, perDay: Math.ceil(unseen / Math.max(goal.left, 1)) };
 
+  const lean = company.key === 'spring-practice'; // 소규모 문제집은 첫 화면을 단출하게 보여 준다
   const exams = data.history.filter(h => h.mode === 'exam' || h.mode === 'set');
   const best = exams.reduce((b, h) => (!b || h.score > b.score ? h : b), null);
   const last = exams.at(-1);
@@ -330,7 +331,7 @@ export function CompanyExamWithProgress({ company, back, progress, initialIds })
           </span>
         </div>
       )}
-      {saved && (
+      {saved && !lean && (
         <div className="exam-resume">
           <div className="exam-resume-text">
             <strong>풀던 문제가 있습니다</strong>
@@ -342,7 +343,7 @@ export function CompanyExamWithProgress({ company, back, progress, initialIds })
           <button className="exam-btn ghost" onClick={() => { if (confirm('풀던 기록을 지울까요? 모의고사는 답한 내용이 채점되지 않고 사라집니다.')) clearResume(); }}>지우기</button>
         </div>
       )}
-      {company.source && SOURCE_KINDS[company.source.kind] && (
+      {!lean && company.source && SOURCE_KINDS[company.source.kind] && (
         <div className={`exam-source ${company.source.kind}`}>
           <span className="badge">
             {SOURCE_KINDS[company.source.kind].icon} {company.source.label || SOURCE_KINDS[company.source.kind].badge}
@@ -350,7 +351,7 @@ export function CompanyExamWithProgress({ company, back, progress, initialIds })
           <span className="txt">{company.source.detail || SOURCE_KINDS[company.source.kind].detail}</span>
         </div>
       )}
-      <p className="exam-lede">{company.lede}</p>
+      {!lean && <p className="exam-lede">{company.lede}</p>}
       {company.references?.map(ref => <p key={ref.url}><a href={ref.url} target="_blank" rel="noreferrer">{ref.title} ↗</a></p>)}
 
       {/* 실제 시험을 복원한 문제는 예상문제보다 먼저 보이게 맨 위에 둔다 */}
@@ -383,7 +384,7 @@ export function CompanyExamWithProgress({ company, back, progress, initialIds })
         <StatTile k="현재 오답" v={wrongIds.length} unit="문제" />
       </div>
 
-      <div className="exam-modes">
+      <div className={`exam-modes${lean ? ' compact' : ''}`}>
         <button className={`exam-mode wrong${wrongIds.length ? '' : ' empty'}`} disabled={!wrongIds.length} onClick={() => start('wrong', shuffle(wrongIds))}>
           <span className="exam-mode-head">
             <span className="exam-mode-icon" aria-hidden="true">{wrongIds.length ? '↺' : '✓'}</span>
@@ -412,8 +413,8 @@ export function CompanyExamWithProgress({ company, back, progress, initialIds })
         </button>
       </div>
 
-      <div className="section-title">영역별 연습<Kind kind={mainKind} /></div>
-      <div className="exam-sections">
+      {!lean && <div className="section-title">영역별 연습<Kind kind={mainKind} /></div>}
+      {!lean && <div className="exam-sections">
         {Object.entries(SECTIONS).filter(([, s]) => !s.extra).map(([k, s]) => {
           const qs = Q.filter(q => q.sec === k);
           const done = qs.filter(q => data.stats[q.id]).length;
@@ -427,7 +428,7 @@ export function CompanyExamWithProgress({ company, back, progress, initialIds })
             </button>
           );
         })}
-      </div>
+      </div>}
 
       {UNITS && (
         <>
@@ -481,7 +482,7 @@ export function CompanyExamWithProgress({ company, back, progress, initialIds })
         </>
       )}
 
-      {data.history.length > 0 && (
+      {!lean && data.history.length > 0 && (
         <>
           <div className="section-title">응시 기록</div>
           <div className="exam-table-wrap">

@@ -423,6 +423,17 @@
   transition: var(--transition);
 }
 
+/* 작은 문제집: 오답·북마크 버튼을 한 줄짜리로 줄인다 */
+.exam-modes.compact { gap: 8px; margin-bottom: 20px; }
+.exam-modes.compact .exam-mode { min-height: 0; flex-direction: row; align-items: center; gap: 10px; padding: 10px 14px; border-radius: var(--radius-md, 12px); box-shadow: none; }
+.exam-modes.compact .exam-mode-head { gap: 8px; }
+.exam-modes.compact .exam-mode-icon { width: 28px; height: 28px; font-size: 14px; }
+.exam-modes.compact .exam-mode .d,
+.exam-modes.compact .exam-mode-foot { display: none; }
+.exam-modes.compact .exam-mode .t { font-size: 14px; flex: 1; }
+.exam-modes.compact .exam-mode-count { font-size: 12px; }
+.exam-modes.compact .exam-mode-count b { font-size: 14px; }
+
 .exam-mode:hover:not(:disabled) {
   transform: translateY(-3px);
   border-color: var(--accent-blue);
