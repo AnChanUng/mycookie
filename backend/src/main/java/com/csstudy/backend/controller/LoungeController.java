@@ -14,7 +14,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -38,6 +37,8 @@ public class LoungeController {
     private static final int TEXT_MAX = 200;
     private static final int ADMIN_LIST = 200;
     private static final ZoneId CHAT_ZONE = ZoneId.of("Asia/Seoul");
+    // 대화 기록은 2026년 11월 22일(한국 시간) 0시부터 계속 보여 준다. 날이 바뀌어도 비우지 않고, 그 이전 글은 목록에 올리지 않는다
+    private static final Instant HISTORY_START = LocalDate.of(2026, 11, 22).atStartOfDay(CHAT_ZONE).toInstant();
     // 한 사람이 연달아 보낼 수 있는 간격과, 한 곳(IP)에서 1분에 보낼 수 있는 수
     private static final Duration MIN_GAP = Duration.ofMillis(1500);
     private static final int PER_IP_PER_MINUTE = 30;
@@ -52,7 +53,6 @@ public class LoungeController {
 
     private final Deque<LoungeMessage> recent = new ArrayDeque<>();
     private boolean loaded;
-    private LocalDate visibleDay = LocalDate.now(CHAT_ZONE);
     // 글이 지워지면 바뀐다. 화면은 이 값이 달라지면 목록을 처음부터 다시 받는다
     private long epoch = System.currentTimeMillis();
 
@@ -73,7 +73,6 @@ public class LoungeController {
         long currentEpoch;
         synchronized (this) {
             load();
-            rollDay();
             rows = recent.stream().filter(m -> after == null || m.getId() > after).map(LoungeController::row).toList();
             currentEpoch = epoch;
         }
@@ -136,7 +135,6 @@ public class LoungeController {
         LoungeMessage saved;
         synchronized (this) {
             load();
-            rollDay();
             LoungeMessage last = recent.peekLast();
             if (last != null && last.getVisitorId().equals(visitorId) && last.getText().equals(text)) {
                 return ResponseEntity.badRequest().body(Map.of("error", "같은 내용을 연달아 보낼 수 없습니다."));
@@ -171,26 +169,13 @@ public class LoungeController {
         return Map.of("ok", true);
     }
 
-    // DB에는 보관하고, 한국시간 자정에 공개 목록만 비운다.
-    @Scheduled(cron = "0 0 0 * * *", zone = "Asia/Seoul")
-    public synchronized void newDay() {
-        rollDay();
-        streamService.publish(messages(null));
-    }
-
-    private void rollDay() {
-        LocalDate today = LocalDate.now(CHAT_ZONE);
-        Instant cutoff = today.atStartOfDay(CHAT_ZONE).toInstant();
-        boolean changed = recent.removeIf(message -> message.getCreatedAt().isBefore(cutoff));
-        if (!today.equals(visibleDay) || changed) epoch++;
-        visibleDay = today;
-    }
-
     // 서버가 뜬 뒤 첫 조회 때 한 번만 DB에서 최근 글을 가져온다. synchronized 안에서 부른다
     private void load() {
         if (loaded) return;
         List<LoungeMessage> rows = messageRepository.findByOrderByIdDesc(PageRequest.of(0, RECENT));
-        for (int i = rows.size() - 1; i >= 0; i--) recent.addLast(rows.get(i));
+        for (int i = rows.size() - 1; i >= 0; i--) {
+            if (!rows.get(i).getCreatedAt().isBefore(HISTORY_START)) recent.addLast(rows.get(i));
+        }
         loaded = true;
     }
 

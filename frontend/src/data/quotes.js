@@ -16,20 +16,12 @@ export const QUOTES = [
   { text: '당신의 인생은 왜 힘들지 않아야 한다고 생각하십니까?', by: '아르투어 쇼펜하우어' },
 ];
 
-const LAST_QUOTE_KEY = 'home:last-quote:v1';
-let lastQuote = '';
+// 오늘의 명언: 한국 시간 기준으로 하루에 한 번 바뀐다. 같은 날에는 새로고침해도, 누구에게나 같은 문장이 나온다.
+// 날짜 번호를 문장 수로 나눈 나머지로 고르므로 목록을 한 바퀴 돈 뒤 다시 처음부터 돌아온다.
+const DAY_MS = 24 * 60 * 60 * 1000;
+const KST_MS = 9 * 60 * 60 * 1000;
 
-// 홈 진입·새로고침마다 선택한다. 화면 안에서 상태만 바뀔 때는 같은 문장을 유지한다.
-export function quoteForVisit() {
-  let previous = lastQuote;
-  try { previous = localStorage.getItem(LAST_QUOTE_KEY) || previous; } catch { /* 저장소를 쓸 수 없으면 메모리 값을 사용한다 */ }
-  const candidates = QUOTES.filter(quote => quote.text !== previous);
-  const quote = candidates[Math.floor(Math.random() * candidates.length)];
-  return quote;
-}
-
-// 실제 표시된 문장을 기록한다. StrictMode의 초기화 재호출이 마지막 문장을 바꾸지 않게 한다.
-export function rememberQuote(quote) {
-  lastQuote = quote.text;
-  try { localStorage.setItem(LAST_QUOTE_KEY, quote.text); } catch { /* 저장소가 없어도 메모리로 중복을 피한다 */ }
+export function quoteForDay(now = Date.now()) {
+  const day = Math.floor((now + KST_MS) / DAY_MS);
+  return QUOTES[day % QUOTES.length];
 }

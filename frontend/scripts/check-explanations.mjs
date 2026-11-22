@@ -13,7 +13,7 @@ const old = BANKS.filter(b => b.key !== 'pearl').flatMap(allQuestions).filter(th
 // 기존 문제집의 기준 수와 새 Spring 문제집의 이론 연결 수를 나눠 검증한다.
 // 새 문제집 추가 때문에 기존 기준 수를 무조건 올려 누락을 감추지 않는다.
 const springPractice = BANKS.find(b => b.key === 'spring-practice');
-assert.equal(springPractice.questions.length, 40);
+assert.equal(springPractice.questions.length, 53);
 const springTheory = springPractice.questions.filter(theoryFor);
 const legacyTheory = BANKS.filter(b => !['pearl', 'spring-practice'].includes(b.key)).flatMap(allQuestions).filter(theoryFor);
 assert.equal(legacyTheory.length, 466);
@@ -30,7 +30,7 @@ for (const q of old.filter(q => explanationFor(q)?.length > 70)) {
   assert.equal(explanationFor({...q,id:'copied',topic:q.topic+' · 출처'}), explanationFor(q));
   assert.equal(explanationFor({...q,q:q.q+' changed'}), undefined, 'Changed questions must not inherit an unrelated answer');
 }
-assert.equal(Object.keys(notes).length + Object.keys(privateNotes).length, 684, '공개와 비공개 해설 합계(기존 683개 + Spring 롤백 문항 1개)');
+assert.equal(Object.keys(notes).length + Object.keys(privateNotes).length, 736, '공개와 비공개 해설 합계(기존 683개 + Spring 핵심 실전 53문항)');
 for (const key of Object.keys(privateNotes)) assert.ok(!(key in notes), `해설이 공개, 비공개 양쪽에 있음: ${key.slice(0, 40)}`);
 const pearl = BANKS.find(b=>b.key==='pearl');
 assert.equal(companyPath(pearl),'/exam/pearl');
@@ -61,4 +61,4 @@ try {
   const escaped=renderToStaticMarkup(React.createElement(Detail,{q:{explanation:'<script>alert(1)</script>'}}));
   assert.ok(!escaped.includes('<script>'));
 } finally { await server.close(); }
-console.log(`해설 검사 통과: 공개 이론 ${old.length}문항, 공개와 비공개 해설 684개, 상세 해설 공백 0개, 주제별 복사본, 펄어비스 50문항, 상세 해설 SSR`);
+console.log(`해설 검사 통과: 공개 이론 ${old.length}문항, 공개와 비공개 해설 736개, 상세 해설 공백 0개, 주제별 복사본, 펄어비스 50문항, 상세 해설 SSR`);
