@@ -38,9 +38,14 @@ public class AdminController {
     private final QuestionReportRepository questionReportRepository;
     private final ChatService chatService;
     private final JdbcTemplate jdbcTemplate;
+    private final com.csstudy.backend.repository.AdminAuditLogRepository auditLogs;
 
     @Value("${slack.enabled:false}")
     private boolean slackEnabled;
+
+    // 관리자 페이지 바로가기. 비어 있으면 그 링크는 보이지 않는다(GRAFANA_URL)
+    @Value("${app.alert.grafana-url:}")
+    private String grafanaUrl;
 
     @GetMapping("/system")
     public Map<String, Object> system(@RequestHeader(value = "X-Admin-Key", required = false) String key) {
@@ -54,7 +59,22 @@ public class AdminController {
         body.put("slackEnabled", slackEnabled);
         body.put("database", database());
         body.put("server", server());
+        body.put("links", Map.of("grafana", grafanaUrl == null ? "" : grafanaUrl.trim(), "repo", "https://github.com/AnChanUng/mycookie"));
         return body;
+    }
+
+    // 관리자 작업 기록(최근 100개)
+    @GetMapping("/audit")
+    public List<Map<String, Object>> audit(@RequestHeader(value = "X-Admin-Key", required = false) String key) {
+        adminAuth.require(key);
+        return auditLogs.findTop100ByOrderByIdDesc().stream().map(a -> {
+            Map<String, Object> row = new LinkedHashMap<>();
+            row.put("at", a.getAt());
+            row.put("actor", a.getActor());
+            row.put("action", a.getAction());
+            row.put("target", a.getTarget());
+            return row;
+        }).toList();
     }
 
     private Map<String, Object> accounts() {
@@ -73,6 +93,7 @@ public class AdminController {
             row.put("id", u.getId());
             row.put("nickname", u.getNickname());
             row.put("joinedAt", iso(u.getCreatedAt()));
+            row.put("tier", com.csstudy.backend.service.MembershipService.baseTier(u).name());
             row.put("sessions", t == null ? 0 : t[1]);
             row.put("lastLoginAt", t == null ? null : iso((LocalDateTime) t[2]));
             row.put("answers", a == null ? 0 : a[1]);

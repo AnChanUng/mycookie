@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../api';
 import { COMPANIES, EXAM_CATEGORIES, companyPath } from '../data/examQuestions';
@@ -7,7 +7,7 @@ import { account } from '../sync';
 const KEY = 'admin-key';
 const RANGES = [7, 30, 90];
 const AUTO_SECONDS = 60;
-const TABS = [['overview', '개요'], ['solves', '풀이'], ['visitors', '방문자'], ['security', '보안 · 크롤링'], ['reports', '제보'], ['chat', '채팅'], ['accounts', '계정 · 채점'], ['system', '시스템']];
+const TABS = [['overview', '개요'], ['solves', '풀이'], ['visitors', '방문자'], ['security', '보안 · 크롤링'], ['reports', '제보'], ['chat', '채팅'], ['accounts', '계정 · 채점'], ['audit', '작업 기록'], ['system', '시스템']];
 const REPORT_KINDS = { answer: '정답 오류', typo: '오타', explain: '해설 문제', etc: '기타' };
 const MODES = { exam: '모의고사', set: '회차별 모의고사', unit: '단원별 문제집', practice: '영역별 연습', wrong: '오답 다시 풀기', marked: '북마크 다시 풀기', cpp: 'C++ 문제집', recall: '응시 후기 복원 문제' };
 
@@ -98,6 +98,7 @@ function AdminControls({ back, viaLogin }) {
   const [sys, setSys] = useState(null);
   const [reports, setReports] = useState(null);
   const [chat, setChat] = useState(null);
+  const [audit, setAudit] = useState(null);
   const [updatedAt, setUpdatedAt] = useState(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(() => viaLogin || !!savedKey());
@@ -114,6 +115,9 @@ function AdminControls({ back, viaLogin }) {
     api.get('/admin/reports', options)
       .then(res => { if (!stale) setReports(res.data); })
       .catch(() => { if (!stale) setReports(null); });
+    api.get('/admin/audit', options)
+      .then(res => { if (!stale) setAudit(res.data); })
+      .catch(() => { if (!stale) setAudit(null); });
     api.get('/admin/lounge/messages', options)
       .then(res => { if (!stale) setChat(res.data); })
       .catch(() => { if (!stale) setChat(null); });
@@ -218,6 +222,7 @@ function AdminControls({ back, viaLogin }) {
             ))}
           </div>
           <Health sys={sys} />
+          <QuickLinks links={sys?.links} />
           {tab === 'overview' && <Overview data={data} sys={sys} />}
           {tab === 'solves' && <Solves data={data} />}
           {tab === 'visitors' && <Visitors data={data} />}
@@ -229,6 +234,7 @@ function AdminControls({ back, viaLogin }) {
             ? <Chat chat={chat} adminKey={key} onChange={setChat} />
             : <p className="exam-note">채팅 글을 불러오지 못했습니다. 백엔드 배포가 끝난 뒤 새로고침해 주세요.</p>)}
           {tab === 'accounts' && (sys ? <Accounts sys={sys} /> : <SysMissing />)}
+          {tab === 'audit' && (audit ? <AuditLog rows={audit} /> : <p className="exam-note">작업 기록을 불러오지 못했습니다. 백엔드 배포가 끝난 뒤 새로고침해 주세요.</p>)}
           {tab === 'system' && (sys ? <System sys={sys} events={data.server.events} /> : <SysMissing />)}
         </>
       )}
@@ -601,8 +607,57 @@ function Chat({ chat, adminKey, onChange }) {
   );
 }
 
+const SORTS = {
+  joined: ['가입 최신순', (a, b) => (b.id || 0) - (a.id || 0)],
+  login: ['마지막 로그인순', (a, b) => String(b.lastLoginAt || '').localeCompare(String(a.lastLoginAt || ''))],
+  studied: ['학습 문제 많은 순', (a, b) => (b.studied || 0) - (a.studied || 0)],
+  answers: ['채점 많은 순', (a, b) => (b.answers || 0) - (a.answers || 0)],
+};
+
+const TIER_LABELS = { BRONZE: '동', SILVER: '은', GOLD: '금', DIAMOND: '다이아', RUBY: '루비' };
+
+// 관리자 페이지 바로가기. 서버가 알려 준 주소만 보여 준다(Grafana는 서버의 GRAFANA_URL을 설정해야 나온다)
+function QuickLinks({ links }) {
+  if (!links) return null;
+  return (
+    <p className="exam-note admin-links" style={{ display: 'flex', gap: 14, flexWrap: 'wrap', alignItems: 'center' }}>
+      <strong>바로가기</strong>
+      {links.grafana
+        ? <a href={links.grafana} target="_blank" rel="noopener noreferrer">Grafana 모니터링 열기</a>
+        : <span>Grafana 주소 미설정(서버 GRAFANA_URL)</span>}
+      {links.repo && <a href={links.repo} target="_blank" rel="noopener noreferrer">GitHub 저장소</a>}
+    </p>
+  );
+}
+
+// 관리자 작업 기록(계정 생성, 권한 부여 등). 비밀번호와 키는 남기지 않는다
+function AuditLog({ rows }) {
+  return (
+    <>
+      <div className="section-title">관리자 작업 기록</div>
+      {rows.length ? (
+        <div className="exam-table-wrap">
+          <table className="exam-table admin-table">
+            <thead><tr><th>시각</th><th>누가</th><th>작업</th><th>대상</th></tr></thead>
+            <tbody>
+              {rows.map((r, i) => <tr key={i}><td>{fmtAt(r.at)}</td><td>{r.actor}</td><td>{r.action}</td><td>{r.target || '–'}</td></tr>)}
+            </tbody>
+          </table>
+        </div>
+      ) : <p className="exam-note">아직 기록된 작업이 없습니다.</p>}
+      <p className="exam-note">최근 100개까지 보여 줍니다. 계정 생성과 권한 부여·회수가 기록됩니다.</p>
+    </>
+  );
+}
+
 function Accounts({ sys }) {
   const { accounts, grading, examSync } = sys;
+  const [query, setQuery] = useState('');
+  const [sort, setSort] = useState('joined');
+  const shown = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return accounts.users.filter(u => !q || String(u.nickname).toLowerCase().includes(q)).sort(SORTS[sort][1]);
+  }, [accounts.users, query, sort]);
   const maxGrade = Math.max(1, ...Object.values(grading.grades));
   return (
     <>
@@ -614,14 +669,22 @@ function Accounts({ sys }) {
       </div>
 
       <div className="section-title">계정 목록</div>
+      <div className="admin-filter" style={{ display: 'flex', gap: 8, flexWrap: 'wrap', margin: '0 0 10px' }}>
+        <input type="search" aria-label="닉네임 검색" placeholder="닉네임 검색" value={query} onChange={e => setQuery(e.target.value)} />
+        <select aria-label="정렬" value={sort} onChange={e => setSort(e.target.value)}>
+          {Object.entries(SORTS).map(([k, [label]]) => <option key={k} value={k}>{label}</option>)}
+        </select>
+        <span className="exam-note" role="status">{query.trim() ? `${accounts.users.length}명 중 ${shown.length}명` : `${accounts.users.length}명`}</span>
+      </div>
       {accounts.users.length ? (
         <div className="exam-table-wrap">
           <table className="exam-table admin-table">
-            <thead><tr><th>닉네임</th><th>가입</th><th>마지막 로그인</th><th>로그인 기기</th><th>학습 문제</th><th>북마크</th><th>채점</th><th>채점 평균</th><th>기출 저장</th><th>마지막 기출 저장</th></tr></thead>
+            <thead><tr><th>닉네임</th><th>등급</th><th>가입</th><th>마지막 로그인</th><th>로그인 기기</th><th>학습 문제</th><th>북마크</th><th>채점</th><th>채점 평균</th><th>기출 저장</th><th>마지막 기출 저장</th></tr></thead>
             <tbody>
-              {accounts.users.map(u => (
+              {shown.map(u => (
                 <tr key={u.id}>
                   <td>{u.nickname}</td>
+                  <td>{TIER_LABELS[u.tier] || '–'}</td>
                   <td>{fmtAt(u.joinedAt)}</td>
                   <td>{fmtAt(u.lastLoginAt)}</td>
                   <td className="num">{u.sessions}</td>
@@ -637,6 +700,7 @@ function Accounts({ sys }) {
           </table>
         </div>
       ) : <p className="exam-note">아직 가입한 계정이 없습니다.</p>}
+      {accounts.users.length > 0 && shown.length === 0 && <p className="exam-note">검색 결과가 없습니다.</p>}
       <p className="exam-note">최근에 가입한 순서로 200명까지 보여줍니다. 마지막 로그인은 로그아웃하지 않은 기기 기준이라, 모두 로그아웃한 계정은 "–"로 나옵니다.</p>
 
       <div className="section-title">기출 풀이 기록을 계정에 저장한 문제은행</div>
