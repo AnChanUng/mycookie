@@ -1,5 +1,6 @@
 package com.csstudy.backend.service;
 
+import com.csstudy.backend.news.NewsArticle;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.core.io.ClassPathResource;
@@ -120,6 +121,66 @@ public class NewsletterLetter {
         return new Letter("[나의쿠키] " + main.title() + " | 웹 필수지식", doc.text.toString(), doc.html());
     }
 
+    private static final String[] MARKS = {"①", "②", "③", "④"};
+
+    private static final java.time.ZoneId SEOUL = java.time.ZoneId.of("Asia/Seoul");
+    private static final java.time.format.DateTimeFormatter DATE = java.time.format.DateTimeFormatter.ofPattern("yyyy.MM.dd");
+
+    /**
+     * 오늘의 학습 세트 메일: 오늘의 문제 → (오늘의 CS, 있을 때만) → 문제와 이어지는 기술블로그 → 맨 아래 정답과 해설 → 더 공부하기.
+     * 기술블로그는 세트에 정해 둔 글을 쓰고, 없으면 발송할 때 고른 수집 글(crawled)을 쓴다. 둘 다 없으면 그 칸을 건너뛴다.
+     */
+    public Letter buildDaily(NewsletterDailySets.DailySet set, NewsArticle crawled, String baseUrl, String unsubscribeUrl) {
+        NewsletterDailySets.Question q = set.question();
+        NewsletterDailySets.Cs cs = set.cs();
+        int section = 1;
+        Doc doc = new Doc();
+        doc.title("나의쿠키 오늘의 학습 #" + set.day() + " | " + set.theme());
+        doc.line("오늘의 주제는 **" + set.theme() + "**입니다. 문제를 먼저 풀고, 실제 기업 사례를 읽은 뒤 정답을 확인해 보세요.");
+
+        doc.heading(section++ + ". 오늘의 문제 · " + q.title());
+        if (q.context() != null && !q.context().isBlank()) doc.line(q.context());
+        if (q.code() != null && !q.code().isBlank()) doc.code(q.code());
+        doc.line("**Q. " + q.prompt() + "**");
+        for (int i = 0; i < q.options().size(); i++) doc.line(MARKS[i] + " " + q.options().get(i));
+        doc.note("먼저 답을 골라 보세요. 정답과 해설은 메일 맨 아래에 있어요.");
+
+        if (cs != null) {
+            doc.heading(section++ + ". 오늘의 CS · " + cs.title());
+            for (String paragraph : cs.body()) doc.line(paragraph);
+            doc.subheading("핵심 정리");
+            for (String point : cs.points()) doc.bullet(point);
+            if (cs.followUp() != null) {
+                doc.subheading("면접 꼬리질문");
+                doc.line("**Q. " + cs.followUp().question() + "**");
+                doc.line(cs.followUp().answer());
+            }
+        }
+
+        NewsletterDailySets.Blog blog = set.blog();
+        if (blog != null) {
+            doc.heading(section + ". 이 문제와 이어지는 기술블로그 · " + blog.company());
+            doc.link(blog.title() + (blog.published() == null || blog.published().isBlank() ? "" : " (" + blog.published() + ")"), blog.url());
+            if (blog.note() != null && !blog.note().isBlank()) doc.line(blog.note());
+            doc.note("전체 내용은 원문에서 읽어 주세요.");
+        } else if (crawled != null) {
+            doc.heading(section + ". 오늘의 기술블로그 · " + crawled.getCompany());
+            doc.link(crawled.getTitle() + " (" + DATE.format(crawled.getPublishedAt().atZone(SEOUL)) + ")", crawled.getUrl());
+            String summary = crawled.getSummary() == null ? "" : crawled.getSummary().strip();
+            if (!summary.isEmpty()) doc.line(summary.length() > 160 ? summary.substring(0, 159).strip() + "…" : summary);
+            doc.note(crawled.getSourceName() + "에 올라온 글입니다. 전체 내용은 원문에서 읽어 주세요.");
+        }
+
+        doc.heading("정답과 해설");
+        doc.line("**정답 " + MARKS[q.answer()] + "** " + q.options().get(q.answer()));
+        for (String paragraph : q.explanation()) doc.line(paragraph);
+
+        doc.button("나의쿠키에서 더 공부하기", baseUrl + "/");
+        doc.footer("이 메일은 나의쿠키에서 학습 메일 구독을 신청하고 확인 링크를 누른 분께 보냅니다.",
+                "수신 거부", unsubscribeUrl);
+        return new Letter("[나의쿠키] 오늘의 학습 #" + set.day() + " | " + set.theme(), doc.text.toString(), doc.html());
+    }
+
     // 글자 본문과 HTML 본문을 함께 만든다
     private static final class Doc {
         final StringBuilder text = new StringBuilder();
@@ -144,6 +205,21 @@ public class NewsletterLetter {
         void line(String value) {
             text.append(plain(value)).append("\n");
             html.append("<p style=\"margin:6px 0\">").append(inline(value)).append("</p>");
+        }
+
+        void note(String value) {
+            text.append("(").append(plain(value)).append(")\n");
+            html.append("<p style=\"margin:10px 0;padding:10px 12px;background:#f1f5f9;border-radius:8px;font-size:13px;color:#475569\">")
+                    .append(inline(value)).append("</p>");
+        }
+
+        void code(String value) {
+            html.append("<pre style=\"margin:10px 0;padding:12px 14px;background:#0f172a;color:#e2e8f0;border-radius:8px;font-size:12.5px;line-height:1.55;overflow-x:auto;white-space:pre\">");
+            for (String row : value.split("\n")) {
+                text.append("    ").append(row).append("\n");
+                html.append(escape(row)).append("\n");
+            }
+            html.append("</pre>");
         }
 
         void bullet(String value) {

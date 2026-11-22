@@ -1,6 +1,5 @@
 import { Link, Navigate, useParams } from 'react-router-dom';
 import { COMPANIES, EXAM_CATEGORIES, SOURCE_KINDS, allQuestions, companyPath } from '../data/examQuestions';
-import TrackIntro from '../components/TrackIntro';
 
 function summary(company) {
   try {
@@ -38,7 +37,6 @@ function CategoryPicker() {
         <h1>기업별 기출문제</h1>
         <p>공기업 IT직무 전공필기 문제집 · 즉시 채점 · 오답노트 · 북마크</p>
       </div>
-      <TrackIntro track="exam" />
 
       <div className="exam-category-grid">
         {EXAM_CATEGORIES.filter(cat => !cat.hub && cat.key !== 'tech').map(cat => (

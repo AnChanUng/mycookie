@@ -9,11 +9,16 @@ import StudyAmbience from './StudyAmbience';
 import StudyCount from './StudyCount';
 import RankWelcome from './RankWelcome';
 import MemberMenu from './MemberMenu';
+import HeaderSubscribe from './HeaderSubscribe';
 import { account, onAccountChange } from '../sync';
 import PromotionAnnouncements from './PromotionAnnouncements';
 
 // 카오스 고양이 챗봇은 잠시 숨겨 둔다. true로 바꾸면 다시 나온다
 const SHOW_CHAOS_CHAT = false;
+
+// 큰 푸터(소개, 약관 링크)는 이 화면들에서만 보인다. 문제를 풀거나 노트를 읽는 공부 화면에서는 어디서든 숨기고,
+// 새 공부 화면이 생겨도 따로 고치지 않아도 되게 "보일 화면"만 적는다
+const FOOTER_PATHS = [/^\/$/, /^\/(intro|changelog|terms|privacy|feedback)(\/|$)/];
 
 // 주 메뉴. 하위 화면에 있어도 해당 메뉴가 켜져 보이게 경로 묶음으로 판단한다
 const startsWithAny = (p, list) => list.some(x => p === x || p.startsWith(x + '/'));
@@ -41,7 +46,6 @@ const APTITUDE_SITES = [
 // "소개"를 누르면 펼쳐지는 사이트 안내
 const ABOUT_LINKS = [
   { to: '/intro', name: '서비스 소개' },
-  { to: '/intro#how', name: '공부하는 법' },
   { to: '/feedback', name: '건의 · 제보' },
   { to: '/changelog', name: '패치노트' },
 ];
@@ -61,6 +65,7 @@ export default function Layout() {
   const signedIn = !!useSyncExternalStore(onAccountChange, tokenSnapshot, () => '');
   const location = useLocation();
   const loginOnly = !signedIn && location.pathname === "/account";
+  const showFooter = FOOTER_PATHS.some(re => re.test(location.pathname));
   // 펼친 메뉴: null | 'coding'(코테) | 'about'(소개). 한 번에 하나만 연다
   const [openMenu, setOpenMenu] = useState(null);
   const menuRef = useRef(null);
@@ -100,6 +105,7 @@ export default function Layout() {
                 </Link>
               ))}
             </nav>
+            <HeaderSubscribe />
             {!signedIn && <Link to="/account#settings" className="header-login">로그인</Link>}
             <StudyCount />
             <MemberMenu />
@@ -153,7 +159,7 @@ export default function Layout() {
           <Outlet />
         </Suspense>
       </main>
-      {!loginOnly && <SiteFooter />}
+      {!loginOnly && showFooter && <SiteFooter />}
 
       {!loginOnly && <PromotionAnnouncements />}
       {!loginOnly && !location.pathname.startsWith('/admin') && !location.pathname.startsWith('/private') && <RankWelcome />}

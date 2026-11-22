@@ -317,6 +317,39 @@ export function CompanyExamWithProgress({ company, back, progress, initialIds })
     </>
   );
 
+  if (lean) {
+    const areas = Object.values(SECTIONS).filter(sec => !sec.extra).map(sec => sec.name);
+    return (
+      <div className="fade-in sp-home">
+        <Link to={back.to} className="back-link">{back.label}</Link>
+        <header className="sp-head">
+          <p className="sp-eyebrow">웹 개발 · 백엔드</p>
+          <h1>{company.name}</h1>
+          <ul className="sp-areas" aria-label="출제 영역">{areas.map(name => <li key={name}>{name}</li>)}</ul>
+        </header>
+
+        <section className="sp-hero" aria-label="모의고사">
+          <dl className="sp-facts">
+            <div><dt>문항</dt><dd>{examCount}</dd></div>
+            <div><dt>형식</dt><dd>4지선다</dd></div>
+            <div><dt>시간</dt><dd>제한 없음</dd></div>
+          </dl>
+          <button type="button" className="sp-cta" onClick={() => start('exam', examIds())}>모의고사 시작하기<span aria-hidden="true">→</span></button>
+          <p className="sp-hint">다 풀고 나면 한 번에 채점하고, 문제마다 해설을 보여 줘요.</p>
+        </section>
+
+        <div className="sp-again">
+          <button type="button" className="sp-chip" disabled={!wrongIds.length} onClick={() => start('wrong', shuffle(wrongIds))}>
+            <span className="sp-chip-icon wrong" aria-hidden="true">↺</span>오답 다시 풀기<b>{wrongIds.length}</b>
+          </button>
+          <button type="button" className="sp-chip" disabled={!markedIds.length} onClick={() => start('marked', shuffle(markedIds))}>
+            <span className="sp-chip-icon mark" aria-hidden="true">★</span>북마크 다시 풀기<b>{markedIds.length}</b>
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="fade-in">
       {header(company.name)}
@@ -377,12 +410,12 @@ export function CompanyExamWithProgress({ company, back, progress, initialIds })
 
       {setsBlock}
 
-      <div className="exam-stats">
+      {!lean && <div className="exam-stats">
         <StatTile k="모의고사 응시" v={exams.length} unit="회" />
         <StatTile k="최고 점수" v={best?.score ?? '–'} of={best?.total ?? examCount} />
         <StatTile k="최근 점수" v={last?.score ?? '–'} of={last?.total ?? examCount} />
         <StatTile k="현재 오답" v={wrongIds.length} unit="문제" />
-      </div>
+      </div>}
 
       <div className={`exam-modes${lean ? ' compact' : ''}`}>
         <button className={`exam-mode wrong${wrongIds.length ? '' : ' empty'}`} disabled={!wrongIds.length} onClick={() => start('wrong', shuffle(wrongIds))}>

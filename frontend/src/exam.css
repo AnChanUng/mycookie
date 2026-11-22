@@ -423,6 +423,40 @@
   transition: var(--transition);
 }
 
+/* 작은 문제집 첫 화면(Spring 핵심 실전) */
+.sp-home { max-width: 760px; margin: 0 auto; padding-bottom: 56px; }
+.sp-head { margin: 20px 0 24px; }
+.sp-eyebrow { margin: 0 0 8px; font-size: 13px; font-weight: 700; color: var(--ds-brand); letter-spacing: .02em; }
+.sp-head h1 { margin: 0; font-size: var(--ds-fs-h2); font-weight: 800; letter-spacing: -0.02em; color: var(--ds-text); }
+.sp-areas { display: flex; flex-wrap: wrap; gap: 6px; margin: 14px 0 0; padding: 0; list-style: none; }
+.sp-areas li { padding: 5px 11px; border: 1px solid var(--ds-line); border-radius: var(--ds-r-full); background: var(--ds-surface); color: var(--ds-text-2); font-size: 12.5px; font-weight: 600; }
+.sp-hero { position: relative; overflow: hidden; padding: 28px; border: 1px solid var(--ds-line); border-radius: 20px; background: radial-gradient(120% 140% at 100% 0%, var(--ds-brand-soft) 0%, transparent 55%), var(--ds-surface); box-shadow: 0 1px 2px rgba(15, 23, 42, .04), 0 12px 32px -18px rgba(15, 23, 42, .18); }
+.sp-facts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin: 0 0 22px; }
+.sp-facts > div { padding: 14px 16px; border-radius: 14px; background: color-mix(in srgb, var(--ds-surface) 70%, transparent); border: 1px solid var(--ds-line); backdrop-filter: blur(6px); }
+.sp-facts dt { margin: 0 0 4px; font-size: 12px; color: var(--ds-text-3); font-weight: 600; }
+.sp-facts dd { margin: 0; font-size: 18px; font-weight: 800; color: var(--ds-text); letter-spacing: -0.01em; }
+.sp-cta { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; height: 54px; border: 0; border-radius: 14px; background: var(--ds-brand); color: #fff; font-size: 16px; font-weight: 700; cursor: pointer; box-shadow: 0 8px 20px -8px color-mix(in srgb, var(--ds-brand) 70%, transparent); transition: transform .15s ease, box-shadow .15s ease, filter .15s ease; }
+.sp-cta span { transition: transform .15s ease; }
+.sp-cta:hover { filter: brightness(1.05); transform: translateY(-1px); box-shadow: 0 12px 26px -10px color-mix(in srgb, var(--ds-brand) 75%, transparent); }
+.sp-cta:hover span { transform: translateX(3px); }
+.sp-cta:focus-visible { outline: 3px solid var(--ds-brand-soft); outline-offset: 2px; }
+.sp-hint { margin: 12px 0 0; text-align: center; font-size: 13px; color: var(--ds-text-3); }
+.sp-again { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
+.sp-chip { display: flex; align-items: center; gap: 10px; height: 52px; padding: 0 16px; border: 1px solid var(--ds-line); border-radius: 14px; background: var(--ds-surface); color: var(--ds-text); font-size: 14px; font-weight: 600; cursor: pointer; transition: border-color .15s ease, background .15s ease; }
+.sp-chip b { margin-left: auto; min-width: 26px; padding: 2px 8px; border-radius: var(--ds-r-full); background: var(--ds-surface-2); color: var(--ds-text-2); font-size: 12px; text-align: center; }
+.sp-chip:hover:not(:disabled) { border-color: var(--ds-brand); background: color-mix(in srgb, var(--ds-brand) 4%, var(--ds-surface)); }
+.sp-chip:disabled { cursor: default; color: var(--ds-text-3); }
+.sp-chip-icon { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 9px; font-size: 14px; }
+.sp-chip-icon.wrong { background: var(--accent-red-light, #fdecec); color: var(--accent-red, #e5484d); }
+.sp-chip-icon.mark { background: #fff4d6; color: #b98400; }
+.sp-chip:disabled .sp-chip-icon { background: var(--ds-surface-2); color: var(--ds-text-3); }
+@media (max-width: 560px) {
+  .sp-hero { padding: 20px; border-radius: 16px; }
+  .sp-facts > div { padding: 12px; }
+  .sp-facts dd { font-size: 16px; }
+  .sp-again { grid-template-columns: 1fr; }
+}
+
 .exam-sections.wide { grid-template-columns: 1fr; margin-top: 4px; }
 
 /* 작은 문제집: 오답·북마크 버튼을 한 줄짜리로 줄인다 */
