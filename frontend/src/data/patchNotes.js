@@ -1,4 +1,4 @@
-// 개발 패치노트. /private/chanung/patch-notes 에서 비밀번호를 확인한 뒤에만 불러온다.
+// 개발 패치노트 기록(버전, 변경 내용). 화면에서는 보여 주지 않고, 버전 번호의 기준으로만 쓴다.
 // 새 패치는 맨 위에 추가한다. 항목 type: 'feature' 새 기능 | 'improve' 개선 | 'fix' 수정 | 'security' 보안 | 'infra' 인프라·개발 환경 | 'docs' 문서
 // status: 'released' 배포됨(master) | 'dev' 개발 브랜치에만 있음 | 'wip' 작업 중
 export const PATCH_NOTES = [
