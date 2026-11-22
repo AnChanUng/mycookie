@@ -54,6 +54,7 @@ x-backend: &backend
     MAIL_PASSWORD: ${MAIL_PASSWORD:-}
     MAIL_FROM: ${MAIL_FROM:-}
     NEWSLETTER_DAILY_LIMIT: ${NEWSLETTER_DAILY_LIMIT:-400}
+    NEWSLETTER_MAX_SUBSCRIBERS: ${NEWSLETTER_MAX_SUBSCRIBERS:-400}
     NEWSLETTER_CRON: ${NEWSLETTER_CRON:-0 30 8 * * *}
     # 신규 개발자 안내 페이지에 보여 줄 기술 블로그 RSS
     BLOG_RSS_URL: ${BLOG_RSS_URL:-https://cookie.tistory.com/rss}
