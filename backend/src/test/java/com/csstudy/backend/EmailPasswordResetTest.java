@@ -37,6 +37,7 @@ class EmailPasswordResetTest {
     private static final Pattern TOKEN = Pattern.compile("token=([A-Za-z0-9_-]+)");
 
     @Autowired MockMvc mvc;
+    @Autowired com.csstudy.backend.repository.UserRepository users;
     @Autowired ObjectMapper json;
     @Autowired EmailTokenRepository tokens;
     @MockitoBean MailService mail;
@@ -78,16 +79,58 @@ class EmailPasswordResetTest {
 
         postJson("password/forgot", Map.of("email", "MAIL-user@example.com "), null).andExpect(status().isOk());
         String link = lastLinkTo("mail-user@example.com");
-        postJson("password/reset", Map.of("token", link, "password", "new-pw"), null).andExpect(status().isOk());
+        postJson("password/reset", Map.of("token", link, "password", "new-password-1"), null).andExpect(status().isOk());
 
         // 로그인은 모두 끊기고, 옛 비밀번호는 거절, 새 비밀번호는 통과
         mvc.perform(get("/api/v1/auth/me").header("Authorization", "Bearer " + session)).andExpect(status().isUnauthorized());
         postJson("login", Map.of("nickname", "mail-user", "password", "old-password"), null).andExpect(status().isBadRequest());
-        postJson("login", Map.of("nickname", "mail-user", "password", "new-pw"), null).andExpect(status().isOk());
+        postJson("login", Map.of("nickname", "mail-user", "password", "new-password-1"), null).andExpect(status().isOk());
         // 같은 링크는 두 번 쓸 수 없다
-        postJson("password/reset", Map.of("token", link, "password", "again"), null).andExpect(status().isBadRequest());
+        postJson("password/reset", Map.of("token", link, "password", "again-password"), null).andExpect(status().isBadRequest());
     }
 
+    // 로그인은 닉네임 또는 인증한 이메일(대소문자 무관)로 할 수 있다. 인증하지 않은 주소로는 안 된다
+    @Test
+    void loginWithNicknameOrVerifiedEmail() throws Exception {
+        verifiedAccount("email-login", "email-password", "email-login@example.com");
+        postJson("login", Map.of("identifier", "Email-Login@Example.com", "password", "email-password"), null)
+                .andExpect(status().isOk()).andExpect(jsonPath("$.nickname").value("email-login"));
+        postJson("login", Map.of("nickname", "email-login@example.com", "password", "email-password"), null).andExpect(status().isOk());
+        postJson("login", Map.of("identifier", "email-login", "password", "email-password"), null).andExpect(status().isOk());
+        postJson("login", Map.of("identifier", "email-login@example.com", "password", "wrong-password"), null).andExpect(status().isBadRequest());
+        postJson("login", Map.of("identifier", "nobody@example.com", "password", "email-password"), null).andExpect(status().isBadRequest());
+    }
+
+    // 새 비밀번호는 8자 이상이어야 한다. 규칙에 안 맞으면 재설정 링크는 쓰이지 않아 다시 시도할 수 있다
+    @Test
+    void newPasswordsNeedEightCharacters() throws Exception {
+        String session = verifiedAccount("short-pw", "long-enough", "short-pw@example.com");
+        postJson("change-password", Map.of("currentPassword", "long-enough", "newPassword", "short7!"), session).andExpect(status().isBadRequest());
+
+        postJson("password/forgot", Map.of("email", "short-pw@example.com"), null).andExpect(status().isOk());
+        String link = lastLinkTo("short-pw@example.com");
+        postJson("password/reset", Map.of("token", link, "password", "short"), null).andExpect(status().isBadRequest());
+        postJson("password/reset", Map.of("token", link, "password", "now-long-enough"), null).andExpect(status().isOk());
+        postJson("login", Map.of("nickname", "short-pw", "password", "now-long-enough"), null).andExpect(status().isOk());
+    }
+
+    // 규칙이 생기기 전에 가입한 계정은 8자 미만 비밀번호여도 계속 로그인 · 이메일 등록 · 비밀번호 변경(현재 비밀번호 확인)이 된다
+    @Test
+    void existingShortPasswordsStillWork() throws Exception {
+        register("old-short", "temporary-long");
+        var user = users.findByNickname("old-short").orElseThrow();
+        user.setPassword(new org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder().encode("1234"));
+        users.saveAndFlush(user);
+
+        String session = json.readTree(postJson("login", Map.of("nickname", "old-short", "password", "1234"), null)
+                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString()).get("token").asText();
+        postJson("email", Map.of("email", "old-short@example.com", "currentPassword", "1234"), session).andExpect(status().isOk());
+        postJson("email/verify", Map.of("token", lastLinkTo("old-short@example.com")), null).andExpect(status().isOk());
+        postJson("login", Map.of("identifier", "old-short@example.com", "password", "1234"), null).andExpect(status().isOk());
+        // 바꿀 때는 새 규칙을 따른다
+        postJson("change-password", Map.of("currentPassword", "1234", "newPassword", "5678"), session).andExpect(status().isBadRequest());
+        postJson("change-password", Map.of("currentPassword", "1234", "newPassword", "new-long-password"), session).andExpect(status().isOk());
+    }
     @Test
     void forgotPasswordDoesNotRevealWhetherAnAccountExists() throws Exception {
         register("no-mail-user", "password-for-tests");
@@ -136,7 +179,7 @@ class EmailPasswordResetTest {
                 && t.getEmail().equals("shared@example.com")).findFirst().orElseThrow();
         saved.setExpiresAt(LocalDateTime.now().minusMinutes(1));
         tokens.saveAndFlush(saved);
-        postJson("password/reset", Map.of("token", link, "password", "late"), null).andExpect(status().isBadRequest());
+        postJson("password/reset", Map.of("token", link, "password", "late-password"), null).andExpect(status().isBadRequest());
         postJson("login", Map.of("nickname", "owner-a", "password", "password-a"), null).andExpect(status().isOk());
     }
 

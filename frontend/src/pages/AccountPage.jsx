@@ -28,15 +28,15 @@ export default function AccountPage() {
   return <AccountDashboard key={`${token ? account()?.id : ''}:${openForgot}`} user={token ? account() : null} openForgot={openForgot} />;
 }
 function AccountDashboard({ user, openForgot }) {
-  const [form, setForm] = useState({ nickname: '', password: '', confirm: '' });
+  const [form, setForm] = useState({ identifier: '', password: '' });
   const [passwords, setPasswords] = useState({ current: '', next: '', confirm: '' });
-  const signupValid = form.password.trim().length >= 8 && new TextEncoder().encode(form.password.trim()).length <= 72 && form.password === form.confirm;
+  // 새로 정하는 비밀번호만 8자 이상(기존 비밀번호는 짧아도 로그인된다)
+  const nextValid = passwords.next.trim().length >= 8 && new TextEncoder().encode(passwords.next.trim()).length <= 72;
   const [hasPassword, setHasPassword] = useState(true);
   const [emailInfo, setEmailInfo] = useState({ email: '', mailEnabled: true });
   const [emailForm, setEmailForm] = useState({ email: '', current: '' });
   const [forgot, setForgot] = useState({ open: openForgot, email: '' });
   const [authBusy, setAuthBusy] = useState(false);
-  const [registering, setRegistering] = useState(false);
   const [nicknameDraft, setNicknameDraft] = useState(user?.nickname || savedNickname());
   const [message, setMessage] = useState('');
   const [result, setResult] = useState({ records: {}, failed: [] });
@@ -63,10 +63,10 @@ function AccountDashboard({ user, openForgot }) {
     });
     return () => controller.abort();
   }, [user, revision]);
-  async function authenticate(mode) {
-    if (mode === 'register' && !signupValid) return;
+  // 새 가입은 간편 로그인으로만 받는다. 여기서는 이미 있는 계정만 닉네임 또는 인증한 이메일로 로그인한다
+  async function authenticate() {
     setAuthBusy(true); setMessage('');
-    try { await signIn(mode, form.nickname.trim(), form.password); }
+    try { await signIn('login', form.identifier.trim(), form.password); }
     catch (error) { setMessage(error?.response?.data?.error || '로그인하지 못했습니다. 입력 내용과 서버 연결을 확인해 주세요.'); }
     finally { setAuthBusy(false); }
   }
@@ -84,7 +84,7 @@ function AccountDashboard({ user, openForgot }) {
     finally { setAuthBusy(false); }
   }
   async function submitPassword() {
-    if (!passwords.next.trim() || passwords.next !== passwords.confirm) return;
+    if (!nextValid || passwords.next !== passwords.confirm) return;
     setAuthBusy(true); setMessage('');
     try {
       await changePassword(passwords.current, passwords.next);
@@ -120,8 +120,9 @@ function AccountDashboard({ user, openForgot }) {
           {hasPassword && <input aria-label="현재 비밀번호" type="password" placeholder="현재 비밀번호" autoComplete="current-password" maxLength={72} disabled={authBusy} value={passwords.current} onChange={e => setPasswords({ ...passwords, current: e.target.value })} />}
           <input aria-label="새 비밀번호" type="password" placeholder={hasPassword ? '새 비밀번호' : '로그인용 비밀번호 정하기'} autoComplete="new-password" maxLength={72} disabled={authBusy} value={passwords.next} onChange={e => setPasswords({ ...passwords, next: e.target.value })} />
           <input aria-label="새 비밀번호 확인" type="password" placeholder="새 비밀번호 한 번 더" autoComplete="new-password" maxLength={72} disabled={authBusy} value={passwords.confirm} onChange={e => setPasswords({ ...passwords, confirm: e.target.value })} />
+          {passwords.next && !nextValid && <p className="account-hint">새 비밀번호는 8자 이상, 최대 72바이트로 정해 주세요.</p>}
           {passwords.confirm && passwords.next !== passwords.confirm && <p role="alert" className="account-hint">두 비밀번호가 다릅니다.</p>}
-          <button className="exam-btn sm" disabled={authBusy || (hasPassword && !passwords.current) || !passwords.next.trim() || passwords.next !== passwords.confirm}>비밀번호 변경</button>
+          <button className="exam-btn sm" disabled={authBusy || (hasPassword && !passwords.current) || !nextValid || passwords.next !== passwords.confirm}>비밀번호 변경</button>
         </form>
         <h3 className="acc-label">비밀번호 찾기 이메일</h3>
         <p className="account-hint">{emailInfo.email ? `등록된 이메일: ${emailInfo.email}` : '이메일을 등록해 두면 비밀번호를 잊었을 때 재설정 메일을 받을 수 있어요.'}</p>
@@ -153,26 +154,21 @@ function AccountDashboard({ user, openForgot }) {
           <p className="auth-note">이메일을 등록하지 않았다면 연결해 둔 소셜 계정으로 로그인한 뒤 내 계정에서 비밀번호를 바꿀 수 있어요.</p>
           <div className="auth-links"><button type="button" onClick={() => { setForgot({ open: false, email: '' }); setMessage(''); }}>← 로그인으로 돌아가기</button></div>
         </> : <>
-          <h2 className="auth-title">{registering ? '계정 만들기' : '로그인'}</h2>
-          <p className="auth-sub">{registering ? '닉네임과 비밀번호만 정하면 바로 시작해요.' : '로그인하면 어느 기기에서든 학습 기록이 이어져요.'}</p>
-          {!registering && <SocialLogin user={null} />}
-          <form className="auth-form" onSubmit={e => { e.preventDefault(); authenticate(registering ? 'register' : 'login'); }}>
-            <label className="auth-field"><span>닉네임</span>
-              <input aria-label={registering ? '가입 닉네임' : '로그인 닉네임'} autoComplete="username" maxLength={20} value={form.nickname} onChange={e => setForm({ ...form, nickname: e.target.value })} />
+          <h2 className="auth-title">로그인</h2>
+          <p className="auth-sub">처음이라면 간편 로그인으로 바로 가입돼요. 로그인하면 어느 기기에서든 학습 기록이 이어져요.</p>
+          <SocialLogin user={null} />
+          <form className="auth-form" onSubmit={e => { e.preventDefault(); authenticate(); }}>
+            <label className="auth-field"><span>닉네임 또는 이메일</span>
+              <input aria-label="로그인 닉네임 또는 이메일" autoComplete="username" maxLength={254} value={form.identifier} onChange={e => setForm({ ...form, identifier: e.target.value })} />
             </label>
             <label className="auth-field"><span>비밀번호</span>
-              <input aria-label={registering ? '가입 비밀번호' : '로그인 비밀번호'} type="password" autoComplete={registering ? 'new-password' : 'current-password'} maxLength={72} value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} />
+              <input aria-label="로그인 비밀번호" type="password" autoComplete="current-password" maxLength={72} value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} />
             </label>
-            {registering && <>
-              <label className="auth-field"><span>비밀번호 확인</span><input aria-label="가입 비밀번호 확인" type="password" autoComplete="new-password" maxLength={72} value={form.confirm} onChange={e => setForm({ ...form, confirm: e.target.value })} /></label>
-              <p className="account-hint">닉네임 1~20자 · 비밀번호 8자 이상, 최대 72바이트. 이메일은 가입 후 계정 복구용으로 등록할 수 있어요.</p>
-              {form.confirm && form.password !== form.confirm && <p role="alert">두 비밀번호가 다릅니다.</p>}
-            </>}
-            <button className="auth-submit" disabled={authBusy || !form.nickname.trim() || !form.password || (registering && !signupValid)}>{authBusy ? '잠시만요…' : registering ? '가입하기' : '로그인'}</button>
+            <button className="auth-submit" disabled={authBusy || !form.identifier.trim() || !form.password}>{authBusy ? '잠시만요…' : '로그인'}</button>
           </form>
+          <p className="auth-note">이메일은 내 계정에서 인증을 마친 주소만 쓸 수 있어요.</p>
           <div className="auth-links">
-            <button type="button" onClick={() => { setRegistering(!registering); setMessage(''); }}>{registering ? '이미 계정이 있어요' : '새 계정 만들기'}</button>
-            {!registering && <><span aria-hidden="true">·</span><button type="button" onClick={() => { setForgot({ open: true, email: '' }); setMessage(''); }}>비밀번호 찾기</button></>}
+            <button type="button" onClick={() => { setForgot({ open: true, email: '' }); setMessage(''); }}>비밀번호 찾기</button>
           </div>
         </>}
         {message && <p className="auth-message" role="alert">{message}</p>}

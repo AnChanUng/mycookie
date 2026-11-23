@@ -98,7 +98,8 @@ public class EmailAccountService {
     public void reset(String token, String rawPassword) {
         String password = rawPassword == null ? "" : rawPassword.trim();
         if (password.isEmpty()) throw bad("새 비밀번호를 입력해주세요.");
-        if (password.getBytes(StandardCharsets.UTF_8).length > 72) throw bad("새 비밀번호는 UTF-8 기준 72바이트 이하여야 합니다.");
+        // 규칙에 안 맞으면 링크를 쓰지 않은 채로 돌려보내 다시 입력할 수 있게 한다
+        CredentialService.requireStrong(password);
         EmailToken saved = consume(token, EmailToken.Purpose.RESET_PASSWORD, "재설정 링크가 만료되었거나 이미 사용되었습니다. 다시 요청해 주세요.");
         User user = users.findForUpdate(saved.getUser().getId()).orElseThrow(this::unauthorized);
         // 메일을 보낸 뒤 이메일이 바뀌었다면 옛 주소로 간 링크는 쓰지 못한다

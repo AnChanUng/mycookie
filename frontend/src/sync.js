@@ -37,9 +37,10 @@ export function onAccountChange(listener) {
 // 무료 서버가 잠들어 있으면 깨어나는 데 1분쯤 걸려서 넉넉히 기다린다
 const auth = () => ({ headers: { Authorization: `Bearer ${account()?.token}` }, timeout: 90000 });
 
-// mode: 'login' | 'register'
-export async function signIn(mode, nickname, password) {
-  const { data } = await api.post(`/auth/${mode}`, { nickname, password }, { timeout: 90000, headers: { 'X-Visitor-Id': visitorId() } });
+// mode: 'login' | 'register'. 로그인은 닉네임 또는 인증한 이메일(identifier). 예전 서버도 받게 nickname 칸에도 같은 값을 넣는다
+// 새 가입은 간편 로그인으로만 받으므로 화면에서는 'login'만 쓴다(서버도 기본으로 닉네임 · 비밀번호 가입을 닫아 둔다)
+export async function signIn(mode, identifier, password) {
+  const { data } = await api.post(`/auth/${mode}`, { nickname: identifier, identifier, password }, { timeout: 90000, headers: { 'X-Visitor-Id': visitorId() } });
   setAccount({ id: data.id, nickname: data.nickname, token: data.token });
 }
 

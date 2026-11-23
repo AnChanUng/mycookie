@@ -98,7 +98,7 @@ try {
   checkingAccount = true;
   await mount(AccountPage);
   assert.ok(!text(view.toJSON()).includes('본인 설정'), '로그아웃 상태에서는 본인 설정을 숨긴다');
-  assert.ok(view.root.findByProps({ 'aria-label': '로그인 닉네임' }));
+  assert.ok(view.root.findByProps({ 'aria-label': '로그인 닉네임 또는 이메일' }));
   for (const label of ['내 등급', '개인정보 · 교육생 배지', '풀었던 문제', '학습 완료한 전공노트', '현재 브라우저의 비로그인 풀이 기록']) {
     assert.ok(!text(view.toJSON()).includes(label), label);
   }
@@ -112,8 +112,8 @@ try {
   assert.deepEqual(resetRequest, { email: 'me@example.com' });
   assert.ok(text(view.toJSON()).includes('재설정 메일을 보냈습니다'));
   await act(() => view.root.findAllByType('button').find(b => text(b).includes('로그인으로 돌아가기')).props.onClick());
-  await act(() => view.root.findAllByType('button').find(b => text(b) === '새 계정 만들기').props.onClick());
-  assert.ok(view.root.findByProps({ 'aria-label': '가입 비밀번호 확인' }));
+  // 새 가입은 간편 로그인으로만 받아 닉네임 · 비밀번호 가입 버튼이 없다
+  assert.equal(view.root.findAllByType('button').filter(b => text(b) === '새 계정 만들기').length, 0);
   assert.ok(!text(view.toJSON()).includes('내 등급'));
   await act(() => {
     localStorage.setItem('sync:account', JSON.stringify({ id: 1, token: 'test-account', nickname: '회원닉네임' }));
@@ -148,7 +148,11 @@ try {
     localStorage.setItem('sync:account', JSON.stringify({ id: token, token, nickname: '아무개' }));
     await mount(Menu);
     await act(() => view.root.findAllByType('button').find(b => b.props['aria-haspopup'] === 'menu').props.onClick());
-    assert.equal(view.root.findAll(n => n.props.role === 'menuitem' && n.props.to === '/private/banks').length, allowed ? 1 : 0, token);
+    // 주소는 들어올 때마다 바뀌는 쿼리(?k=)가 붙고, 목록 맨 위에 "전공필기 문제집"으로 보인다
+    const items = view.root.findAll(n => n.props.role === 'menuitem' && typeof n.props.to === 'string');
+    const bank = items.filter(n => /^\/private\/banks\?k=[a-z0-9]+$/.test(n.props.to));
+    assert.equal(bank.length, allowed ? 1 : 0, token);
+    if (allowed) { assert.equal(items[0].props.to, bank[0].props.to, '목록 맨 위'); assert.ok(text(bank[0]).includes('전공필기 문제집')); }
     await unmount();
   }
   assert.deepEqual(errors, []);
