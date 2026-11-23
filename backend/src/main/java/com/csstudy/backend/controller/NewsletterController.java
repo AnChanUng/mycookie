@@ -24,6 +24,13 @@ public class NewsletterController {
         return Map.of("ok", true);
     }
 
+    // 메일로 받은 6자리 인증 번호를 확인하면 구독이 시작된다
+    @PostMapping("/verify")
+    public Map<String, Object> verify(@RequestBody Map<String, String> body) {
+        newsletter.verify(body.get("email"), body.get("code"));
+        return Map.of("ok", true);
+    }
+
     @PostMapping("/confirm")
     public Map<String, Object> confirm(@RequestBody Map<String, String> body) {
         newsletter.confirm(body.get("token"));

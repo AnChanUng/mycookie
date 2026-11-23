@@ -15,3 +15,8 @@ export function loadNewsletterEnabled() {
 export async function subscribeNewsletter(email) {
   await api.post('/newsletter/subscribe', { email: email.trim() }, { timeout: 90000 });
 }
+
+// 메일로 받은 6자리 인증 번호를 확인하면 구독이 시작된다
+export async function verifyNewsletter(email, code) {
+  await api.post('/newsletter/verify', { email: email.trim(), code: code.trim() }, { timeout: 30000 });
+}

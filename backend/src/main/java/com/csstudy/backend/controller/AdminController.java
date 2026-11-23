@@ -39,6 +39,7 @@ public class AdminController {
     private final ChatService chatService;
     private final JdbcTemplate jdbcTemplate;
     private final com.csstudy.backend.repository.AdminAuditLogRepository auditLogs;
+    private final com.csstudy.backend.service.MailFailures mailFailures;
 
     @Value("${slack.enabled:false}")
     private boolean slackEnabled;
@@ -61,6 +62,13 @@ public class AdminController {
         body.put("server", server());
         body.put("links", Map.of("grafana", grafanaUrl == null ? "" : grafanaUrl.trim(), "repo", "https://github.com/AnChanUng/mycookie"));
         return body;
+    }
+
+    // 메일 발송 실패 현황: 최근 24시간·7일·30일 건수, 종류별 건수, 최근 실패 100건(받는 주소와 오류 요약)
+    @GetMapping("/mail-failures")
+    public Map<String, Object> mailFailures(@RequestHeader(value = "X-Admin-Key", required = false) String key) {
+        adminAuth.require(key);
+        return mailFailures.summary();
     }
 
     // 관리자 작업 기록(최근 100개)

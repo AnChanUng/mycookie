@@ -28,6 +28,13 @@ public interface NewsletterSubscriberRepository extends JpaRepository<Newsletter
 
     Optional<NewsletterSubscriber> findByUnsubscribeKey(String key);
 
+    long countByStatus(com.csstudy.backend.entity.NewsletterSubscriber.Status status);
+
+    // 자리를 차지한 수: 구독 중인 사람 + 확인 링크가 아직 유효한 신청
+    @Query("select count(s) from NewsletterSubscriber s where s.status = com.csstudy.backend.entity.NewsletterSubscriber.Status.ACTIVE "
+            + "or (s.status = com.csstudy.backend.entity.NewsletterSubscriber.Status.PENDING and s.confirmSentAt >= :since)")
+    long countTaken(@Param("since") LocalDateTime since);
+
     // 확인 링크가 만료된 미확인 신청 삭제(예전에 수신 거부로 남겨 둔 행도 함께 정리)
     @Modifying
     @Query("delete from NewsletterSubscriber s where (s.status = com.csstudy.backend.entity.NewsletterSubscriber.Status.PENDING "

@@ -34,6 +34,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -60,17 +61,18 @@ class NewsletterTest {
         return mvc.perform(post("/api/v1/newsletter/" + path).contentType(MediaType.APPLICATION_JSON).content(json.writeValueAsString(body)));
     }
 
-    private String confirmToken(String email) {
+    // 메일로 간 가장 최근 6자리 인증 번호
+    private String codeFor(String email) {
         ArgumentCaptor<String> body = ArgumentCaptor.forClass(String.class);
-        verify(mail, atLeastOnce()).send(eq(email), contains("구독을 확인"), body.capture());
-        Matcher m = Pattern.compile("token=([A-Za-z0-9_-]+)").matcher(body.getValue());
+        verify(mail, atLeastOnce()).send(eq(email), contains("인증 번호"), body.capture());
+        Matcher m = Pattern.compile("인증 번호: (\\d{6})").matcher(body.getValue());
         assertThat(m.find()).isTrue();
         return m.group(1);
     }
 
     private void subscribed(String email) throws Exception {
         postJson("subscribe", Map.of("email", email)).andExpect(status().isOk());
-        postJson("confirm", Map.of("token", confirmToken(email))).andExpect(status().isOk());
+        postJson("verify", Map.of("email", email, "code", codeFor(email))).andExpect(status().isOk());
     }
 
     @Test
@@ -87,15 +89,67 @@ class NewsletterTest {
     }
 
     @Test
-    void confirmingSendsTheFirstDailySetRightAway() throws Exception {
+    void verifyingStartsTheSubscriptionButTheFirstLetterWaitsForMorning() throws Exception {
         subscribed("reader@example.com");
-        verify(mail).send(eq("reader@example.com"), startsWith("[나의쿠키] 오늘의 학습 #1"), contains("정답과 해설"), contains("<a href"), contains("/newsletter/unsubscribe?key="));
+        // 인증하는 순간에는 학습 메일을 보내지 않는다(인증 번호 메일만 간다)
+        verify(mail, never()).send(eq("reader@example.com"), startsWith("[나의쿠키] 오늘의 학습"), anyString(), anyString(), anyString());
         NewsletterSubscriber s = subscriber("reader@example.com");
         assertThat(s.getStatus()).isEqualTo(NewsletterSubscriber.Status.ACTIVE);
-        assertThat(s.getSetsSent()).isEqualTo(1);
-        assertThat(s.getNextIndex()).isZero();
-        // 확인 링크는 한 번만
+        assertThat(s.getSetsSent()).isNull();
+        assertThat(s.getLastSentOn()).isNull();
+
+        // 다음 아침 발송(8시 30분)에 1번 세트가 간다
+        newsletter.sendDue(LocalDate.now().plusDays(1));
+        verify(mail).send(eq("reader@example.com"), startsWith("[나의쿠키] 오늘의 학습 #1"), contains("정답과 해설"), contains("<a href"), contains("/newsletter/unsubscribe?key="));
+        assertThat(subscriber("reader@example.com").getSetsSent()).isEqualTo(1);
+        // 예전에 보낸 확인 링크가 잘못되면 거절한다
         postJson("confirm", Map.of("token", "nope")).andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void wrongOrExpiredCodesAreRefusedAndTooManyWrongTriesLockTheCode() throws Exception {
+        postJson("subscribe", Map.of("email", "code@example.com")).andExpect(status().isOk());
+        String code = codeFor("code@example.com");
+        String wrong = code.equals("000000") ? "111111" : "000000";
+        // 번호가 아닌 값, 틀린 번호
+        postJson("verify", Map.of("email", "code@example.com", "code", "12ab")).andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("NEWSLETTER_CODE_WRONG"));
+        postJson("verify", Map.of("email", "code@example.com", "code", wrong)).andExpect(status().isBadRequest());
+        // 틀린 횟수가 쌓이면 맞는 번호도 막고 새 번호를 받게 한다
+        for (int i = 0; i < 3; i++) postJson("verify", Map.of("email", "code@example.com", "code", wrong)).andExpect(status().isBadRequest());
+        postJson("verify", Map.of("email", "code@example.com", "code", code)).andExpect(status().isTooManyRequests())
+                .andExpect(jsonPath("$.code").value("NEWSLETTER_CODE_LOCKED"));
+        assertThat(subscriber("code@example.com").getStatus()).isEqualTo(NewsletterSubscriber.Status.PENDING);
+
+        // 번호를 받은 적 없는 주소와 만료된 번호
+        postJson("verify", Map.of("email", "nobody@example.com", "code", "123456")).andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("NEWSLETTER_CODE_EXPIRED"));
+        NewsletterSubscriber s = subscriber("code@example.com");
+        s.setConfirmSentAt(java.time.LocalDateTime.now().minusMinutes(11));
+        subscribers.save(s);
+        postJson("verify", Map.of("email", "code@example.com", "code", code)).andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("NEWSLETTER_CODE_EXPIRED"));
+    }
+
+    @Test
+    void codeCanBeResentOnlyAfterAMinuteAndAnActiveAddressIsToldItIsAlreadyRegistered() throws Exception {
+        postJson("subscribe", Map.of("email", "resend@example.com")).andExpect(status().isOk());
+        postJson("subscribe", Map.of("email", "resend@example.com")).andExpect(status().isOk());
+        verify(mail, times(1)).send(eq("resend@example.com"), contains("인증 번호"), anyString());
+
+        NewsletterSubscriber s = subscriber("resend@example.com");
+        s.setConfirmSentAt(java.time.LocalDateTime.now().minusMinutes(2));
+        subscribers.save(s);
+        postJson("subscribe", Map.of("email", "resend@example.com")).andExpect(status().isOk());
+        verify(mail, times(2)).send(eq("resend@example.com"), contains("인증 번호"), anyString());
+        postJson("verify", Map.of("email", "resend@example.com", "code", codeFor("resend@example.com"))).andExpect(status().isOk());
+
+        // 이미 구독 중이면 번호를 보내지 않고 "이미 등록된 메일입니다"로 알려 준다
+        clearInvocations(mail);
+        postJson("subscribe", Map.of("email", "resend@example.com")).andExpect(status().isConflict())
+                .andExpect(jsonPath("$.code").value("NEWSLETTER_ALREADY"))
+                .andExpect(jsonPath("$.error").value("이미 등록된 메일입니다."));
+        verify(mail, never()).send(eq("resend@example.com"), anyString(), anyString());
     }
 
     @Test
@@ -103,8 +157,10 @@ class NewsletterTest {
         subscribed("order@example.com");
         LocalDate day = LocalDate.now().plusDays(90);
         clearInvocations(mail);
-        // 다음 날에는 2번 세트
+        // 첫 발송은 1번, 다음 날에는 2번 세트
         newsletter.sendDue(day);
+        verify(mail).send(eq("order@example.com"), startsWith("[나의쿠키] 오늘의 학습 #1 |"), anyString(), anyString(), anyString());
+        newsletter.sendDue(day.plusDays(1));
         verify(mail).send(eq("order@example.com"), startsWith("[나의쿠키] 오늘의 학습 #2 |"), anyString(), anyString(), anyString());
         assertThat(subscriber("order@example.com").getSetsSent()).isEqualTo(2);
 
@@ -113,7 +169,7 @@ class NewsletterTest {
         s.setSetsSent(30);
         subscribers.save(s);
         clearInvocations(mail);
-        newsletter.sendDue(day.plusDays(1));
+        newsletter.sendDue(day.plusDays(2));
         verify(mail).send(eq("order@example.com"), contains("웹 필수지식"), contains("문제 풀러 가기"), anyString(), anyString());
         assertThat(subscriber("order@example.com").getSetsSent()).isEqualTo(30);
         assertThat(subscriber("order@example.com").getNextIndex()).isEqualTo(1);

@@ -36,6 +36,10 @@ public class NewsletterSubscriber {
     @Column(name = "confirm_hash", length = 64)
     private String confirmHash;
 
+    // 인증 번호를 틀린 횟수(번호를 새로 받으면 0으로 돌린다)
+    @Column(name = "confirm_attempts")
+    private Integer confirmAttempts;
+
     @Column(name = "confirm_sent_at")
     private LocalDateTime confirmSentAt;
 
@@ -55,6 +59,10 @@ public class NewsletterSubscriber {
     // 마지막으로 받은 기술블로그 글(news_articles.id). 다음에는 이보다 뒤에 수집된 글을 보낸다
     @Column(name = "last_blog_article_id")
     private Long lastBlogArticleId;
+
+    // 학습 메일 발송이 이어서 실패한 횟수(성공하면 0으로 돌린다)
+    @Column(name = "delivery_failures")
+    private Integer deliveryFailures;
 
     @Column(name = "last_sent_on")
     private LocalDate lastSentOn;
