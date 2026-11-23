@@ -37,7 +37,27 @@ export default function CookieAssistant() {
   }
   if(!enabled) return null;
   return <aside className="cookie-help" onKeyDown={e=>{if(e.key==='Escape') close();}}>
-    <button ref={toggle} aria-expanded={open} onClick={()=>open?close():setOpen(true)}>쿠키 도우미</button>
+    <button
+      ref={toggle}
+      type="button"
+      className="cookie-help-launcher"
+      aria-label="쿠키 도우미 챗봇"
+      title="쿠키 도우미 챗봇"
+      aria-expanded={open}
+      onClick={() => open ? close() : setOpen(true)}
+    >
+      <svg className="cookie-help-robot" width="38" height="38" viewBox="0 0 40 40" aria-hidden="true" focusable="false">
+        <path d="M20 12V7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+        <circle cx="20" cy="6" r="2.7" className="cookie-help-robot-accent" />
+        <rect x="4" y="18" width="32" height="11" rx="5.5" className="cookie-help-robot-accent" />
+        <rect x="7" y="11" width="26" height="23" rx="9.5" className="cookie-help-robot-face" />
+        <circle cx="15.5" cy="21" r="1.9" fill="currentColor" />
+        <circle cx="24.5" cy="21" r="1.9" fill="currentColor" />
+        <ellipse cx="12.5" cy="26" rx="2.2" ry="1.25" className="cookie-help-robot-cheek" />
+        <ellipse cx="27.5" cy="26" rx="2.2" ry="1.25" className="cookie-help-robot-cheek" />
+        <path d="M17.5 25.5a2.5 2.5 0 0 0 5 0" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+      </svg>
+    </button>
     {open && <section aria-label="쿠키 도우미">
       <header><strong>쿠키 도우미</strong><button disabled={busy} onClick={()=>setTurns([])}>새 대화</button><button onClick={close}>닫기</button></header>
       <small>개인정보는 입력하지 마세요.</small>

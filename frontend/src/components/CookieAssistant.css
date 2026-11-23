@@ -1,6 +1,37 @@
 .cookie-help { position:fixed; right:16px; bottom:76px; z-index:65; color:var(--ds-text); }
 .cookie-help button { cursor:pointer; color:inherit; background:var(--ds-surface); border:1px solid var(--ds-line); border-radius:12px; padding:8px 12px; }
-.cookie-help section { position:absolute; bottom:48px; right:0; width:min(380px,94vw); height:min(600px,70dvh); display:flex; flex-direction:column; gap:8px; padding:16px; background:var(--ds-surface); border:1px solid var(--ds-line); border-radius:16px; }
+.cookie-help .cookie-help-launcher {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  padding: 0;
+  border-color: color-mix(in srgb, var(--ds-brand) 45%, var(--ds-line));
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--ds-brand) 13%, var(--ds-surface));
+  color: var(--ds-text);
+}
+.cookie-help .cookie-help-launcher:hover,
+.cookie-help .cookie-help-launcher[aria-expanded="true"] {
+  background: color-mix(in srgb, var(--ds-brand) 25%, var(--ds-surface));
+  border-color: var(--ds-brand);
+}
+.cookie-help .cookie-help-launcher:focus-visible {
+  outline: 2px solid var(--ds-brand);
+  outline-offset: 3px;
+}
+.cookie-help-robot-face {
+  fill: var(--ds-surface);
+  stroke: currentColor;
+  stroke-width: 1.7;
+}
+.cookie-help-robot-accent {
+  fill: var(--ds-brand);
+}
+.cookie-help-robot-cheek {
+  fill: color-mix(in srgb, var(--ds-brand) 35%, #f6a4bd);
+}
+.cookie-help section { position:absolute; bottom:68px; right:0; width:min(380px,94vw); height:min(600px,70dvh); display:flex; flex-direction:column; gap:8px; padding:16px; background:var(--ds-surface); border:1px solid var(--ds-line); border-radius:16px; }
 .cookie-help header,.cookie-help form { display:flex; align-items:center; gap:8px; }
 .cookie-help header strong,.cookie-help textarea,.cookie-turns { flex:1; }
 .cookie-turns { overflow:auto; }
