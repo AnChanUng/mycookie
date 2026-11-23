@@ -25,7 +25,8 @@ export default function AuthCallbackPage() {
     let stale = false;
     finishOnce(code, state).then(data => {
       if (stale) return;
-      if (data.status === 'ok') navigate('/account#settings', { replace: true });
+      // 로그인에 성공하면 첫 화면(메인)으로 보낸다
+      if (data.status === 'ok') navigate('/', { replace: true });
       else setPhase({ kind: 'link', ...data });
     }).catch(error => { if (!stale) setPhase({ kind: 'error', message: errorText(error) }); });
     return () => { stale = true; };
@@ -44,7 +45,7 @@ export default function AuthCallbackPage() {
           <p className="auth-sub">{phase.message}</p>
           <Link className="auth-submit auth-submit-link" to="/account#settings">로그인 화면으로</Link>
         </>}
-        {phase.kind === 'link' && <LinkPanel {...phase} onDone={() => navigate('/account#settings', { replace: true })} />}
+        {phase.kind === 'link' && <LinkPanel {...phase} onDone={() => navigate('/', { replace: true })} />}
       </div>
     </section>
   </div>;
