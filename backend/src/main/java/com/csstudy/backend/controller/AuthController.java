@@ -11,6 +11,7 @@ import com.csstudy.backend.service.MembershipService;
 import com.csstudy.backend.service.NicknameService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -18,7 +19,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Objects;
 
@@ -38,8 +38,16 @@ public class AuthController {
     private final MailService mail;
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
+    // 새 가입은 간편 로그인(소셜)으로만 받는다(OAuthController.signup). 닉네임 · 비밀번호 가입은 기본으로 닫혀 있고,
+    // 이미 가입한 계정의 로그인은 그대로다. 시험 환경과 긴급 상황에서만 PASSWORD_SIGNUP_ENABLED=true로 연다
+    @Value("${app.auth.password-signup-enabled:false}")
+    private boolean passwordSignupEnabled;
+
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody Map<String, String> body, HttpServletRequest request) {
+        if (!passwordSignupEnabled) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", "새 가입은 간편 로그인(카카오 · 구글 · 네이버 등)으로만 받아요."));
+        }
         final String nickname = body.getOrDefault("nickname", "").trim();
         final String password = body.getOrDefault("password", "").trim();
 
@@ -47,10 +55,7 @@ public class AuthController {
             return ResponseEntity.badRequest().body(Map.of("error", "닉네임과 비밀번호를 입력해주세요."));
         }
 
-        if (password.length() < 8 || password.getBytes(StandardCharsets.UTF_8).length > 72) {
-            throw new com.csstudy.backend.exception.CookieException(com.csstudy.backend.exception.CookieErrorCode.INVALID_REQUEST,
-                    "비밀번호는 8자 이상, UTF-8 기준 72바이트 이하로 입력해 주세요.");
-        }
+        CredentialService.requireStrong(password);
 
         NicknameService.rejectReserved(nickname);
         if (userRepository.existsByNickname(nickname)) {
@@ -64,7 +69,9 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Map<String, String> body) {
-        User user = credentials.authenticate(body.getOrDefault("nickname", "").trim(), body.getOrDefault("password", "").trim());
+        // 닉네임 또는 인증한 이메일로 로그인한다. 예전 화면이 보내는 nickname 칸도 그대로 받는다
+        String identifier = Objects.toString(body.getOrDefault("identifier", body.getOrDefault("nickname", "")), "").trim();
+        User user = credentials.authenticateLogin(identifier, body.getOrDefault("password", "").trim());
         return ResponseEntity.ok(UserResponse.from(user, authService.issueToken(user), membershipService.membership(user)));
     }
 
@@ -79,9 +86,7 @@ public class AuthController {
         if (password.isEmpty()) {
             return ResponseEntity.badRequest().body(Map.of("error", "새 비밀번호를 입력해주세요."));
         }
-        if (password.getBytes(StandardCharsets.UTF_8).length > 72) {
-            return ResponseEntity.badRequest().body(Map.of("error", "새 비밀번호는 UTF-8 기준 72바이트 이하여야 합니다."));
-        }
+        CredentialService.requireStrong(password);
         User user = userRepository.findByNicknameForUpdate(session.getNickname())
                 .filter(found -> found.getId().equals(session.getId()))
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "로그인이 필요합니다."));

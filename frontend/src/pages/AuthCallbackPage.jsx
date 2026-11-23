@@ -67,13 +67,13 @@ function LinkPanel({ provider, ticket, suggestedNickname, onDone }) {
 
   return <>
     <h2>{label} 계정으로 처음 오셨어요</h2>
-    <p>이미 쓰던 닉네임이 있다면 닉네임과 비밀번호를 한 번만 입력해 주세요. 바로 연결되고, 지금까지의 학습 기록을 그대로 이어서 볼 수 있어요.</p>
+    <p>이미 쓰던 계정이 있다면 닉네임(또는 인증한 이메일)과 비밀번호를 한 번만 입력해 주세요. 바로 연결되고, 지금까지의 학습 기록을 그대로 이어서 볼 수 있어요.</p>
     <div className="account-actions" role="tablist">
       <button type="button" role="tab" aria-selected={mode === 'link'} className={`exam-btn sm${mode === 'link' ? ' primary' : ''}`} onClick={() => { setMode('link'); setMessage(''); }}>기존 계정에 연결</button>
       <button type="button" role="tab" aria-selected={mode === 'signup'} className={`exam-btn sm${mode === 'signup' ? ' primary' : ''}`} onClick={() => { setMode('signup'); setMessage(''); }}>새 계정 만들기</button>
     </div>
     {mode === 'link' ? <form onSubmit={e => { e.preventDefault(); run(() => linkOAuth(ticket, form.nickname.trim(), form.password)); }}>
-      <input aria-label="기존 닉네임" placeholder="기존 닉네임" autoComplete="username" maxLength={20} disabled={busy} value={form.nickname} onChange={e => setForm({ ...form, nickname: e.target.value })} />
+      <input aria-label="기존 닉네임" placeholder="기존 닉네임 또는 인증한 이메일" autoComplete="username" maxLength={254} disabled={busy} value={form.nickname} onChange={e => setForm({ ...form, nickname: e.target.value })} />
       <input aria-label="비밀번호" type="password" placeholder="비밀번호" autoComplete="current-password" maxLength={72} disabled={busy} value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} />
       <button className="exam-btn sm primary" disabled={busy || !form.nickname.trim() || !form.password}>연결하고 로그인</button>
     </form> : <form onSubmit={e => { e.preventDefault(); run(() => signUpOAuth(ticket, form.newNickname.trim())); }}>

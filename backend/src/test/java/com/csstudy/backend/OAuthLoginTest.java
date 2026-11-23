@@ -146,12 +146,12 @@ class OAuthLoginTest {
         String token = created.path("token").asText();
         mvc.perform(get("/api/v1/auth/password").header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.hasPassword").value(false));
-        token = read(postJson("/api/v1/auth/change-password", Map.of("currentPassword", "", "newPassword", "my-pass"), token)
+        token = read(postJson("/api/v1/auth/change-password", Map.of("currentPassword", "", "newPassword", "my-password"), token)
                 .andExpect(status().isOk())).path("token").asText();
         mvc.perform(get("/api/v1/auth/password").header("Authorization", "Bearer " + token))
                 .andExpect(jsonPath("$.hasPassword").value(true));
-        postJson("/api/v1/auth/change-password", Map.of("currentPassword", "", "newPassword", "again"), token).andExpect(status().isBadRequest());
-        postJson("/api/v1/auth/login", Map.of("nickname", "새회원", "password", "my-pass"), null).andExpect(status().isOk());
+        postJson("/api/v1/auth/change-password", Map.of("currentPassword", "", "newPassword", "again-password"), token).andExpect(status().isBadRequest());
+        postJson("/api/v1/auth/login", Map.of("nickname", "새회원", "password", "my-password"), null).andExpect(status().isOk());
     }
 
     // 네이버 연령대는 가입할 때 저장되고, 다음 로그인에서 바뀌면 새 값으로 바뀐다
