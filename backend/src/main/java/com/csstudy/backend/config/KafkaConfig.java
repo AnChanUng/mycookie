@@ -25,9 +25,17 @@ import org.springframework.util.backoff.FixedBackOff;
 public class KafkaConfig {
 
     private final String topic;
+    private final String mailTopic;
 
     public KafkaConfig(@Value("${app.kafka.topic-prefix:local}") String prefix) {
         this.topic = FeedbackEvents.topic(prefix);
+        this.mailTopic = com.csstudy.backend.service.MailService.topic(prefix);
+    }
+
+    // 메일 발송 이벤트(MAIL_VIA_KAFKA). 받는 주소와 본문이 들어 있어 하루만 남긴다
+    @Bean
+    NewTopic mailSendTopic() {
+        return TopicBuilder.name(mailTopic).partitions(1).replicas(1).config("retention.ms", "86400000").build();
     }
 
     // 홈서버 한 대라 파티션 1개, 복제 1개. 7일 동안 남겨 두어 장애 뒤에도 다시 처리할 수 있다
@@ -47,6 +55,28 @@ public class KafkaConfig {
         var recoverer = new DeadLetterPublishingRecoverer(template,
                 (ConsumerRecord<?, ?> record, Exception e) -> new TopicPartition(record.topic() + ".dlt", 0));
         return new DefaultErrorHandler(recoverer, new FixedBackOff(10_000L, 3));
+    }
+
+    // 메일 발송 이벤트 소비자. 발송이 실패해도 예외를 던지지 않으므로(실패 기록과 학습 메일 되감기가 맡는다) 재시도·DLT로 본문이 쌓이지 않는다
+    @Component
+    @ConditionalOnProperty(name = "app.kafka.enabled", havingValue = "true")
+    static class MailSendListener {
+        private final com.csstudy.backend.service.MailService mail;
+        private final com.fasterxml.jackson.databind.ObjectMapper json;
+
+        MailSendListener(com.csstudy.backend.service.MailService mail, com.fasterxml.jackson.databind.ObjectMapper json) {
+            this.mail = mail;
+            this.json = json;
+        }
+
+        @KafkaListener(topics = "${app.kafka.topic-prefix:local}.mail.send")
+        void onMail(String payload) {
+            try {
+                mail.deliver(json.readValue(payload, com.csstudy.backend.service.MailService.Mail.class));
+            } catch (Exception e) {
+                log.warn("메일 발송 이벤트를 읽지 못했습니다: {}", e.getClass().getSimpleName());
+            }
+        }
     }
 
     @Component

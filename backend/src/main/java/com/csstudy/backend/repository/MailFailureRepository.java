@@ -20,6 +20,10 @@ public interface MailFailureRepository extends JpaRepository<MailFailure, Long> 
     @Query("select f.kind, count(f) from MailFailure f where f.at > :since group by f.kind")
     List<Object[]> countByKindSince(@Param("since") Instant since);
 
+    // 최근 실패 원인 상위(많은 순)
+    @Query("select f.reason, count(f) from MailFailure f where f.at > :since group by f.reason order by count(f) desc")
+    List<Object[]> topReasonsSince(@Param("since") Instant since, org.springframework.data.domain.Pageable page);
+
     @Modifying
     @Query("delete from MailFailure f where f.at < :before")
     int deleteOlderThan(@Param("before") Instant before);

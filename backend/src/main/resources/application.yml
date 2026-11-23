@@ -108,6 +108,8 @@ app:
     from: ${MAIL_FROM:}
     # 메일 서버 없이 개발할 때만 true: 링크를 서버 로그에 찍는다
     log-links: ${MAIL_LOG_LINKS:false}
+    # true이고 Kafka가 켜져 있으면 메일을 Kafka 이벤트로 넘겨 소비자가 보낸다. 끄거나 Kafka가 멈추면 서버 안에서 바로 보낸다
+    via-kafka: ${MAIL_VIA_KAFKA:false}
   # No fallback key: unset ADMIN_KEY closes administrator APIs.
   admin-key: ${ADMIN_KEY:}
   security:
@@ -142,6 +144,8 @@ app:
   alert:
     enabled: ${ALERT_ENABLED:true}
     error-threshold: ${ALERT_ERROR_THRESHOLD:10}
+    # 최근 24시간 메일 발송 실패가 이만큼 쌓이면 Mattermost로 알린다(6시간에 한 번)
+    mail-failure-threshold: ${ALERT_MAIL_FAILURE_THRESHOLD:5}
     cooldown-minutes: ${ALERT_COOLDOWN_MINUTES:30}
     gemini-model: ${ALERT_GEMINI_MODEL:gemini-flash-lite-latest}
     # 알림에 붙일 Grafana 주소(팀원이 Tailscale로 여는 주소). 비우면 링크를 붙이지 않는다
