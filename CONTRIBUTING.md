@@ -49,7 +49,7 @@ feat: 버그 제보 양식을 세 칸으로 나눔
 | `style` | 화면 모양(CSS), 코드 포맷 |
 | `ci` / `build` | CI 워크플로 / 의존성, 빌드 설정 |
 | `chore` | 그 밖의 잡일 |
-| `release` | `dev` → `master` 배포 PR |
+| `release` / `배포` | `dev` → `master` 배포 PR. 예) `배포: 운영 배포 v1.0.0` |
 | `revert` | 되돌리기 |
 
 ## 4. PR
