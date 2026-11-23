@@ -60,6 +60,7 @@ class PromotionExamTest {
                 .andExpect(status().isNotFound());
     }
     @Test void serverGrades95PercentBoundaryAndSubmissionRetryDoesNotPromoteTwice() throws Exception {
+        // 예전 기본 금 쿠키(grant)는 등급을 올리지 않는다: 0문제면 동 쿠키 Ⅴ에서 시험으로 한 단계씩 오른다
         grants.saveAndFlush(new VisitorTierGrant("exam-gold",UserTier.GOLD));
         String failed=start("exam-gold").path("id").asText();
         var fail=submit("exam-gold",failed,answers(failed,28));
@@ -68,15 +69,15 @@ class PromotionExamTest {
         String passed=start("exam-gold").path("id").asText();
         var result=submit("exam-gold",passed,answers(passed,29));
         assertEquals(96.7,result.path("score").asDouble());assertTrue(result.path("promoted").asBoolean());
-        assertEquals("금 쿠키 Ⅳ",result.path("tierName").asText());
-        assertEquals(11,awards.findById("visitor:exam-gold").orElseThrow().getTierLevel());
+        assertEquals("동 쿠키 Ⅳ",result.path("tierName").asText());
+        assertEquals(1,awards.findById("visitor:exam-gold").orElseThrow().getTierLevel());
         assertEquals(result,submit("exam-gold",passed,answers(passed,0)));
-        assertEquals(11,awards.findById("visitor:exam-gold").orElseThrow().getTierLevel());
+        assertEquals(1,awards.findById("visitor:exam-gold").orElseThrow().getTierLevel());
         mvc.perform(get("/api/v1/membership").header("X-Visitor-Id","exam-gold"))
-                .andExpect(jsonPath("$.tier").value("GOLD")).andExpect(jsonPath("$.division").value(4))
+                .andExpect(jsonPath("$.tier").value("BRONZE")).andExpect(jsonPath("$.division").value(4))
                 .andExpect(jsonPath("$.solvedCount").value(0));
         String next=start("exam-gold").path("id").asText();
-        assertEquals("금 쿠키 Ⅲ",submit("exam-gold",next,answers(next,30)).path("tierName").asText());
+        assertEquals("동 쿠키 Ⅲ",submit("exam-gold",next,answers(next,30)).path("tierName").asText());
     }
     @Test void incompleteOrInvalidAnswersCannotEarnPromotionAndHighestTierIsCapped() throws Exception {
         String id=start("exam-cap").path("id").asText();

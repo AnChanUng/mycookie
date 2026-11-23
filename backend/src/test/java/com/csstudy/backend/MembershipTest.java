@@ -38,27 +38,33 @@ class MembershipTest {
         var record=progress.findByUserIdAndCompany(user.getId(),"ibkit").orElseGet(()->ExamProgress.builder().user(user).company("ibkit").build());
         record.setData(json.writeValueAsString(root));progress.saveAndFlush(record);
     }
-    @Test void tierBoundariesAndExistingGoldArePreserved() {
+    // 등급은 푼 문제 수로만 정한다: 은 50 · 금 150 · 다이아 300 · 루비 1,000. 예전 기본 금 쿠키(base GOLD)는 등급을 올리지 않는다
+    @Test void tierBoundariesUseSolvedCountOnly() {
         assertEquals(UserTier.BRONZE,MembershipService.describe(UserTier.BRONZE,49).tier());
         assertEquals(UserTier.SILVER,MembershipService.describe(UserTier.BRONZE,50).tier());
-        assertEquals(UserTier.SILVER,MembershipService.describe(UserTier.BRONZE,199).tier());
+        assertEquals(UserTier.SILVER,MembershipService.describe(UserTier.BRONZE,149).tier());
+        assertEquals(UserTier.GOLD,MembershipService.describe(UserTier.BRONZE,150).tier());
+        assertEquals(UserTier.GOLD,MembershipService.describe(UserTier.BRONZE,299).tier());
         assertEquals(UserTier.DIAMOND,MembershipService.describe(UserTier.BRONZE,300).tier());
         assertEquals(UserTier.DIAMOND,MembershipService.describe(UserTier.GOLD,999).tier());
         assertEquals(UserTier.RUBY,MembershipService.describe(UserTier.GOLD,1000).tier());
-        assertEquals(UserTier.GOLD,MembershipService.describe(UserTier.GOLD,0).tier());
-        assertEquals(UserTier.GOLD,MembershipService.describe(UserTier.GOLD,299).tier());
-        assertEquals(UserTier.SILVER,MembershipService.describe(UserTier.BRONZE,299).tier());
+        assertEquals(UserTier.BRONZE,MembershipService.describe(UserTier.GOLD,0).tier());
+        assertEquals(UserTier.SILVER,MembershipService.describe(UserTier.GOLD,149).tier());
+        assertEquals(UserTier.GOLD,MembershipService.describe(UserTier.GOLD,150).tier());
+        // 저장된 값은 그대로 읽는다(데이터 보존). 계산에만 쓰지 않는다
         assertEquals(UserTier.GOLD,MembershipService.baseTier(User.builder().build()));
+        // 시험 · 결제로 얻은 최소 등급(floor)은 계속 지킨다: 14 = 금 쿠키 Ⅰ
+        assertEquals(UserTier.GOLD,MembershipService.describe(UserTier.BRONZE,0,14).tier());
     }
     @Test void accountTierCountsUniqueQuestionsNotAttempts() throws Exception {
         var registered=register("tier-boundary");
         assertEquals("BRONZE",registered.path("membership").path("tier").asText());
         User user=users.findByNickname("tier-boundary").orElseThrow();
-        for(int count:new int[]{49,50,199,200,299,300,999,1000}) {
+        for(int count:new int[]{49,50,149,150,299,300,999,1000}) {
             save(user,count);
             var current=membership.membership(user);
             assertEquals(count,current.solvedCount());
-            assertEquals(count>=1000?UserTier.RUBY:count>=300?UserTier.DIAMOND:count>=50?UserTier.SILVER:UserTier.BRONZE,current.tier());
+            assertEquals(count>=1000?UserTier.RUBY:count>=300?UserTier.DIAMOND:count>=150?UserTier.GOLD:count>=50?UserTier.SILVER:UserTier.BRONZE,current.tier());
         }
         mvc.perform(get("/api/v1/auth/me").header("Authorization","Bearer "+registered.path("token").asText()))
                 .andExpect(jsonPath("$.membership.tier").value("RUBY"));
@@ -137,33 +143,34 @@ class MembershipTest {
                 }
             }
         }
-        var gold = MembershipService.describe(UserTier.GOLD, 125);
-        assertEquals("금 쿠키 Ⅱ", gold.tierName());
-        assertEquals("금 쿠키 Ⅰ", gold.nextTierName());
-        assertEquals(200, gold.nextThreshold());
-        assertEquals(75, gold.remaining());
-        assertEquals(300, MembershipService.describe(UserTier.GOLD, 299).nextThreshold());
-        assertEquals("다이아 쿠키 Ⅴ", MembershipService.describe(UserTier.GOLD, 299).nextTierName());
+        var silver = MembershipService.describe(UserTier.BRONZE, 125);
+        assertEquals("은 쿠키 Ⅰ", silver.tierName());
+        assertEquals("금 쿠키 Ⅴ", silver.nextTierName());
+        assertEquals(150, silver.nextThreshold());
+        assertEquals(25, silver.remaining());
+        var gold = MembershipService.describe(UserTier.BRONZE, 210);
+        assertEquals("금 쿠키 Ⅲ", gold.tierName());
+        assertEquals(230, gold.nextThreshold());
+        assertEquals(300, MembershipService.describe(UserTier.BRONZE, 299).nextThreshold());
+        assertEquals("다이아 쿠키 Ⅴ", MembershipService.describe(UserTier.BRONZE, 299).nextTierName());
         var top = MembershipService.describe(UserTier.GOLD, 2300);
         assertNull(top.nextTier()); assertNull(top.nextDivision()); assertNull(top.nextThreshold());
         assertEquals(0, top.remaining());
         assertEquals(0, MembershipService.describe(UserTier.BRONZE, -1).solvedCount());
     }
 
-    @Test void grantedGoldUsesAbsoluteLifetimeTotalsAtEveryBoundary() {
-        long[] totals = {0, 29, 30, 59, 60, 99, 100, 199, 200, 299};
+    @Test void goldDivisionsStartAt150Solved() {
+        long[] totals = {150, 169, 170, 199, 200, 229, 230, 259, 260, 299};
         int[] divisions = {5, 5, 4, 4, 3, 3, 2, 2, 1, 1};
         for (int i = 0; i < totals.length; i++) {
-            var tier = MembershipService.describe(UserTier.GOLD, totals[i]);
+            var tier = MembershipService.describe(UserTier.BRONZE, totals[i]);
             assertEquals(UserTier.GOLD, tier.tier());
             assertEquals(divisions[i], tier.division(), "lifetime total=" + totals[i]);
         }
-        var fresh = MembershipService.describe(UserTier.GOLD, 0);
-        assertEquals(30, fresh.nextThreshold()); assertEquals(30, fresh.remaining());
-        var existing = MembershipService.describe(UserTier.GOLD, 30);
-        assertEquals(60, existing.nextThreshold()); assertEquals(30, existing.remaining());
-        assertEquals(UserTier.DIAMOND, MembershipService.describe(UserTier.GOLD, 300).tier());
-        assertEquals(1, MembershipService.describe(UserTier.GOLD, 0, 14).division());
+        var fresh = MembershipService.describe(UserTier.BRONZE, 150);
+        assertEquals(170, fresh.nextThreshold()); assertEquals(20, fresh.remaining());
+        assertEquals(UserTier.DIAMOND, MembershipService.describe(UserTier.BRONZE, 300).tier());
+        assertEquals(1, MembershipService.describe(UserTier.BRONZE, 0, 14).division());
     }
 
     @Test void cohortBadgePersistsAndOnlyOwnPersonalEndpointRevealsIt() throws Exception {

@@ -74,8 +74,9 @@ class ExistingUsersGoldRolloutTest {
             assertEquals("대전",badge.getCampus());assertEquals(4,badge.getClassNumber());
         }
         assertEquals(silver.getId(),cohorts.findById("visitor:linked-high-solver").orElseThrow().getUserId());
+        // 저장된 금 쿠키 기록은 남지만, 등급은 푼 문제 수로 정한다(0문제 → 동 쿠키)
         mvc.perform(get("/api/v1/membership").header("X-Visitor-Id","visit-only-no-nickname"))
-                .andExpect(jsonPath("$.tier").value("GOLD")).andExpect(jsonPath("$.campus").doesNotExist());
+                .andExpect(jsonPath("$.tier").value("BRONZE")).andExpect(jsonPath("$.campus").doesNotExist());
         mvc.perform(get("/api/v1/profile/badges").header("X-Visitor-Id","visit-only-no-nickname"))
                 .andExpect(jsonPath("$[0].name").value("16기 대전 4반"));
         mvc.perform(get("/api/v1/profile/badges").header("X-Visitor-Id","unrelated-guest"))

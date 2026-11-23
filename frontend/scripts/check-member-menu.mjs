@@ -86,8 +86,10 @@ try {
   assert.equal(info().props['aria-expanded'], true);
   const content = text(view.root.findByProps({ 'aria-label': '티어 등급 기준' }));
   for (const word of ['동 쿠키','은 쿠키','금 쿠키','다이아 쿠키','루비 쿠키','50개','300개','1,000개']) assert.ok(content.includes(word), word);
-  for (const range of ['0~29', '30~59', '60~99', '100~199', '200~299']) assert.ok(content.includes(range));
-  assert.ok(content.includes('누적 30문제부터 금 쿠키 Ⅳ'));
+  // 금 쿠키는 150문제부터(교육생 인증으로 주지 않는다)
+  for (const range of ['150~169', '170~199', '200~229', '230~259', '260~299']) assert.ok(content.includes(range));
+  assert.ok(content.includes('150문제부터 금 쿠키'));
+  assert.ok(!content.includes('교육생 인증'));
   assert.ok(content.includes('승급해도 초기화되지 않습니다'));
   await act(() => info().props.onKeyDown({ key: 'Escape' }));
   assert.equal(view.root.findAllByProps({ 'aria-label': '티어 등급 기준' }).length, 0);
