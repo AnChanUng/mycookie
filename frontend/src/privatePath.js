@@ -24,5 +24,11 @@ export function decodePrivateId(code) {
 /** 관리자 화면 주소. id가 없으면 첫 화면(목록). */
 export const privatePath = (id) => (id ? `${PRIVATE_BASE}/${encodePrivateId(id)}` : PRIVATE_BASE);
 
-// 비공개 문제집(찬웅과 지정한 계정만). 주소는 숨기지 않고 계정으로 막는다(pages/PrivateBanksPage.jsx)
+// 비공개 문제집(찬웅과 지정한 계정만). 실제 보호는 계정 권한이 맡는다(pages/PrivateBanksPage.jsx).
+// 주소창에는 들어올 때마다 바뀌는 쿼리(?k=무작위)를 붙이고, 문제집 ID는 base64url로 바꿔 이름이 드러나지 않게 한다
 export const PRIVATE_BANKS_PATH = '/private/banks';
+
+export const freshKey = () => Math.random().toString(36).slice(2, 10);
+
+/** 비공개 문제집 주소. id가 없으면 목록. 부를 때마다 쿼리가 달라진다 */
+export const privateBanksPath = (id) => `${PRIVATE_BANKS_PATH}${id ? `/${encodePrivateId(id)}` : ''}?k=${freshKey()}`;

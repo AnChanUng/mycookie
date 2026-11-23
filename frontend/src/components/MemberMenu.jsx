@@ -5,7 +5,7 @@ import { onNicknameChange, savedNickname } from '../nickname';
 import { useMembership } from '../membership';
 import TierBadge from './TierBadge';
 import useRoles, { canOpenPrivateBanks } from '../useRoles';
-import { PRIVATE_BANKS_PATH } from '../privatePath';
+import { privateBanksPath } from '../privatePath';
 
 const snapshot = () => `${account()?.token || ''}:${account()?.nickname || ''}:${savedNickname()}`;
 const subscribe = listener => {
@@ -102,9 +102,10 @@ export default function MemberMenu() {
       </div>
 
       <nav className="member-panel-links">
+        {/* 권한을 받은 계정은 목록 맨 위에 문제집 바로가기가 따로 보인다(찬웅의 [취업] 안찬웅 자리) */}
+        {showBanks && <Link to={privateBanksPath()} role="menuitem" onClick={() => setOpen(false)}>전공필기 문제집<span aria-hidden="true">›</span></Link>}
         {showCareer && <Link to="/private/chanung" role="menuitem" onClick={() => setOpen(false)}>[취업] 안찬웅<span aria-hidden="true">›</span></Link>}
         {showAdmin && <Link to="/admin" role="menuitem" onClick={() => setOpen(false)}>관리자 페이지<span aria-hidden="true">›</span></Link>}
-        {showBanks && <Link to={PRIVATE_BANKS_PATH} role="menuitem" onClick={() => setOpen(false)}>비공개 문제집<span aria-hidden="true">›</span></Link>}
         {LINKS.map(l => <Link key={l.to} to={l.to} role="menuitem" onClick={() => setOpen(false)}>{l.label}<span aria-hidden="true">›</span></Link>)}
       </nav>
 
