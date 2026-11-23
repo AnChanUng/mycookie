@@ -34,9 +34,18 @@ public class ChatbotController {
         List<HybridIndex.Chunk> hits;
         try { hits=index.search(q,index.complete()); }
         catch(Exception unavailable){ hits=index.search(q,false); }
-        String answer;
-        try { answer=gemini.answer(q,hits); stats.record(true); }
-        catch(Exception unavailable){ stats.record(false); answer="지금은 답변을 생성하기 어려워요. 관련 자료를 확인해 주세요."; }
+        GeminiClient.Reply reply;
+        try { reply=gemini.answer(q,hits); stats.record(true); }
+        catch(Exception unavailable){
+            stats.record(false);
+            return Map.of("status","UNAVAILABLE","answer","지금은 답변을 생성하기 어려워요. 잠시 뒤 다시 시도해 주세요.",
+                "grounded",false,"sources",List.of(),"remainingToday",remaining);
+        }
+        if(reply.intent()==GeminiClient.Intent.OUT_OF_SCOPE || reply.intent()==GeminiClient.Intent.CLARIFY){
+            return Map.of("status",reply.intent().name(),"answer",reply.answer(),
+                "grounded",false,"sources",List.of(),"remainingToday",remaining);
+        }
+        String answer=reply.answer();
         var sources=new ArrayList<Map<String,Object>>();
         boolean grounded=false;
         for(var hit:hits){
@@ -44,6 +53,6 @@ public class ChatbotController {
             grounded |= answer.contains("["+n+"]");
             sources.add(Map.of("n",n,"title",hit.title(),"url",hit.url(),"excerpt",hit.text()));
         }
-        return Map.of("answer",answer,"grounded",grounded,"sources",sources,"remainingToday",remaining);
+        return Map.of("status","ANSWERED","answer",answer,"grounded",grounded,"sources",sources,"remainingToday",remaining);
     }
 }

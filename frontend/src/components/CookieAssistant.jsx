@@ -64,7 +64,7 @@ export default function CookieAssistant() {
       <div className="cookie-turns" aria-live="polite">
       {!turns.length && ['트랜잭션 격리 수준이 뭐예요?','등급은 어떻게 올라가요?','대결은 어떻게 해요?','전공노트 사용법을 알려주세요.'].map(q=><button key={q} onClick={()=>{setMessage(q);input.current?.focus();}}>{q}</button>)}
       {turns.map((t,i)=><article key={i}><strong>{t.question}</strong>
-        {t.sources && <small>{t.grounded?'학습 자료 기반':'근거 미확인 · 틀릴 수 있어요'}</small>}
+        {t.sources && (!t.status || t.status==='ANSWERED') && <small>{t.grounded?'학습 자료 기반':'근거 미확인 · 틀릴 수 있어요'}</small>}
         <ReactMarkdown skipHtml components={{a:({children})=><span>{children}</span>,img:()=>null}}>{t.answer}</ReactMarkdown>
         {t.sources?.map(s=><details key={s.n}><summary>[{s.n}] {s.title}</summary>
           <p>{s.excerpt}</p><a href={s.url}>학습 메뉴 열기</a></details>)}</article>)}
