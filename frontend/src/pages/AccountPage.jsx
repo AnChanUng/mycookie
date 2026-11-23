@@ -188,9 +188,9 @@ function AccountDashboard({ user, openForgot }) {
         {tierStatus.membership.nextTier ? ` · ${tierStatus.membership.nextTierName || TIER_NAMES[tierStatus.membership.nextTier]} 승급 기준: 누적 ${tierStatus.membership.nextThreshold.toLocaleString()}문제 이상 · 앞으로 ${tierStatus.membership.remaining.toLocaleString()}문제` : ' · 최고 등급입니다!'}
       </p>}
       <details className="account-fold"><summary>등급 기준 보기</summary>
-      <p>동 쿠키: 기본 방문자 · 은 쿠키: 50문제 · 금 쿠키: SSAFY 16기 교육생 · 다이아 쿠키: 300문제 · 루비 쿠키: 1,000문제</p>
+      <p>동 쿠키: 처음 시작 · 은 쿠키: 50문제 · 금 쿠키: 150문제 · 다이아 쿠키: 300문제 · 루비 쿠키: 1,000문제</p>
       <p>같은 문제의 반복 풀이는 1문제로 집계합니다.</p>
-      <p>금 쿠키 Ⅴ·Ⅳ·Ⅲ·Ⅱ·Ⅰ은 각각 누적 0·30·60·100·200문제부터입니다. 금 쿠키를 부여받아도 기존 풀이 수를 그대로 사용합니다. 시험 승급으로 획득한 최소 등급은 유지됩니다.</p>
+      <p>금 쿠키 Ⅴ·Ⅳ·Ⅲ·Ⅱ·Ⅰ은 각각 누적 150·170·200·230·260문제부터입니다. 시험 승급으로 획득한 최소 등급은 유지됩니다.</p>
       </details>
     </section>
     <div className="account-record-heading"><p>{user ? '계정에 저장된 기록' : '현재 브라우저의 비로그인 풀이 기록'} · 문제집별 문항 기준</p><button className="exam-btn sm" disabled={loading} onClick={() => { setLoading(true); setRevision(v => v + 1); }}>새로고침</button></div>

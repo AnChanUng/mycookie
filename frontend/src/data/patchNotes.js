@@ -5,6 +5,16 @@
 // status: 'released' 배포됨(master) | 'dev' 개발 브랜치에만 있음(release PR을 머지하면 released로 바꾼다)
 export const PATCH_NOTES = [
   {
+    version: '1.2.0',
+    date: '2026-11-23',
+    title: '등급은 푼 문제 수로만',
+    status: 'dev',
+    summary: '금 쿠키를 150문제부터로 바꾸고, 모든 등급을 푼 문제 수로만 정합니다.',
+    items: [
+      { type: 'improve', text: '등급 기준: 은 쿠키 50 · 금 쿠키 150 · 다이아 쿠키 300 · 루비 쿠키 1,000문제. 교육생 인증이나 예전 일괄 지급으로는 금 쿠키가 되지 않습니다. 시험 · 구매로 얻은 등급은 유지됩니다.' },
+    ],
+  },
+  {
     version: '1.1.0',
     date: '2026-11-23',
     title: '간편 로그인으로 가입, 닉네임 · 이메일 로그인',
