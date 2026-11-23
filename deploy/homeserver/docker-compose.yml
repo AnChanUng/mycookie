@@ -178,6 +178,9 @@ services:
       REDIS_KEY_PREFIX: "prod:"
       KAFKA_TOPIC_PREFIX: prod
       KAFKA_GROUP_ID: cookie-prod
+      # RAG 쿠키 도우미는 품질을 다듬는 동안 운영에서 끈다(스테이징은 CHATBOT_ENABLED로 켠다).
+      # 꺼져 있으면 서버가 enabled=false를 알려 화면의 꼬마 로봇 버튼도 숨는다. 운영에 내보낼 때 .env에 PROD_CHATBOT_ENABLED=true
+      CHATBOT_ENABLED: ${PROD_CHATBOT_ENABLED:-false}
       # Mattermost 장애·제보 운영 알림(운영에만)
       MATTERMOST_WEBHOOK_URL: ${MATTERMOST_WEBHOOK_URL:-}
       # 긴급 알림에 붙일 Grafana 로그 링크(docs/monitoring.md)
