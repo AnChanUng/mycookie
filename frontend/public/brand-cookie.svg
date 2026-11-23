@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="나의쿠키">
+  <defs>
+    <radialGradient id="dough" cx="42%" cy="38%" r="62%">
+      <stop offset="0" stop-color="#f3d3a1"/>
+      <stop offset=".6" stop-color="#e2b67c"/>
+      <stop offset="1" stop-color="#c48d55"/>
+    </radialGradient>
+    <radialGradient id="chunk" cx="35%" cy="30%" r="80%">
+      <stop offset="0" stop-color="#6b4330"/>
+      <stop offset="1" stop-color="#3a2218"/>
+    </radialGradient>
+  </defs>
+  <path d="M32 3.5c4.2 0 6.6 1.2 10 2.6 3.8 1.6 7.4 3.4 9.9 6.6 2.6 3.3 4.3 6.6 5.6 10.6 1.2 3.7 2.2 6.5 1.9 10.5-.3 4.2-1.8 7.6-3.9 11.1-2 3.4-4.4 6.2-7.8 8.4-3.5 2.2-7 3.4-11.3 3.9-4.1.5-7.5.2-11.3-1.2-3.9-1.4-7-3.3-9.6-6.4-2.7-3.1-4.6-6.3-5.6-10.3-1-3.9-1.5-7.2-.8-11.2.7-4 2.5-7.1 4.8-10.4 2.3-3.3 4.9-5.8 8.5-7.6C25.7 4.8 28.3 3.5 32 3.5Z" fill="url(#dough)" stroke="#b07a46" stroke-width="1.2"/>
+  <path d="M14 20c4-6 10-9.5 17-10" fill="none" stroke="#fff6e6" stroke-width="2.4" stroke-linecap="round" opacity=".55"/>
+  <g fill="#c9965f" opacity=".55">
+    <circle cx="22" cy="40" r="1.1"/><circle cx="44" cy="22" r="1"/><circle cx="36" cy="49" r="1.2"/><circle cx="16" cy="29" r=".9"/><circle cx="48" cy="40" r="1"/><circle cx="30" cy="16" r=".9"/>
+  </g>
+  <g fill="url(#chunk)">
+    <path d="M21.5 12.8 27 11.6l2 4.4-2.6 4.1-5.6-.9-1.4-3.9Z"/>
+    <path d="M38.5 9.8l5.2 1.6 1 4.6-3.6 2.4-4.6-1.8-.6-4.2Z"/>
+    <path d="M11.8 25.5l4.8-1.4 3.1 3.6-1.7 4.6-4.9.4-2.6-3.7Z"/>
+    <path d="M29.6 26.6l6.1-1.2 3 4.8-2.5 5-6.2.5-2.6-4.6Z"/>
+    <path d="M46.4 24.4l5.4.6 2 4.8-3 3.8-5-1.1-1.4-4.6Z"/>
+    <path d="M17.6 40.4l5.4-.8 2.4 4.6-2.9 4-5.1-.9-1.4-4.2Z"/>
+    <path d="M33 45.6l5.8-.6 2.4 4.2-3 3.9-5.4-.6-1.6-4Z"/>
+    <path d="M44.2 39.4l5-.9 2.3 4-2.8 3.8-4.9-.8-1.2-3.7Z"/>
+  </g>
+  <g fill="#8a5a3f" opacity=".7">
+    <path d="M23.4 13.4l2.2-.4.7 1.6-1.6.8Z"/><path d="M31.2 27.6l2.5-.5 1 1.8-2 .9Z"/><path d="M47.8 25.6l2-.2.8 1.6-1.7.6Z"/>
+  </g>
+</svg>

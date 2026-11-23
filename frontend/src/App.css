@@ -101,6 +101,13 @@
   white-space: nowrap;
 }
 
+.logo-cookie {
+  width: 30px;
+  height: 30px;
+  flex: none;
+  filter: drop-shadow(0 2px 4px rgba(120, 72, 30, .18));
+}
+
 .logo-dot {
   width: 10px;
   height: 10px;
