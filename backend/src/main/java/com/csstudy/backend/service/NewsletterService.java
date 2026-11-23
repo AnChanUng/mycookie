@@ -75,21 +75,16 @@ public class NewsletterService {
     }
 
     // 이메일을 받으면 6자리 인증 번호를 메일로 보낸다. 번호를 맞게 넣어야(verify) 구독이 시작된다.
-    // 같은 주소에는 60초에 한 번만 보내고, 이미 구독 중인 주소에는 번호 대신 "이미 구독 중" 안내만 보낸다(응답으로는 구분하지 않는다)
+    // 같은 주소에는 60초에 한 번만 보내고, 이미 구독 중인 주소는 "이미 등록된 메일입니다"로 거절한다
     @Transactional
     public void subscribe(String rawEmail) {
         if (!enabled()) throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "지금은 메일 서버가 준비되지 않아 구독할 수 없어요.");
         String email = EmailAccountService.normalize(rawEmail);
         NewsletterSubscriber s = subscribers.findByEmailForUpdate(email).orElse(null);
         LocalDateTime now = LocalDateTime.now(SEOUL);
+        // 이미 구독 중인 주소는 인증 번호를 보내지 않고 바로 알려 준다(주소가 등록돼 있는지 화면에서 알 수 있다)
+        if (s != null && s.getStatus() == Status.ACTIVE) throw new CookieException(CookieErrorCode.NEWSLETTER_ALREADY);
         if (s != null && s.getConfirmSentAt() != null && s.getConfirmSentAt().isAfter(now.minus(RESEND_WAIT))) return;
-        if (s != null && s.getStatus() == Status.ACTIVE) {
-            s.setConfirmSentAt(now);
-            subscribers.saveAndFlush(s);
-            mail.send(email, "[나의쿠키] 이미 학습 메일을 구독 중이에요",
-                    "이 주소는 이미 학습 메일을 받고 있어요. 평일(월~금) 아침 8시 30분에 도착합니다.\n\n본인이 신청한 것이 아니라면 이 메일을 무시하세요.");
-            return;
-        }
         // 구독자는 최대 maxSubscribers명. 이미 자리를 잡은(인증 번호가 유효한) 신청이면 자리를 더 쓰지 않는다
         boolean holdsSeat = s != null && s.getStatus() == Status.PENDING && s.getConfirmSentAt() != null && s.getConfirmSentAt().isAfter(now.minus(CONFIRM_TTL));
         if (!holdsSeat && subscribers.countTaken(now.minus(CONFIRM_TTL)) >= maxSubscribers) throw new CookieException(CookieErrorCode.NEWSLETTER_FULL);
