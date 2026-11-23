@@ -29,9 +29,11 @@ public class NewsletterDailySets {
     // 문제와 이어지는 기업 기술블로그 글(수집 대상 회사의 실제 글). 없으면 발송할 때 수집해 둔 글(news_articles)에서 고른다
     public record Blog(String company, String title, String url, String published, String note) {}
     // cs(오늘의 CS)는 선택 항목이다. 지금 세트는 문제 → 관련 기술블로그 → 정답과 해설로 구성한다
-    public record DailySet(int day, String theme, Question question, Cs cs, Blog blog) {}
+    // practice: 메일의 "더 공부하기"로 들어와 푸는 그날 주제의 연습 문제(5개). 메일 문제와 같은 모양이다
+    public record DailySet(int day, String theme, Question question, Cs cs, Blog blog, List<Question> practice) {}
 
     static final String RESOURCE = "newsletter/daily-sets.json";
+    static final int PRACTICE_SIZE = 5;
 
     private final NewsletterDailySetRepository repository;
     private final ObjectMapper json;
@@ -95,6 +97,17 @@ public class NewsletterDailySets {
                 || q.options().stream().anyMatch(NewsletterDailySets::blank) || q.options().stream().distinct().count() != 4
                 || q.answer() < 0 || q.answer() > 3 || q.explanation() == null || q.explanation().isEmpty()) {
             throw new IllegalStateException(where + "문제는 제목, 질문, 서로 다른 보기 4개, 정답(0~3), 해설이 필요합니다");
+        }
+        if (set.practice() != null) {
+            if (set.practice().size() != PRACTICE_SIZE) throw new IllegalStateException(where + "연습 문제는 " + PRACTICE_SIZE + "개여야 합니다");
+            for (int i = 0; i < set.practice().size(); i++) {
+                Question p = set.practice().get(i);
+                if (p == null || blank(p.title()) || blank(p.prompt()) || p.options() == null || p.options().size() != 4
+                        || p.options().stream().anyMatch(NewsletterDailySets::blank) || p.options().stream().distinct().count() != 4
+                        || p.answer() < 0 || p.answer() > 3 || p.explanation() == null || p.explanation().isEmpty()) {
+                    throw new IllegalStateException(where + "연습 문제 " + (i + 1) + "번은 제목, 질문, 서로 다른 보기 4개, 정답(0~3), 해설이 필요합니다");
+                }
+            }
         }
         Cs cs = set.cs();
         if (cs != null && (blank(cs.title()) || cs.body() == null || cs.body().isEmpty() || cs.points() == null || cs.points().isEmpty())) {

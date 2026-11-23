@@ -180,9 +180,9 @@ class NewsletterTest {
         NewsArticle a = article("blog-a"), b = article("blog-b");
         NewsletterDailySets.DailySet first = dailySets.find(1).orElseThrow();
         dailySetRows.save(NewsletterDailySet.builder().dayNo(31).content(json.writeValueAsString(
-                new NewsletterDailySets.DailySet(31, "글이 정해지지 않은 주제", first.question(), null, null))).build());
+                new NewsletterDailySets.DailySet(31, "글이 정해지지 않은 주제", first.question(), null, null, null))).build());
         dailySetRows.save(NewsletterDailySet.builder().dayNo(32).content(json.writeValueAsString(
-                new NewsletterDailySets.DailySet(32, "글이 정해지지 않은 주제 2", first.question(), null, null))).build());
+                new NewsletterDailySets.DailySet(32, "글이 정해지지 않은 주제 2", first.question(), null, null, null))).build());
         subscribed("blog@example.com");
         NewsletterSubscriber s = subscriber("blog@example.com");
         assertThat(s.getLastBlogArticleId()).as("세트에 글이 정해져 있으면 수집 글을 쓰지 않는다").isNull();
@@ -210,17 +210,17 @@ class NewsletterTest {
         NewsletterLetter.Letter letter = letters.buildDaily(set, null, "https://mycookie.dev", "https://mycookie.dev/newsletter/unsubscribe?key=k");
         String text = letter.text();
         assertThat(text).contains("[1. 오늘의 문제", "[2. 이 문제와 이어지는 기술블로그 · " + set.blog().company(), set.blog().url(),
-                "① ", "④ ", "[정답과 해설]", "나의쿠키에서 더 공부하기", "수신 거부");
+                "① ", "④ ", "[정답과 해설]", "나의쿠키에서 오늘 주제 5문제 더 풀기", "https://mycookie.dev/daily/1", "수신 거부");
         assertThat(text).doesNotContain("10분").doesNotContain("오늘의 CS");
         // 문제 → 관련 기술블로그 → 정답과 해설 → 더 공부하기 순서
         assertThat(text.indexOf("[2. 이 문제와 이어지는 기술블로그")).isGreaterThan(text.indexOf("[1. 오늘의 문제"));
         assertThat(text.indexOf("[정답과 해설]")).isGreaterThan(text.indexOf("[2. 이 문제와 이어지는 기술블로그"));
-        assertThat(text.indexOf("나의쿠키에서 더 공부하기")).isGreaterThan(text.indexOf("[정답과 해설]"));
+        assertThat(text.indexOf("나의쿠키에서 오늘 주제 5문제 더 풀기")).isGreaterThan(text.indexOf("[정답과 해설]"));
         assertThat(letter.html()).contains("<pre").contains("href=\"" + set.blog().url() + "\"")
                 .doesNotContain("**").doesNotContain("<script");
 
         // 세트에 글이 없으면 수집 글을, 그것도 없으면 그 칸을 건너뛴다
-        NewsletterDailySets.DailySet bare = new NewsletterDailySets.DailySet(99, "주제", set.question(), null, null);
+        NewsletterDailySets.DailySet bare = new NewsletterDailySets.DailySet(99, "주제", set.question(), null, null, null);
         NewsArticle crawled = NewsArticle.builder().company("toss").sourceName("토스 기술블로그").url("https://toss.tech/article/sample")
                 .title("샘플 글").summary("요약 문장").publishedAt(Instant.parse("2026-11-20T00:00:00Z")).build();
         assertThat(letters.buildDaily(bare, crawled, "https://mycookie.dev", "https://mycookie.dev/newsletter/unsubscribe?key=k").text())

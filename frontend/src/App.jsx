@@ -58,7 +58,8 @@ const NcsPage = lazy(() => import('./pages/NcsPage'));
 const WeakPage = lazy(() => import('./pages/WeakPage'));
 const SsafyPage = lazy(() => import('./pages/SsafyPage'));
 const AptitudePage = lazy(() => import('./pages/AptitudePage'));
-const AuthCallbackPage = lazy(() => import('./pages/AuthCallbackPage'));
+const DailyPracticePage = lazy(() => import('./pages/DailyPracticePage'));
+const AuthCallbackPage =lazy(() => import('./pages/AuthCallbackPage'));
 const OnboardingPage = lazy(() => import('./pages/OnboardingPage'));
 const DevLogPage = lazy(() => import('./pages/DevLogPage'));
 const VerifyEmailPage = lazy(() => import('./pages/AuthEmailPage').then(m => ({ default: m.VerifyEmailPage })));
@@ -105,7 +106,8 @@ function App() {
           <Route path="question/:id" element={<QuestionPage />} />
           <Route path="account" element={<AccountPage />} />
           <Route path="account/retry" element={<AccountRetryPage />} />
-          <Route path="auth/callback" element={<AuthCallbackPage />} />
+          <Route path="daily/:day" element={<DailyPracticePage />} />
+          <Route path="auth/callback"element={<AuthCallbackPage />} />
           <Route path="auth/verify-email" element={<VerifyEmailPage />} />
           <Route path="auth/reset-password" element={<ResetPasswordPage />} />
           <Route path="newsletter/confirm" element={<NewsletterConfirmPage />} />
