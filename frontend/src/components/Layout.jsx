@@ -4,7 +4,7 @@ import SiteFooter from './SiteFooter';
 import { Link, Outlet, useLocation } from 'react-router-dom';
 import { warmUpBackend } from '../api';
 import { track } from '../track';
-import ChaosChat from './ChaosChat';
+import CookieAssistant from './CookieAssistant';
 import StudyAmbience from './StudyAmbience';
 import StudyCount from './StudyCount';
 import RankWelcome from './RankWelcome';
@@ -13,8 +13,6 @@ import HeaderSubscribe from './HeaderSubscribe';
 import { account, onAccountChange } from '../sync';
 import PromotionAnnouncements from './PromotionAnnouncements';
 
-// 카오스 고양이 챗봇은 잠시 숨겨 둔다. true로 바꾸면 다시 나온다
-const SHOW_CHAOS_CHAT = false;
 
 // 큰 푸터(소개, 약관 링크)는 이 화면들에서만 보인다. 문제를 풀거나 노트를 읽는 공부 화면에서는 어디서든 숨기고,
 // 새 공부 화면이 생겨도 따로 고치지 않아도 되게 "보일 화면"만 적는다
@@ -163,7 +161,7 @@ export default function Layout() {
       {!loginOnly && <PromotionAnnouncements />}
       {!loginOnly && !location.pathname.startsWith('/admin') && !location.pathname.startsWith('/private') && <RankWelcome />}
       {!loginOnly && <StudyAmbience />}
-      {SHOW_CHAOS_CHAT && <ChaosChat />}
+      <CookieAssistant />
     </>
   );
 }
