@@ -237,7 +237,10 @@ function AdminControls({ back, viaLogin }) {
           {tab === 'chat' && (chat
             ? <Chat chat={chat} adminKey={key} onChange={setChat} />
             : <p className="exam-note">채팅 글을 불러오지 못했습니다. 백엔드 배포가 끝난 뒤 새로고침해 주세요.</p>)}
-          {tab === 'accounts' && (sys ? <Accounts sys={sys} /> : <SysMissing />)}
+          {tab === 'accounts' && <>
+            <PrivateBankGrants adminKey={key} />
+            {sys ? <Accounts sys={sys} /> : <SysMissing />}
+          </>}
           {tab === 'audit' && (audit ? <AuditLog rows={audit} /> : <p className="exam-note">작업 기록을 불러오지 못했습니다. 백엔드 배포가 끝난 뒤 새로고침해 주세요.</p>)}
           {tab === 'mail' && (mailFailures ? <MailFailures data={mailFailures} /> : <p className="exam-note">메일 발송 현황을 불러오지 못했습니다. 백엔드 배포가 끝난 뒤 새로고침해 주세요.</p>)}
           {tab === 'system' && (sys ? <System sys={sys} events={data.server.events} /> : <SysMissing />)}
@@ -266,6 +269,63 @@ function SecurityPanel({ adminKey, revision }) {
       <thead><tr><th>한국 시간</th><th>IP</th><th>사유</th><th>경로</th><th>응답</th><th>분당 API 요청</th><th>User-Agent</th></tr></thead>
       <tbody>{events.map(event => <tr key={event.id}><td>{new Date(event.occurredAt).toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' })}</td><td>{event.ip}</td><td>{reasons[event.reason] || event.reason}</td><td>{event.method} {event.path}</td><td>{event.reason === 'DECLARED_AUTOMATION' ? '감지' : event.status}</td><td>{event.requestsInWindow || '—'}</td><td style={{ maxWidth: 280, overflowWrap: 'anywhere' }}>{event.userAgent}</td></tr>)}</tbody>
     </table></div>}
+  </section>;
+}
+
+// 비공개 문제집 열람 권한. 닉네임으로 열어 주면 그 계정의 내 계정 메뉴에 "비공개 문제집"이 생기고 /private/banks가 열린다.
+// 홈서버 작업 없이 여기서 주고 뺀다(관리자 · 주인 권한은 계속 홈서버에서만 준다)
+function PrivateBankGrants({ adminKey }) {
+  const [rows, setRows] = useState(null);
+  const [error, setError] = useState('');
+  const [nickname, setNickname] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [done, setDone] = useState('');
+
+  useEffect(() => {
+    const controller = new AbortController();
+    api.get('/admin/private-bank', { headers: adminHeaders(adminKey), signal: controller.signal, timeout: 60000 })
+      .then(({ data }) => { if (!controller.signal.aborted) setRows(Array.isArray(data) ? data : []); })
+      .catch(() => { if (!controller.signal.aborted) setError('목록을 불러오지 못했습니다. 백엔드 배포가 끝난 뒤 새로고침해 주세요.'); });
+    return () => controller.abort();
+  }, [adminKey]);
+
+  const change = (name, grant) => {
+    const target = name.trim();
+    if (!target || busy) return;
+    if (!grant && !window.confirm(`${target} 님의 비공개 문제집 권한을 뺄까요?`)) return;
+    setBusy(true); setError(''); setDone('');
+    api.post('/admin/private-bank', { nickname: target, grant }, { headers: adminHeaders(adminKey), timeout: 60000 })
+      .then(({ data }) => {
+        setRows(data.grants || []);
+        setDone(grant ? `${data.nickname} 님에게 비공개 문제집을 열었어요. 그 계정이 새로고침하면 메뉴에 보여요.` : `${data.nickname} 님의 권한을 뺐어요.`);
+        if (grant) setNickname('');
+      })
+      .catch(e => setError(e?.response?.data?.error || e?.response?.data?.message || '바꾸지 못했어요. 잠시 후 다시 시도해 주세요.'))
+      .finally(() => setBusy(false));
+  };
+
+  return <section aria-label="비공개 문제집 권한">
+    <div className="section-title">비공개 문제집 권한</div>
+    <p className="exam-note">닉네임으로 열어 주면 그 계정의 내 계정 메뉴에 "비공개 문제집"이 생깁니다. 주인 계정은 항상 열려 있어 목록에 없습니다.</p>
+    <form className="admin-filter" style={{ display: 'flex', gap: 8, flexWrap: 'wrap', margin: '0 0 10px' }}
+      onSubmit={e => { e.preventDefault(); change(nickname, true); }}>
+      <input aria-label="권한을 줄 닉네임" placeholder="닉네임" maxLength={40} value={nickname} disabled={busy} onChange={e => setNickname(e.target.value)} />
+      <button type="submit" className="exam-btn sm" disabled={busy || !nickname.trim()}>{busy ? '처리 중…' : '권한 주기'}</button>
+    </form>
+    {done && <p className="exam-note" role="status">{done}</p>}
+    {error && <p role="alert">{error}</p>}
+    {rows === null ? (!error && <p role="status">목록을 불러오는 중…</p>) : rows.length ? (
+      <div className="exam-table-wrap">
+        <table className="exam-table admin-table">
+          <thead><tr><th>닉네임</th><th>연 날짜</th><th>빼기</th></tr></thead>
+          <tbody>{rows.map(r => <tr key={r.nickname}>
+            <td>{r.nickname}</td>
+            <td>{fmtAt(r.grantedAt)}</td>
+            <td><button type="button" className="exam-btn sm" disabled={busy} onClick={() => change(r.nickname, false)}>권한 빼기</button></td>
+          </tr>)}</tbody>
+        </table>
+      </div>
+    ) : <p className="exam-note">아직 열어 준 계정이 없습니다.</p>}
   </section>;
 }
 

@@ -50,4 +50,36 @@ class PrivateBankAccessTest {
         roles.grant("주인후보", Role.OWNER);
         expect(owner, true);
     }
+
+    // 관리자 페이지에서 ADMIN 계정이 열어 주고 빼면 바로 반영된다. 일반 계정은 주고 뺄 수 없다
+    @Test
+    void adminPageGrantsAndRevokesPrivateBanks() throws Exception {
+        String admin = register("문제집관리자");
+        roles.grant("문제집관리자", Role.ADMIN);
+        String guest = register("새손님");
+        String other = register("다른계정");
+        expect(guest, false);
+
+        String grant = "{\"nickname\":\"새손님\"}";
+        mvc.perform(post("/api/v1/admin/private-bank").header("Authorization", "Bearer " + other)
+                .contentType(MediaType.APPLICATION_JSON).content(grant))
+                // 관리자 키가 없는 시험 환경이라 503, 키가 있으면 401. 어느 쪽이든 거절이다
+                .andExpect(result -> org.junit.jupiter.api.Assertions.assertTrue(result.getResponse().getStatus() >= 400));
+        expect(guest, false);
+
+        mvc.perform(post("/api/v1/admin/private-bank").header("Authorization", "Bearer " + admin)
+                        .contentType(MediaType.APPLICATION_JSON).content(grant))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.granted").value(true));
+        expect(guest, true);
+        mvc.perform(get("/api/v1/admin/private-bank").header("Authorization", "Bearer " + admin))
+                .andExpect(status().isOk()).andExpect(jsonPath("$[?(@.nickname == '새손님')]").exists());
+
+        mvc.perform(post("/api/v1/admin/private-bank").header("Authorization", "Bearer " + admin)
+                        .contentType(MediaType.APPLICATION_JSON).content("{\"nickname\":\"새손님\",\"grant\":false}"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.granted").value(false));
+        expect(guest, false);
+
+        mvc.perform(post("/api/v1/admin/private-bank").header("Authorization", "Bearer " + admin)
+                .contentType(MediaType.APPLICATION_JSON).content("{\"nickname\":\"없는계정\"}")).andExpect(status().isNotFound());
+    }
 }
