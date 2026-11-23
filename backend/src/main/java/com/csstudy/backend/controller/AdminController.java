@@ -4,7 +4,7 @@ import com.csstudy.backend.dto.GradeResponse;
 import com.csstudy.backend.entity.User;
 import com.csstudy.backend.repository.*;
 import com.csstudy.backend.service.AdminAuth;
-import com.csstudy.backend.service.ChatService;
+import com.csstudy.backend.chatbot.ChatbotStats;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
@@ -36,7 +36,7 @@ public class AdminController {
     private final CategoryRepository categoryRepository;
     private final UsageEventRepository usageEventRepository;
     private final QuestionReportRepository questionReportRepository;
-    private final ChatService chatService;
+    private final ChatbotStats chatbotStats;
     private final JdbcTemplate jdbcTemplate;
     private final com.csstudy.backend.repository.AdminAuditLogRepository auditLogs;
     private final com.csstudy.backend.service.MailFailures mailFailures;
@@ -56,7 +56,7 @@ public class AdminController {
         body.put("grading", grading());
         body.put("examSync", pairs(examProgressRepository.countByCompany(), "company"));
         body.put("openReports", questionReportRepository.countByHandledFalse());
-        body.put("chat", chatService.adminStatus());
+        body.put("chat", chatbotStats.adminStatus());
         body.put("slackEnabled", slackEnabled);
         body.put("database", database());
         body.put("server", server());
