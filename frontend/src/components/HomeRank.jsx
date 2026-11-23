@@ -7,6 +7,7 @@ import TierBadge from './TierBadge';
 import RankMedal from './RankMedal';
 import TierGuide from './TierGuide';
 import './HomeRank.css';
+import { holdSplash } from '../splash';
 
 // 첫 화면 맨 위 "실시간 순위" 카드. 1~3위는 시상대, 4~5위는 짧은 줄, 내 순위는 맨 아래에 고정한다.
 // 읽기만 한다(문제 수 보고 · 기기 동기화는 전체 순위 화면의 SolveRank가 맡는다).
@@ -29,7 +30,10 @@ export default function HomeRank() {
   useEffect(() => {
     const controller = new AbortController();
     const headers = { 'X-Visitor-Id': visitorId(), ...(account() ? { Authorization: `Bearer ${account().token}` } : {}) };
-    api.get('/rank/solved', { headers, signal: controller.signal, timeout: 90000 })
+    const request = api.get('/rank/solved', { headers, signal: controller.signal, timeout: 90000 });
+    // 저장해 둔 순위가 없으면 첫 로딩 대기 화면이 이 응답을 기다린다(순위 칸이 나중에 끼어들며 화면이 밀리지 않게)
+    if (!readCache()) holdSplash(request);
+    request
       .then(({ data }) => {
         if (!data || !Array.isArray(data.top)) return;
         setRank(data);

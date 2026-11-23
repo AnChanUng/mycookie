@@ -10,6 +10,7 @@ import StudyCount from './StudyCount';
 import RankWelcome from './RankWelcome';
 import MemberMenu from './MemberMenu';
 import HeaderSubscribe from './HeaderSubscribe';
+import SplashReady from './SplashReady';
 import { account, onAccountChange } from '../sync';
 import PromotionAnnouncements from './PromotionAnnouncements';
 
@@ -85,7 +86,7 @@ export default function Layout() {
       <header className="header">
         <div className="container header-inner">
           <Link to="/" className="logo">
-            <span className="logo-dot" />
+            <img className="logo-cookie" src="/brand-cookie.svg" alt="" width="30" height="30" />
             <span className="logo-title">나의쿠키</span>
           </Link>
           <div className="header-right">
@@ -154,6 +155,7 @@ export default function Layout() {
       <main className="container">
         <Suspense fallback={<div className="loading"><div className="loading-spinner" />불러오는 중...</div>}>
           <Outlet />
+          <SplashReady />
         </Suspense>
       </main>
       {!loginOnly && showFooter && <SiteFooter />}
