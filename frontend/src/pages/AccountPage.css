@@ -182,3 +182,20 @@
   .account-auth > .auth-card { max-width: none; padding: 32px 20px 28px; border: 0; box-shadow: none; background: none; }
   .auth-card .auth-title { font-size: 26px; }
 }
+
+/* 소셜 로그인에서 돌아온 화면(/auth/callback): 로그인 카드와 같은 모양 */
+.auth-card .auth-provider { display: table; margin: 0 auto 14px; padding: 5px 12px; border-radius: 999px; background: var(--ds-brand-soft); color: var(--ds-brand); font-size: 13px; font-weight: 700; }
+.auth-card .auth-sub strong { color: var(--ds-text); }
+.auth-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin: 0 0 24px; padding: 4px; border-radius: 12px; background: var(--ds-surface-2); }
+.auth-tabs button { height: 42px; border: 0; border-radius: 9px; background: none; color: var(--ds-text-2); font-size: 14px; font-weight: 600; cursor: pointer; transition: background var(--ds-fast) var(--ds-ease), color var(--ds-fast) var(--ds-ease); }
+.auth-tabs button.on { background: var(--ds-surface); color: var(--ds-text); box-shadow: 0 1px 3px rgb(0 0 0 / 8%); }
+.auth-tabs button:focus-visible { outline: 2px solid var(--ds-brand); outline-offset: 2px; }
+.auth-submit-link { display: grid; place-items: center; width: 100%; text-decoration: none; }
+.account-page .auth-card .auth-submit-link { color: #fff; }
+.auth-links a { color: var(--ds-text-2); text-decoration: none; }
+.auth-links a:hover { color: var(--ds-brand); }
+.auth-wait { display: grid; justify-items: center; padding: 8px 0; }
+.auth-spinner { width: 40px; height: 40px; margin-bottom: 20px; border: 3px solid var(--ds-brand-soft); border-top-color: var(--ds-brand); border-radius: 50%; animation: auth-spin .8s linear infinite; }
+@keyframes auth-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .auth-spinner { animation: none; } }
+@media (max-width: 480px) { .account-auth > .auth-card { padding: 36px 22px 30px; } }

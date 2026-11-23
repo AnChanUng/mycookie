@@ -12,7 +12,7 @@ const finishOnce = (code, state) => {
 
 const errorText = error => error?.response?.data?.error || error?.message || '로그인하지 못했습니다. 다시 시도해 주세요.';
 
-// 소셜 · 깃허브 로그인에서 돌아오는 화면(/auth/callback)
+// 소셜 · 깃허브 로그인에서 돌아오는 화면(/auth/callback). 로그인 화면과 같은 카드 모양으로 보여 준다
 export default function AuthCallbackPage() {
   const navigate = useNavigate();
   const [params] = useState(() => new URLSearchParams(window.location.search));
@@ -32,11 +32,20 @@ export default function AuthCallbackPage() {
   }, [navigate, params, cancelled]);
 
   return <div className="account-page fade-in">
-    <header className="page-header"><h1>로그인</h1></header>
     <section className="account-auth">
-      {phase.kind === 'loading' && <p role="status">로그인하는 중… 서버가 깨어나는 데 시간이 걸릴 수 있습니다.</p>}
-      {phase.kind === 'error' && <><p role="alert">{phase.message}</p><Link className="exam-btn sm" to="/account#settings">로그인 화면으로</Link></>}
-      {phase.kind === 'link' && <LinkPanel {...phase} onDone={() => navigate('/account#settings', { replace: true })} />}
+      <div className="auth-card">
+        {phase.kind === 'loading' && <div className="auth-wait" role="status">
+          <span className="auth-spinner" aria-hidden="true" />
+          <h2 className="auth-title">로그인하는 중</h2>
+          <p className="auth-sub">잠시만 기다려 주세요. 서버가 깨어나는 데 시간이 걸릴 수 있어요.</p>
+        </div>}
+        {phase.kind === 'error' && <>
+          <h2 className="auth-title">로그인하지 못했어요</h2>
+          <p className="auth-sub">{phase.message}</p>
+          <Link className="auth-submit auth-submit-link" to="/account#settings">로그인 화면으로</Link>
+        </>}
+        {phase.kind === 'link' && <LinkPanel {...phase} onDone={() => navigate('/account#settings', { replace: true })} />}
+      </div>
     </section>
   </div>;
 }
@@ -44,7 +53,7 @@ export default function AuthCallbackPage() {
 function LinkPanel({ provider, ticket, suggestedNickname, onDone }) {
   const label = OAUTH_LABELS[provider] || provider;
   const current = account();
-  const [mode, setMode] = useState('link');
+  const [mode, setMode] = useState('signup');
   const [form, setForm] = useState({ nickname: '', password: '', newNickname: (suggestedNickname || '').slice(0, 20) });
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
@@ -54,32 +63,46 @@ function LinkPanel({ provider, ticket, suggestedNickname, onDone }) {
     catch (error) { setMessage(errorText(error)); }
     finally { setBusy(false); }
   }
+  const choose = next => { setMode(next); setMessage(''); };
 
+  // 이미 로그인한 상태에서 소셜 계정을 연결할 때
   if (current) return <>
-    <h2>{label} 계정 연결</h2>
-    <p>지금 로그인한 <strong>{current.nickname}</strong> 계정에 {label} 계정을 연결합니다. 다음부터는 {label}로 바로 로그인할 수 있어요.</p>
-    <div className="account-actions">
-      <button className="exam-btn sm primary" disabled={busy} onClick={() => run(() => linkOAuth(ticket))}>{current.nickname} 계정에 연결</button>
-      <Link className="exam-btn sm" to="/account#settings">취소</Link>
-    </div>
-    {message && <p role="alert">{message}</p>}
+    <span className="auth-provider">{label}</span>
+    <h2 className="auth-title">{label} 계정 연결</h2>
+    <p className="auth-sub"><strong>{current.nickname}</strong> 계정에 {label} 계정을 연결해요. 다음부터는 {label}로 바로 로그인할 수 있어요.</p>
+    <button type="button" className="auth-submit" disabled={busy} onClick={() => run(() => linkOAuth(ticket))}>{busy ? '연결하는 중…' : `${current.nickname} 계정에 연결`}</button>
+    <div className="auth-links"><Link to="/account#settings">취소</Link></div>
+    {message && <p className="auth-message" role="alert">{message}</p>}
   </>;
 
   return <>
-    <h2>{label} 계정으로 처음 오셨어요</h2>
-    <p>이미 쓰던 계정이 있다면 닉네임(또는 인증한 이메일)과 비밀번호를 한 번만 입력해 주세요. 바로 연결되고, 지금까지의 학습 기록을 그대로 이어서 볼 수 있어요.</p>
-    <div className="account-actions" role="tablist">
-      <button type="button" role="tab" aria-selected={mode === 'link'} className={`exam-btn sm${mode === 'link' ? ' primary' : ''}`} onClick={() => { setMode('link'); setMessage(''); }}>기존 계정에 연결</button>
-      <button type="button" role="tab" aria-selected={mode === 'signup'} className={`exam-btn sm${mode === 'signup' ? ' primary' : ''}`} onClick={() => { setMode('signup'); setMessage(''); }}>새 계정 만들기</button>
+    <span className="auth-provider">{label}로 시작하기</span>
+    <h2 className="auth-title">{mode === 'signup' ? '닉네임을 정해 주세요' : '기존 계정에 연결'}</h2>
+    <p className="auth-sub">{mode === 'signup'
+      ? '나의쿠키에서 쓸 닉네임만 정하면 바로 시작해요. 순위와 채팅에 이 이름이 보여요.'
+      : '쓰던 계정이 있다면 한 번만 로그인해 주세요. 지금까지의 학습 기록을 그대로 이어서 볼 수 있어요.'}</p>
+
+    <div className="auth-tabs" role="tablist" aria-label="가입 방법">
+      <button type="button" role="tab" aria-selected={mode === 'signup'} className={mode === 'signup' ? 'on' : ''} onClick={() => choose('signup')}>새로 시작하기</button>
+      <button type="button" role="tab" aria-selected={mode === 'link'} className={mode === 'link' ? 'on' : ''} onClick={() => choose('link')}>기존 계정 연결</button>
     </div>
-    {mode === 'link' ? <form onSubmit={e => { e.preventDefault(); run(() => linkOAuth(ticket, form.nickname.trim(), form.password)); }}>
-      <input aria-label="기존 닉네임" placeholder="기존 닉네임 또는 인증한 이메일" autoComplete="username" maxLength={254} disabled={busy} value={form.nickname} onChange={e => setForm({ ...form, nickname: e.target.value })} />
-      <input aria-label="비밀번호" type="password" placeholder="비밀번호" autoComplete="current-password" maxLength={72} disabled={busy} value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} />
-      <button className="exam-btn sm primary" disabled={busy || !form.nickname.trim() || !form.password}>연결하고 로그인</button>
-    </form> : <form onSubmit={e => { e.preventDefault(); run(() => signUpOAuth(ticket, form.newNickname.trim())); }}>
-      <input aria-label="새 닉네임" placeholder="새 닉네임" maxLength={20} disabled={busy} value={form.newNickname} onChange={e => setForm({ ...form, newNickname: e.target.value })} />
-      <button className="exam-btn sm primary" disabled={busy || !form.newNickname.trim()}>{label} 계정으로 가입</button>
+
+    {mode === 'signup' ? <form className="auth-form" onSubmit={e => { e.preventDefault(); run(() => signUpOAuth(ticket, form.newNickname.trim())); }}>
+      <label className="auth-field"><span>닉네임</span>
+        <input aria-label="새 닉네임" placeholder="1~20자" maxLength={20} autoComplete="nickname" disabled={busy} value={form.newNickname} onChange={e => setForm({ ...form, newNickname: e.target.value })} />
+      </label>
+      <button className="auth-submit" disabled={busy || !form.newNickname.trim()}>{busy ? '가입하는 중…' : '시작하기'}</button>
+    </form> : <form className="auth-form" onSubmit={e => { e.preventDefault(); run(() => linkOAuth(ticket, form.nickname.trim(), form.password)); }}>
+      <label className="auth-field"><span>닉네임 또는 인증한 이메일</span>
+        <input aria-label="기존 닉네임" autoComplete="username" maxLength={254} disabled={busy} value={form.nickname} onChange={e => setForm({ ...form, nickname: e.target.value })} />
+      </label>
+      <label className="auth-field"><span>비밀번호</span>
+        <input aria-label="비밀번호" type="password" autoComplete="current-password" maxLength={72} disabled={busy} value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} />
+      </label>
+      <button className="auth-submit" disabled={busy || !form.nickname.trim() || !form.password}>{busy ? '연결하는 중…' : '연결하고 로그인'}</button>
     </form>}
-    {message && <p role="alert">{message}</p>}
+
+    {message && <p className="auth-message" role="alert">{message}</p>}
+    {mode === 'signup' && <p className="auth-note">닉네임은 나중에 내 계정에서 바꿀 수 있어요.</p>}
   </>;
 }
