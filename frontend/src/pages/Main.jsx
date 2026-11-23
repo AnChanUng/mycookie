@@ -115,15 +115,16 @@ export default function Main() {
 
   return (
     <div className="mn">
+      {/* 오늘의 명언: 첫 화면 맨 위 가운데 */}
+      <figure className="mn-quote ds-rise">
+        <blockquote>“{quote.text}”</blockquote>
+        {quote.by && <figcaption>{quote.by}</figcaption>}
+      </figure>
+
       {/* 인사 + 오늘 목표 */}
       <section className="mn-top">
         <div className="mn-hello">
           <p className="ds-eyebrow">{dateLabel}</p>
-          {/* 오늘의 명언: 첫 화면 안에 작은 한 줄로 */}
-          <figure className="mn-quote">
-            <blockquote>“{quote.text}”</blockquote>
-            {quote.by && <figcaption>{quote.by}</figcaption>}
-          </figure>
           <h1 className="mn-h1">{user?.nickname ? `${user.nickname}님, 오늘은 뭘 공부해 볼까요?` : '개발자 공부, 여기 다 있어요'}</h1>
           <p className="mn-sub">AI, 웹 개발, 컴퓨터공학 모든 공부를 한곳에서</p>
           <div className="mn-chips">
