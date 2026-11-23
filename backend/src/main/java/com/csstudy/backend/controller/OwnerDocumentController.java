@@ -25,7 +25,7 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class OwnerDocumentController {
 
-    private static final Set<String> KEYS = Set.of("tech-interview", "portfolio-interview");
+    private static final Set<String> KEYS = Set.of("tech-interview", "portfolio-interview", "webnote-interview");
     private static final int MAX_CHARS = 300_000;
 
     private final OwnerDocumentRepository docs;

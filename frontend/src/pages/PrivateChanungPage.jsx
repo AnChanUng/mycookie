@@ -32,20 +32,24 @@ function PrivateChanung() {
   const interviews = id === 'interviews';
   const techInterview = id === 'tech-interview';
   const portfolioInterview = id === 'portfolio-interview';
+  const webnoteInterview = id === 'webnote-interview';
 
   useEffect(() => {
-    if (data || trouble || admin || interviews || techInterview || portfolioInterview) return;
+    if (data || trouble || admin || interviews || techInterview || portfolioInterview || webnoteInterview) return;
     let alive = true;
     import('../data/privateBanks')
       .then(m => { if (alive) setData(m); })
       .catch(() => { if (alive) setLoadError(true); });
     return () => { alive = false; };
-  }, [data, trouble, admin, interviews, techInterview, portfolioInterview]);
+  }, [data, trouble, admin, interviews, techInterview, portfolioInterview, webnoteInterview]);
 
   if (trouble) return <TroubleLog />;
   if (techInterview) return <Suspense fallback={<p role="status">기술면접을 불러오는 중…</p>}><TechInterview back={{ to: BASE, label: '← 찬웅 전용 페이지' }} /></Suspense>;
   if (portfolioInterview) return <Suspense fallback={<p role="status">포트폴리오 면접을 불러오는 중…</p>}><TechInterview back={{ to: BASE, label: '← 찬웅 전용 페이지' }} doc="portfolio-interview" title="포트폴리오 면접"
     intro="이력서와 포트폴리오에 적은 경험마다 기본 질문, 꼬리질문, 기술 질문, 인성 질문을 단계별로 연습해요." /></Suspense>;
+  if (webnoteInterview) return <Suspense fallback={<p role="status">웹노트 질문지를 불러오는 중…</p>}><TechInterview back={{ to: BASE, label: '← 찬웅 전용 페이지' }} doc="webnote-interview" title="웹노트 질문지"
+    depthNames={{ 1: 'Lv.1 · 기초', 2: 'Lv.2 · 실무', 3: 'Lv.3 · 심화' }}
+    intro="웹노트 문답과 백엔드 실무 주제를 Lv.1 기초, Lv.2 실무, Lv.3 심화로 나눠 연습해요. 왜 썼고, 어떤 상황에서 겪었고, 어떻게 해결했는지로 답해 보세요." /></Suspense>;
   if (interviews) return <Suspense fallback={<p role="status">면접 자료를 불러오는 중…</p>}><OthersInterviews back={{ to: BASE, label: '← 찬웅 전용 페이지' }} /></Suspense>;
   // 관리자 모니터링은 /admin(관리자 계정)으로 옮겼다
   if (admin) return <Navigate to="/admin" replace />;
@@ -187,6 +191,11 @@ function PrivateList({ data }) {
             <span className="exam-company-name">포트폴리오 면접</span>
             <span className="exam-company-meta">이력서 · 포트폴리오 기반 꼬리질문 · 기술 · 인성</span>
           </Link>
+          <Link to={privatePath("webnote-interview")} className="exam-company-card">
+            <span className="exam-company-abbr">웹노트</span>
+            <span className="exam-company-name">웹노트 질문지</span>
+            <span className="exam-company-meta">웹노트 문답 + 백엔드 실무 주제 · Lv.1~3</span>
+          </Link>
           <Link to={privatePath("tech-interview")} className="exam-company-card">
             <span className="exam-company-abbr">기술</span>
             <span className="exam-company-name">기술면접</span>
@@ -202,25 +211,15 @@ function PrivateList({ data }) {
             <span className="exam-company-name">트러블슈팅 기록</span>
             <span className="exam-company-meta">개발하면서 겪은 기술 문제 · 원인 · 해결 · 측정 결과</span>
           </Link>
-          <Link to="/admin" className="exam-company-card">
-            <span className="exam-company-abbr">ADMIN</span>
-            <span className="exam-company-name">관리자 모니터링</span>
-            <span className="exam-company-meta">이용 현황 · 풀이 · 방문자 · 보안 · 제보 · 채팅 · 계정 · 시스템</span>
+          <Link to={privatePath('banks')} className="exam-company-card">
+            <span className="exam-company-abbr">문제집</span>
+            <span className="exam-company-name">비공개 문제집</span>
+            <span className="exam-company-meta">복기 문제집 · 컴퓨터일반 {bankCount}개</span>
           </Link>
           <Link to={privatePath("interviews")} className="exam-company-card">
             <span className="exam-company-abbr">면접</span>
             <span className="exam-company-name">다른 사람 면접</span>
             <span className="exam-company-meta">AWS · 현대오토에버 면접 복기 질문과 예시 답변 · 꼬리질문</span>
-          </Link>
-        </div>
-      </section>
-      <section style={{ marginTop: 32 }}>
-        <div className="section-title">학습 자료</div>
-        <div className="exam-company-grid">
-          <Link to={privatePath('banks')} className="exam-company-card">
-            <span className="exam-company-abbr">문제집</span>
-            <span className="exam-company-name">비공개 문제집</span>
-            <span className="exam-company-meta">복기 문제집 · 컴퓨터일반 {bankCount}개</span>
           </Link>
         </div>
       </section>
