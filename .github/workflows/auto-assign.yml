@@ -1,4 +1,4 @@
-# 새 PR과 이슈의 담당자(Assignees)에 저장소 주인을 자동으로 넣고, PR에는 리뷰어를 자동으로 요청한다.
+# 새 PR의 담당자(Assignees)에는 PR을 올린 사람을, 이슈와 봇이 연 PR에는 저장소 주인을 자동으로 넣고, PR에는 리뷰어를 자동으로 요청한다.
 # 사이트 제보로 백엔드가 만든 이슈도 포함된다(제보용 토큰으로 만든 이슈도 이 이벤트를 일으킨다).
 # 리뷰어는 REVIEWERS에 적은 사람 모두다. GitHub은 작성자 본인을 리뷰어로 둘 수 없어서 작성자만 빼고 요청한다
 # (찬웅님 PR → 보민님, 보민님 PR → 찬웅님, 그 밖의 사람 PR → 두 사람 모두).
@@ -19,16 +19,21 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 2
     steps:
-      - name: 저장소 주인을 담당자로
+      # PR은 올린 사람이 담당자다(보민님 PR → 보민님). 봇이 연 PR(운영 배포 PR 등)과 이슈는 저장소 주인이 맡는다
+      - name: 담당자 지정
         env:
           GH_TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}
           OWNER: ${{ github.repository_owner }}
           NUMBER: ${{ github.event.issue.number || github.event.pull_request.number }}
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+          PR_AUTHOR_TYPE: ${{ github.event.pull_request.user.type }}
         run: |
+          assignee="$OWNER"
+          if [ -n "$PR_AUTHOR" ] && [ "$PR_AUTHOR_TYPE" = "User" ]; then assignee="$PR_AUTHOR"; fi
           # 이슈와 PR은 같은 번호 체계라 issues API 하나로 둘 다 지정된다
-          gh api -X POST "repos/$REPO/issues/$NUMBER/assignees" -f "assignees[]=$OWNER" --silent \
-            || echo "::warning::담당자를 지정하지 못했어요(포크 PR이면 권한이 없어 건너뜁니다)"
+          gh api -X POST "repos/$REPO/issues/$NUMBER/assignees" -f "assignees[]=$assignee" --silent \
+            || echo "::warning::담당자($assignee)를 지정하지 못했어요(포크 PR이거나 저장소 권한이 없는 사람이면 건너뜁니다)"
 
       - name: 리뷰어 요청
         if: github.event_name == 'pull_request' && !github.event.pull_request.draft
