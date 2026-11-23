@@ -37,7 +37,7 @@ export default function SocialLogin({ user }) {
         ? <span key={p} className={`social-btn ${p} linked`}><i className="social-mark" aria-hidden="true">✓</i>{OAUTH_LABELS[p]} 연결됨</span>
         : <button key={p} type="button" className={`social-btn ${p}`} disabled={!!busy} onClick={() => go(p)}>
           <i className="social-mark" aria-hidden="true">{MARKS[p]}</i>
-          {busy === p ? '이동 중…' : user ? `${OAUTH_LABELS[p]} 연결하기` : `${p === 'ssafy' ? 'SSAFY' : OAUTH_LABELS[p]} 로그인`}
+          {busy === p ? '이동 중…' : user ? `${OAUTH_LABELS[p]} 연결하기` : `${p === 'ssafy' ? 'SSAFY' : OAUTH_LABELS[p]}로 시작하기`}
         </button>)}
     </div>
     {message && <p className="auth-message" role="alert">{message}</p>}

@@ -157,3 +157,28 @@
 .membership-panel > p { margin: 0 0 var(--ds-s3); color: var(--ds-text-2); font-size: var(--ds-fs-small); }
 .account-metrics > div { border: 1px solid var(--ds-line); background: var(--ds-surface); border-radius: var(--ds-r-lg, 12px); padding: var(--ds-s4); }
 .account-history, .account-notes { border-color: var(--ds-line-strong); border-radius: var(--ds-r-xl); background: var(--ds-surface); }
+
+/* ===== 로그인 화면(로그아웃 상태) 크게: 큰 포털 로그인 화면처럼 넓은 카드 · 큰 입력 칸 · 세로로 쌓은 간편 로그인 버튼 =====
+   위의 예전 규칙보다 뒤에 두어 덮어쓴다. 로그인한 뒤의 본인 설정 화면에는 영향이 없다(.auth-card 안쪽만) */
+.account-auth:has(> .auth-card) { box-shadow: none; padding: 40px 0 64px; }
+.account-auth > .auth-card { max-width: 480px; padding: 48px 44px 40px; border-radius: 20px; box-shadow: 0 20px 60px rgb(0 0 0 / 7%); }
+.auth-card .auth-title { font-size: 30px; line-height: 1.25; margin-bottom: 10px; }
+.auth-card .auth-sub { font-size: 15px; line-height: 1.6; margin-bottom: 32px; word-break: keep-all; }
+.auth-card .social-login--row .social-login-buttons { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; }
+.auth-card .social-login--row .social-btn { height: 54px; padding: 0 20px; gap: 0; border-radius: 12px; font-size: 16px; font-weight: 700; justify-content: center; }
+.auth-card .social-login--row .social-mark { position: absolute; left: 20px; min-width: 24px; font-size: 18px; }
+.auth-card .social-btn.ssafy { background: var(--ds-surface-2); color: var(--ds-text); border-color: var(--ds-line-strong); }
+.auth-card .auth-divider { margin: 28px 0 24px; font-size: 13px; }
+.auth-card .auth-form { gap: 18px; }
+.auth-card .auth-field { gap: 8px; font-size: 14px; color: var(--ds-text); }
+.account-auth .auth-card .auth-field input { height: 54px; min-height: 54px; padding: 0 16px; border-radius: 12px; font-size: 16px; }
+.auth-card .auth-submit { height: 56px; margin-top: 6px; border-radius: 12px; font-size: 17px; font-weight: 700; }
+.auth-card .auth-note { font-size: 13px; margin-top: 16px; }
+.auth-card .auth-links { margin-top: 20px; font-size: 14px; }
+.auth-card .auth-links button { font-size: 14px; }
+.auth-card .account-hint { font-size: 14px; text-align: center; }
+@media (max-width: 560px) {
+  .account-auth:has(> .auth-card) { padding: 8px 0 40px; }
+  .account-auth > .auth-card { max-width: none; padding: 32px 20px 28px; border: 0; box-shadow: none; background: none; }
+  .auth-card .auth-title { font-size: 26px; }
+}
