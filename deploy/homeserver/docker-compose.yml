@@ -72,12 +72,6 @@ x-backend: &backend
     KAFKA_BOOTSTRAP_SERVERS: kafka:9092
     # 면접 AI와 긴급 오류 알림 요약(Gemini 무료 등급). 비어 있으면 두 기능의 AI 부분만 꺼진다
     GEMINI_API_KEY: ${GEMINI_API_KEY:-}
-    CHATBOT_ENABLED: ${CHATBOT_ENABLED:-true}
-    CHATBOT_MODEL: ${CHATBOT_MODEL:-gemini-flash-lite-latest}
-    CHATBOT_EMBED_MODEL: ${CHATBOT_EMBED_MODEL:-gemini-embedding-001}
-    CHATBOT_DAILY_GUEST: ${CHATBOT_DAILY_GUEST:-10}
-    CHATBOT_DAILY_USER: ${CHATBOT_DAILY_USER:-50}
-    CHATBOT_DAILY_TOTAL: ${CHATBOT_DAILY_TOTAL:-500}
     # 모델 이름. 구글이 옛 모델을 내리면 여기만 바꾼다(2026-11 기준 gemini-2.5-flash는 404, gemini-flash-latest는 응답 없음)
     STUDY_COACH_MODEL: ${STUDY_COACH_MODEL:-gemini-flash-lite-latest}
     INTERVIEW_GEMINI_MODEL: ${INTERVIEW_GEMINI_MODEL:-gemini-flash-lite-latest}

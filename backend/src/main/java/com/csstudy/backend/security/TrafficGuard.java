@@ -37,7 +37,7 @@ public class TrafficGuard {
         return (path.startsWith("/api/v1/auth/") || path.startsWith("/api/v1/newsletter/")) && "POST".equals(method) ? "auth"
                 : path.equals("/api/v1/code/java") ? "code"
                 : path.startsWith("/api/v1/questions") && Set.of("GET","HEAD").contains(method) ? "content"
-                : (path.equals("/api/v1/chatbot/ask") || path.equals("/api/v1/chat")) && "POST".equals(method) ? "chat" : "general";
+                : path.equals("/api/v1/chat") && "POST".equals(method) ? "chat" : "general";
     }
 
     static int limit(String group) {
