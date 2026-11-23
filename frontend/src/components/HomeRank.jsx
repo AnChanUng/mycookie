@@ -5,6 +5,7 @@ import { account } from '../sync';
 import { visitorId } from '../track';
 import TierBadge from './TierBadge';
 import RankMedal from './RankMedal';
+import TierGuide from './TierGuide';
 import './HomeRank.css';
 
 // 첫 화면 맨 위 "실시간 순위" 카드. 1~3위는 시상대, 4~5위는 짧은 줄, 내 순위는 맨 아래에 고정한다.
@@ -52,7 +53,7 @@ export default function HomeRank() {
     <header className="hr-head">
       <h2 id="hr-title"><i className="hr-live" aria-hidden="true" />실시간 순위</h2>
       {rank && <span className="hr-total">함께 {(rank.totalSolved || 0).toLocaleString()}문제</span>}
-      <Link to="/rank" className="hr-more">전체 보기</Link>
+      <span className="hr-actions"><TierGuide /><Link to="/rank" className="hr-more">전체 보기</Link></span>
     </header>
 
     {!rank ? <p className="hr-empty" role="status">{failed ? '순위를 불러오지 못했어요.' : '순위를 불러오는 중…'}</p> : <>
