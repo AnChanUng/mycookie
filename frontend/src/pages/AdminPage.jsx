@@ -902,7 +902,7 @@ function System({ sys, events }) {
         </table>
       </div>
 
-      <div className="section-title">카오스 고양이 챗봇</div>
+      <div className="section-title">쿠키 도우미</div>
       <div className="exam-stats">
         <Tile k="AI 응답" v={chat.aiReplies} unit=" 회" sub={chat.geminiConfigured ? 'Gemini가 답한 횟수' : 'GEMINI_API_KEY가 설정되지 않았습니다'} />
         <Tile k="검색 답변" v={chat.fallbackReplies} unit=" 회" sub="Gemini 없이 문제 검색으로 답한 횟수" />
