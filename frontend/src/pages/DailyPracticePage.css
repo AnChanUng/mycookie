@@ -1,0 +1,20 @@
+.daily-page { max-width: 640px; margin: 0 auto; padding: 24px 16px 48px; }
+.daily-kicker { margin: 0 0 4px; font-size: 0.85rem; opacity: 0.7; }
+.daily-card { display: grid; gap: 14px; }
+.daily-title { margin: 0; font-size: 1.1rem; }
+.daily-context { margin: 0; opacity: 0.8; white-space: pre-wrap; }
+.daily-prompt { margin: 0; font-weight: 600; line-height: 1.55; white-space: pre-wrap; }
+.daily-options { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.daily-option { width: 100%; text-align: left; padding: 12px 14px; border-radius: 10px; border: 1px solid rgba(128, 128, 128, 0.4); background: transparent; color: inherit; font: inherit; line-height: 1.5; cursor: pointer; }
+.daily-option:hover:not(:disabled) { border-color: currentColor; }
+.daily-option:disabled { cursor: default; }
+.daily-option.right { border-color: #2e9e5b; background: rgba(46, 158, 91, 0.14); }
+.daily-option.wrong { border-color: #d64545; background: rgba(214, 69, 69, 0.14); }
+.daily-option.idle { opacity: 0.55; }
+.daily-mark { margin-right: 8px; }
+.daily-explain { display: grid; gap: 8px; padding: 14px; border-radius: 10px; background: rgba(128, 128, 128, 0.1); }
+.daily-explain p { margin: 0; line-height: 1.6; }
+.daily-explain .exam-btn { justify-self: start; }
+.daily-score { margin: 0; font-size: 2rem; }
+.daily-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+@media (max-width: 480px) { .daily-page { padding: 16px 12px 40px; } }
