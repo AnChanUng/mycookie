@@ -58,8 +58,7 @@ public class MembershipService {
         return describe(base, count, "visitor:" + id).withNickname(nickname);
     }
 
-    // Existing rows have no base_tier; this preserves GOLD for every pre-existing account.
-    // Registration explicitly saves BRONZE, so future restarts cannot turn new users into GOLD.
+    // 예전 행은 base_tier가 비어 있어 GOLD로 읽는다. 다만 등급 계산(UserTier.calculate)은 GOLD 기본 등급을 쓰지 않고 푼 문제 수로 정한다
     public static UserTier baseTier(User user) {
         return user.getBaseTier() == null ? UserTier.GOLD : user.getBaseTier();
     }
@@ -101,15 +100,13 @@ public class MembershipService {
         } else {
             next = switch (tier) {
                 case BRONZE -> UserTier.SILVER;
-                case SILVER, GOLD -> UserTier.DIAMOND;
+                case SILVER -> UserTier.GOLD;
+                case GOLD -> UserTier.DIAMOND;
                 case DIAMOND -> UserTier.RUBY;
                 case RUBY -> null;
             };
             nextDivision = next == null ? null : Integer.valueOf(5);
-            threshold = null;
-            if (next == UserTier.SILVER) threshold = 50L;
-            else if (next == UserTier.DIAMOND) threshold = 300L;
-            else if (next == UserTier.RUBY) threshold = 1000L;
+            threshold = next == null ? null : next.thresholds()[0];
         }
         return new Membership(tier, tier.displayName(division), count, next, threshold,
                 threshold == null ? 0 : Math.max(0, threshold - count), null, division, nextDivision,

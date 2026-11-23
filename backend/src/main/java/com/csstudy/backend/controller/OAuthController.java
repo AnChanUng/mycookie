@@ -55,12 +55,12 @@ public class OAuthController {
         return ResponseEntity.ok(response);
     }
 
-    /** 처음 들어온 소셜 계정을 기존 닉네임 계정에 연결한다. 로그인 중이면 그 계정에, 아니면 닉네임 · 비밀번호로 확인한다. */
+    /** 처음 들어온 소셜 계정을 기존 닉네임 계정에 연결한다. 로그인 중이면 그 계정에, 아니면 닉네임(또는 이메일) · 비밀번호로 확인한다. */
     @PostMapping("/link")
     @Transactional
     public ResponseEntity<?> link(@RequestBody Map<String, String> body, HttpServletRequest request) {
         OAuthService.Ticket ticket = oauth.readTicket(body.get("ticket"));
-        User user = authService.currentUser(request).orElseGet(() -> credentials.authenticate(
+        User user = authService.currentUser(request).orElseGet(() -> credentials.authenticateLogin(
                 Objects.toString(body.get("nickname"), "").trim(), Objects.toString(body.get("password"), "").trim()));
         oauth.link(user, ticket);
         return ResponseEntity.ok(UserResponse.from(user, authService.issueToken(user), membershipService.membership(user)));

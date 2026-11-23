@@ -5,7 +5,9 @@ import { account } from '../sync';
 import { visitorId } from '../track';
 import TierBadge from './TierBadge';
 import RankMedal from './RankMedal';
+import TierGuide from './TierGuide';
 import './HomeRank.css';
+import { holdSplash } from '../splash';
 
 // 첫 화면 맨 위 "실시간 순위" 카드. 1~3위는 시상대, 4~5위는 짧은 줄, 내 순위는 맨 아래에 고정한다.
 // 읽기만 한다(문제 수 보고 · 기기 동기화는 전체 순위 화면의 SolveRank가 맡는다).
@@ -28,7 +30,10 @@ export default function HomeRank() {
   useEffect(() => {
     const controller = new AbortController();
     const headers = { 'X-Visitor-Id': visitorId(), ...(account() ? { Authorization: `Bearer ${account().token}` } : {}) };
-    api.get('/rank/solved', { headers, signal: controller.signal, timeout: 90000 })
+    const request = api.get('/rank/solved', { headers, signal: controller.signal, timeout: 90000 });
+    // 저장해 둔 순위가 없으면 첫 로딩 대기 화면이 이 응답을 기다린다(순위 칸이 나중에 끼어들며 화면이 밀리지 않게)
+    if (!readCache()) holdSplash(request);
+    request
       .then(({ data }) => {
         if (!data || !Array.isArray(data.top)) return;
         setRank(data);
@@ -43,7 +48,8 @@ export default function HomeRank() {
   const mark = r => ({ ...r, me: r.me || (!!myName && r.nickname === myName) });
   const top = (rank?.top.slice(0, LIST) || []).map(mark);
   const podium = PODIUM_ORDER.map(i => top[i]).filter(Boolean);
-  // 4~5위 줄은 빼고, 시상대 밖이면 내 순위 한 줄만 보여 준다(4~5위는 전체 보기에서)
+  // 1~3위는 시상대, 4~5위는 짧은 줄, 그 밖이면 내 순위 한 줄을 아래에 고정한다
+  const rest = top.slice(3, LIST);
   const me = top.find(r => r.me) || (rank?.me ? { ...rank.me, me: true } : null);
   const third = top[2];
   const toPodium = me && me.rank > 3 && third ? Math.max(1, third.count - me.count + 1) : null;
@@ -52,7 +58,7 @@ export default function HomeRank() {
     <header className="hr-head">
       <h2 id="hr-title"><i className="hr-live" aria-hidden="true" />실시간 순위</h2>
       {rank && <span className="hr-total">함께 {(rank.totalSolved || 0).toLocaleString()}문제</span>}
-      <Link to="/rank" className="hr-more">전체 보기</Link>
+      <span className="hr-actions"><TierGuide /><Link to="/rank" className="hr-more">전체 보기</Link></span>
     </header>
 
     {!rank ? <p className="hr-empty" role="status">{failed ? '순위를 불러오지 못했어요.' : '순위를 불러오는 중…'}</p> : <>
@@ -64,7 +70,15 @@ export default function HomeRank() {
           <span className="hr-pcount">{Number(r.count).toLocaleString()}문제</span>
         </li>)}
       </ol>
-      {me && me.rank > 3 && <Link to="/rank" className="hr-mine">
+      {rest.length > 0 && <ol className="hr-list" aria-label="4위부터 5위">
+        {rest.map(r => <li key={r.rank} className={`hr-row${r.me ? ' me' : ''}`} value={r.rank}>
+          <span className="hr-rank">{r.rank}</span>
+          <TierBadge tier={r.tier} division={r.division} />
+          <span className="hr-name" title={r.nickname}>{r.nickname}{r.me && <em>나</em>}</span>
+          <span className="hr-count">{Number(r.count).toLocaleString()}문제</span>
+        </li>)}
+      </ol>}
+      {me && me.rank > LIST && <Link to="/rank" className="hr-mine">
         <span className="hr-mine-rank">{me.rank}위</span>
         <TierBadge tier={me.tier} division={me.division} />
         <span className="hr-name">{me.nickname}<em>나</em></span>

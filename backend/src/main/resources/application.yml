@@ -85,6 +85,9 @@ app:
   # 비공개 문제집을 볼 수 있는 닉네임(쉼표로 구분). 찬웅(OWNER)은 항상 열린다. 값은 서버 환경변수로만 넣고 저장소에는 적지 않는다
   private-bank:
     nicknames: ${PRIVATE_BANK_NICKNAMES:}
+  # 새 가입은 간편 로그인(소셜)으로만 받는다. 닉네임 · 비밀번호 가입은 닫아 두고, 기존 계정의 로그인은 그대로다
+  auth:
+    password-signup-enabled: ${PASSWORD_SIGNUP_ENABLED:false}
   # 기업 소식(대기업 기술 블로그 · 뉴스룸 RSS). 일주일에 한 번 모아 최신순으로 보여 준다. 꺼져 있으면 외부 요청을 하지 않는다
   news:
     enabled: ${NEWS_ENABLED:false}

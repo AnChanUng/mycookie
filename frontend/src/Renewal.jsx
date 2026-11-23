@@ -1,4 +1,5 @@
 import { Suspense } from 'react';
+import SplashReady from './components/SplashReady';
 import { Link, Outlet } from 'react-router-dom';
 import SiteFooter from './components/SiteFooter';
 
@@ -10,6 +11,7 @@ export function RenewalShell({ footer = false }) {
       <main className="container" style={{ paddingTop: 24, paddingBottom: 48 }}>
         <Suspense fallback={<div className="loading"><div className="loading-spinner" />불러오는 중...</div>}>
           <Outlet />
+          <SplashReady />
         </Suspense>
       </main>
       {footer && <SiteFooter />}

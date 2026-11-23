@@ -6,7 +6,9 @@
 @keyframes hr-pulse { 0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--ds-green) 45%, transparent); } 70%, 100% { box-shadow: 0 0 0 7px transparent; } }
 @media (prefers-reduced-motion: reduce) { .hr-live { animation: none; } }
 .hr-total { font-size: var(--ds-fs-caption); color: var(--ds-text-3); }
-.hr-more { margin-left: auto; font-size: var(--ds-fs-caption); color: var(--ds-text-2); text-decoration: none; }
+.hr-actions { margin-left: auto; display: inline-flex; align-items: center; gap: 10px; }
+.hr-actions .tier-guide-toggle { height: 28px; padding: 0 11px; font-size: 12px; }
+.hr-more { font-size: var(--ds-fs-caption); color: var(--ds-text-2); text-decoration: none; }
 .hr-more:hover { color: var(--ds-brand); }
 
 /* 시상대: 1위가 가운데, 조금 더 높게 */

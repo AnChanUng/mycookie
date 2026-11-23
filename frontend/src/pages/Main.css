@@ -129,3 +129,41 @@ a:hover > .mn-chev { color: var(--ds-brand); transform: translateX(3px); }
 .mn-cta-resume { max-width: 100%; gap: 8px; }
 .mn-cta-resume span { opacity: .8; font-weight: 600; }
 .mn-cta-resume b { min-width: 0; max-width: 260px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ===== 넓은 웹 화면 다듬기(뒤에 두어 위 규칙을 덮어쓴다) =====
+   명언은 맨 위 가운데(위쪽 규칙 그대로), 왼쪽에 내 학습 숫자 줄, 글자 · 카드 크게 */
+.mn-top { align-items: stretch; gap: 48px; padding-bottom: 40px; }
+.mn-hello { align-content: center; gap: 12px; }
+.mn-h1 { font-size: clamp(28px, 2.4vw, 40px); }
+.mn-sub { font-size: 17px; }
+.mn-chips .ds-chip { height: 30px; padding: 0 12px; font-size: 13px; }
+.mn-cta .ds-btn { height: 48px; padding: 0 22px; font-size: 16px; }
+.mn-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); margin-top: 12px; border: 1px solid var(--ds-line-strong); border-radius: var(--ds-r-lg); background: var(--ds-surface); color: var(--ds-text); text-decoration: none; transition: border-color var(--ds-fast) ease; }
+.mn-stats:hover { border-color: var(--ds-brand); }
+.mn-stats > span { display: grid; gap: 4px; padding: 16px 18px; }
+.mn-stats > span + span { border-left: 1px solid var(--ds-line); }
+.mn-stats small { font-size: 13px; color: var(--ds-text-3); }
+.mn-stats b { font-size: 24px; font-weight: 800; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+.mn-section { margin-top: 56px; }
+.mn-section-head h2 { font-size: 24px; }
+.mn-cards { gap: 18px; }
+.mn-cat { padding: 26px 24px; min-height: 108px; gap: 18px; }
+.mn-cat-icon { width: 52px; height: 52px; border-radius: 14px; }
+.mn-cat-text { gap: 4px; }
+.mn-cat-text b { font-size: 18px; }
+.mn-cat-text small { font-size: 14px; }
+/* 아주 넓은 화면: 카드를 더 크게 */
+@media (min-width: 1680px) {
+  .mn-cat { min-height: 120px; padding: 28px; }
+  .mn-h1 { font-size: 42px; }
+}
+@media (max-width: 860px) {
+  .mn-top { gap: 24px; }
+}
+@media (max-width: 640px) {
+  .mn-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .mn-stats > span:nth-child(3) { border-left: 0; }
+  .mn-stats > span:nth-child(n+3) { border-top: 1px solid var(--ds-line); }
+  .mn-cat { padding: 16px; min-height: 0; }
+  .mn-cat-text b { font-size: 16px; }
+}

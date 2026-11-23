@@ -13,6 +13,9 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.H2Dialect
 app:
+  # 시험은 닉네임 · 비밀번호로 계정을 만들어 쓴다(운영은 소셜 가입만)
+  auth:
+    password-signup-enabled: true
   security:
     rate-limit-enabled: false
     min-admin-key-length: 0

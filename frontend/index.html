@@ -29,8 +29,28 @@
     <script src="/theme-init.js"></script>
     <!-- 검색용으로 미리 넣은 본문(scripts/prerender-seo.mjs)이 앱이 뜨기 전 잠깐 보일 때의 최소 모양 -->
     <style>.seo-static{max-width:1280px;margin:0 auto;padding:32px 24px;font-family:system-ui,sans-serif;line-height:1.7}</style>
+    <!-- 첫 로딩 대기 화면: 화면이 다 준비될 때까지 덮어 두었다가 한 번에 보여 준다(레이아웃 밀림 방지, src/splash.js가 걷어 낸다) -->
+    <style>
+      #boot-splash{position:fixed;inset:0;z-index:9999;display:grid;place-items:center;background:#f7f8fb;transition:opacity .3s ease}
+      html[data-mode=dark] #boot-splash{background:#16181d}
+      #boot-splash.boot-out{opacity:0;pointer-events:none}
+      .boot-box{display:grid;justify-items:center;gap:18px}
+      .boot-logo{display:flex;align-items:center;gap:12px;font:800 30px/1 system-ui,-apple-system,'Apple SD Gothic Neo','Malgun Gothic',sans-serif;letter-spacing:-.02em;color:#191f28}
+      html[data-mode=dark] .boot-logo{color:#f2f4f6}
+      .boot-logo img{width:52px;height:52px;animation:boot-bob 1.2s ease-in-out infinite}
+      .boot-bar{width:180px;height:6px;border-radius:999px;background:rgba(99,102,241,.15);overflow:hidden}
+      .boot-bar i{display:block;width:15%;height:100%;border-radius:inherit;background:#6366f1;transition:width .4s ease}
+      @keyframes boot-bob{50%{transform:translateY(-4px) rotate(-6deg)}}
+      @media (prefers-reduced-motion:reduce){.boot-logo img{animation:none}#boot-splash,.boot-bar i{transition:none}}
+    </style>
   </head>
   <body>
+    <div id="boot-splash" role="status" aria-label="나의쿠키를 불러오는 중">
+      <div class="boot-box">
+        <div class="boot-logo"><img src="/brand-cookie.svg" alt="" width="52" height="52" />나의쿠키</div>
+        <div class="boot-bar"><i></i></div>
+      </div>
+    </div>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>

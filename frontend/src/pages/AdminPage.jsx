@@ -239,6 +239,7 @@ function AdminControls({ back, viaLogin }) {
             : <p className="exam-note">채팅 글을 불러오지 못했습니다. 백엔드 배포가 끝난 뒤 새로고침해 주세요.</p>)}
           {tab === 'accounts' && <>
             <PrivateBankGrants adminKey={key} />
+            <TierAdjust adminKey={key} />
             {sys ? <Accounts sys={sys} /> : <SysMissing />}
           </>}
           {tab === 'audit' && (audit ? <AuditLog rows={audit} /> : <p className="exam-note">작업 기록을 불러오지 못했습니다. 백엔드 배포가 끝난 뒤 새로고침해 주세요.</p>)}
@@ -326,6 +327,67 @@ function PrivateBankGrants({ adminKey }) {
         </table>
       </div>
     ) : <p className="exam-note">아직 열어 준 계정이 없습니다.</p>}
+  </section>;
+}
+
+// 등급 조정: 닉네임으로 지금 등급을 보고, 최소 등급(시험 · 구매로 생기는 "이 아래로 안 내려가는 등급")을 바꾸거나 지운다.
+// 최소 등급이라 푼 문제 수가 더 높은 등급이면 그 등급으로 보인다. 바꾸면 관리자 작업 기록에 남는다
+const ADJUST_TIERS = [['AUTO', '문제 수대로(최소 등급 지우기)'], ['BRONZE', '동 쿠키'], ['SILVER', '은 쿠키'], ['GOLD', '금 쿠키'], ['DIAMOND', '다이아 쿠키'], ['RUBY', '루비 쿠키']];
+const DIVISION_LABELS = [[5, 'Ⅴ'], [4, 'Ⅳ'], [3, 'Ⅲ'], [2, 'Ⅱ'], [1, 'Ⅰ']];
+function TierAdjust({ adminKey }) {
+  const [nickname, setNickname] = useState('');
+  const [current, setCurrent] = useState(null);
+  const [tier, setTier] = useState('DIAMOND');
+  const [division, setDivision] = useState(5);
+  const [busy, setBusy] = useState(false);
+  const [message, setMessage] = useState('');
+  const [error, setError] = useState('');
+  const options = { headers: adminHeaders(adminKey), timeout: 60000 };
+  const fail = e => setError(e?.response?.data?.error || e?.response?.data?.message || '처리하지 못했어요. 잠시 후 다시 시도해 주세요.');
+
+  const lookup = () => {
+    const name = nickname.trim();
+    if (!name || busy) return;
+    setBusy(true); setError(''); setMessage('');
+    api.get('/admin/tier', { ...options, params: { nickname: name } })
+      .then(({ data }) => setCurrent(data)).catch(e => { setCurrent(null); fail(e); }).finally(() => setBusy(false));
+  };
+  const apply = () => {
+    if (!current || busy) return;
+    const label = tier === 'AUTO' ? '문제 수대로' : `${ADJUST_TIERS.find(t => t[0] === tier)[1]} ${DIVISION_LABELS.find(d => d[0] === division)[1]}`;
+    if (!window.confirm(`${current.nickname} 님의 등급을 "${label}"(으)로 바꿀까요?`)) return;
+    setBusy(true); setError(''); setMessage('');
+    api.post('/admin/tier', { nickname: current.nickname, tier, division: tier === 'AUTO' ? null : division }, options)
+      .then(({ data }) => { setCurrent(data); setMessage(`${data.nickname} 님: ${data.before?.tierName} → ${data.tierName}`); })
+      .catch(fail).finally(() => setBusy(false));
+  };
+
+  return <section aria-label="등급 조정" style={{ marginTop: 32 }}>
+    <div className="section-title">등급 조정</div>
+    <p className="exam-note">최소 등급(승급 시험 · 구매로 생긴 등급)을 바꾸거나 지웁니다. 푼 문제 수가 더 높은 등급에 해당하면 그 등급으로 보여요.</p>
+    <form className="admin-filter" style={{ display: 'flex', gap: 8, flexWrap: 'wrap', margin: '0 0 10px' }} onSubmit={e => { e.preventDefault(); lookup(); }}>
+      <input aria-label="등급을 조정할 닉네임" placeholder="닉네임" maxLength={40} value={nickname} disabled={busy} onChange={e => setNickname(e.target.value)} />
+      <button type="submit" className="exam-btn sm" disabled={busy || !nickname.trim()}>조회</button>
+    </form>
+    {current && <>
+      <div className="exam-table-wrap">
+        <table className="exam-table admin-table">
+          <thead><tr><th>닉네임</th><th>지금 등급</th><th>푼 문제</th><th>최소 등급</th></tr></thead>
+          <tbody><tr><td>{current.nickname}</td><td>{current.tierName}</td><td className="num">{Number(current.solvedCount).toLocaleString()}</td><td>{current.floor || '없음'}</td></tr></tbody>
+        </table>
+      </div>
+      <div className="admin-filter" style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center', margin: '10px 0' }}>
+        <select aria-label="바꿀 등급" value={tier} disabled={busy} onChange={e => setTier(e.target.value)}>
+          {ADJUST_TIERS.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+        </select>
+        {tier !== 'AUTO' && <select aria-label="바꿀 단계" value={division} disabled={busy} onChange={e => setDivision(Number(e.target.value))}>
+          {DIVISION_LABELS.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+        </select>}
+        <button type="button" className="exam-btn sm" disabled={busy} onClick={apply}>{busy ? '처리 중…' : '등급 바꾸기'}</button>
+      </div>
+    </>}
+    {message && <p className="exam-note" role="status">{message}</p>}
+    {error && <p role="alert">{error}</p>}
   </section>;
 }
 
@@ -902,7 +964,7 @@ function System({ sys, events }) {
         </table>
       </div>
 
-      <div className="section-title">카오스 고양이 챗봇</div>
+      <div className="section-title">쿠키 도우미</div>
       <div className="exam-stats">
         <Tile k="AI 응답" v={chat.aiReplies} unit=" 회" sub={chat.geminiConfigured ? 'Gemini가 답한 횟수' : 'GEMINI_API_KEY가 설정되지 않았습니다'} />
         <Tile k="검색 답변" v={chat.fallbackReplies} unit=" 회" sub="Gemini 없이 문제 검색으로 답한 횟수" />
