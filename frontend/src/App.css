@@ -1,6 +1,9 @@
 /* ===== Layout ===== */
 /* 화면 폭: 헤더와 본문이 같은 폭으로 넓게 꽉 차도록 한 값으로 맞춘다(본문 1280px + 좌우 여백) */
 :root { --page-max: 1280px; }
+/* 큰 모니터(100% 배율)에서 양옆이 비어 보이지 않게 폭을 단계적으로 넓힌다 */
+@media (min-width: 1680px) { :root { --page-max: 1440px; } }
+@media (min-width: 2160px) { :root { --page-max: 1640px; } }
 
 .container {
   max-width: calc(var(--page-max) + 48px);
