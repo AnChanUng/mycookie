@@ -11,7 +11,6 @@ import './TechInterview.css';
 // 질문과 답변 포인트는 서버(OWNER 권한)에만 저장해 두고 이 화면이 권한으로 받아 온다. 화면 코드와 저장소에는 두지 않는다.
 // 자료 모양: [{ id, title, source, levels: [{ depth: 1~4, questions: [{ q, intent, points: [..] }] }] }]
 // 화면 구성은 면접 준비 화면(질문 목차 + 녹음 연습 + 직접 적어보기 + 학습 완료)과 같고, 카메라만 뺐다.
-const DOC = '/private/docs/tech-interview';
 const DEPTH_NAME = { 1: '1단계 · 기본 질문', 2: '2단계 · 꼬리질문', 3: '3단계 · 깊은 꼬리질문', 4: '4단계 · 한계까지' };
 const GRADING_HINT = '기술면접 답변은 녹음하고 다시 들으며 연습해요. 아래 답변 포인트와 비교해 보세요.';
 const headers = () => ({ Authorization: `Bearer ${account()?.token || ''}` });
@@ -25,7 +24,9 @@ const flatten = topics => topics.flatMap(t => [...t.levels].sort((a, b) => a.dep
 
 const readJson = key => { try { return JSON.parse(localStorage.getItem(key)) || {}; } catch { return {}; } };
 
-export default function TechInterviewPage({ back }) {
+// doc: 서버에 저장된 질문 모음 키(소유자 전용). title, intro: 화면 제목과 한 줄 소개
+export default function TechInterviewPage({ back, doc = 'tech-interview', depthNames = DEPTH_NAME, title = '기술면접', intro = '이력서의 경험마다 기본 질문에서 시작해 꼬리질문을 4단계까지 이어서 연습해요.' }) {
+  const DOC = `/private/docs/${doc}`;
   const [state, setState] = useState({ status: 'loading', topics: [] });
   const [draft, setDraft] = useState('');
   const [message, setMessage] = useState('');
@@ -37,7 +38,7 @@ export default function TechInterviewPage({ back }) {
       .then(({ data }) => { if (alive) setState({ status: 'ready', topics: validTopics(data?.data) ? data.data : [] }); })
       .catch(() => { if (alive) setState({ status: 'error', topics: [] }); });
     return () => { alive = false; };
-  }, []);
+  }, [DOC]);
   useEffect(() => load(), [load]);
 
   const save = async () => {
@@ -61,7 +62,7 @@ export default function TechInterviewPage({ back }) {
   return (
     <div className="cs-notes chanung-page ti-page fade-in">
       <header className="notes-heading">
-        <div><h1>기술면접</h1><p>이력서의 경험마다 기본 질문에서 시작해 꼬리질문을 4단계까지 이어서 연습해요.</p></div>
+        <div><h1>{title}</h1><p>{intro}</p></div>
         <div><Link to={back.to}>{back.label}</Link> · <Link to="/">홈으로</Link></div>
       </header>
 
@@ -69,7 +70,7 @@ export default function TechInterviewPage({ back }) {
       {state.status === 'error' && <p role="alert">질문을 불러오지 못했어요. 로그인 상태와 권한을 확인한 뒤 새로고침해 주세요.</p>}
       {state.status === 'ready' && !questions.length && <p className="ti-empty">아직 등록된 질문이 없어요. 아래 "질문 등록·수정"에 자료를 붙여 넣어 저장하면 돼요.</p>}
 
-      {questions.length > 0 && <Practice topics={state.topics} questions={questions} />}
+      {questions.length > 0 && <Practice key={doc} doc={doc} depthNames={depthNames} topics={state.topics} questions={questions} />}
 
       <details className="ti-edit">
         <summary>질문 등록·수정</summary>
@@ -82,11 +83,13 @@ export default function TechInterviewPage({ back }) {
   );
 }
 
-function Practice({ topics, questions }) {
+function Practice({ doc, depthNames, topics, questions }) {
   const user = account();
   const owner = user ? `user:${user.id || user.nickname}` : 'guest';
-  const draftKey = `tech-interview:drafts:v1:${owner}`;
-  const doneKey = `tech-interview:done:v1:${owner}`;
+  // 기존 기술면접 기록 키는 그대로 두고, 다른 질문 모음은 문서 키로 나눠 저장한다
+  const prefix = doc === 'tech-interview' ? 'tech-interview' : `owner-doc:${doc}`;
+  const draftKey = `${prefix}:drafts:v1:${owner}`;
+  const doneKey = `${prefix}:done:v1:${owner}`;
   const [drafts, setDrafts] = useState(() => readJson(draftKey));
   const [done, setDone] = useState(() => readJson(doneKey));
   const [recordings, setRecordings] = useState({});
@@ -128,7 +131,7 @@ function Practice({ topics, questions }) {
         <div className="chanung-list-meta"><span>{visible.length}문항 · 작성 {questions.filter(q => drafts[q.id]?.trim()).length}/{questions.length}</span><button type="button" disabled={visible.length < 2} onClick={random}>랜덤 질문</button></div>
         <nav className="notes-questions" aria-label="기술면접 질문 목차">{topics.map(t => {
           const list = visible.filter(q => q.topicId === t.id);
-          return list.length ? <section key={t.id}><h2>{t.title}<small>{list.length}</small></h2><ul>{list.map(q => <li key={q.id} className={selected?.id === q.id ? 'is-selected' : ''}><button type="button" aria-current={selected?.id === q.id ? 'true' : undefined} onClick={() => select(q.id)}>[{q.depth}단계] {q.q}{drafts[q.id]?.trim() && <small> · 작성함</small>}</button></li>)}</ul></section> : null;
+          return list.length ? <section key={t.id}><h2>{t.title}<small>{list.length}</small></h2><ul>{list.map(q => <li key={q.id} className={selected?.id === q.id ? 'is-selected' : ''}><button type="button" aria-current={selected?.id === q.id ? 'true' : undefined} onClick={() => select(q.id)}>[{(depthNames[q.depth] || '').split(' · ')[0] || `${q.depth}단계`}] {q.q}{drafts[q.id]?.trim() && <small> · 작성함</small>}</button></li>)}</ul></section> : null;
         })}</nav>
       </aside>
       <div className="notes-content">
@@ -137,7 +140,7 @@ function Practice({ topics, questions }) {
           return list.length ? <section key={t.id} className="interview-stage">
             <h2>{t.title}</h2>
             {t.source && <p className="ti-source">이력서: {t.source}</p>}
-            {list.map(q => <TechQuestion key={q.id} q={q} draft={drafts[q.id] || ''} write={write} recording={recordings[q.id]} saveRecording={saveRecording} active={selected?.id === q.id} activate={() => select(q.id)} done={!!done[q.id]} toggleDone={() => toggleDone(q.id)} />)}
+            {list.map(q => <TechQuestion key={q.id} q={q} depthNames={depthNames} draft={drafts[q.id] || ''} write={write} recording={recordings[q.id]} saveRecording={saveRecording} active={selected?.id === q.id} activate={() => select(q.id)} done={!!done[q.id]} toggleDone={() => toggleDone(q.id)} />)}
           </section> : null;
         })}
         {!visible.length && <p className="notes-empty">표시할 질문이 없습니다. 완료한 질문 표시를 켜거나 검색 조건을 바꿔 주세요.</p>}
@@ -146,10 +149,10 @@ function Practice({ topics, questions }) {
   </>;
 }
 
-function TechQuestion({ q, draft, write, recording, saveRecording, active, activate, done, toggleDone }) {
+function TechQuestion({ q, depthNames, draft, write, recording, saveRecording, active, activate, done, toggleDone }) {
   const [open, setOpen] = useState(false);
   return <article className={`notes-detail-card ${done ? 'is-done' : ''}`} id={q.id}>
-    <div className="notes-detail-top"><span>{DEPTH_NAME[q.depth] || `${q.depth}단계`}</span><label><input type="checkbox" aria-label={`${q.q} 학습 완료`} checked={done} onChange={toggleDone} /> 학습 완료</label></div>
+    <div className="notes-detail-top"><span>{depthNames[q.depth] || `${q.depth}단계`}</span><label><input type="checkbox" aria-label={`${q.q} 학습 완료`} checked={done} onChange={toggleDone} /> 학습 완료</label></div>
     <h2 className="notes-question">{q.q}</h2>
     {active ? <InterviewAudio gradingDisabled gradingHint={GRADING_HINT} questionId={q.id} recording={recording} saveRecording={saveRecording} /> : <button type="button" className="exam-btn sm" onClick={activate}>이 질문 녹음 연습</button>}
     <details className="chanung-draft-panel">

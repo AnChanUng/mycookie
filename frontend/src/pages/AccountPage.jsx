@@ -1,5 +1,5 @@
 import { useEffect, useState, useSyncExternalStore } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { account, changeNickname, changePassword, emailStatus, onAccountChange, passwordStatus, requestEmailVerification, requestPasswordReset, signIn, signOut } from '../sync';
 import { loadAccountRecords, summarizeAccount } from '../accountRecords';
 import { CS_NOTES, migrateNotesCompletion } from '../data/csNotes';
@@ -28,6 +28,7 @@ export default function AccountPage() {
   return <AccountDashboard key={`${token ? account()?.id : ''}:${openForgot}`} user={token ? account() : null} openForgot={openForgot} />;
 }
 function AccountDashboard({ user, openForgot }) {
+  const navigate = useNavigate();
   const [form, setForm] = useState({ identifier: '', password: '' });
   const [passwords, setPasswords] = useState({ current: '', next: '', confirm: '' });
   // 새로 정하는 비밀번호만 8자 이상(기존 비밀번호는 짧아도 로그인된다)
@@ -66,7 +67,8 @@ function AccountDashboard({ user, openForgot }) {
   // 새 가입은 간편 로그인으로만 받는다. 여기서는 이미 있는 계정만 닉네임 또는 인증한 이메일로 로그인한다
   async function authenticate() {
     setAuthBusy(true); setMessage('');
-    try { await signIn('login', form.identifier.trim(), form.password); }
+    // 로그인에 성공하면 첫 화면(메인)으로 보낸다
+    try { await signIn('login', form.identifier.trim(), form.password); navigate('/', { replace: true }); }
     catch (error) { setMessage(error?.response?.data?.error || '로그인하지 못했습니다. 입력 내용과 서버 연결을 확인해 주세요.'); }
     finally { setAuthBusy(false); }
   }
