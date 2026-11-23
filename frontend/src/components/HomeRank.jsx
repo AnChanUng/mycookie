@@ -44,7 +44,8 @@ export default function HomeRank() {
   const mark = r => ({ ...r, me: r.me || (!!myName && r.nickname === myName) });
   const top = (rank?.top.slice(0, LIST) || []).map(mark);
   const podium = PODIUM_ORDER.map(i => top[i]).filter(Boolean);
-  // 4~5위 줄은 빼고, 시상대 밖이면 내 순위 한 줄만 보여 준다(4~5위는 전체 보기에서)
+  // 1~3위는 시상대, 4~5위는 짧은 줄, 그 밖이면 내 순위 한 줄을 아래에 고정한다
+  const rest = top.slice(3, LIST);
   const me = top.find(r => r.me) || (rank?.me ? { ...rank.me, me: true } : null);
   const third = top[2];
   const toPodium = me && me.rank > 3 && third ? Math.max(1, third.count - me.count + 1) : null;
@@ -65,7 +66,15 @@ export default function HomeRank() {
           <span className="hr-pcount">{Number(r.count).toLocaleString()}문제</span>
         </li>)}
       </ol>
-      {me && me.rank > 3 && <Link to="/rank" className="hr-mine">
+      {rest.length > 0 && <ol className="hr-list" aria-label="4위부터 5위">
+        {rest.map(r => <li key={r.rank} className={`hr-row${r.me ? ' me' : ''}`} value={r.rank}>
+          <span className="hr-rank">{r.rank}</span>
+          <TierBadge tier={r.tier} division={r.division} />
+          <span className="hr-name" title={r.nickname}>{r.nickname}{r.me && <em>나</em>}</span>
+          <span className="hr-count">{Number(r.count).toLocaleString()}문제</span>
+        </li>)}
+      </ol>}
+      {me && me.rank > LIST && <Link to="/rank" className="hr-mine">
         <span className="hr-mine-rank">{me.rank}위</span>
         <TierBadge tier={me.tier} division={me.division} />
         <span className="hr-name">{me.nickname}<em>나</em></span>

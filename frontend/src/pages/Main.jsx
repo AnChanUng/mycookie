@@ -115,15 +115,15 @@ export default function Main() {
 
   return (
     <div className="mn">
-      <figure className="mn-quote ds-rise">
-        <blockquote>“{quote.text}”</blockquote>
-        <figcaption>{quote.by}</figcaption>
-      </figure>
-
       {/* 인사 + 오늘 목표 */}
       <section className="mn-top">
         <div className="mn-hello">
           <p className="ds-eyebrow">{dateLabel}</p>
+          {/* 오늘의 명언: 첫 화면 안에 작은 한 줄로 */}
+          <figure className="mn-quote">
+            <blockquote>“{quote.text}”</blockquote>
+            {quote.by && <figcaption>{quote.by}</figcaption>}
+          </figure>
           <h1 className="mn-h1">{user?.nickname ? `${user.nickname}님, 오늘은 뭘 공부해 볼까요?` : '개발자 공부, 여기 다 있어요'}</h1>
           <p className="mn-sub">AI, 웹 개발, 컴퓨터공학 모든 공부를 한곳에서</p>
           <div className="mn-chips">
@@ -139,6 +139,13 @@ export default function Main() {
               </Link>
               : <Link to="/cs" className="ds-btn ds-btn--primary">공부 시작하기</Link>}
           </div>
+          {/* 내 학습 한눈에: 오른쪽 순위 카드와 높이를 맞춰 첫 화면을 채운다(이 기기 + 계정 기록) */}
+          <Link to="/stats" className="mn-stats" aria-label="내 학습 자세히 보기">
+            <span><small>누적 푼 문제</small><b>{(learning?.solved || 0).toLocaleString()}</b></span>
+            <span><small>이번 주</small><b>{(learning?.week || 0).toLocaleString()}</b></span>
+            <span><small>연속 학습</small><b>{learning?.streak || 0}일</b></span>
+            <span><small>정답률</small><b>{learning?.rate != null ? `${learning.rate}%` : '–'}</b></span>
+          </Link>
         </div>
         {/* 실시간 순위: 첫 화면 맨 위 오른쪽(휴대폰에서는 인사 아래) */}
         <HomeRank />
