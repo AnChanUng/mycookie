@@ -31,18 +31,21 @@ function PrivateChanung() {
   const banks = id === 'banks';
   const interviews = id === 'interviews';
   const techInterview = id === 'tech-interview';
+  const portfolioInterview = id === 'portfolio-interview';
 
   useEffect(() => {
-    if (data || trouble || admin || interviews || techInterview) return;
+    if (data || trouble || admin || interviews || techInterview || portfolioInterview) return;
     let alive = true;
     import('../data/privateBanks')
       .then(m => { if (alive) setData(m); })
       .catch(() => { if (alive) setLoadError(true); });
     return () => { alive = false; };
-  }, [data, trouble, admin, interviews, techInterview]);
+  }, [data, trouble, admin, interviews, techInterview, portfolioInterview]);
 
   if (trouble) return <TroubleLog />;
   if (techInterview) return <Suspense fallback={<p role="status">기술면접을 불러오는 중…</p>}><TechInterview back={{ to: BASE, label: '← 찬웅 전용 페이지' }} /></Suspense>;
+  if (portfolioInterview) return <Suspense fallback={<p role="status">포트폴리오 면접을 불러오는 중…</p>}><TechInterview back={{ to: BASE, label: '← 찬웅 전용 페이지' }} doc="portfolio-interview" title="포트폴리오 면접"
+    intro="이력서와 포트폴리오에 적은 경험마다 기본 질문, 꼬리질문, 기술 질문, 인성 질문을 단계별로 연습해요." /></Suspense>;
   if (interviews) return <Suspense fallback={<p role="status">면접 자료를 불러오는 중…</p>}><OthersInterviews back={{ to: BASE, label: '← 찬웅 전용 페이지' }} /></Suspense>;
   // 관리자 모니터링은 /admin(관리자 계정)으로 옮겼다
   if (admin) return <Navigate to="/admin" replace />;
@@ -178,6 +181,11 @@ function PrivateList({ data }) {
             <span className="exam-company-abbr">면접</span>
             <span className="exam-company-name">면접준비하기</span>
             <span className="exam-company-meta">딜로이트 면접 예상질문 · 내 답변 · 녹음 연습</span>
+          </Link>
+          <Link to={privatePath("portfolio-interview")} className="exam-company-card">
+            <span className="exam-company-abbr">포폴</span>
+            <span className="exam-company-name">포트폴리오 면접</span>
+            <span className="exam-company-meta">이력서 · 포트폴리오 기반 꼬리질문 · 기술 · 인성</span>
           </Link>
           <Link to={privatePath("tech-interview")} className="exam-company-card">
             <span className="exam-company-abbr">기술</span>
