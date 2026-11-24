@@ -196,3 +196,10 @@
 }
 
 .ob-tool-list li { margin-bottom: 10px; }
+/* 개발 일지 맨 위 안내 줄(주인만 고치기) */
+.dl-header-lines { display: grid; gap: 2px; }
+.dl-header-lines a { color: var(--ds-brand); text-decoration: none; overflow-wrap: anywhere; }
+.dl-header-lines a:hover { text-decoration: underline; }
+.dl-header-edit { justify-self: start; margin-top: 8px; }
+.dl-header-editor { margin-top: 12px; max-width: 760px; }
+.dl-header-editor .dl-edit-line input:first-child { flex: 0 0 34%; }

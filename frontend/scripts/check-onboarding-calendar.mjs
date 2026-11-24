@@ -23,9 +23,15 @@ try {
   const { default: api } = await server.ssrLoadModule('/src/api.js');
   const { default: Onboarding } = await server.ssrLoadModule('/src/pages/OnboardingPage.jsx');
   const { default: DevLog } = await server.ssrLoadModule('/src/pages/DevLogPage.jsx');
-  let offline = false;
+  let offline = false, headerEditable = false;
+  const headerPuts = [];
   api.defaults.adapter = async config => {
     let data = {};
+    if (config.url === '/devlog/header') {
+      if (offline) throw new Error('offline');
+      if (config.method === 'put') { const body = JSON.parse(config.data); headerPuts.push(body); data = { lines: body.lines, version: 1, canEdit: true }; }
+      else data = { lines: [{ label: 'Grafana', value: 'https://grafana.mycookie.dev' }, { label: '홈서버', value: 'ssh@ip' }], version: 0, canEdit: headerEditable };
+    }
     if (config.url === '/auth/me') data = { roles: ['TEAM'] };
     if (config.url === '/devlog') {
       assert.equal(config.headers.Authorization, 'Bearer team-token');
@@ -70,11 +76,34 @@ try {
   assert.equal(dayCells().length, 29, '2028년 2월은 29일');
   await act(() => view.unmount());
 
-  // 서버에 닿지 않아도 캘린더는 기본 일정으로 그려진다
+  // 맨 위 안내 줄: 주소는 누르면 열리는 링크, 고치기 버튼은 주인(canEdit)에게만
+  await mount(DevLog);
+  const lead = () => text(view.root.findByProps({ className: 'dl-header-lines' }));
+  assert.ok(lead().includes('홈서버: ssh@ip'));
+  assert.ok(view.root.findAllByType('a').some(a => a.props.href === 'https://grafana.mycookie.dev'), 'Grafana 주소는 링크');
+  const editButton = () => view.root.findAll(n => n.type === 'button' && text(n) === '안내 줄 고치기');
+  assert.equal(editButton().length, 0, 'TEAM에게는 고치기 버튼이 없다');
+  await act(() => view.unmount());
+
+  headerEditable = true;
+  await mount(DevLog);
+  await act(async () => editButton()[0].props.onClick());
+  await act(async () => view.root.findByProps({ 'aria-label': '2번째 줄 내용' }).props.onChange({ target: { value: 'ssh cookie@100.64.0.1' } }));
+  await act(async () => view.root.findByProps({ 'aria-label': '1번째 줄 지우기' }).props.onClick());
+  await act(async () => view.root.findAll(n => n.type === 'button' && text(n) === '+ 줄 추가')[0].props.onClick());
+  await act(async () => view.root.findByProps({ 'aria-label': '2번째 줄 이름' }).props.onChange({ target: { value: 'DB' } }));
+  await act(async () => view.root.findByProps({ 'aria-label': '2번째 줄 내용' }).props.onChange({ target: { value: 'postgres 5432' } }));
+  await act(async () => view.root.findAll(n => n.type === 'button' && text(n) === '저장')[0].props.onClick());
+  assert.deepEqual(headerPuts.at(-1), { lines: [{ label: '홈서버', value: 'ssh cookie@100.64.0.1' }, { label: 'DB', value: 'postgres 5432' }], version: 0 });
+  assert.ok(lead().includes('홈서버: ssh cookie@100.64.0.1') && lead().includes('DB: postgres 5432') && !lead().includes('Grafana'), '저장한 줄로 바뀐다');
+  await act(() => view.unmount());
+
+  // 서버에 닿지 않아도 캘린더와 기본 안내 줄이 그려진다
   offline = true;
   await mount(DevLog);
   assert.equal(calendar().length, 1);
-  console.log('Dev log calendar passed: onboarding has no calendar, fixed calendar on the dev log, saved days open, year boundary, leap day and offline.');
+  assert.ok(lead().includes('Grafana: https://grafana.mycookie.dev'), '오프라인이면 기본 안내 줄');
+  console.log('Dev log calendar passed: onboarding has no calendar, fixed calendar on the dev log, saved days open, year boundary, leap day, header lines edit (owner only) and offline.');
 } finally {
   if (view) await act(() => view.unmount());
   await server.close();

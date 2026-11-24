@@ -1,6 +1,7 @@
 package com.csstudy.backend.controller;
 
 import com.csstudy.backend.service.AuthService;
+import com.csstudy.backend.service.DevLogHeaderService;
 import com.csstudy.backend.service.DevLogService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -23,11 +24,29 @@ public class DevLogController {
     private final DevLogService devLog;
     private final AuthService auth;
     private final com.csstudy.backend.service.RoleService roles;
+    private final DevLogHeaderService header;
 
     @GetMapping
     public Map<String, Object> list(HttpServletRequest request) {
         roles.require(request, com.csstudy.backend.entity.AccountRole.Role.TEAM);
         return Map.of("canEdit", true, "entries", devLog.list());
+    }
+
+    // 맨 위 안내 줄(Grafana, 홈서버 접속 방법 등): TEAM은 읽고, 저장소 주인(OWNER)만 고친다
+    @GetMapping("/header")
+    public Map<String, Object> header(HttpServletRequest request) {
+        var user = roles.require(request, com.csstudy.backend.entity.AccountRole.Role.TEAM);
+        Map<String, Object> out = new java.util.LinkedHashMap<>(header.get());
+        out.put("canEdit", roles.has(java.util.Optional.of(user), com.csstudy.backend.entity.AccountRole.Role.OWNER));
+        return out;
+    }
+
+    @PutMapping("/header")
+    public Map<String, Object> saveHeader(@RequestBody Map<String, Object> body, HttpServletRequest request) {
+        var user = roles.require(request, com.csstudy.backend.entity.AccountRole.Role.OWNER);
+        Map<String, Object> out = new java.util.LinkedHashMap<>(header.save(body, user));
+        out.put("canEdit", true);
+        return out;
     }
 
     @PutMapping("/{date}")

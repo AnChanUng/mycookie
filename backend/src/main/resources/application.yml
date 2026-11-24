@@ -206,3 +206,16 @@ spring.ai:
       transcription: none
   vectorstore:
     type: none
+
+# API 문서: 화면 서버(nginx)가 /api/만 백엔드로 넘기므로 문서도 /api/ 아래에 둔다.
+# 기본은 꺼져 있고(운영), 개발 서버(스테이징)와 로컬에서만 SWAGGER_ENABLED=true로 켠다. 비밀번호는 없다
+springdoc:
+  api-docs:
+    enabled: ${SWAGGER_ENABLED:false}
+    path: /api/v3/api-docs
+  swagger-ui:
+    enabled: ${SWAGGER_ENABLED:false}
+    path: /api/docs
+    tags-sorter: alpha
+    operations-sorter: alpha
+  paths-to-match: /api/**

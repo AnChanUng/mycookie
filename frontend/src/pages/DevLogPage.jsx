@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import api from '../api';
 import { account } from '../sync';
 import OnboardingTabs from '../components/OnboardingTabs';
+import DevLogHeader from './DevLogHeader';
 import { DEV_LOG } from '../data/devLog';
 import './OnboardingPage.css';
 import RoleGate from '../components/RoleGate';
@@ -147,8 +148,7 @@ function DevLog() {
     <div className="ob">
       <header className="ob-hero ob-hero--slim">
         <OnboardingTabs />
-        <p className="ob-lead">Grafana: https://grafana.mycookie.dev</p>
-        <p className="ob-lead">홈서버: ssh@ip</p>
+        <DevLogHeader />
       </header>
 
       <div className="dl">
