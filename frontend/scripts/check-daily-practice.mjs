@@ -22,3 +22,13 @@ assert.equal(JSON.parse(data['daily-practice:v1'])['3.1'].w, 1, '틀린 횟수�
 data['daily-practice:v1'] = '깨진 값';
 assert.deepEqual(dailyWrongRows(storage), [], '깨진 저장값은 빈 목록');
 console.log('daily practice records ok');
+
+// 오늘의 복습: 하루 3개, 날짜가 바뀌면 시작 위치가 돈다
+import { pickReview } from '../src/dailyPracticeRecords.js';
+const many = ['a', 'b', 'c', 'd', 'e'].map(id => ({ id }));
+assert.deepEqual(pickReview(many, 0).map(r => r.id), ['a', 'b', 'c']);
+assert.deepEqual(pickReview(many, 4).map(r => r.id), ['e', 'a', 'b']);
+assert.deepEqual(pickReview(many, 5).map(r => r.id), ['a', 'b', 'c'], '한 바퀴 돌면 처음으로');
+assert.deepEqual(pickReview(many.slice(0, 2), 7).map(r => r.id), ['b', 'a'], '문제가 적으면 있는 만큼만');
+assert.deepEqual(pickReview([], 3), []);
+console.log('daily review pick ok');
