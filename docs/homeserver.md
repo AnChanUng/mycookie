@@ -223,6 +223,48 @@ sudo -u devcookie /srv/devcookie/app/deploy/homeserver/backup.sh   # 백업이 �
 - 정전 · 공유기 재부팅 · 노트북 고장 동안은 사이트가 멈춥니다. 집 인터넷 업로드 속도와 통신사 약관(가정용 회선의 서버 운영 제한)도 한 번 확인해 두세요.
 - RAG 스택(ChromaDB · 임베딩 · 재정렬 모델)은 RAM 8GB에서 백엔드 두 개와 함께 돌리기 어려워 넣지 않았습니다.
 
+## DB 도구로 보기 (DBeaver)
+
+DB는 노트북 자기 자신의 `127.0.0.1:15432`에만 열려 있습니다. 바깥에서는 닿지 않으니 **SSH 터널**로 들어옵니다.
+
+### 1. 읽기 전용 계정 만들기 (관리자, 한 번만)
+
+운영 DB를 소유자 계정(`cookie_prod`)으로 열면 실수 한 번(`UPDATE`, `DELETE`)에 이용자 데이터가 지워질 수 있습니다. 조회는 읽기 전용 계정으로 합니다.
+
+```bash
+sudo -u devcookie /srv/devcookie/app/deploy/homeserver/compose.sh exec postgres psql -U postgres -d cookie_prod
+```
+
+```sql
+CREATE ROLE dbeaver_ro LOGIN PASSWORD '여기에_새_비밀번호';   -- openssl rand -hex 16 으로 만든 값
+GRANT CONNECT ON DATABASE cookie_prod TO dbeaver_ro;
+GRANT USAGE ON SCHEMA public TO dbeaver_ro;
+GRANT SELECT ON ALL TABLES IN SCHEMA public TO dbeaver_ro;
+-- 앞으로 서버가 새로 만드는 표도 읽을 수 있게
+ALTER DEFAULT PRIVILEGES FOR ROLE cookie_prod IN SCHEMA public GRANT SELECT ON TABLES TO dbeaver_ro;
+```
+
+- 스테이징도 보려면 `-d cookie_staging`으로 접속해 `CREATE ROLE` 줄은 빼고(계정은 서버 전체에 하나) 나머지를 `cookie_staging`으로 바꿔 실행합니다.
+- 비밀번호는 저장소 · 메신저 단체방에 남기지 않고 필요한 사람에게만 따로 전달합니다. 바꿀 때는 `ALTER ROLE dbeaver_ro PASSWORD '...';`
+- 그만두는 사람이 생기면 비밀번호를 바꾸거나 `DROP ROLE` 전에 `REVOKE`로 권한을 회수합니다.
+
+### 2. DBeaver 연결
+
+새 연결 → **PostgreSQL**
+
+| 탭 | 항목 | 값 |
+| --- | --- | --- |
+| SSH | Use SSH Tunnel | 체크 |
+| SSH | Host / Port | 홈서버 SSH 주소(Tailscale) / `22` |
+| SSH | 사용자 · 인증 | 평소 SSH 접속 계정, **Public Key**(개인 키 파일). 서버는 비밀번호 로그인을 꺼 두었습니다 |
+| Main | Host / Port | `localhost` / `15432` (SSH로 들어간 홈서버 기준) |
+| Main | Database | `cookie_prod` (스테이징은 `cookie_staging`) |
+| Main | Username / Password | `dbeaver_ro` / 1번에서 정한 비밀번호 |
+
+- 연결 설정 → **General → Connection type: Production**, **Read-only connection** 체크(실수로 쓰기를 한 번 더 막음)
+- **Test Connection** 뒤 `SELECT 1;`로 확인합니다.
+- 운영 데이터를 바꿔야 하면 DBeaver가 아니라 코드(PR)나, 백업을 뜬 뒤 관리자가 서버에서 직접 처리합니다.
+
 ## 관리자 계정과 권한
 
 비공개 페이지는 로그인한 계정의 권한으로 막습니다(주소를 숨기는 방식이 아님).

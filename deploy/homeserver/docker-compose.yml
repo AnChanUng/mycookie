@@ -115,6 +115,9 @@ services:
       STAGING_DB_PASSWORD: ${STAGING_DB_PASSWORD:?STAGING_DB_PASSWORD가 .env에 없습니다}
       TZ: Asia/Seoul
     command: ["postgres", "-c", "shared_buffers=128MB", "-c", "effective_cache_size=384MB", "-c", "max_connections=60", "-c", "timezone=Asia/Seoul"]
+    # DBeaver 같은 DB 도구용. 노트북 자기 자신(127.0.0.1)에만 열어 바깥에서는 닿지 않고(방화벽은 SSH만), SSH 터널로만 들어온다.
+    # 노트북에 따로 깔린 PostgreSQL과 부딪히지 않게 5432 대신 15432를 쓴다(docs/homeserver.md "DB 도구로 보기")
+    ports: ["127.0.0.1:15432:5432"]
     volumes:
       - ./pgdata18:/var/lib/postgresql
       - ./app/deploy/homeserver/postgres-init.sh:/docker-entrypoint-initdb.d/10-cookie.sh:ro

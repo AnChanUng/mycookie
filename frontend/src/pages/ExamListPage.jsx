@@ -1,5 +1,8 @@
 import { Link, Navigate, useParams } from 'react-router-dom';
 import { COMPANIES, EXAM_CATEGORIES, SOURCE_KINDS, allQuestions, companyPath } from '../data/examQuestions';
+import { HubCard, HubHeader, HubSection } from '../components/Hub';
+
+const CATEGORY_ICONS = { finance: '🏦', public: '🏢' };
 
 function summary(company) {
   try {
@@ -30,44 +33,26 @@ export default function ExamListPage() {
 }
 
 function CategoryPicker() {
+  const categories = EXAM_CATEGORIES.filter(cat => !cat.hub && cat.key !== 'tech');
+  const companyCount = COMPANIES.filter(c => categories.some(cat => cat.key === c.category)).length;
   return (
     <div className="fade-in">
-      <div className="page-header">
-        <Link to="/" className="back-link">← 홈으로</Link>
-        <h1>기업별 기출문제</h1>
-        <p>공기업 IT직무 전공필기 문제집 · 즉시 채점 · 오답노트 · 북마크</p>
-      </div>
-
-      <div className="exam-category-grid">
-        {EXAM_CATEGORIES.filter(cat => !cat.hub && cat.key !== 'tech').map(cat => (
-          <CategoryCard key={cat.key} category={cat} />
+      <HubHeader eyebrow="전공필기" title="기업별 기출문제" desc="공기업 IT직무 전공필기 문제집을 즉시 채점, 오답노트, 북마크와 함께 풀어요."
+        stats={[{ value: companyCount, label: '기업 문제집' }, { value: categories.length, label: '분류' }, { value: '즉시', label: '채점 · 해설' }]} />
+      <HubSection title="분류별로 고르기">
+        {categories.map(cat => (
+          <HubCard key={cat.key} to={`/exam/category/${cat.key}`} icon={CATEGORY_ICONS[cat.key] || '📚'}
+            badge={`${COMPANIES.filter(c => c.category === cat.key).length}개 ${cat.unit || '기업'}`} title={cat.name} desc={cat.desc} go="기업 고르기" />
         ))}
-        {/* 문제 수는 문제은행 데이터를 다 읽어야 나오므로 여기서는 세지 않는다 */}
-        <Link to="/topics" className="exam-company-card exam-category-card">
-          <span className="exam-category-name">주제별 통합</span>
-          <span className="exam-company-meta">기업 구분 없이 과목별로 모아 풀기</span>
-          <span className="exam-category-count">8개 과목 · 20문제씩</span>
-        </Link>
-        <Link to="/calc" className="exam-company-card exam-category-card">
-          <span className="exam-category-name">계산 무한 연습</span>
-          <span className="exam-company-meta">숫자가 매번 바뀌는 계산 문제 · 그림 해설</span>
-          <span className="exam-category-count">스케줄링 · 페이지 교체 · 서브넷 등 19종</span>
-        </Link>
-      </div>
+      </HubSection>
+      {/* 문제 수는 문제은행 데이터를 다 읽어야 나오므로 여기서는 세지 않는다 */}
+      <HubSection title="과목으로 연습하기">
+        <HubCard to="/topics" icon="🧩" badge="8개 과목" title="주제별 통합" desc="기업 구분 없이 과목별로 20문제씩 모아 풀어요." go="과목 고르기" />
+        <HubCard to="/calc" icon="🧮" badge="19종" title="계산 무한 연습" topics="스케줄링 · 페이지 교체 · 서브넷" desc="숫자가 매번 바뀌는 계산 문제를 그림 해설과 함께 풀어요." go="연습하기" />
+      </HubSection>
     </div>
   );
 }
-
-function CategoryCard({ category }) {
-  return (
-    <Link to={`/exam/category/${category.key}`} className="exam-company-card exam-category-card">
-      <span className="exam-category-name">{category.name}</span>
-      <span className="exam-company-meta">{category.desc}</span>
-      <span className="exam-category-count">{COMPANIES.filter(c => c.category === category.key).length}개 {category.unit || '기업'}</span>
-    </Link>
-  );
-}
-
 
 export function CompanyCard({ company }) {
   const s = company.ready ? summary(company) : null;
@@ -102,11 +87,8 @@ function CompanyList({ category }) {
 
   return (
     <div className="fade-in">
-      <div className="page-header">
-        <Link to="/exam" className="back-link">← 기업별 기출문제</Link>
-        <h1>{category.name}</h1>
-        <p>{category.desc}</p>
-      </div>
+      <HubHeader back={{ to: '/exam', label: '기업별 기출문제' }} eyebrow="전공필기" title={category.name} desc={category.desc}
+        stats={[{ value: list.length, label: '기업' }, ...groups.map(g => ({ value: g.items.length, label: g.group }))]} />
 
       {groups.map(g => (
         <section key={g.kind} className="exam-group">
