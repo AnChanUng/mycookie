@@ -1,7 +1,10 @@
-import { Link } from 'react-router-dom';
+import { HubCard, HubHeader, HubSection } from '../components/Hub';
 
 const AWS_BOOKING = 'https://aws.amazon.com/ko/certification/certification-prep/testing/';
 const DATAQ = 'https://www.dataq.or.kr/';
+// 분야별 아이콘(이름으로 고른다)
+const iconOf = name => /AWS/.test(name) ? '☁️' : /보안/.test(name) ? '🔐' : /빅데이터|ADsP|SQLD|AICE/.test(name) ? '📊' : /리눅스/.test(name) ? '🐧' : /네트워크/.test(name) ? '🌐' : '📜';
+
 const CERTIFICATIONS = [
   { name: '정보처리기사', description: '소프트웨어 개발 · 데이터베이스 · 정보시스템 기본기', provider: 'Q-Net', href: 'https://www.q-net.or.kr/rcv001.do?id=rcv00103&gSite=Q&gId=' },
   { name: '빅데이터분석기사', description: '데이터 전처리 · 분석 · 모델링', provider: '데이터자격검정', href: DATAQ },
@@ -19,27 +22,16 @@ const ADDITIONAL = [
 ];
 
 function CertificateCards({ items }) {
-  return <div className="exam-sections">
-    {items.map(item => <a key={item.name} href={item.href} target="_blank" rel="noopener noreferrer"
-      className="exam-section" aria-label={`${item.name} 공식 접수 사이트 (새 탭에서 열림)`}>
-      <span className="t">{item.name}</span>
-      <span className="d">{item.description}</span>
-      <span className="d">{item.provider} · 공식 접수 사이트 <span aria-hidden="true">↗</span></span>
-    </a>)}
-  </div>;
+  return items.map(item => <HubCard key={item.name} href={item.href} icon={iconOf(item.name)} badge={item.provider}
+    title={item.name} topics={item.description} go="공식 접수 사이트" label={`${item.name} 공식 접수 사이트`} />);
 }
 
 export default function CertificationsPage() {
   return <div className="fade-in">
-    <div className="page-header">
-      <Link to="/" className="back-link">← 홈으로</Link>
-      <h1>추천 자격증</h1>
-      <p>개발·데이터·AI·클라우드 분야의 자격증을 모았어요. 관심 있는 자격증을 누르면 공식 접수 사이트가 새 탭에서 열려요.</p>
-    </div>
-    <CertificateCards items={CERTIFICATIONS} />
-    <section style={{ marginTop: 28 }} aria-labelledby="additional-certifications">
-      <h2 id="additional-certifications" className="section-title">함께 살펴볼 추천 자격증</h2>
-      <CertificateCards items={ADDITIONAL} />
-    </section>
+    <HubHeader eyebrow="자격증" title="추천 자격증"
+      desc="개발 · 데이터 · AI · 클라우드 분야의 자격증을 모았어요. 누르면 공식 접수 사이트가 새 탭에서 열려요."
+      stats={[{ value: CERTIFICATIONS.length, label: '추천 자격증' }, { value: ADDITIONAL.length, label: '함께 볼 자격증' }]} />
+    <HubSection title="추천 자격증"><CertificateCards items={CERTIFICATIONS} /></HubSection>
+    <HubSection title="함께 살펴볼 추천 자격증" note="관심 분야에 따라 더해 볼 만한 자격증이에요."><CertificateCards items={ADDITIONAL} /></HubSection>
   </div>;
 }
