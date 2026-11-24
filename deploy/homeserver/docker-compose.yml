@@ -187,9 +187,8 @@ services:
       MATTERMOST_WEBHOOK_URL: ${MATTERMOST_WEBHOOK_URL:-}
       # 긴급 알림에 붙일 Grafana 로그 링크(docs/monitoring.md)
       GRAFANA_URL: ${GRAFANA_URL:-}
-      # API 문서(https://mycookie.dev/api/docs). 비밀번호를 비우면 문서를 열지 않는다
-      SWAGGER_USER: ${SWAGGER_USER:-mycookie}
-      SWAGGER_PASSWORD: ${PROD_SWAGGER_PASSWORD:-}
+      # API 문서(Swagger)는 운영에서 끈다(개발 서버에서만 켠다)
+      SWAGGER_ENABLED: "false"
 
   backend-staging:
     <<: *backend
@@ -201,8 +200,8 @@ services:
       OAUTH_ALLOWED_ORIGINS: https://staging.mycookie.dev
       DATABASE_URL: postgresql://cookie_staging:${STAGING_DB_PASSWORD}@postgres:5432/cookie_staging?sslmode=disable
       ADMIN_KEY: ${STAGING_ADMIN_KEY:?STAGING_ADMIN_KEY가 .env에 없습니다}
-      SWAGGER_USER: ${SWAGGER_USER:-mycookie}
-      SWAGGER_PASSWORD: ${STAGING_SWAGGER_PASSWORD:-}
+      # API 문서(https://staging.mycookie.dev/api/docs). 앞단 Cloudflare Access가 팀원만 들여보내므로 비밀번호는 없다
+      SWAGGER_ENABLED: "true"
       REDIS_KEY_PREFIX: "staging:"
       KAFKA_TOPIC_PREFIX: staging
       KAFKA_GROUP_ID: cookie-staging
