@@ -5,7 +5,7 @@
 // status: 'released' 배포됨(master) | 'dev' 개발 브랜치에만 있음(release PR을 머지하면 released로 바꾼다)
 export const PATCH_NOTES = [
   {
-    version: '1.5.0', date: '2026-11-24', status: 'dev',
+    version: '1.5.0', date: '2026-11-24', status: 'released',
     title: '프로필 꾸미기와 새 메뉴 화면',
     summary: '내 계정에서 프로필을 꾸미고, 메뉴 첫 화면이 한눈에 보이게 바뀌었습니다.',
     items: [
@@ -15,7 +15,7 @@ export const PATCH_NOTES = [
     ],
   },
   {
-    version: '1.4.0', date: '2026-11-24', status: 'dev',
+    version: '1.4.0', date: '2026-11-24', status: 'released',
     title: 'Java 핵심 문법 문제집',
     summary: '웹 개발에서 Java 17 문법과 표준 라이브러리를 연습합니다.',
     items: [{ type: 'feature', text: 'Java 전용 4지선다 40문제를 모의고사 또는 영역별 연습으로 풀고 해설을 확인합니다.' }],
@@ -24,7 +24,7 @@ export const PATCH_NOTES = [
     version: '1.3.0',
     date: '2026-11-24',
     title: '새 채팅 화면과 친구 찾기',
-    status: 'dev',
+    status: 'released',
     summary: '채팅을 메신저처럼 바꾸고, 닉네임 일부로 친구를 찾아 요청 · 수락합니다.',
     items: [
       { type: 'improve', text: '채팅 화면: 프로필 아이콘, 이어 보낸 말 묶기, 날짜 구분선, 이모지 넣기, 위로 올려 읽을 때 "새 메시지" 버튼.' },
@@ -36,7 +36,7 @@ export const PATCH_NOTES = [
     version: '1.2.0',
     date: '2026-11-23',
     title: '등급은 푼 문제 수로만',
-    status: 'dev',
+    status: 'released',
     summary: '금 쿠키를 150문제부터로 바꾸고, 모든 등급을 푼 문제 수로만 정합니다.',
     items: [
       { type: 'improve', text: '등급 기준: 은 쿠키 50 · 금 쿠키 150 · 다이아 쿠키 300 · 루비 쿠키 1,000문제. 교육생 인증이나 예전 일괄 지급으로는 금 쿠키가 되지 않습니다. 시험 · 구매로 얻은 등급은 유지됩니다.' },
@@ -46,7 +46,7 @@ export const PATCH_NOTES = [
     version: '1.1.0',
     date: '2026-11-23',
     title: '간편 로그인으로 가입, 닉네임 · 이메일 로그인',
-    status: 'dev',
+    status: 'released',
     summary: '새 가입은 간편 로그인으로만 받고, 기존 계정은 닉네임 또는 인증한 이메일로 로그인합니다.',
     items: [
       { type: 'improve', text: '새 가입은 구글 · 카카오 · 네이버 등 간편 로그인으로만 받습니다. 처음 들어오면 닉네임만 정하면 바로 시작합니다. 이미 만든 닉네임 · 비밀번호 계정은 그대로 씁니다.' },
@@ -59,7 +59,7 @@ export const PATCH_NOTES = [
     version: '1.0.0',
     date: '2026-11-22',
     title: '학습 메일 구독, 기업 소식, 새 Spring 문제집',
-    status: 'dev',
+    status: 'released',
     summary: '이메일 인증 한 번으로 평일 아침마다 학습 메일을 받고, 기업 기술블로그 새 글을 모아 봅니다.',
     items: [
       { type: 'feature', text: '학습 메일 구독: 이메일 인증 번호로 구독하면 평일(월~금) 아침 8시 30분에 오늘의 문제, 이어지는 기업 기술블로그 글, 정답과 해설을 한 통으로 보냅니다(30세트, 구독자 400명 한정). 메일 맨 아래 버튼으로 그날 주제 문제 5개를 더 풀 수 있습니다.' },
