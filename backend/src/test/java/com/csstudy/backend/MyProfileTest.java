@@ -65,4 +65,22 @@ class MyProfileTest {
         put(a, Map.of("bio", "", "interests", List.of())).andExpect(status().isOk())
                 .andExpect(jsonPath("$.bio").doesNotExist()).andExpect(jsonPath("$.interests.length()").value(0));
     }
+
+    @Test
+    void themesAndFramesUnlockWithTier() throws Exception {
+        String t = register("해금테스터");
+        // 처음(동 쿠키)에는 기본 테마만
+        put(t, Map.of("theme", "cookie", "frame", "none")).andExpect(status().isOk()).andExpect(jsonPath("$.theme").value("cookie"));
+        put(t, Map.of("theme", "gold")).andExpect(status().isBadRequest());
+        put(t, Map.of("frame", "silver")).andExpect(status().isBadRequest());
+        put(t, Map.of("theme", "rainbow")).andExpect(status().isBadRequest());
+        // 160문제를 풀면 금 쿠키: 금 테마 · 금 테두리가 열리고, 다이아는 아직
+        mvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put("/api/v1/rank/solved").header("Authorization", t)
+                .contentType(MediaType.APPLICATION_JSON).content(json.writeValueAsString(Map.of("visitorId", "unlock-device-1", "count", 160))))
+                .andExpect(status().isOk());
+        put(t, Map.of("theme", "gold", "frame", "gold")).andExpect(status().isOk())
+                .andExpect(jsonPath("$.theme").value("gold")).andExpect(jsonPath("$.frame").value("gold"));
+        put(t, Map.of("theme", "diamond")).andExpect(status().isBadRequest());
+        mvc.perform(get("/api/v1/me/profile").header("Authorization", t)).andExpect(jsonPath("$.frame").value("gold"));
+    }
 }

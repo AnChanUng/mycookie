@@ -16,3 +16,29 @@ export const PROFILE_INTERESTS = [
 
 export const PROFILE_MAX_INTERESTS = 5;
 export const PROFILE_MAX_TEXT = 60;
+
+// 등급 순서(낮은 것부터). 테마 · 테두리는 이 등급 이상이면 열린다
+export const TIER_ORDER = ['BRONZE', 'SILVER', 'GOLD', 'DIAMOND', 'RUBY'];
+export const isUnlocked = (minTier, tier) => TIER_ORDER.indexOf(tier || 'BRONZE') >= TIER_ORDER.indexOf(minTier);
+
+// 카드 테마: 강조 색 하나만 바꾼다(사이트의 "파란 강조 하나" 원칙을 테마 색으로)
+export const PROFILE_THEMES = [
+  { key: 'basic', label: '기본', color: '#3182f6', minTier: 'BRONZE' },
+  { key: 'cookie', label: '쿠키', color: '#c9813f', minTier: 'BRONZE' },
+  { key: 'mint', label: '민트', color: '#00a878', minTier: 'SILVER' },
+  { key: 'silver', label: '은빛', color: '#6f8196', minTier: 'SILVER' },
+  { key: 'gold', label: '금빛', color: '#c18a25', minTier: 'GOLD' },
+  { key: 'sunset', label: '노을', color: '#f0723c', minTier: 'GOLD' },
+  { key: 'diamond', label: '다이아', color: '#1a9ad0', minTier: 'DIAMOND' },
+  { key: 'night', label: '밤하늘', color: '#5b5cf6', minTier: 'DIAMOND' },
+  { key: 'ruby', label: '루비', color: '#ce355e', minTier: 'RUBY' },
+];
+
+// 아이콘 테두리
+export const PROFILE_FRAMES = [
+  { key: 'none', label: '없음', minTier: 'BRONZE' },
+  { key: 'silver', label: '은 테두리', minTier: 'SILVER' },
+  { key: 'gold', label: '금 테두리', minTier: 'GOLD' },
+  { key: 'diamond', label: '다이아 반짝', minTier: 'DIAMOND' },
+  { key: 'ruby', label: '루비 빛', minTier: 'RUBY' },
+];

@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
 import api from '../api';
 import { membershipHeaders, TIER_NAMES } from '../membership';
-import { PROFILE_AVATARS, PROFILE_INTERESTS, PROFILE_MAX_INTERESTS, PROFILE_MAX_TEXT } from '../data/profileOptions';
+import { PROFILE_AVATARS, PROFILE_FRAMES, PROFILE_INTERESTS, PROFILE_MAX_INTERESTS, PROFILE_MAX_TEXT, PROFILE_THEMES, TIER_ORDER, isUnlocked } from '../data/profileOptions';
 import TierBadge from './TierBadge';
 import './ProfileCard.css';
 
-const EMPTY = { avatar: null, bio: null, goal: null, interests: [] };
+const EMPTY = { avatar: null, bio: null, goal: null, interests: [], theme: null, frame: null };
 const labelOf = key => PROFILE_INTERESTS.find(i => i.key === key)?.label || key;
 const length = text => [...(text || '')].length;
 
@@ -14,6 +14,15 @@ function progressOf(m) {
   if (!m || m.nextThreshold == null) return 1;
   const span = m.nextThreshold - (m.currentThreshold || 0);
   return span > 0 ? Math.min(1, Math.max(0, (m.solvedCount - (m.currentThreshold || 0)) / span)) : 1;
+}
+
+// 지금 등급 바로 다음 등급과, 그 등급이 되면 열리는 테마 · 테두리
+function nextRewards(tier) {
+  const next = TIER_ORDER[TIER_ORDER.indexOf(tier || 'BRONZE') + 1];
+  if (!next) return null;
+  const items = [...PROFILE_THEMES.filter(t => t.minTier === next).map(t => `${t.label} 테마`),
+    ...PROFILE_FRAMES.filter(f => f.minTier === next).map(f => f.label)];
+  return items.length ? { tier: next, items } : null;
 }
 
 // 마이페이지 맨 위 프로필 카드. 대표 아이콘 · 한 줄 소개 · 관심 분야 · 목표를 꾸미고, 등급과 다음 등급까지 진행을 함께 보여 준다
@@ -50,28 +59,34 @@ export default function ProfileCard({ user, tier }) {
 
   const m = tier?.membership;
   const percent = Math.round(progressOf(m) * 100);
-  const avatar = profile.avatar || [...(user.nickname || '?')][0];
+  // 꾸미는 동안에는 고르는 대로 카드에 바로 보여 준다
+  const shown = draft ? { ...profile, ...draft } : profile;
+  const avatar = shown.avatar || [...(user.nickname || '?')][0];
+  const theme = PROFILE_THEMES.find(t => t.key === shown.theme) || PROFILE_THEMES[0];
+  const frame = shown.frame && shown.frame !== 'none' ? shown.frame : null;
+  const rewards = m ? nextRewards(m.tier) : null;
+  const lockText = minTier => `${TIER_NAMES[minTier]}부터`;
 
   return (
-    <section className="profile-card" aria-label="내 프로필">
+    <section className="profile-card" aria-label="내 프로필" style={{ '--profile-accent': theme.color }}>
       <div className="profile-main">
-        <span className={`profile-avatar${profile.avatar ? ' emoji' : ''}`} aria-hidden="true">{avatar}</span>
+        <span className={`profile-avatar${shown.avatar ? ' emoji' : ''}${frame ? ` frame-${frame}` : ''}`} aria-hidden="true">{avatar}</span>
         <div className="profile-who">
           <div className="profile-name">
             <strong>{user.nickname}</strong>
             {m && <TierBadge tier={m.tier} division={m.division} />}
             {m && <span className="profile-tier-name">{m.tierName || TIER_NAMES[m.tier]}</span>}
           </div>
-          <p className={`profile-bio${profile.bio ? '' : ' is-empty'}`}>{profile.bio || '한 줄 소개를 적어 보세요.'}</p>
-          {profile.interests.length > 0 && (
+          <p className={`profile-bio${shown.bio ? '' : ' is-empty'}`}>{shown.bio || '한 줄 소개를 적어 보세요.'}</p>
+          {shown.interests.length > 0 && (
             <ul className="profile-interests" aria-label="관심 분야">
-              {profile.interests.map(k => <li key={k}>{labelOf(k)}</li>)}
+              {shown.interests.map(k => <li key={k}>{labelOf(k)}</li>)}
             </ul>
           )}
         </div>
         {!draft && (
           <button type="button" className="ds-btn ds-btn--ghost ds-btn--sm profile-edit"
-            onClick={() => { setMessage(''); setDraft({ avatar: profile.avatar, bio: profile.bio || '', goal: profile.goal || '', interests: [...profile.interests] }); }}>
+            onClick={() => { setMessage(''); setDraft({ avatar: profile.avatar, bio: profile.bio || '', goal: profile.goal || '', interests: [...profile.interests], theme: profile.theme, frame: profile.frame }); }}>
             프로필 꾸미기
           </button>
         )}
@@ -79,7 +94,7 @@ export default function ProfileCard({ user, tier }) {
 
       <div className="profile-progress">
         <div className="profile-progress-text">
-          {profile.goal && <span className="profile-goal">🎯 {profile.goal}</span>}
+          {shown.goal && <span className="profile-goal">🎯 {shown.goal}</span>}
           {tier?.loading ? <span>등급을 불러오는 중…</span>
             : !m ? <span>등급을 불러오지 못했어요.</span>
             : m.nextThreshold == null ? <span>최고 등급이에요! 누적 {m.solvedCount.toLocaleString()}문제</span>
@@ -88,6 +103,7 @@ export default function ProfileCard({ user, tier }) {
         {m && <span className="profile-bar" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={percent} aria-label="다음 등급까지 진행">
           <i style={{ width: `${percent}%` }} />
         </span>}
+        {rewards && <p className="profile-rewards"><span aria-hidden="true">🔓</span> <b>{TIER_NAMES[rewards.tier]}</b>가 되면 열려요: {rewards.items.join(' · ')}</p>}
       </div>
 
       {draft && (
@@ -101,6 +117,35 @@ export default function ProfileCard({ user, tier }) {
                 <button type="button" key={a} className={draft.avatar === a ? 'on' : ''} aria-pressed={draft.avatar === a}
                   onClick={() => setDraft(d => ({ ...d, avatar: a }))} aria-label={`아이콘 ${a}`}>{a}</button>
               ))}
+            </div>
+          </fieldset>
+          <fieldset>
+            <legend>카드 테마 <small>등급이 오르면 더 열려요</small></legend>
+            <div className="profile-theme-pick">
+              {PROFILE_THEMES.map(t => {
+                const open = isUnlocked(t.minTier, m?.tier);
+                const on = (draft.theme || 'basic') === t.key;
+                return <button type="button" key={t.key} className={on ? 'on' : ''} aria-pressed={on} disabled={!open}
+                  style={{ '--swatch': t.color }} onClick={() => setDraft(d => ({ ...d, theme: t.key === 'basic' ? null : t.key }))}
+                  aria-label={open ? `${t.label} 테마` : `${t.label} 테마, ${lockText(t.minTier)}`}>
+                  <i aria-hidden="true" />{t.label}{!open && <small>🔒 {lockText(t.minTier)}</small>}
+                </button>;
+              })}
+            </div>
+          </fieldset>
+          <fieldset>
+            <legend>아이콘 테두리</legend>
+            <div className="profile-frame-pick">
+              {PROFILE_FRAMES.map(f => {
+                const open = isUnlocked(f.minTier, m?.tier);
+                const on = (draft.frame || 'none') === f.key;
+                return <button type="button" key={f.key} className={on ? 'on' : ''} aria-pressed={on} disabled={!open}
+                  onClick={() => setDraft(d => ({ ...d, frame: f.key === 'none' ? null : f.key }))}
+                  aria-label={open ? f.label : `${f.label}, ${lockText(f.minTier)}`}>
+                  <span className={`profile-frame-sample${f.key !== 'none' ? ` frame-${f.key}` : ''}`} aria-hidden="true">{[...(user.nickname || '?')][0]}</span>
+                  {f.label}{!open && <small>🔒 {lockText(f.minTier)}</small>}
+                </button>;
+              })}
             </div>
           </fieldset>
           <label>
