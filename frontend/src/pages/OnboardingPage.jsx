@@ -397,7 +397,7 @@ git push origin v0.24.0`}</pre>
       <Section id="docs" no="14" title="더 읽을 문서">
         <div className="ob-links">
           {[['CONTRIBUTING.md', '브랜치, 커밋, PR, 리뷰 규칙'], ['docs/homeserver.md', '홈서버 구축, 배포, 백업과 복구'], ['docs/monitoring.md', '로그, 서버 상태 보기 (Grafana)'], ['docs/design-system.md', '디자인 시스템'], ['docs/security.md', '보안 설계'],
-            ['docs/seo.md', '검색 노출'], ['docs/staging.md', '스테이징과 운영 환경'], ['docs/membership.md', '등급과 승급']]
+            ['docs/seo.md', '검색 노출'], ['docs/staging.md', '스테이징과 운영 환경'], ['docs/membership.md', '등급과 승급'], ['docs/question-authoring.md', '문제 출제 원칙(공식 문서 기반)']]
             .map(([path, label]) => <a key={path} href={doc(path)}><b>{label}</b><small>{path}</small></a>)}
         </div>
       </Section>
