@@ -50,4 +50,25 @@ class PublicProfileTest {
                 .andExpect(jsonPath("$['없는사람']").doesNotExist());
         mvc.perform(get("/api/v1/profiles/public")).andExpect(status().isOk()).andExpect(jsonPath("$").isEmpty());
     }
+
+    @Test
+    void profileCardShowsBioButNotGoal() throws Exception {
+        String a = register("카드주인");
+        mvc.perform(put("/api/v1/me/profile").header("Authorization", a).contentType(MediaType.APPLICATION_JSON)
+                .content(json.writeValueAsString(Map.of("avatar", "🐼", "bio", "모두 반가워요", "goal", "남에게 안 보이는 목표", "interests", List.of("backend", "ai")))))
+                .andExpect(status().isOk());
+        mvc.perform(get("/api/v1/profiles/public/카드주인"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.nickname").value("카드주인"))
+                .andExpect(jsonPath("$.avatar").value("🐼"))
+                .andExpect(jsonPath("$.bio").value("모두 반가워요"))
+                .andExpect(jsonPath("$.interests.length()").value(2))
+                .andExpect(jsonPath("$.tier").value("BRONZE"))
+                .andExpect(jsonPath("$.goal").doesNotExist());
+        // 프로필을 꾸미지 않은 계정도 등급은 보여 준다
+        register("안꾸민카드");
+        mvc.perform(get("/api/v1/profiles/public/안꾸민카드")).andExpect(status().isOk())
+                .andExpect(jsonPath("$.avatar").doesNotExist()).andExpect(jsonPath("$.tier").value("BRONZE"));
+        mvc.perform(get("/api/v1/profiles/public/계정없는방문자")).andExpect(status().isNotFound());
+    }
 }

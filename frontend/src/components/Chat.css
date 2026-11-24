@@ -88,6 +88,9 @@
   font: inherit; font-size: 11px; font-weight: 700; cursor: pointer;
 }
 .lounge-person button:hover:not(:disabled) { background: var(--ds-brand); color: #fff; }
+/* 닉네임 버튼(누르면 프로필 카드)은 칩 안 버튼 모양을 쓰지 않는다 */
+.lounge-person button.profile-name-btn, .lounge-person button.profile-name-btn:hover:not(:disabled) { padding: 0; border: 0; border-radius: 0; background: none; color: inherit; font-size: inherit; font-weight: inherit; }
+.lounge-person button.profile-name-btn:hover { text-decoration: underline; }
 .lounge-person button:disabled { opacity: .5; cursor: default; }
 
 /* 메시지 목록 */
