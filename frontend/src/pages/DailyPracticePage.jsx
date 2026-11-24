@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import api from '../api';
+import { recordDailyAnswer } from '../dailyPracticeRecords';
 import './DailyPracticePage.css';
 
 const MARKS = ['①', '②', '③', '④'];
@@ -47,6 +48,7 @@ function DailyPractice({ day }) {
     if (answered) return;
     setPicked(i);
     setResults(prev => [...prev, i === q.answer]);
+    recordDailyAnswer(data.day, index + 1, data.theme, q, i === q.answer);
   };
   const next = () => { setIndex(index + 1); setPicked(null); };
   const restart = () => { setIndex(0); setPicked(null); setResults([]); };
