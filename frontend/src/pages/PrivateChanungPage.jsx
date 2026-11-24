@@ -4,6 +4,7 @@ import { decodePrivateId, privatePath } from '../privatePath';
 import { CompanyExam } from './ExamCompanyPage';
 import RoleGate from '../components/RoleGate';
 import './CsNotesPage.css';
+import './PrivateChanungPage.css';
 
 // AWS · 현대오토에버 면접 복기 자료(다른 사람이 본 면접). 공개 메뉴에서 빼고 여기서만 연다
 const OthersInterviews = lazy(() => import('./TechnicalInterviewPage'));
@@ -14,6 +15,15 @@ const TechInterview = lazy(() => import('./TechInterviewPage'));
 // 문제 데이터는 권한을 확인한 뒤에만 따로 불러와 공개 화면 번들과 분리한다
 // 화면 안 링크는 알아보기 어려운 주소로 만든다(privatePath.js)
 const BASE = privatePath();
+
+// 제목 오른쪽 빈 곳에 두는 블로그 글 바로가기(코딩테스트부터 순서대로)
+const BLOG_LINKS = [
+  ['코딩테스트 오답노트', 'https://cookie.tistory.com/195'],
+  ['코딩테스트 문법', 'https://cookie.tistory.com/166'],
+  ['네트워크', 'https://cookie.tistory.com/238'],
+  ['운영체제', 'https://cookie.tistory.com/234'],
+  ['AWS', 'https://cookie.tistory.com/227'],
+];
 
 export default function PrivateChanungPage() {
   return <RoleGate role="OWNER" title="찬웅 전용 페이지"><PrivateChanung /></RoleGate>;
@@ -173,10 +183,18 @@ function PrivateList({ data }) {
   const bankCount = data.PRIVATE_GROUPS.reduce((n, g) => n + g.banks.length, 0);
   return (
     <div className="fade-in">
-      <div className="page-header">
-        <Link to="/" className="back-link">← 홈으로</Link>
-        <h1>[취업] 안찬웅</h1>
-        <p>면접 준비와 취업 관련 자료를 정리하는 개인 공간입니다.</p>
+      <div className="page-header private-head">
+        <div>
+          <Link to="/" className="back-link">← 홈으로</Link>
+          <h1>[취업] 안찬웅</h1>
+          <p>면접 준비와 취업 관련 자료를 정리하는 개인 공간입니다.</p>
+        </div>
+        <nav className="private-blog" aria-label="내 블로그 바로가기">
+          <span className="private-blog-title">블로그 바로가기</span>
+          {BLOG_LINKS.map(([name, url]) => (
+            <a key={url} href={url} target="_blank" rel="noopener noreferrer">{name}<span aria-hidden="true">↗</span></a>
+          ))}
+        </nav>
       </div>
       <section style={{ marginTop: 24 }} aria-label="취업 준비">
         <div className="section-title">취업 준비</div>

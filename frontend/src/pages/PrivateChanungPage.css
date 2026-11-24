@@ -1,0 +1,15 @@
+/* 찬웅 전용 페이지: 제목 오른쪽 빈 곳의 블로그 바로가기 */
+.private-head { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--ds-s6); flex-wrap: wrap; }
+.private-blog { display: flex; flex-direction: column; gap: var(--ds-s2); min-width: 220px; padding: var(--ds-s4); border: 1px solid var(--ds-line); border-radius: var(--ds-r-xl); background: var(--ds-surface); }
+.private-blog-title { font-size: var(--ds-fs-caption); font-weight: 700; color: var(--ds-text-3); }
+.private-blog a {
+  display: flex; align-items: center; justify-content: space-between; gap: var(--ds-s3);
+  padding: var(--ds-s2) var(--ds-s3); border-radius: var(--ds-r-md);
+  background: var(--ds-surface-2); color: var(--ds-text);
+  font-size: var(--ds-fs-small); font-weight: 700; text-decoration: none;
+  transition: background var(--ds-fast), color var(--ds-fast);
+}
+.private-blog a span { color: var(--ds-text-3); }
+.private-blog a:hover { background: var(--ds-brand-soft); color: var(--ds-brand); }
+.private-blog a:hover span { color: var(--ds-brand); }
+@media (max-width: 640px) { .private-blog { width: 100%; } }
