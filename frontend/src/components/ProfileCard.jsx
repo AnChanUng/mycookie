@@ -4,6 +4,8 @@ import { membershipHeaders, TIER_NAMES } from '../membership';
 import { PROFILE_AVATARS, PROFILE_FRAMES, PROFILE_INTERESTS, PROFILE_MAX_INTERESTS, PROFILE_MAX_TEXT, PROFILE_THEMES, TIER_ORDER, isUnlocked } from '../data/profileOptions';
 import TierBadge from './TierBadge';
 import './ProfileCard.css';
+import '../styles/profile-frames.css';
+import { setMyProfile } from '../profileStore';
 
 const EMPTY = { avatar: null, bio: null, goal: null, interests: [], theme: null, frame: null };
 const labelOf = key => PROFILE_INTERESTS.find(i => i.key === key)?.label || key;
@@ -35,7 +37,7 @@ export default function ProfileCard({ user, tier }) {
   useEffect(() => {
     const controller = new AbortController();
     api.get('/me/profile', { headers: membershipHeaders(), signal: controller.signal })
-      .then(({ data }) => { if (!controller.signal.aborted && data) setProfile({ ...EMPTY, ...data, interests: Array.isArray(data.interests) ? data.interests : [] }); })
+      .then(({ data }) => { if (!controller.signal.aborted && data) { setProfile({ ...EMPTY, ...data, interests: Array.isArray(data.interests) ? data.interests : [] }); setMyProfile(data); } })
       .catch(() => { /* 프로필을 못 불러와도 기본 카드는 보여 준다 */ });
     return () => controller.abort();
   }, [user.token]);
@@ -45,6 +47,7 @@ export default function ProfileCard({ user, tier }) {
     try {
       const { data } = await api.put('/me/profile', draft, { headers: membershipHeaders(), timeout: 15000 });
       setProfile({ ...EMPTY, ...data, interests: Array.isArray(data.interests) ? data.interests : [] });
+      setMyProfile(data);
       setDraft(null);
       setMessage('프로필을 저장했어요.');
     } catch (error) {

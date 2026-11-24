@@ -59,6 +59,7 @@
 }
 :root[data-mode='dark'] .chat-avatar { background: hsl(var(--avatar-hue) 30% 28%); color: hsl(var(--avatar-hue) 70% 86%); }
 .chat-avatar.small { --size: 26px; }
+.chat-avatar.emoji, :root[data-mode='dark'] .chat-avatar.emoji { background: var(--ds-surface-2); font-size: calc(var(--size) * .6); }
 .chat-avatar-gap { flex: none; width: 34px; }
 .chat-online-dot {
   position: absolute; right: -1px; bottom: -1px;

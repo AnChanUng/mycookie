@@ -66,14 +66,7 @@
 .profile-rewards { margin: 0; font-size: var(--ds-fs-caption); color: var(--ds-text-3); }
 .profile-rewards b { color: var(--ds-text-2); }
 
-/* 아이콘 테두리: 등급이 오르면 열린다 */
-.frame-silver { box-shadow: 0 0 0 3px var(--ds-surface), 0 0 0 6px #a9b6c4; }
-.frame-gold { box-shadow: 0 0 0 3px var(--ds-surface), 0 0 0 6px #e0a92e; }
-.frame-diamond { box-shadow: 0 0 0 3px var(--ds-surface), 0 0 0 6px #37c3f0, 0 0 14px 2px rgba(55, 195, 240, .45); animation: profile-shimmer 2.8s ease-in-out infinite; }
-.frame-ruby { box-shadow: 0 0 0 3px var(--ds-surface), 0 0 0 6px #e8436e, 0 0 18px 4px rgba(232, 67, 110, .5); animation: profile-glow 2.2s ease-in-out infinite; }
-@keyframes profile-shimmer { 50% { box-shadow: 0 0 0 3px var(--ds-surface), 0 0 0 6px #8fe3ff, 0 0 22px 5px rgba(55, 195, 240, .6); } }
-@keyframes profile-glow { 50% { box-shadow: 0 0 0 3px var(--ds-surface), 0 0 0 6px #ff7d9e, 0 0 26px 8px rgba(232, 67, 110, .65); } }
-@media (prefers-reduced-motion: reduce) { .frame-diamond, .frame-ruby { animation: none; } }
+/* 아이콘 테두리 모양은 styles/profile-frames.css(채팅 · 순위 · 헤더와 함께 씀) */
 
 /* 테마 · 테두리 고르기 */
 .profile-theme-pick, .profile-frame-pick { display: flex; flex-wrap: wrap; gap: var(--ds-s2); }

@@ -45,3 +45,7 @@
 .hr-mine-rank { font-size: var(--ds-fs-small); font-weight: 800; color: var(--ds-brand); font-variant-numeric: tabular-nums; }
 .hr-mine-gap { font-size: var(--ds-fs-caption); color: var(--ds-text-2); white-space: nowrap; font-variant-numeric: tabular-nums; }
 @media (max-width: 420px) { .hr-mine-gap { white-space: normal; text-align: right; } }
+
+/* 프로필 꾸미기에서 고른 아이콘(고른 사람만): 닉네임 앞에 붙인다 */
+.hr-name .pf-avatar { margin-right: 6px; vertical-align: middle; }
+.hr-pname .pf-avatar { margin-right: 4px; vertical-align: middle; }
