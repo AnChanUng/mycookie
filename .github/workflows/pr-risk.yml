@@ -8,14 +8,13 @@
 #           CI, 의존성
 #   운영    dev → master                         → 브랜치 규칙상 관리자만 병합
 # 이 잡("위험도 검사")을 dev, master 브랜치 규칙의 필수 검사로 둔다(.github/rulesets/).
-# 승인, 승인 취소가 생기면 다시 돌아 결과를 갱신한다.
+# 승인, 승인 취소가 생기면 pr-risk-recheck.yml이 이 검사를 그대로 다시 실행해 결과를 갱신한다
+# (리뷰 이벤트로 따로 돌리면 푸시 때 실패한 검사가 PR에 남아 승인해도 병합이 막혀 있었다).
 name: PR 위험도
 
 on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
-  pull_request_review:
-    types: [submitted, dismissed]
 
 permissions:
   contents: write        # 자동 병합
