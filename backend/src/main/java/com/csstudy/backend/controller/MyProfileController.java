@@ -2,6 +2,8 @@ package com.csstudy.backend.controller;
 
 import com.csstudy.backend.entity.User;
 import com.csstudy.backend.entity.UserProfile;
+import com.csstudy.backend.entity.UserTier;
+import com.csstudy.backend.service.MembershipService;
 import com.csstudy.backend.repository.UserProfileRepository;
 import com.csstudy.backend.service.AuthService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -25,9 +27,20 @@ public class MyProfileController {
     static final List<String> AVATARS = List.of("🍪", "🧑‍💻", "🐱", "🐶", "🦊", "🐼", "🐧", "🦉", "🐻", "🐰", "🚀", "🔥", "🌱", "⭐", "🎯", "📚");
     static final List<String> INTERESTS = List.of("backend", "frontend", "ai", "data", "cloud", "security", "cs", "algo", "public", "finance");
     static final int MAX_INTERESTS = 5, MAX_TEXT = 60;
+    // 카드 테마와 아이콘 테두리. 그 등급 이상이 되면 열린다(화면 profileOptions.js와 같은 목록)
+    static final Map<String, UserTier> THEMES = Map.of(
+            "basic", UserTier.BRONZE, "cookie", UserTier.BRONZE,
+            "mint", UserTier.SILVER, "silver", UserTier.SILVER,
+            "gold", UserTier.GOLD, "sunset", UserTier.GOLD,
+            "diamond", UserTier.DIAMOND, "night", UserTier.DIAMOND,
+            "ruby", UserTier.RUBY);
+    static final Map<String, UserTier> FRAMES = Map.of(
+            "none", UserTier.BRONZE, "silver", UserTier.SILVER, "gold", UserTier.GOLD,
+            "diamond", UserTier.DIAMOND, "ruby", UserTier.RUBY);
 
     private final AuthService auth;
     private final UserProfileRepository profiles;
+    private final MembershipService membership;
 
     @GetMapping
     @Transactional(readOnly = true)
@@ -50,11 +63,16 @@ public class MyProfileController {
             }
         }
         if (interests.size() > MAX_INTERESTS) throw bad("관심 분야는 " + MAX_INTERESTS + "개까지 고를 수 있어요.");
+        UserTier tier = membership.membership(me).tier();
+        String theme = unlocked(body.get("theme"), THEMES, tier, "테마");
+        String frame = unlocked(body.get("frame"), FRAMES, tier, "테두리");
         UserProfile p = profiles.findByUserId(me.getId()).orElseGet(() -> { UserProfile n = new UserProfile(); n.setUserId(me.getId()); return n; });
         p.setAvatar(avatar);
         p.setBio(text(body.get("bio")));
         p.setGoal(text(body.get("goal")));
         p.setInterests(interests.isEmpty() ? null : String.join(",", interests));
+        p.setTheme(theme);
+        p.setFrame(frame);
         p.setUpdatedAt(Instant.now());
         return view(profiles.saveAndFlush(p));
     }
@@ -65,7 +83,18 @@ public class MyProfileController {
         out.put("bio", p == null ? null : p.getBio());
         out.put("goal", p == null ? null : p.getGoal());
         out.put("interests", p == null || p.getInterests() == null ? List.of() : List.of(p.getInterests().split(",")));
+        out.put("theme", p == null ? null : p.getTheme());
+        out.put("frame", p == null ? null : p.getFrame());
         return out;
+    }
+
+    // 고른 테마 · 테두리가 목록에 있고, 지금 등급으로 열려 있는지 확인한다. 비우면 기본값(null)
+    private static String unlocked(Object v, Map<String, UserTier> options, UserTier tier, String what) {
+        if (!(v instanceof String key) || key.isBlank()) return null;
+        UserTier need = options.get(key);
+        if (need == null) throw bad("고를 수 없는 " + what + "예요.");
+        if (tier == null || tier.ordinal() < need.ordinal()) throw bad(need.label() + "부터 쓸 수 있는 " + what + "예요.");
+        return key;
     }
 
     // 한 줄 글로 다듬는다(줄바꿈 · 제어 문자는 공백으로). 길면 거절한다

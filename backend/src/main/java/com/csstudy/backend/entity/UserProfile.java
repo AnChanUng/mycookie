@@ -32,5 +32,12 @@ public class UserProfile {
     @Column(length = 60)
     private String goal;
 
+    // 등급이 오르면 열리는 카드 테마와 아이콘 테두리(MyProfileController의 THEMES · FRAMES 키)
+    @Column(length = 16)
+    private String theme;
+
+    @Column(length = 16)
+    private String frame;
+
     private Instant updatedAt;
 }
