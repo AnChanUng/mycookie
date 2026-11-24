@@ -8,6 +8,7 @@ public interface DirectMessageRepository extends JpaRepository<DirectMessage, Lo
     List<DirectMessage> findTop100ByThreadIdOrderByIdDesc(Long id);
     Optional<DirectMessage> findBySenderIdAndClientId(Long sender, String client);
     Optional<DirectMessage> findTopBySenderIdOrderByIdDesc(Long sender);
+    Optional<DirectMessage> findTopByThreadIdOrderByIdDesc(Long thread);
     long countByThreadIdAndSenderIdNotAndReadAtIsNull(Long thread, Long sender);
     @Modifying
     @Query("update DirectMessage m set m.readAt=:at where m.threadId=:thread and m.senderId<>:me and m.readAt is null and m.id<=:last")

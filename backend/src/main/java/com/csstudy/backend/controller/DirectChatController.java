@@ -3,6 +3,7 @@ package com.csstudy.backend.controller;
 import com.csstudy.backend.entity.*;
 import com.csstudy.backend.repository.*;
 import com.csstudy.backend.service.AuthService;
+import com.csstudy.backend.service.ChatReactionService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -21,6 +22,9 @@ public class DirectChatController {
     private final UserRepository users;
     private final DirectThreadRepository threads;
     private final DirectMessageRepository messages;
+    private final ChatReactionService reactions;
+    private static final int SEARCH_LIMIT = 8;
+    private static final int MEMBERS_MAX = 50;
 
     private DirectThread owned(Long id, Long me) {
         DirectThread t = threads.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
@@ -30,12 +34,55 @@ public class DirectChatController {
     private Map<String,Object> row(DirectThread t, Long me) {
         Long peer = me.equals(t.getLowUser()) ? t.getHighUser() : t.getLowUser();
         String state = t.isFriends() ? "friends" : t.getRequestedBy() == null ? "none" : me.equals(t.getRequestedBy()) ? "sent" : "received";
-        return Map.of("id",t.getId(),"nickname",users.findById(peer).map(User::getNickname).orElse("탈퇴한 사용자"),"friendship",state,"unread",messages.countByThreadIdAndSenderIdNotAndReadAtIsNull(t.getId(),me));
+        Map<String,Object> out = new LinkedHashMap<>();
+        out.put("id",t.getId());
+        out.put("nickname",users.findById(peer).map(User::getNickname).orElse("탈퇴한 사용자"));
+        out.put("friendship",state);
+        out.put("unread",messages.countByThreadIdAndSenderIdNotAndReadAtIsNull(t.getId(),me));
+        // 목록에서 마지막 메시지를 미리 보여 준다
+        messages.findTopByThreadIdOrderByIdDesc(t.getId()).ifPresent(m -> {
+            out.put("lastText",m.getText().length() > 60 ? m.getText().substring(0,60) + "…" : m.getText());
+            out.put("lastAt",m.getCreatedAt());
+            out.put("lastMine",m.getSenderId().equals(me));
+        });
+        return out;
     }
+    // 최근에 대화가 오간 순서로 보여 준다. 메시지가 없는 대화는 만든 순서대로 뒤에 둔다
     @GetMapping
     public List<Map<String,Object>> inbox(HttpServletRequest request) {
         Long me = auth.requireUser(request).getId();
-        return threads.findByLowUserOrHighUserOrderByIdDesc(me,me).stream().map(t -> row(t,me)).toList();
+        return threads.findByLowUserOrHighUserOrderByIdDesc(me,me).stream().map(t -> row(t,me))
+                .sorted(Comparator.comparing((Map<String,Object> r) -> (Instant) r.get("lastAt"), Comparator.nullsLast(Comparator.reverseOrder())))
+                .toList();
+    }
+    // 계정 사람을 찾는 한 줄. 친구 관계와 대화방 번호를 함께 돌려준다
+    private Map<String,Object> person(User u, Long me) {
+        Long low = Math.min(me,u.getId()), high = Math.max(me,u.getId());
+        Map<String,Object> out = new LinkedHashMap<>();
+        out.put("nickname",u.getNickname());
+        var thread = threads.findByLowUserAndHighUser(low,high);
+        out.put("friendship",thread.map(t -> t.isFriends() ? "friends" : t.getRequestedBy() == null ? "none" : me.equals(t.getRequestedBy()) ? "sent" : "received").orElse("none"));
+        thread.ifPresent(t -> out.put("threadId",t.getId()));
+        return out;
+    }
+    // 닉네임 일부로 계정을 찾는다
+    @GetMapping("/search")
+    public List<Map<String,Object>> search(@RequestParam(defaultValue = "") String q, HttpServletRequest request) {
+        Long me = auth.requireUser(request).getId();
+        String query = q.trim();
+        if (query.isEmpty()) return List.of();
+        if (query.length() > 20) query = query.substring(0,20);
+        return users.findTop9ByNicknameContainingIgnoreCaseOrderByNicknameAsc(query).stream()
+                .filter(u -> !u.getId().equals(me) && u.getNickname() != null).limit(SEARCH_LIMIT).map(u -> person(u,me)).toList();
+    }
+    // 접속 중인 사람들 가운데 계정이 있는 사람만 골라 친구 추천에 쓴다
+    @PostMapping("/members")
+    public List<Map<String,Object>> members(@RequestBody Map<String,List<String>> body, HttpServletRequest request) {
+        Long me = auth.requireUser(request).getId();
+        List<String> names = Optional.ofNullable(body.get("nicknames")).orElse(List.of()).stream()
+                .filter(Objects::nonNull).map(String::trim).filter(n -> !n.isEmpty() && n.length() <= 40).distinct().limit(MEMBERS_MAX).toList();
+        if (names.isEmpty()) return List.of();
+        return users.findByNicknameIn(names).stream().filter(u -> !u.getId().equals(me)).map(u -> person(u,me)).toList();
     }
     @PostMapping
     public Map<String,Object> start(@RequestBody Map<String,String> body, HttpServletRequest request) {
@@ -78,7 +125,23 @@ public class DirectChatController {
         Long me=auth.requireUser(request).getId(); owned(id,me);
         List<DirectMessage> rows = new ArrayList<>(messages.findTop100ByThreadIdOrderByIdDesc(id));
         Collections.reverse(rows);
-        return rows.stream().map(m -> Map.<String,Object>of("id",m.getId(),"mine",m.getSenderId().equals(me),"text",m.getText(),"at",m.getCreatedAt())).toList();
+        var reacted = reactions.load("direct", rows.stream().map(DirectMessage::getId).toList());
+        return rows.stream().map(m -> Map.<String,Object>of("id",m.getId(),"mine",m.getSenderId().equals(me),"text",m.getText(),"at",m.getCreatedAt(),
+                "reactions",summary(reacted.getOrDefault(m.getId(),Map.of()),me))).toList();
+    }
+    private static List<Map<String,Object>> summary(Map<String,? extends Collection<String>> byEmoji, Long me) {
+        return byEmoji.entrySet().stream().filter(e -> !e.getValue().isEmpty())
+                .map(e -> Map.<String,Object>of("emoji",e.getKey(),"count",e.getValue().size(),"mine",e.getValue().contains("u:"+me))).toList();
+    }
+    // 1:1 메시지에 이모지 반응을 달거나 뗀다
+    @PostMapping("/{id}/messages/{messageId}/reactions")
+    public List<Map<String,Object>> react(@PathVariable Long id, @PathVariable Long messageId, @RequestBody Map<String,String> body, HttpServletRequest request) {
+        Long me=auth.requireUser(request).getId(); owned(id,me);
+        DirectMessage m = messages.findById(messageId).filter(x -> x.getThreadId().equals(id)).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        String emoji = body.get("emoji");
+        if (!ChatReactionService.allowed(emoji)) throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"보낼 수 없는 반응입니다.");
+        reactions.toggle("direct",m.getId(),"u:"+me,emoji);
+        return summary(reactions.load("direct",List.of(m.getId())).getOrDefault(m.getId(),Map.of()),me);
     }
     @PostMapping("/{id}/read")
     public Map<String,Boolean> read(@PathVariable Long id,@RequestBody Map<String,Long> body,HttpServletRequest request) {

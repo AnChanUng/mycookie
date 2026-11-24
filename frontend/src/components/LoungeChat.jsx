@@ -6,6 +6,9 @@ import { NICKNAME_MAX, cleanNickname, myNickname, saveNickname, savedNickname } 
 import { account, changeNickname, onAccountChange } from '../sync';
 import { membershipHeaders } from '../membership';
 import DirectChat from './DirectChat';
+import { Avatar, DayDivider, EmojiButton, ReactionChips, ReactionPicker, SendIcon } from './chatUi';
+import { clock, layout } from './chatFormat';
+import './Chat.css';
 
 const accountSnapshot = () => `${account()?.token || ''}:${account()?.nickname || ''}`;
 
@@ -25,12 +28,9 @@ function ChatText({ text }) {
 const KEEP = 200;
 const SEEN_KEY = 'lounge:seen';
 
-const p2 = (n) => String(n).padStart(2, '0');
-function fmtAt(iso) {
-  const d = new Date(iso);
-  const clock = `${p2(d.getHours())}:${p2(d.getMinutes())}`;
-  return d.toDateString() === new Date().toDateString() ? clock : `${d.getMonth() + 1}.${d.getDate()} ${clock}`;
-}
+// 서버는 반응을 이모지 → 누른 사람(방문자 ID 앞 8자) 목록으로 보낸다
+const reactionList = (m, me) => Object.entries(m.reactions || {})
+  .map(([emoji, who]) => ({ emoji, count: who.length, mine: who.includes(me) }));
 
 const readSeen = () => { try { return Number(localStorage.getItem(SEEN_KEY)) || 0; } catch { return 0; } };
 const writeSeen = (id) => { try { localStorage.setItem(SEEN_KEY, String(id)); } catch { /* storage unavailable */ } };
@@ -53,6 +53,8 @@ export default function LoungeChat({ open, online, onClose, onOnline, onUnread, 
   const [challenging, setChallenging] = useState(false);
   const [room, setRoom] = useState(null);
   const [tab, setTab] = useState('public');
+  const [unseen, setUnseen] = useState(0);
+  const inputRef = useRef(null);
   const displayName = account()?.nickname || nickname;
 
   const lastId = useRef(0);
@@ -159,10 +161,43 @@ export default function LoungeChat({ open, online, onClose, onOnline, onUnread, 
   }, [nickname, identity]);
 
   // 맨 아래를 보고 있을 때만 새 글을 따라 내려간다
+  // 위로 올려 읽는 중에 새 글이 오면 '새 메시지' 버튼에 개수를 띄운다
+  const seenCount = useRef(0);
   useEffect(() => {
     const list = listRef.current;
+    const added = messages.length - seenCount.current;
+    seenCount.current = messages.length;
     if (open && list && stick.current) list.scrollTop = list.scrollHeight;
-  }, [messages, pending, open, ready]);
+    else if (open && added > 0) setUnseen(n => n + added);
+  }, [messages, pending, open, ready, tab]);
+  const toBottom = () => {
+    const list = listRef.current;
+    stick.current = true; setUnseen(0);
+    if (list) list.scrollTop = list.scrollHeight;
+  };
+
+  // 반응은 먼저 화면에 그리고, 서버가 돌려준 결과로 맞춘다
+  const react = async (message, emoji) => {
+    const id = visitorId();
+    if (!id) return;
+    const had = (message.reactions?.[emoji] || []).includes(me);
+    setMessages(prev => prev.map(m => {
+      if (m.id !== message.id) return m;
+      const who = m.reactions?.[emoji] || [];
+      const next = had ? who.filter(v => v !== me) : [...who, me];
+      const reactions = { ...(m.reactions || {}) };
+      if (next.length) reactions[emoji] = next; else delete reactions[emoji];
+      return { ...m, reactions };
+    }));
+    try {
+      const { data } = await api.post(`/lounge/messages/${message.id}/reactions`, { visitorId: id, emoji }, { timeout: 20000 });
+      setMessages(prev => prev.map(m => m.id === data.id ? { ...m, reactions: data.reactions } : m));
+    } catch (err) {
+      setMessages(prev => prev.map(m => m.id === message.id ? { ...m, reactions: message.reactions } : m));
+      setError(err.response?.data?.error || '반응을 남기지 못했습니다.');
+    }
+  };
+  const addEmoji = e => { setText(t => (t + e).slice(0, TEXT_MAX)); inputRef.current?.focus(); };
 
   const openNaming = () => { setDraftName(displayName); setNaming(true); };
 
@@ -234,43 +269,95 @@ export default function LoungeChat({ open, online, onClose, onOnline, onUnread, 
 
   if (!open) return null;
 
+  const others = participants.filter(p => p.id !== self);
+  const rows = layout(messages, m => `${m.visitor}:${m.nickname}`);
   return (
     <section className="lounge" aria-label="채팅">
       <header className="lounge-head">
-        <div>
+        <div className="lounge-title">
           <strong>공부방 채팅</strong>
           <span className="lounge-online"><i aria-hidden="true" />{online > 0 ? `${online}명 접속 중` : '접속 인원 확인 중'}</span>
         </div>
         <button type="button" className="lounge-close" onClick={onClose} aria-label="채팅 닫기">×</button>
       </header>
 
-      <div className="lounge-tabs"><button aria-pressed={tab === 'public'} onClick={() => setTab('public')}>전체 채팅</button><button aria-pressed={tab === 'direct'} onClick={() => setTab('direct')}>1:1 대화 · 친구{directUnread > 0 ? ` (${directUnread})` : ''}</button></div>
+      <div className="lounge-tabs" role="tablist">
+        <button type="button" role="tab" aria-pressed={tab === 'public'} aria-selected={tab === 'public'} onClick={() => setTab('public')}>전체 채팅</button>
+        <button type="button" role="tab" aria-pressed={tab === 'direct'} aria-selected={tab === 'direct'} onClick={() => setTab('direct')}>
+          친구 · 1:1 대화{directUnread > 0 && <span className="lounge-tab-badge">{directUnread > 99 ? '99+' : directUnread}</span>}
+        </button>
+      </div>
       {tab === 'direct' ? <DirectChat key={identity} participants={participants} self={self} /> : <>
 
       <div className="lounge-participants" aria-label="사이트 접속자">
-        <strong>사이트 접속 중 {participants.length}명</strong>
-        {participants.map(person => <div key={person.id}><span>{person.nickname}{person.id === self ? ' (나)' : ''}</span>
-          {person.id !== self && <button type="button" disabled={!self || challenging || sending} onClick={() => challenge(person)}>대결 신청</button>}
-        </div>)}
-        {room && <Link to={`/duel/${room}`} onClick={onClose}>내 대결 방 입장 →</Link>}
+        <div className="lounge-participants-head">
+          <strong>지금 접속 중 <em>{participants.length}</em></strong>
+          {room && <Link to={`/duel/${room}`} onClick={onClose}>내 대결 방 입장 →</Link>}
+        </div>
+        <div className="lounge-people">
+          {participants.length === 0 && <span className="lounge-people-empty">접속자를 확인하는 중…</span>}
+          {participants.filter(p => p.id === self).map(p => (
+            <div key={p.id} className="lounge-person me"><Avatar name={p.nickname} online small /><span>{p.nickname} (나)</span></div>
+          ))}
+          {others.map(person => (
+            <div key={person.id} className="lounge-person">
+              <Avatar name={person.nickname} online small />
+              <span title={person.nickname}>{person.nickname}</span>
+              <button type="button" disabled={!self || challenging || sending} onClick={() => challenge(person)}>대결 신청</button>
+            </div>
+          ))}
+        </div>
       </div>
 
-      <div className="lounge-list" ref={listRef}
-        onScroll={e => { const el = e.currentTarget; stick.current = el.scrollHeight - el.scrollTop - el.clientHeight < 40; }}>
-        {!ready && <p className="lounge-empty">불러오는 중... 서버가 잠들어 있으면 1~2분 걸립니다</p>}
-        {ready && messages.length === 0 && <p className="lounge-empty">아직 대화가 없습니다. 첫 인사를 남겨 보세요 👋</p>}
-        {messages.map(m => (
-          <div key={m.id} className={`lounge-msg${m.visitor === me ? ' mine' : ''}`}>
-            <span className="lounge-meta">{m.visitor === me ? '나' : m.nickname} · {fmtAt(m.at)}</span>
-            <span className="lounge-bubble"><ChatText text={m.text} /></span>
-          </div>
-        ))}
-        {pending.map(m => <div key={m.clientId} className="lounge-msg mine">
-          <span className="lounge-meta">나 · {m.status === 'failed' ? '전송 실패' : '전송 중…'}</span>
-          <span className="lounge-bubble"><ChatText text={m.text} /></span>
-          {m.status === 'failed' && <button type="button" disabled={sending} onClick={() => deliver(m)}>재시도</button>}
-        </div>)}
+      <div className="lounge-list-wrap">
+        <div className="lounge-list" ref={listRef}
+          onScroll={e => {
+            const el = e.currentTarget;
+            stick.current = el.scrollHeight - el.scrollTop - el.clientHeight < 40;
+            if (stick.current) setUnseen(0);
+          }}>
+          {!ready && <p className="lounge-empty">불러오는 중... 서버가 잠들어 있으면 1~2분 걸립니다</p>}
+          {ready && messages.length === 0 && <p className="lounge-empty"><span aria-hidden="true">👋</span>아직 대화가 없습니다. 첫 인사를 남겨 보세요</p>}
+          {rows.map(({ m, day, first, last }) => {
+            const mine = m.visitor === me;
+            return (
+              <div key={m.id} className="lounge-row-wrap">
+                {day && <DayDivider at={m.at} />}
+                <div className={`lounge-msg${mine ? ' mine' : ''}${first ? ' first' : ''}${last ? ' last' : ''}`}>
+                  {!mine && (first ? <Avatar name={m.nickname} /> : <span className="chat-avatar-gap" />)}
+                  <div className="lounge-msg-body">
+                    {!mine && first && <span className="lounge-meta">{m.nickname}</span>}
+                    <div className="lounge-line">
+                      <span className="lounge-bubble"><ChatText text={m.text} /></span>
+                      {last && <time className="lounge-time" dateTime={m.at}>{clock(m.at)}</time>}
+                      <ReactionPicker onPick={emoji => react(m, emoji)} />
+                    </div>
+                    <ReactionChips items={reactionList(m, me)} onToggle={emoji => react(m, emoji)} />
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+          {pending.map(m => <div key={m.clientId} className="lounge-msg mine last pending">
+            <div className="lounge-msg-body">
+              <div className="lounge-line">
+                <span className="lounge-bubble"><ChatText text={m.text} /></span>
+              </div>
+              <span className={`lounge-status${m.status === 'failed' ? ' failed' : ''}`}>{m.status === 'failed' ? '전송 실패' : '전송 중…'}
+                {m.status === 'failed' && <button type="button" disabled={sending} onClick={() => deliver(m)}>재시도</button>}
+              </span>
+            </div>
+          </div>)}
+        </div>
+        {unseen > 0 && <button type="button" className="lounge-jump" onClick={toBottom}>새 메시지 {unseen}개 ↓</button>}
       </div>
+
+      {error && <p className="lounge-error" role="alert">{error}</p>}
+      <form className="lounge-form" onSubmit={send}>
+        <EmojiButton onPick={addEmoji} />
+        <input ref={inputRef} value={text} onChange={e => setText(e.target.value)} maxLength={TEXT_MAX} placeholder="메시지 보내기" aria-label="메시지" />
+        <button type="submit" className="chat-send" disabled={sending || !text.trim()} aria-label="보내기"><SendIcon /></button>
+      </form>
 
       {naming ? (
         <form className="lounge-name" onSubmit={saveName}>
@@ -284,13 +371,6 @@ export default function LoungeChat({ open, online, onClose, onOnline, onUnread, 
           <button type="button" onClick={openNaming}>{displayName ? '바꾸기' : '직접 정하기'}</button>
         </div>
       )}
-
-      {error && <p className="lounge-error" role="alert">{error}</p>}
-      <form className="lounge-form" onSubmit={send}>
-        <input value={text} onChange={e => setText(e.target.value)} maxLength={TEXT_MAX} placeholder="메시지를 입력하세요" aria-label="메시지" />
-        <button type="submit" disabled={sending || !text.trim()}>보내기</button>
-      </form>
-      <p className="lounge-rule">한국시간 00시에 전날 대화가 화면에서 사라집니다. 서로 존중하는 대화를 부탁드려요.</p>
       </>}
     </section>
   );
