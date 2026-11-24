@@ -22,3 +22,9 @@
 .weak-daily-item { border: 1px solid rgba(128, 128, 128, 0.4); border-radius: 10px; padding: 10px 14px; }
 .weak-daily-item summary { cursor: pointer; font-weight: 600; }
 .weak-daily-item p { margin: 8px 0; line-height: 1.6; white-space: pre-wrap; }
+.daily-option, .daily-prompt, .daily-explain p { word-break: keep-all; overflow-wrap: anywhere; }
+.daily-review { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.daily-review li { padding: 6px 10px; border-radius: 8px; word-break: keep-all; }
+.daily-review li.right span { color: #2e9e5b; }
+.daily-review li.wrong { background: rgba(214, 69, 69, 0.1); }
+.daily-review li.wrong span { color: #d64545; }
