@@ -4,6 +4,8 @@ import api from '../api';
 import { account } from '../sync';
 import { visitorId } from '../track';
 import TierBadge from '../components/TierBadge';
+import ProfileAvatar from '../components/ProfileAvatar';
+import { usePublicLooks } from '../profileStore';
 import RankMedal from '../components/RankMedal';
 import '../components/HomeRank.css';
 import './RankPage.css';
@@ -34,6 +36,7 @@ export default function RankPage() {
 
   const myName = account()?.nickname;
   const rows = useMemo(() => (state.data?.top || []).map(r => ({ ...r, me: r.me || (!!myName && r.nickname === myName) })), [state.data, myName]);
+  const looks = usePublicLooks(rows.map(r => r.nickname));
   const shown = rows.filter(r => r.nickname.toLowerCase().includes(query.trim().toLowerCase()));
   const me = rows.find(r => r.me) || state.data?.me;
 
@@ -60,7 +63,7 @@ export default function RankPage() {
         {shown.slice(0, limit).map(r => <li key={`${r.rank}-${r.nickname}`} className={`hr-row rk-row${r.me ? ' me' : ''}${r.rank <= 3 ? ` t${r.rank}` : ''}`} value={r.rank}>
           <span className="hr-rank"><RankMedal rank={r.rank} /></span>
           <TierBadge tier={r.tier} division={r.division} />
-          <span className="hr-name">{r.nickname}{r.me && <em>나</em>}</span>
+          <span className="hr-name"><ProfileAvatar look={looks[r.nickname]} size={24} />{r.nickname}{r.me && <em>나</em>}</span>
           <span className="rk-tier">{r.tierName}</span>
           <b className="hr-count">{Number(r.count).toLocaleString()}<small>문제</small></b>
         </li>)}

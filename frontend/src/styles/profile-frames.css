@@ -1,0 +1,19 @@
+/* 프로필 아이콘 테두리(등급 보상). 프로필 카드 · 채팅 · 순위 · 헤더가 함께 쓴다.
+   --pf-gap(안쪽 흰 띠)과 --pf-ring(색 테두리 바깥 끝)으로 크기를 맞춘다. 작은 아이콘은 줄여서 쓴다 */
+.frame-silver, .frame-gold, .frame-diamond, .frame-ruby { --pf-gap: 3px; --pf-ring: 6px; }
+.pf-small.frame-silver, .pf-small.frame-gold, .pf-small.frame-diamond, .pf-small.frame-ruby { --pf-gap: 2px; --pf-ring: 4px; }
+.frame-silver { box-shadow: 0 0 0 var(--pf-gap) var(--ds-surface), 0 0 0 var(--pf-ring) #a9b6c4; }
+.frame-gold { box-shadow: 0 0 0 var(--pf-gap) var(--ds-surface), 0 0 0 var(--pf-ring) #e0a92e; }
+.frame-diamond { box-shadow: 0 0 0 var(--pf-gap) var(--ds-surface), 0 0 0 var(--pf-ring) #37c3f0, 0 0 14px 2px rgba(55, 195, 240, .45); animation: profile-shimmer 2.8s ease-in-out infinite; }
+.frame-ruby { box-shadow: 0 0 0 var(--pf-gap) var(--ds-surface), 0 0 0 var(--pf-ring) #e8436e, 0 0 18px 4px rgba(232, 67, 110, .5); animation: profile-glow 2.2s ease-in-out infinite; }
+@keyframes profile-shimmer { 50% { box-shadow: 0 0 0 var(--pf-gap) var(--ds-surface), 0 0 0 var(--pf-ring) #8fe3ff, 0 0 22px 5px rgba(55, 195, 240, .6); } }
+@keyframes profile-glow { 50% { box-shadow: 0 0 0 var(--pf-gap) var(--ds-surface), 0 0 0 var(--pf-ring) #ff7d9e, 0 0 26px 8px rgba(232, 67, 110, .65); } }
+@media (prefers-reduced-motion: reduce) { .frame-diamond, .frame-ruby { animation: none; } }
+
+/* 고른 대표 아이콘(이모지) 동그라미 */
+.pf-avatar {
+  --pf-size: 28px;
+  display: inline-grid; place-items: center; flex: none;
+  width: var(--pf-size); height: var(--pf-size); border-radius: 50%;
+  background: var(--ds-surface-2); font-size: calc(var(--pf-size) * .62); line-height: 1;
+}

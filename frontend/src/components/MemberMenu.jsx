@@ -4,6 +4,8 @@ import { account, onAccountChange, signOut } from '../sync';
 import { onNicknameChange, savedNickname } from '../nickname';
 import { useMembership } from '../membership';
 import TierBadge from './TierBadge';
+import ProfileAvatar from './ProfileAvatar';
+import { useMyProfile } from '../profileStore';
 import useRoles, { canOpenPrivateBanks } from '../useRoles';
 import { privateBanksPath } from '../privatePath';
 
@@ -24,6 +26,7 @@ export default function MemberMenu() {
   const identity = useSyncExternalStore(subscribe, snapshot, () => '');
   const location = useLocation();
   const { membership, loading, error } = useMembership(`${identity}:${location.pathname}`);
+  const mine = useMyProfile();
   const signedIn = !!account()?.token;
   const access = useRoles();
   const showCareer = access.signedIn && !access.loading && access.roles.includes('OWNER');
@@ -77,7 +80,8 @@ export default function MemberMenu() {
       className={`account-nav-link member-menu${open || location.pathname.startsWith('/account') ? ' active' : ''}`}
       aria-haspopup="menu" aria-expanded={open} aria-controls="member-panel"
       aria-label={`${membership?.tierName || ''} ${nickname} 내 계정 메뉴`.trim()}>
-      {membership ? <TierBadge tier={membership.tier} division={membership.division} /> : <span className="member-tier-status">{status}</span>}
+      {mine?.avatar ? <ProfileAvatar look={mine} size={26} />
+        : membership ? <TierBadge tier={membership.tier} division={membership.division} /> : <span className="member-tier-status">{status}</span>}
       <span className="member-menu-name">{nickname}</span><span aria-hidden="true" className={`member-caret${open ? ' on' : ''}`}>⌄</span>
     </button>
 
