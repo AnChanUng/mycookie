@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { REACTIONS, dayLabel } from './chatFormat';
+import '../styles/profile-frames.css';
 
 // 채팅 창 두 곳(전체 채팅 · 1:1 대화)이 함께 쓰는 작은 부품들
 
@@ -12,11 +13,13 @@ function hue(name = '') {
   return h;
 }
 
-export function Avatar({ name, online, small }) {
+// look: 프로필 꾸미기에서 고른 { avatar, frame }. 없으면 지금처럼 닉네임 첫 글자
+export function Avatar({ name, online, small, look }) {
   const initial = [...(name || '?').trim()][0] || '?';
+  const frame = look?.frame && look.frame !== 'none' ? ` frame-${look.frame}${small ? ' pf-small' : ''}` : '';
   return (
-    <span className={`chat-avatar${small ? ' small' : ''}`} style={{ '--avatar-hue': hue(name) }} aria-hidden="true">
-      {initial.toUpperCase()}
+    <span className={`chat-avatar${small ? ' small' : ''}${look?.avatar ? ' emoji' : ''}${frame}`} style={{ '--avatar-hue': hue(name) }} aria-hidden="true">
+      {look?.avatar || initial.toUpperCase()}
       {online && <i className="chat-online-dot" />}
     </span>
   );

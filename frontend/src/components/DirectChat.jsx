@@ -6,6 +6,7 @@ import { membershipHeaders } from '../membership';
 import { Avatar, DayDivider, EmojiButton, ReactionChips, ReactionPicker, SendIcon } from './chatUi';
 import { clock, layout, shortWhen, toggled } from './chatFormat';
 import './Chat.css';
+import { usePublicLooks } from '../profileStore';
 
 const config = () => ({ headers: membershipHeaders(), timeout: 20000 });
 const STATE_LABEL = { friends: '친구', sent: '요청 보냄', received: '요청 받음', none: '' };
@@ -34,6 +35,7 @@ export default function DirectChat({ participants, self }) {
   const onlineNames = useMemo(() => new Set(participants.filter(p => p.id !== self).map(p => p.nickname)), [participants, self]);
   const onlineKey = useMemo(() => [...onlineNames].filter(n => n !== myName).sort().join('\n'), [onlineNames, myName]);
 
+  const looks = usePublicLooks([...threads.map(t => t.nickname), ...suggested.map(p => p.nickname), ...(results || []).map(p => p.nickname), selected?.nickname]);
   const refresh = useCallback(async () => {
     const { data } = await api.get('/direct', config());
     if (active.current) { setThreads(data); setLoaded(true); }
@@ -181,7 +183,7 @@ export default function DirectChat({ participants, self }) {
       <div className="direct-panel direct-conversation">
         <div className="direct-heading">
           <button type="button" className="chat-icon-btn" disabled={busy} onClick={() => { setSelected(null); setMessages([]); }} aria-label="목록으로">←</button>
-          <Avatar name={current.nickname} online={online} />
+          <Avatar name={current.nickname} look={looks[current.nickname]} online={online} />
           <div className="direct-peer">
             <strong>{current.nickname}</strong>
             <span>{online ? '접속 중' : '오프라인'}{STATE_LABEL[current.friendship] ? ` · ${STATE_LABEL[current.friendship]}` : ''}</span>
@@ -207,7 +209,7 @@ export default function DirectChat({ participants, self }) {
         <div className="direct-messages lounge-list" ref={list}>
           {!messages.length && (
             <div className="direct-first">
-              <Avatar name={current.nickname} online={online} />
+              <Avatar name={current.nickname} look={looks[current.nickname]} online={online} />
               <strong>{current.nickname}</strong>
               <p>두 사람만 볼 수 있는 대화예요. 첫 메시지를 보내 보세요.</p>
             </div>
@@ -216,7 +218,7 @@ export default function DirectChat({ participants, self }) {
             <div key={m.id} className="lounge-row-wrap">
               {day && <DayDivider at={m.at} />}
               <div className={`lounge-msg${m.mine ? ' mine' : ''}${first ? ' first' : ''}${last ? ' last' : ''}`}>
-                {!m.mine && (first ? <Avatar name={current.nickname} /> : <span className="chat-avatar-gap" />)}
+                {!m.mine && (first ? <Avatar name={current.nickname} look={looks[current.nickname]} /> : <span className="chat-avatar-gap" />)}
                 <div className="lounge-msg-body">
                   <div className="lounge-line">
                     <span className="lounge-bubble">{m.text}</span>
@@ -256,7 +258,7 @@ export default function DirectChat({ participants, self }) {
     const online = onlineNames.has(t.nickname);
     return (
       <button type="button" key={t.id} className={`direct-row${t.unread > 0 ? ' unread' : ''}`} disabled={busy} onClick={() => choose(t)}>
-        <Avatar name={t.nickname} online={online} />
+        <Avatar name={t.nickname} look={looks[t.nickname]} online={online} />
         <span className="direct-row-main">
           <span className="direct-row-top">
             <strong>{t.nickname}</strong>
@@ -287,7 +289,7 @@ export default function DirectChat({ participants, self }) {
           {!results.length && <p className="direct-empty">'{query.trim()}'(으)로 찾은 계정이 없어요. 닉네임을 다시 확인해 주세요.</p>}
           {results.map(p => (
             <div className="direct-person" key={p.nickname}>
-              <Avatar name={p.nickname} online={onlineNames.has(p.nickname)} />
+              <Avatar name={p.nickname} look={looks[p.nickname]} online={onlineNames.has(p.nickname)} />
               <span className="direct-person-name"><strong>{p.nickname}</strong><span>{onlineNames.has(p.nickname) ? '지금 접속 중' : '계정 사용자'}</span></span>
               <button type="button" disabled={busy} onClick={() => talk(p)}>메시지</button>
               {personAction(p)}
@@ -300,7 +302,7 @@ export default function DirectChat({ participants, self }) {
             <h3>받은 친구 요청 <em>{received.length}</em></h3>
             {received.map(t => (
               <div className="direct-request" key={t.id}>
-                <Avatar name={t.nickname} online={onlineNames.has(t.nickname)} />
+                <Avatar name={t.nickname} look={looks[t.nickname]} online={onlineNames.has(t.nickname)} />
                 <span className="direct-person-name"><strong>{t.nickname}</strong><span>친구가 되고 싶어 해요</span></span>
                 <button type="button" className="direct-primary" disabled={busy} onClick={() => friend(t.id, 'accept', `${t.nickname}님과 친구가 됐어요!`)}>수락</button>
                 <button type="button" disabled={busy} onClick={() => friend(t.id, 'remove', '친구 요청을 거절했어요.')}>거절</button>
@@ -315,7 +317,7 @@ export default function DirectChat({ participants, self }) {
             <div className="direct-suggest">
               {recommend.map(p => (
                 <div className="direct-suggest-card" key={p.nickname}>
-                  <Avatar name={p.nickname} online />
+                  <Avatar name={p.nickname} look={looks[p.nickname]} online />
                   <strong title={p.nickname}>{p.nickname}</strong>
                   {p.friendship === 'sent'
                     ? <button type="button" disabled>요청됨</button>

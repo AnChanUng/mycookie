@@ -7,6 +7,8 @@ import { BANKS, PRIVATE_BANK_KEYS } from '../data/examQuestions';
 import { syncAllProgress } from '../hooks/useExamProgress';
 import { account, onAccountChange } from '../sync';
 import TierBadge, { CookieIcon } from './TierBadge';
+import ProfileAvatar from './ProfileAvatar';
+import { usePublicLooks } from '../profileStore';
 import RankMedal from './RankMedal';
 import TierGuide from './TierGuide';
 
@@ -115,6 +117,8 @@ function SolveRankContent({ cacheKey }) {
   }, [tick, cacheKey]);
 
   // 여러 번 다시 받아 봐도 순위를 주지 못하면 자리만 차지하지 않게 비워 둔다
+  // 순위에 나온 사람들의 대표 아이콘(고른 사람만). 아래의 조건부 return보다 먼저 불러야 한다
+  const looks = usePublicLooks([...(rank?.top || []).map(r => r.nickname), rank?.me?.nickname]);
   if (failed && !rank) return null;
 
   const save = (e) => {
@@ -149,7 +153,7 @@ function SolveRankContent({ cacheKey }) {
           {rows.map(r => (
             <li key={r.rank} className={r.me ? 'me' : ''}>
               <span className="solve-rank-no"><RankMedal rank={r.rank} /></span>
-              <span className="solve-rank-name"><span className="solve-rank-nickname" title={r.nickname}>{r.nickname}</span><TierBadge tier={r.tier} division={r.division} />{r.me && <em>나</em>}</span>
+              <span className="solve-rank-name"><ProfileAvatar look={looks[r.nickname]} size={22} /><span className="solve-rank-nickname" title={r.nickname}>{r.nickname}</span><TierBadge tier={r.tier} division={r.division} />{r.me && <em>나</em>}</span>
               <span className="solve-rank-count">{r.count.toLocaleString()}문제</span>
             </li>
           ))}
