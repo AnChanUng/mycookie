@@ -216,7 +216,7 @@ public class NewsletterLetter {
         }
 
         void code(String value) {
-            html.append("<pre style=\"margin:10px 0;padding:12px 14px;background:#0f172a;color:#e2e8f0;border-radius:8px;font-size:12.5px;line-height:1.55;overflow-x:auto;white-space:pre\">");
+            html.append("<pre style=\"margin:10px 0;padding:12px 14px;background:#0f172a;color:#e2e8f0;border-radius:8px;font-size:12.5px;line-height:1.55;white-space:pre-wrap;word-break:break-all\">");
             for (String row : value.split("\n")) {
                 text.append("    ").append(row).append("\n");
                 html.append(escape(row)).append("\n");
@@ -264,7 +264,7 @@ public class NewsletterLetter {
                 for (String row : rows) {
                     if (row.startsWith("```")) { code = !code; continue; }
                     if (row.isBlank() || row.matches("^\\|?\\s*:?-{3,}.*")) continue;
-                    if (code) { text.append("    ").append(row).append("\n"); html.append("<pre style=\"margin:0;background:#f1f5f9;padding:2px 8px;font-size:13px\">").append(escape(row)).append("</pre>"); }
+                    if (code) { text.append("    ").append(row).append("\n"); html.append("<pre style=\"margin:0;background:#f1f5f9;padding:2px 8px;font-size:13px;white-space:pre-wrap;word-break:break-all\">").append(escape(row)).append("</pre>"); }
                     else if (row.matches("^\\s*([-*]|\\d+\\.)\\s+.*")) bullet(row.replaceFirst("^\\s*([-*]|\\d+\\.)\\s+", ""));
                     else line(row);
                 }
@@ -272,8 +272,9 @@ public class NewsletterLetter {
         }
 
         String html() {
-            return "<!doctype html><html><body style=\"margin:0;background:#f8fafc\"><div style=\"max-width:640px;margin:0 auto;padding:24px 20px;"
-                    + "font-family:-apple-system,'Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:15px;line-height:1.7;color:#1e293b;background:#ffffff\">"
+            // 폰 메일 앱에서 글자가 작게 줄어들지 않게 viewport를 넣고, 한글은 단어 중간에서 꺾이지 않게 한다
+            return "<!doctype html><html><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"></head><body style=\"margin:0;background:#f8fafc\"><div style=\"max-width:640px;margin:0 auto;padding:24px 20px;"
+                    + "font-family:-apple-system,'Apple SD Gothic Neo','Malgun Gothic',sans-serif;font-size:15px;line-height:1.7;color:#1e293b;background:#ffffff;word-break:keep-all;overflow-wrap:anywhere\">"
                     + html + "</div></body></html>";
         }
 

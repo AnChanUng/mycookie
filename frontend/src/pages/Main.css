@@ -4,7 +4,7 @@
 
 /* 첫 줄 명언 */
 .mn-quote { margin: 32px auto 28px; text-align: center; }
-.mn-quote blockquote { margin: 0; font-family: 'Nanum Myeongjo', 'Noto Serif KR', serif; font-size: clamp(18px, 2vw, 22px); font-weight: 400; letter-spacing: 0.04em; color: var(--ds-text-2); }
+.mn-quote blockquote { margin: 0 auto; max-width: 760px; text-wrap: balance; word-break: keep-all; font-family: 'Nanum Myeongjo', 'Noto Serif KR', serif; font-size: clamp(18px, 2vw, 22px); font-weight: 400; letter-spacing: 0.04em; color: var(--ds-text-2); }
 .mn-quote figcaption { margin-top: 8px; font-size: 13px; color: var(--ds-text-3); }
 
 /* 인사 + 오늘 목표 */
@@ -73,6 +73,8 @@ a:hover > .mn-chev { color: var(--ds-brand); transform: translateX(3px); }
 /* 태블릿 */
 @media (max-width: 1024px) {
   .mn-cards, .mn-cards--4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  /* 카드가 홀수 개면 마지막 카드가 혼자 반쪽만 차지하지 않게 한 줄을 다 쓴다 */
+  .mn-cards:not(.mn-cards--single) > :last-child:nth-child(odd) { grid-column: 1 / -1; }
 }
 
 /* 휴대폰 */

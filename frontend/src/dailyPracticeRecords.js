@@ -42,3 +42,11 @@ export function dailySummary(storage = store()) {
   const rows = Object.values(read(storage || { getItem: () => null }));
   return { seen: rows.length, open: rows.filter(r => r?.last === 'w').length };
 }
+
+// 오늘의 복습: 틀린 문제 중 하루 n개. 날짜마다 시작 위치를 돌려서 매일 다른 문제가 나온다
+export function pickReview(rows, dayNumber, n = 3) {
+  if (!rows.length) return [];
+  const count = Math.min(n, rows.length);
+  const start = ((dayNumber % rows.length) + rows.length) % rows.length;
+  return Array.from({ length: count }, (_, i) => rows[(start + i) % rows.length]);
+}
