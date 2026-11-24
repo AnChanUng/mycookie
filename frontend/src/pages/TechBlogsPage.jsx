@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { HubCard, HubHeader, HubSection } from '../components/Hub';
 
 const BLOGS = [
   { name: '네이버', label: 'NAVER D2', url: 'https://d2.naver.com/' },
@@ -11,20 +11,14 @@ const BLOGS = [
 export default function TechBlogsPage() {
   return (
     <div className="fade-in">
-      <div className="page-header">
-        <Link to="/" className="back-link">← 홈으로</Link>
-        <h1>기업 기술블로그</h1>
-        <p>기업별 공식 기술블로그를 새 탭에서 열 수 있어요.</p>
-      </div>
-      <div className="exam-sections">
+      <HubHeader back={{ to: '/web', label: '웹 개발' }} eyebrow="웹 기본기" title="기업 기술블로그"
+        desc="기업별 공식 기술블로그를 모았어요. 누르면 새 탭에서 열려요."
+        stats={[{ value: BLOGS.length, label: '기업' }]} />
+      <HubSection title="기술블로그">
         {BLOGS.map(({ name, label, url }) => (
-          <a key={url} href={url} target="_blank" rel="noopener noreferrer" className="exam-section"
-            aria-label={`${name} 기술블로그 (새 탭에서 열림)`}>
-            <span className="t">{name} <span aria-hidden="true">↗</span></span>
-            <span className="d">{label}</span>
-          </a>
+          <HubCard key={url} href={url} icon={[...name][0]} title={name} desc={label} go="블로그 열기" label={`${name} 기술블로그`} />
         ))}
-      </div>
+      </HubSection>
     </div>
   );
 }
