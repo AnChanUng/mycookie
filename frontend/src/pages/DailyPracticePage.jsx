@@ -74,11 +74,14 @@ function DailyPractice({ day }) {
         })}
       </ul>
       {answered && <div className="daily-explain" role="status">
-        <strong>{picked === q.answer ? '정답이에요' : `아쉬워요. 정답은 ${MARKS[q.answer]}번`}</strong>
+        {/* 해설이 길어도 스크롤 없이 넘어가도록 버튼을 해설 위, 보기 바로 아래에 둔다 */}
+        <div className="daily-verdict">
+          <strong>{picked === q.answer ? '정답이에요' : `아쉬워요. 정답은 ${MARKS[q.answer]}번`}</strong>
+          {index + 1 < total
+            ? <button type="button" className="exam-btn sm" onClick={next} autoFocus>다음 문제</button>
+            : <button type="button" className="exam-btn sm" onClick={() => setIndex(total)} autoFocus>결과 보기</button>}
+        </div>
         {q.explanation.map((line, i) => <p key={i}>{line}</p>)}
-        {index + 1 < total
-          ? <button type="button" className="exam-btn sm" onClick={next}>다음 문제</button>
-          : <button type="button" className="exam-btn sm" onClick={() => setIndex(total)}>결과 보기</button>}
       </div>}
     </section>}
 

@@ -14,7 +14,7 @@
 .daily-mark { margin-right: 8px; }
 .daily-explain { display: grid; gap: 8px; padding: 14px; border-radius: 10px; background: rgba(128, 128, 128, 0.1); }
 .daily-explain p { margin: 0; line-height: 1.6; }
-.daily-explain .exam-btn { justify-self: start; }
+.daily-verdict { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
 .daily-score { margin: 0; font-size: 2rem; }
 .daily-actions { display: flex; flex-wrap: wrap; gap: 8px; }
 @media (max-width: 480px) { .daily-page { padding: 16px 12px 40px; } }
