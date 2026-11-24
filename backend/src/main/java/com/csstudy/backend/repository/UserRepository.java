@@ -28,6 +28,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     boolean existsByNickname(String nickname);
 
+    List<User> findTop9ByNicknameContainingIgnoreCaseOrderByNicknameAsc(String part);
+
+    List<User> findByNicknameIn(java.util.Collection<String> nicknames);
+
     Optional<User> findByEmail(String email);
 
     boolean existsByEmail(String email);
