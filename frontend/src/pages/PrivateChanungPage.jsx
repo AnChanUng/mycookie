@@ -16,7 +16,7 @@ const TechInterview = lazy(() => import('./TechInterviewPage'));
 // 화면 안 링크는 알아보기 어려운 주소로 만든다(privatePath.js)
 const BASE = privatePath();
 
-// 제목 오른쪽 빈 곳에 두는 블로그 글 바로가기(코딩테스트부터 순서대로)
+// 오른쪽 빈 곳에 두는 블로그 글 바로가기(코딩테스트부터 순서대로)
 const BLOG_LINKS = [
   ['코딩테스트 오답노트', 'https://cookie.tistory.com/195'],
   ['코딩테스트 문법', 'https://cookie.tistory.com/166'],
@@ -182,19 +182,12 @@ function TroubleLog() {
 function PrivateList({ data }) {
   const bankCount = data.PRIVATE_GROUPS.reduce((n, g) => n + g.banks.length, 0);
   return (
-    <div className="fade-in">
-      <div className="page-header private-head">
-        <div>
-          <Link to="/" className="back-link">← 홈으로</Link>
-          <h1>[취업] 안찬웅</h1>
-          <p>면접 준비와 취업 관련 자료를 정리하는 개인 공간입니다.</p>
-        </div>
-        <nav className="private-blog" aria-label="내 블로그 바로가기">
-          <span className="private-blog-title">블로그 바로가기</span>
-          {BLOG_LINKS.map(([name, url]) => (
-            <a key={url} href={url} target="_blank" rel="noopener noreferrer">{name}<span aria-hidden="true">↗</span></a>
-          ))}
-        </nav>
+    <div className="fade-in private-layout">
+      <div className="private-main">
+      <div className="page-header">
+        <Link to="/" className="back-link">← 홈으로</Link>
+        <h1>[취업] 안찬웅</h1>
+        <p>면접 준비와 취업 관련 자료를 정리하는 개인 공간입니다.</p>
       </div>
       <section style={{ marginTop: 24 }} aria-label="취업 준비">
         <div className="section-title">취업 준비</div>
@@ -241,6 +234,13 @@ function PrivateList({ data }) {
           </Link>
         </div>
       </section>
+      </div>
+      <nav className="private-blog" aria-label="내 블로그 바로가기">
+        <span className="private-blog-title">블로그 바로가기</span>
+        {BLOG_LINKS.map(([name, url]) => (
+          <a key={url} href={url} target="_blank" rel="noopener noreferrer">{name}<span aria-hidden="true">↗</span></a>
+        ))}
+      </nav>
     </div>
   );
 }

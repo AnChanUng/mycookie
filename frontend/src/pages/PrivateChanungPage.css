@@ -1,6 +1,11 @@
-/* 찬웅 전용 페이지: 제목 오른쪽 빈 곳의 블로그 바로가기 */
-.private-head { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--ds-s6); flex-wrap: wrap; }
-.private-blog { display: flex; flex-direction: column; gap: var(--ds-s2); min-width: 220px; padding: var(--ds-s4); border: 1px solid var(--ds-line); border-radius: var(--ds-r-xl); background: var(--ds-surface); }
+/* 찬웅 전용 페이지: 오른쪽 빈 곳의 블로그 바로가기 */
+.private-layout { display: grid; grid-template-columns: minmax(0, 1fr) 220px; gap: var(--ds-s8); align-items: start; }
+.private-main { min-width: 0; }
+.private-blog {
+  position: sticky; top: 96px; margin-top: var(--ds-s6);
+  display: flex; flex-direction: column; gap: var(--ds-s2);
+  padding: var(--ds-s4); border: 1px solid var(--ds-line); border-radius: var(--ds-r-xl); background: var(--ds-surface);
+}
 .private-blog-title { font-size: var(--ds-fs-caption); font-weight: 700; color: var(--ds-text-3); }
 .private-blog a {
   display: flex; align-items: center; justify-content: space-between; gap: var(--ds-s3);
@@ -12,4 +17,8 @@
 .private-blog a span { color: var(--ds-text-3); }
 .private-blog a:hover { background: var(--ds-brand-soft); color: var(--ds-brand); }
 .private-blog a:hover span { color: var(--ds-brand); }
-@media (max-width: 640px) { .private-blog { width: 100%; } }
+/* 좁은 화면에서는 본문 아래로 내린다 */
+@media (max-width: 1100px) {
+  .private-layout { grid-template-columns: minmax(0, 1fr); }
+  .private-blog { position: static; }
+}
