@@ -8,6 +8,7 @@ import TierBadge from '../components/TierBadge';
 import LineIcon from '../components/LineIcon';
 import StudyCoachEntry from '../components/StudyCoachEntry';
 import HomeRank from '../components/HomeRank';
+import HomeReview from '../components/HomeReview';
 import { quoteForDay } from '../data/quotes';
 import './Main.css';
 
@@ -177,6 +178,9 @@ export default function Main() {
           </Link>
         </div>
       </Section>}
+
+      {/* 학습 메일 연습에서 틀린 문제가 있으면 하루 3개 복습(없으면 안 보인다) */}
+      <HomeReview />
 
       <Section id="mn-web" title="웹 & AI">
         <div className="mn-cards">{WEB_STUDY.map(item => <Category key={item.to} {...item} />)}</div>

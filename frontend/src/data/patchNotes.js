@@ -5,6 +5,15 @@
 // status: 'released' 배포됨(master) | 'dev' 개발 브랜치에만 있음(release PR을 머지하면 released로 바꾼다)
 export const PATCH_NOTES = [
   {
+    version: '1.6.0', date: '2026-11-25', status: 'dev',
+    title: '틀린 문제 복습',
+    summary: '학습 메일 연습에서 틀린 문제를 오답노트와 첫 화면에서 다시 풀 수 있습니다.',
+    items: [
+      { type: 'feature', text: '첫 화면 "오늘의 복습": 학습 메일 연습에서 틀렸던 문제를 하루 3개 다시 풀어 보고, 맞히면 오답노트에서 빠집니다.' },
+      { type: 'improve', text: '연습 결과 화면에서 문제별 결과를 보고 틀린 문제만 다시 풀 수 있습니다.' },
+    ],
+  },
+  {
     version: '1.5.0', date: '2026-11-24', status: 'released',
     title: '프로필 꾸미기와 새 메뉴 화면',
     summary: '내 계정에서 프로필을 꾸미고, 메뉴 첫 화면이 한눈에 보이게 바뀌었습니다.',
