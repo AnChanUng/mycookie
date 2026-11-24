@@ -7,6 +7,7 @@ import com.csstudy.backend.service.PresenceService;
 import com.csstudy.backend.service.VisitorProfileService;
 import com.csstudy.backend.service.LoungeStreamService;
 import com.csstudy.backend.service.AuthService;
+import com.csstudy.backend.service.ChatReactionService;
 import org.springframework.http.MediaType;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import jakarta.servlet.http.HttpServletRequest;
@@ -50,6 +51,12 @@ public class LoungeController {
     private final AdminAuth adminAuth;
     private final LoungeStreamService streamService;
     private final AuthService authService;
+    private final ChatReactionService reactionService;
+
+    // 최근 글에 달린 반응. 글 ID → (이모지 → 방문자 ID). 조회가 DB를 깨우지 않도록 메모리에 둔다
+    private final Map<Long, Map<String, LinkedHashSet<String>>> reactions = new HashMap<>();
+    private final Map<String, long[]> reactionsPerVisitor = new ConcurrentHashMap<>();
+    private static final int REACTIONS_PER_MINUTE = 40;
 
     private final Deque<LoungeMessage> recent = new ArrayDeque<>();
     private boolean loaded;
@@ -73,7 +80,8 @@ public class LoungeController {
         long currentEpoch;
         synchronized (this) {
             load();
-            rows = recent.stream().filter(m -> after == null || m.getId() > after).map(LoungeController::row).toList();
+            rows = recent.stream().filter(m -> after == null || m.getId() > after)
+                    .map(this::row).toList();
             currentEpoch = epoch;
         }
         Map<String, Object> out = new LinkedHashMap<>();
@@ -122,7 +130,7 @@ public class LoungeController {
 
         if (clientId != null) {
             var existing = messageRepository.findByVisitorIdAndClientId(visitorId, clientId);
-            if (existing.isPresent()) return ResponseEntity.ok(row(existing.get()));
+            if (existing.isPresent()) return ResponseEntity.ok(liveRow(existing.get()));
         }
 
         Instant now = Instant.now();
@@ -142,16 +150,50 @@ public class LoungeController {
             saved = messageRepository.save(LoungeMessage.builder()
                     .visitorId(visitorId).clientId(clientId).nickname(nickname).text(text).ipHash(ipHash).createdAt(now).build());
             recent.addLast(saved);
-            while (recent.size() > RECENT) recent.removeFirst();
+            while (recent.size() > RECENT) reactions.remove(recent.removeFirst().getId());
             streamService.publish(messages(null));
         }
-        return ResponseEntity.ok(row(saved));
+        return ResponseEntity.ok(liveRow(saved));
+    }
+
+    // 최근 글에 이모지 반응을 달거나 뗀다. 열려 있는 화면에는 스트림으로 바로 퍼진다
+    @PostMapping("/lounge/messages/{id}/reactions")
+    public synchronized ResponseEntity<?> react(@PathVariable Long id, @RequestBody Map<String, Object> body) {
+        String visitorId = str(body.get("visitorId"), 40);
+        String emoji = str(body.get("emoji"), 16);
+        if (visitorId == null || !ChatReactionService.allowed(emoji)) {
+            return ResponseEntity.badRequest().body(Map.of("error", "보낼 수 없는 반응입니다."));
+        }
+        load();
+        LoungeMessage target = recent.stream().filter(m -> m.getId().equals(id)).findFirst().orElse(null);
+        if (target == null) return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", "최근 대화에만 반응할 수 있습니다."));
+        if (reactionTooFast(visitorId)) return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(Map.of("error", "조금 천천히 눌러 주세요."));
+        boolean on = reactionService.toggle("lounge", id, visitorId, emoji);
+        var byEmoji = reactions.computeIfAbsent(id, k -> ChatReactionService.emptyFor());
+        if (on) byEmoji.computeIfAbsent(emoji, k -> new LinkedHashSet<>()).add(visitorId);
+        else if (byEmoji.containsKey(emoji)) {
+            byEmoji.get(emoji).remove(visitorId);
+            if (byEmoji.get(emoji).isEmpty()) byEmoji.remove(emoji);
+        }
+        streamService.publish(messages(null));
+        return ResponseEntity.ok(row(target));
+    }
+
+    private boolean reactionTooFast(String visitorId) {
+        if (reactionsPerVisitor.size() > LIMITER_MAX) reactionsPerVisitor.clear();
+        long minute = Instant.now().getEpochSecond() / 60;
+        long[] window = reactionsPerVisitor.compute(visitorId, (k, v) -> v == null || v[0] != minute ? new long[]{minute, 0} : v);
+        synchronized (window) {
+            if (window[1] >= REACTIONS_PER_MINUTE) return true;
+            window[1]++;
+        }
+        return false;
     }
 
     @GetMapping("/admin/lounge/messages")
     public List<Map<String, Object>> adminList(@RequestHeader(value = "X-Admin-Key", required = false) String key) {
         adminAuth.require(key);
-        return messageRepository.findByOrderByIdDesc(PageRequest.of(0, ADMIN_LIST)).stream().map(LoungeController::row).toList();
+        return messageRepository.findByOrderByIdDesc(PageRequest.of(0, ADMIN_LIST)).stream().map(this::liveRow).toList();
     }
 
     // 부적절한 글을 지운다. 열려 있는 화면에서도 다음 조회 때 사라진다
@@ -161,8 +203,10 @@ public class LoungeController {
         adminAuth.require(key);
         if (!messageRepository.existsById(id)) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "글을 찾을 수 없습니다.");
         messageRepository.deleteById(id);
+        reactionService.deleteFor("lounge", id);
         synchronized (this) {
             recent.removeIf(m -> m.getId().equals(id));
+            reactions.remove(id);
             epoch++;
             streamService.publish(messages(null));
         }
@@ -176,6 +220,7 @@ public class LoungeController {
         for (int i = rows.size() - 1; i >= 0; i--) {
             if (!rows.get(i).getCreatedAt().isBefore(HISTORY_START)) recent.addLast(rows.get(i));
         }
+        reactions.putAll(reactionService.load("lounge", recent.stream().map(LoungeMessage::getId).toList()));
         loaded = true;
     }
 
@@ -196,17 +241,26 @@ public class LoungeController {
         return false;
     }
 
-    // 방문자 ID는 본인 글을 알아보는 데만 쓰도록 앞 8자만 내보낸다
-    private static Map<String, Object> row(LoungeMessage m) {
+    private synchronized Map<String, Object> liveRow(LoungeMessage m) { return row(m); }
+
+    // 방문자 ID는 본인 글을 알아보는 데만 쓰도록 앞 8자만 내보낸다. 반응을 단 사람도 앞 8자만 보낸다
+    private Map<String, Object> row(LoungeMessage m) {
         Map<String, Object> row = new LinkedHashMap<>();
         row.put("id", m.getId());
         if (m.getClientId() != null) row.put("clientId", m.getClientId());
         row.put("nickname", m.getNickname());
         row.put("text", m.getText());
         row.put("at", m.getCreatedAt().toString());
-        row.put("visitor", m.getVisitorId().substring(0, Math.min(8, m.getVisitorId().length())));
+        row.put("visitor", shortId(m.getVisitorId()));
+        Map<String, List<String>> reacted = new LinkedHashMap<>();
+        reactions.getOrDefault(m.getId(), Map.of()).forEach((emoji, who) -> {
+            if (!who.isEmpty()) reacted.put(emoji, who.stream().map(LoungeController::shortId).toList());
+        });
+        row.put("reactions", reacted);
         return row;
     }
+
+    private static String shortId(String visitorId) { return visitorId.substring(0, Math.min(8, visitorId.length())); }
 
     // 한 줄짜리 글로 다듬는다. 길이는 자르지 않고 호출한 쪽에서 거절한다
     private static String text(Object value) {

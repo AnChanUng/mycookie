@@ -9,7 +9,7 @@ import TierGuide from './TierGuide';
 import './HomeRank.css';
 import { holdSplash } from '../splash';
 
-// 첫 화면 맨 위 "실시간 순위" 카드. 1~3위는 시상대, 4~5위는 짧은 줄, 내 순위는 맨 아래에 고정한다.
+// 첫 화면 맨 위 "실시간 순위" 카드. 1~3위 시상대만 보여 주고, 내가 4위 아래면 내 순위 한 줄을 아래에 고정한다.
 // 읽기만 한다(문제 수 보고 · 기기 동기화는 전체 순위 화면의 SolveRank가 맡는다).
 // 서버가 잠들어 있어도 첫 화면이 늦어지지 않게, 마지막으로 받은 순위를 먼저 보여 주고 새 순위로 바꾼다
 const CACHE = 'home-rank:v1';
@@ -48,8 +48,6 @@ export default function HomeRank() {
   const mark = r => ({ ...r, me: r.me || (!!myName && r.nickname === myName) });
   const top = (rank?.top.slice(0, LIST) || []).map(mark);
   const podium = PODIUM_ORDER.map(i => top[i]).filter(Boolean);
-  // 1~3위는 시상대, 4~5위는 짧은 줄, 그 밖이면 내 순위 한 줄을 아래에 고정한다
-  const rest = top.slice(3, LIST);
   const me = top.find(r => r.me) || (rank?.me ? { ...rank.me, me: true } : null);
   const third = top[2];
   const toPodium = me && me.rank > 3 && third ? Math.max(1, third.count - me.count + 1) : null;
@@ -70,15 +68,7 @@ export default function HomeRank() {
           <span className="hr-pcount">{Number(r.count).toLocaleString()}문제</span>
         </li>)}
       </ol>
-      {rest.length > 0 && <ol className="hr-list" aria-label="4위부터 5위">
-        {rest.map(r => <li key={r.rank} className={`hr-row${r.me ? ' me' : ''}`} value={r.rank}>
-          <span className="hr-rank">{r.rank}</span>
-          <TierBadge tier={r.tier} division={r.division} />
-          <span className="hr-name" title={r.nickname}>{r.nickname}{r.me && <em>나</em>}</span>
-          <span className="hr-count">{Number(r.count).toLocaleString()}문제</span>
-        </li>)}
-      </ol>}
-      {me && me.rank > LIST && <Link to="/rank" className="hr-mine">
+      {me && me.rank > 3 && <Link to="/rank" className="hr-mine">
         <span className="hr-mine-rank">{me.rank}위</span>
         <TierBadge tier={me.tier} division={me.division} />
         <span className="hr-name">{me.nickname}<em>나</em></span>

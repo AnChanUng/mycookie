@@ -175,7 +175,9 @@ public class NewsletterLetter {
         doc.line("**정답 " + MARKS[q.answer()] + "** " + q.options().get(q.answer()));
         for (String paragraph : q.explanation()) doc.line(paragraph);
 
-        doc.button("나의쿠키에서 더 공부하기", baseUrl + "/");
+        // 연습 문제가 있는 세트는 그날 주제의 문제 5개를 푸는 화면으로, 없으면 첫 화면으로 보낸다
+        boolean hasPractice = set.practice() != null && !set.practice().isEmpty();
+        doc.button(hasPractice ? "나의쿠키에서 오늘 주제 5문제 더 풀기" : "나의쿠키에서 더 공부하기", hasPractice ? baseUrl + "/daily/" + set.day() : baseUrl + "/");
         doc.footer("이 메일은 나의쿠키에서 학습 메일 구독을 신청하고 확인 링크를 누른 분께 보냅니다.",
                 "수신 거부", unsubscribeUrl);
         return new Letter("[나의쿠키] 오늘의 학습 #" + set.day() + " | " + set.theme(), doc.text.toString(), doc.html());

@@ -132,21 +132,10 @@ export default function Main() {
             {learning?.streak > 0 && <Link to="/stats" className="ds-chip">{learning.streak}일 연속 학습</Link>}
             {membership?.nextTier && <span className="ds-chip ds-chip--soft">승급까지 {membership.remaining.toLocaleString()}문제</span>}
           </div>
-          {/* 풀다 만 문제집이 있으면 시작 버튼이 곧 이어서 풀기가 된다(따로 한 줄을 차지하지 않게) */}
+          {/* 첫 화면은 단순하게: 이어서 풀기와 학습 숫자 칸은 두지 않는다(내 학습 화면에서 본다) */}
           <div className="mn-cta">
-            {resume
-              ? <Link to={resume.to} className="ds-btn ds-btn--primary mn-cta-resume" title={`${resume.name} · ${resume.detail}`}>
-                <span>이어서 풀기</span><b>{resume.name}</b>
-              </Link>
-              : <Link to="/cs" className="ds-btn ds-btn--primary">공부 시작하기</Link>}
+            <Link to="/cs" className="ds-btn ds-btn--primary">공부 시작하기</Link>
           </div>
-          {/* 내 학습 한눈에: 오른쪽 순위 카드와 높이를 맞춰 첫 화면을 채운다(이 기기 + 계정 기록) */}
-          <Link to="/stats" className="mn-stats" aria-label="내 학습 자세히 보기">
-            <span><small>누적 푼 문제</small><b>{(learning?.solved || 0).toLocaleString()}</b></span>
-            <span><small>이번 주</small><b>{(learning?.week || 0).toLocaleString()}</b></span>
-            <span><small>연속 학습</small><b>{learning?.streak || 0}일</b></span>
-            <span><small>정답률</small><b>{learning?.rate != null ? `${learning.rate}%` : '–'}</b></span>
-          </Link>
         </div>
         {/* 실시간 순위: 첫 화면 맨 위 오른쪽(휴대폰에서는 인사 아래) */}
         <HomeRank />

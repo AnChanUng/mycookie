@@ -18,7 +18,7 @@ class LoungeRealtimeTest {
         var repo = mock(LoungeMessageRepository.class);
         var stream = mock(LoungeStreamService.class);
         var controller = new LoungeController(repo, mock(VisitorProfileService.class),
-                mock(PresenceService.class), mock(AdminAuth.class), stream, mock(AuthService.class));
+                mock(PresenceService.class), mock(AdminAuth.class), stream, mock(AuthService.class), mock(com.csstudy.backend.service.ChatReactionService.class));
         // 기록 시작일(2026-11-22 0시, 한국 시간) 이후 글은 날이 바뀌어도 계속 보이고, 그 이전 글은 목록에 올리지 않는다
         Instant start = LocalDate.of(2026, 11, 22).atStartOfDay(ZoneId.of("Asia/Seoul")).toInstant();
         var beforeStart = message(1L, start.minusMillis(1), "before");
@@ -40,7 +40,7 @@ class LoungeRealtimeTest {
         var repo = mock(LoungeMessageRepository.class);
         var profiles = mock(VisitorProfileService.class);
         var stream = mock(LoungeStreamService.class);
-        var controller = new LoungeController(repo, profiles, mock(PresenceService.class), mock(AdminAuth.class), stream, mock(AuthService.class));
+        var controller = new LoungeController(repo, profiles, mock(PresenceService.class), mock(AdminAuth.class), stream, mock(AuthService.class), mock(com.csstudy.backend.service.ChatReactionService.class));
         var saved = message(9L, Instant.now(), "hello");
         saved.setClientId("request-1");
         when(repo.findByVisitorIdAndClientId("visitor-1", "request-1")).thenReturn(Optional.of(saved));
