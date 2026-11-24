@@ -6,6 +6,10 @@ export const CHANGELOG = [
     year: 2026,
     months: [
       {
+        month: 11, version: '1.4.0', title: 'Java 핵심 문법 문제집',
+        items: ['웹 개발 메뉴에서 Java 17 문제 40개를 풀 수 있어요. 모의고사를 시작하거나 공부할 영역을 골라 보세요.'],
+      },
+      {
         month: 11,
         version: '1.2.0',
         title: '등급은 푼 문제 수로만',

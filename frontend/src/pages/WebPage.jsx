@@ -5,6 +5,7 @@ const GROUPS = [
   {
     title: '백엔드',
     items: [
+      { to: '/web/java', t: 'Java 핵심 문법', d: '언어 기초 · 객체 · 컬렉션 · 예외와 표준 API', m: '40문제' },
       { to: '/web/spring-practice', t: 'Spring 핵심 실전', d: 'IoC·DI · Boot · AOP · MVC · MyBatis · Security', m: '53문제' },
       { to: '/web/spring', t: 'Spring · JPA', d: '스프링 코어 · 웹 MVC · JPA · 부트', m: '60문제' },
       { to: '/ssafy/ssafydb', t: 'DB · Servlet · JSP', d: 'SQL · 트랜잭션 · 정규화 · 인덱스 · Servlet 생명주기', m: '30문제' },
