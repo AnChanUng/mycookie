@@ -148,7 +148,7 @@ function DevLog() {
       <header className="ob-hero ob-hero--slim">
         <OnboardingTabs />
         <p className="ob-lead">Grafana: https://grafana.mycookie.dev</p>
-        <p className="ob-lead">Swagger(API 문서): https://mycookie.dev/api/docs · 아이디 · 비밀번호는 찬웅님에게 받아요</p>
+        <p className="ob-lead">Swagger(API 문서, 개발 서버): https://staging.mycookie.dev/api/docs</p>
         <p className="ob-lead">홈서버: ssh@ip</p>
       </header>
 

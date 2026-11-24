@@ -112,10 +112,6 @@ app:
     via-kafka: ${MAIL_VIA_KAFKA:false}
   # No fallback key: unset ADMIN_KEY closes administrator APIs.
   admin-key: ${ADMIN_KEY:}
-  # API 문서(Swagger UI)를 여는 아이디 · 비밀번호. 비밀번호가 비어 있으면 문서를 열지 않는다(404)
-  swagger:
-    user: ${SWAGGER_USER:mycookie}
-    password: ${SWAGGER_PASSWORD:}
   security:
     rate-limit-enabled: true
     trust-forwarded-for: ${TRUST_FORWARDED_FOR:${RENDER:false}}
@@ -211,11 +207,14 @@ spring.ai:
   vectorstore:
     type: none
 
-# API 문서: 화면 서버(nginx)가 /api/만 백엔드로 넘기므로 문서도 /api/ 아래에 둔다
+# API 문서: 화면 서버(nginx)가 /api/만 백엔드로 넘기므로 문서도 /api/ 아래에 둔다.
+# 기본은 꺼져 있고(운영), 개발 서버(스테이징)와 로컬에서만 SWAGGER_ENABLED=true로 켠다. 비밀번호는 없다
 springdoc:
   api-docs:
+    enabled: ${SWAGGER_ENABLED:false}
     path: /api/v3/api-docs
   swagger-ui:
+    enabled: ${SWAGGER_ENABLED:false}
     path: /api/docs
     tags-sorter: alpha
     operations-sorter: alpha
