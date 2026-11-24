@@ -9,6 +9,7 @@ import { account, onAccountChange } from '../sync';
 import TierBadge, { CookieIcon } from './TierBadge';
 import ProfileAvatar from './ProfileAvatar';
 import { usePublicLooks } from '../profileStore';
+import { ProfileName } from './ProfilePopover';
 import RankMedal from './RankMedal';
 import TierGuide from './TierGuide';
 
@@ -153,7 +154,7 @@ function SolveRankContent({ cacheKey }) {
           {rows.map(r => (
             <li key={r.rank} className={r.me ? 'me' : ''}>
               <span className="solve-rank-no"><RankMedal rank={r.rank} /></span>
-              <span className="solve-rank-name"><ProfileAvatar look={looks[r.nickname]} size={22} /><span className="solve-rank-nickname" title={r.nickname}>{r.nickname}</span><TierBadge tier={r.tier} division={r.division} />{r.me && <em>나</em>}</span>
+              <span className="solve-rank-name"><ProfileAvatar look={looks[r.nickname]} size={22} /><span className="solve-rank-nickname" title={r.nickname}><ProfileName nickname={r.nickname} /></span><TierBadge tier={r.tier} division={r.division} />{r.me && <em>나</em>}</span>
               <span className="solve-rank-count">{r.count.toLocaleString()}문제</span>
             </li>
           ))}

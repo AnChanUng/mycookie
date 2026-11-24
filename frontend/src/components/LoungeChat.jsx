@@ -10,6 +10,7 @@ import { Avatar, DayDivider, EmojiButton, ReactionChips, ReactionPicker, SendIco
 import { clock, layout } from './chatFormat';
 import './Chat.css';
 import { usePublicLooks } from '../profileStore';
+import { ProfileName } from './ProfilePopover';
 
 const accountSnapshot = () => `${account()?.token || ''}:${account()?.nickname || ''}`;
 
@@ -37,7 +38,7 @@ const readSeen = () => { try { return Number(localStorage.getItem(SEEN_KEY)) || 
 const writeSeen = (id) => { try { localStorage.setItem(SEEN_KEY, String(id)); } catch { /* storage unavailable */ } };
 
 // 접속해 있는 사람들이 함께 쓰는 채팅 창. 닫혀 있을 때도 가끔 새 글을 확인해 헤더에 알림 점을 띄운다
-export default function LoungeChat({ open, online, onClose, onOnline, onUnread, directUnread = 0 }) {
+export default function LoungeChat({ open, online, onClose, onOnline, onUnread, directUnread = 0, directTarget = null }) {
   const identity = useSyncExternalStore(onAccountChange, accountSnapshot, () => '');
   const [messages, setMessages] = useState([]);
   const [ready, setReady] = useState(false);
@@ -54,6 +55,9 @@ export default function LoungeChat({ open, online, onClose, onOnline, onUnread, 
   const [challenging, setChallenging] = useState(false);
   const [room, setRoom] = useState(null);
   const [tab, setTab] = useState('public');
+  // 프로필 카드에서 1:1 대화를 누르면 친구 · 1:1 대화 탭으로 넘어간다
+  const [lastTarget, setLastTarget] = useState(null);
+  if (directTarget && directTarget !== lastTarget) { setLastTarget(directTarget); setTab('direct'); }
   const [unseen, setUnseen] = useState(0);
   const inputRef = useRef(null);
   const displayName = account()?.nickname || nickname;
@@ -289,7 +293,7 @@ export default function LoungeChat({ open, online, onClose, onOnline, onUnread, 
           친구 · 1:1 대화{directUnread > 0 && <span className="lounge-tab-badge">{directUnread > 99 ? '99+' : directUnread}</span>}
         </button>
       </div>
-      {tab === 'direct' ? <DirectChat key={identity} participants={participants} self={self} /> : <>
+      {tab === 'direct' ? <DirectChat key={identity} participants={participants} self={self} openWith={directTarget} /> : <>
 
       <div className="lounge-participants" aria-label="사이트 접속자">
         <div className="lounge-participants-head">
@@ -299,12 +303,12 @@ export default function LoungeChat({ open, online, onClose, onOnline, onUnread, 
         <div className="lounge-people">
           {participants.length === 0 && <span className="lounge-people-empty">접속자를 확인하는 중…</span>}
           {participants.filter(p => p.id === self).map(p => (
-            <div key={p.id} className="lounge-person me"><Avatar name={p.nickname} online small look={looks[p.nickname]} /><span>{p.nickname} (나)</span></div>
+            <div key={p.id} className="lounge-person me"><Avatar name={p.nickname} online small look={looks[p.nickname]} /><span><ProfileName nickname={p.nickname} /> (나)</span></div>
           ))}
           {others.map(person => (
             <div key={person.id} className="lounge-person">
               <Avatar name={person.nickname} online small look={looks[person.nickname]} />
-              <span title={person.nickname}>{person.nickname}</span>
+              <span title={person.nickname}><ProfileName nickname={person.nickname} /></span>
               <button type="button" disabled={!self || challenging || sending} onClick={() => challenge(person)}>대결 신청</button>
             </div>
           ))}
@@ -328,7 +332,7 @@ export default function LoungeChat({ open, online, onClose, onOnline, onUnread, 
                 <div className={`lounge-msg${mine ? ' mine' : ''}${first ? ' first' : ''}${last ? ' last' : ''}`}>
                   {!mine && (first ? <Avatar name={m.nickname} look={looks[m.nickname]} /> : <span className="chat-avatar-gap" />)}
                   <div className="lounge-msg-body">
-                    {!mine && first && <span className="lounge-meta">{m.nickname}</span>}
+                    {!mine && first && <span className="lounge-meta"><ProfileName nickname={m.nickname} /></span>}
                     <div className="lounge-line">
                       <span className="lounge-bubble"><ChatText text={m.text} /></span>
                       {last && <time className="lounge-time" dateTime={m.at}>{clock(m.at)}</time>}

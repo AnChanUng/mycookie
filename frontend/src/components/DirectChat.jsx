@@ -12,7 +12,7 @@ const config = () => ({ headers: membershipHeaders(), timeout: 20000 });
 const STATE_LABEL = { friends: '친구', sent: '요청 보냄', received: '요청 받음', none: '' };
 
 // 친구 찾기 · 받은 요청 · 추천 · 친구 목록과 1:1 대화. 모두 로그인한 계정끼리만 쓴다
-export default function DirectChat({ participants, self }) {
+export default function DirectChat({ participants, self, openWith = null }) {
   const [threads, setThreads] = useState([]);
   const [selected, setSelected] = useState(null);
   const [messages, setMessages] = useState([]);
@@ -154,6 +154,14 @@ export default function DirectChat({ participants, self }) {
       setError(e.response?.data?.error || '반응을 남기지 못했습니다.');
     }
   };
+
+  // 프로필 카드의 1:1 대화 버튼으로 들어오면 그 사람과의 대화를 연다(같은 요청은 한 번만)
+  const openedFor = useRef(null);
+  useEffect(() => {
+    if (!openWith?.nickname || openedFor.current === openWith || !account() || openWith.nickname === account()?.nickname) return;
+    openedFor.current = openWith;
+    talk({ nickname: openWith.nickname });
+  }, [openWith]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!account()) return (
     <div className="direct-panel direct-login">

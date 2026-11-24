@@ -4,6 +4,7 @@ import { useLocation } from 'react-router-dom';
 import api from '../api';
 import { visitorId } from '../track';
 import LoungeChat from './LoungeChat';
+import { OPEN_DIRECT_EVENT } from './ProfilePopover';
 import { account, onAccountChange } from '../sync';
 import { membershipHeaders } from '../membership';
 
@@ -15,6 +16,13 @@ export default function StudyCount() {
   const [count, setCount] = useState(0);
   const [open, setOpen] = useState(false);
   const [unread, setUnread] = useState(false);
+  // 프로필 카드의 1:1 대화 버튼으로 연 상대({ nickname, at })
+  const [directTarget, setDirectTarget] = useState(null);
+  useEffect(() => {
+    const onOpen = e => { if (!e.detail?.nickname) return; setDirectTarget({ nickname: e.detail.nickname, at: Date.now() }); setOpen(true); };
+    window.addEventListener(OPEN_DIRECT_EVENT, onOpen);
+    return () => window.removeEventListener(OPEN_DIRECT_EVENT, onOpen);
+  }, []);
   const token = useSyncExternalStore(onAccountChange, () => account()?.token || '', () => '');
   const [privateNotice, setPrivateNotice] = useState({ token: '', count: 0 });
   const directUnread = privateNotice.token === token ? privateNotice.count : 0;
@@ -63,7 +71,7 @@ export default function StudyCount() {
       </button>
       {/* 헤더의 흐림 효과 안에서는 고정 위치가 헤더 기준이 되므로 body에 붙인다 */}
       {createPortal(
-        <LoungeChat open={open} online={count} onClose={() => setOpen(false)} onOnline={setCount} onUnread={setUnread} directUnread={directUnread} />,
+        <LoungeChat open={open} online={count} onClose={() => setOpen(false)} onOnline={setCount} onUnread={setUnread} directUnread={directUnread} directTarget={directTarget} />,
         document.body,
       )}
     </>

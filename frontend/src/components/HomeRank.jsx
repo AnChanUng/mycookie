@@ -6,6 +6,7 @@ import { visitorId } from '../track';
 import TierBadge from './TierBadge';
 import ProfileAvatar from './ProfileAvatar';
 import { usePublicLooks } from '../profileStore';
+import { ProfileName } from './ProfilePopover';
 import RankMedal from './RankMedal';
 import TierGuide from './TierGuide';
 import './HomeRank.css';
@@ -67,14 +68,14 @@ export default function HomeRank() {
         {podium.map(r => <li key={r.rank} className={`hr-step p${r.rank}${r.me ? ' me' : ''}`} value={r.rank}>
           <RankMedal rank={r.rank} className="hr-medal" />
           <TierBadge tier={r.tier} division={r.division} />
-          <b className="hr-pname" title={r.nickname}><ProfileAvatar look={looks[r.nickname]} size={20} />{r.nickname}</b>
+          <b className="hr-pname" title={r.nickname}><ProfileAvatar look={looks[r.nickname]} size={20} /><ProfileName nickname={r.nickname} /></b>
           <span className="hr-pcount">{Number(r.count).toLocaleString()}문제</span>
         </li>)}
       </ol>
       {me && me.rank > 3 && <Link to="/rank" className="hr-mine">
         <span className="hr-mine-rank">{me.rank}위</span>
         <TierBadge tier={me.tier} division={me.division} />
-        <span className="hr-name"><ProfileAvatar look={looks[me.nickname]} size={24} />{me.nickname}<em>나</em></span>
+        <span className="hr-name"><ProfileAvatar look={looks[me.nickname]} size={24} /><ProfileName nickname={me.nickname} /><em>나</em></span>
         <span className="hr-mine-gap">{Number(me.count).toLocaleString()}문제{toPodium && ` · 3위까지 ${toPodium.toLocaleString()}문제`}</span>
       </Link>}
       {!me && <p className="hr-hint">문제를 풀면 내 순위가 여기 생겨요</p>}
