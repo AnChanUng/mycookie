@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import api from '../api';
 import { recordDailyAnswer } from '../dailyPracticeRecords';
@@ -14,6 +14,11 @@ function scoreMessage(correct, total) {
 }
 
 // 학습 메일의 "오늘 주제 5문제 더 풀기"로 들어오는 화면. 한 문제씩 풀고 바로 정답과 해설을 본다
+// 세트별 반응 집계(열었는지, 끝까지 풀었는지). 개인 정보 없이 횟수만 보내고, 실패해도 풀이에는 영향이 없다
+function sendEvent(day, type) {
+  api.post(`/daily/${encodeURIComponent(day)}/events`, { type }).catch(() => {});
+}
+
 // day가 바뀌면 key로 상태를 통째로 새로 시작한다
 export default function DailyPracticePage() {
   const { day } = useParams();
@@ -29,11 +34,13 @@ function DailyPractice({ day }) {
   const [picked, setPicked] = useState(null);
   const [results, setResults] = useState({});
   const [done, setDone] = useState(false);
+  const counted = useRef({ open: false, finish: false });
+
 
   useEffect(() => {
     let stale = false;
     api.get(`/daily/${encodeURIComponent(day)}`)
-      .then(({ data: body }) => { if (!stale) { setData(body); setOrder(body.practice.map((_, i) => i)); } })
+      .then(({ data: body }) => { if (!stale) { setData(body); setOrder(body.practice.map((_, i) => i)); if (!counted.current.open) { counted.current.open = true; sendEvent(day, 'open'); } } })
       .catch(e => { if (!stale) setError(e?.response?.status === 404 ? '이 날짜의 연습 문제를 찾을 수 없어요.' : '문제를 불러오지 못했어요. 잠시 뒤 다시 열어 주세요.'); });
     return () => { stale = true; };
   }, [day]);
@@ -84,7 +91,7 @@ function DailyPractice({ day }) {
           <strong>{picked === q.answer ? '정답이에요' : `아쉬워요. 정답은 ${MARKS[q.answer]}번`}</strong>
           {step + 1 < order.length
             ? <button type="button" className="exam-btn sm" onClick={next} autoFocus>다음 문제</button>
-            : <button type="button" className="exam-btn sm" onClick={() => setDone(true)} autoFocus>결과 보기</button>}
+            : <button type="button" className="exam-btn sm" onClick={() => { setDone(true); if (!counted.current.finish) { counted.current.finish = true; sendEvent(day, 'finish'); } }} autoFocus>결과 보기</button>}
         </div>
         {q.explanation.map((line, i) => <p key={i}>{line}</p>)}
       </div>}
