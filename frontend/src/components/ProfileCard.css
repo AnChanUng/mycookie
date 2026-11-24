@@ -1,0 +1,68 @@
+/* 마이페이지 프로필 카드: 흰 면 + 얇은 테두리 + 파란 강조 하나(사이트 웹 스타일) */
+.profile-card {
+  display: grid; gap: var(--ds-s5);
+  margin-bottom: var(--ds-s6); padding: var(--ds-s6) var(--ds-s8);
+  border: 1px solid var(--ds-line-strong); border-radius: var(--ds-r-xl);
+  background: var(--ds-surface);
+}
+.profile-main { display: flex; align-items: flex-start; gap: var(--ds-s5); }
+.profile-avatar {
+  flex: none; display: grid; place-items: center;
+  width: 80px; height: 80px; border-radius: 50%;
+  background: var(--ds-brand-soft); color: var(--ds-brand);
+  font-size: 34px; font-weight: 800; line-height: 1;
+}
+.profile-avatar.emoji { font-size: 42px; background: var(--ds-surface-2); }
+.profile-who { flex: 1; min-width: 0; display: grid; gap: var(--ds-s2); }
+.profile-name { display: flex; flex-wrap: wrap; align-items: center; gap: var(--ds-s2); }
+.profile-name strong { font-size: var(--ds-fs-h3); font-weight: 800; letter-spacing: -0.02em; overflow-wrap: anywhere; }
+.profile-name .tier-badge { width: 30px; height: 30px; }
+.profile-tier-name { padding: 2px 10px; border-radius: var(--ds-r-full); background: var(--ds-surface-2); font-size: var(--ds-fs-caption); font-weight: 700; color: var(--ds-text-2); }
+.profile-bio { margin: 0; font-size: var(--ds-fs-body); color: var(--ds-text); overflow-wrap: anywhere; }
+.profile-bio.is-empty { color: var(--ds-text-3); }
+.profile-interests { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.profile-interests li { padding: 3px 10px; border-radius: var(--ds-r-full); background: var(--ds-brand-soft); color: var(--ds-brand); font-size: var(--ds-fs-caption); font-weight: 700; }
+.profile-edit { flex: none; }
+
+.profile-progress { display: grid; gap: var(--ds-s2); padding-top: var(--ds-s4); border-top: 1px solid var(--ds-line); }
+.profile-progress-text { display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--ds-s2); font-size: var(--ds-fs-small); color: var(--ds-text-2); }
+.profile-progress-text b { color: var(--ds-text); font-variant-numeric: tabular-nums; }
+.profile-goal { font-weight: 700; color: var(--ds-text); }
+.profile-bar { display: block; height: 8px; border-radius: var(--ds-r-full); background: var(--ds-surface-3); overflow: hidden; }
+.profile-bar i { display: block; height: 100%; border-radius: inherit; background: var(--ds-brand); transition: width .6s var(--ds-ease); }
+
+/* 꾸미기 */
+.profile-editor { display: grid; gap: var(--ds-s4); padding-top: var(--ds-s4); border-top: 1px solid var(--ds-line); }
+.profile-editor fieldset { margin: 0; padding: 0; border: 0; display: grid; gap: var(--ds-s2); }
+.profile-editor legend, .profile-editor label > span { display: flex; align-items: baseline; gap: 6px; margin-bottom: var(--ds-s2); font-size: var(--ds-fs-small); font-weight: 700; color: var(--ds-text-2); }
+.profile-editor small { font-weight: 600; color: var(--ds-text-3); font-variant-numeric: tabular-nums; }
+.profile-editor label { display: grid; }
+.profile-editor input {
+  width: 100%; padding: 10px 12px; border: 1px solid var(--ds-line-strong); border-radius: var(--ds-r-md);
+  background: var(--ds-surface); color: var(--ds-text); font: inherit; font-size: var(--ds-fs-body);
+}
+.profile-editor input:focus { outline: none; border-color: var(--ds-brand); box-shadow: 0 0 0 3px var(--ds-brand-soft); }
+.profile-avatar-grid { display: flex; flex-wrap: wrap; gap: var(--ds-s2); }
+.profile-avatar-grid button {
+  width: 48px; height: 48px; border: 1px solid var(--ds-line-strong); border-radius: 50%;
+  background: var(--ds-surface); font-size: 24px; line-height: 1; cursor: pointer; color: var(--ds-brand); font-weight: 800;
+}
+.profile-avatar-grid button:hover { border-color: var(--ds-brand); }
+.profile-avatar-grid button.on { border: 2px solid var(--ds-brand); background: var(--ds-brand-soft); }
+.profile-interest-pick { display: flex; flex-wrap: wrap; gap: var(--ds-s2); }
+.profile-interest-pick button {
+  padding: 6px 14px; border: 1px solid var(--ds-line-strong); border-radius: var(--ds-r-full);
+  background: var(--ds-surface); color: var(--ds-text-2); font: inherit; font-size: var(--ds-fs-small); font-weight: 700; cursor: pointer;
+}
+.profile-interest-pick button.on { border-color: var(--ds-brand); background: var(--ds-brand-soft); color: var(--ds-brand); }
+.profile-interest-pick button:disabled { opacity: .45; cursor: default; }
+.profile-editor-actions { display: flex; gap: var(--ds-s2); }
+.profile-message { margin: 0; font-size: var(--ds-fs-small); color: var(--ds-text-2); }
+
+@media (max-width: 640px) {
+  .profile-card { padding: var(--ds-s5); }
+  .profile-main { flex-wrap: wrap; }
+  .profile-avatar { width: 64px; height: 64px; font-size: 28px; }
+  .profile-avatar.emoji { font-size: 34px; }
+  .profile-edit { width: 100%; }
+}

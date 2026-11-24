@@ -9,6 +9,7 @@ import SocialLogin from '../components/SocialLogin';
 import { buildAccountRetry } from '../accountRetry';
 import './AccountPage.css';
 import TierBadge from '../components/TierBadge';
+import ProfileCard from '../components/ProfileCard';
 import { membershipHeaders, TIER_NAMES, useMembership } from '../membership';
 import { savedNickname } from '../nickname';
 import api from '../api';
@@ -103,6 +104,7 @@ function AccountDashboard({ user, openForgot }) {
   const completed = [...CS_NOTES.flatMap(s => s.items), ...WEB_ESSENTIALS.items].filter(e => noteRecords[e.id]?.done);
   return <div className="account-page fade-in">
     {user && <header className="page-header"><h1>내 계정</h1><p>{user.nickname}님의 학습 기록</p></header>}
+    {user && <ProfileCard user={user} tier={tierStatus} />}
     <section className="account-auth" id="settings" tabIndex={-1}>
       {user && <h2>본인 설정</h2>}
       {user ? <><div className="account-actions"><span className="acc-avatar" aria-hidden="true">{user.nickname.slice(0, 1)}</span><strong>{user.nickname}</strong><button className="exam-btn sm" disabled={authBusy} onClick={async () => { setAuthBusy(true); await signOut(); }}>로그아웃</button></div>
