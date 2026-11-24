@@ -5,6 +5,12 @@
 // status: 'released' 배포됨(master) | 'dev' 개발 브랜치에만 있음(release PR을 머지하면 released로 바꾼다)
 export const PATCH_NOTES = [
   {
+    version: '1.4.0', date: '2026-11-24', status: 'dev',
+    title: 'Java 핵심 문법 문제집',
+    summary: '웹 개발에서 Java 17 문법과 표준 라이브러리를 연습합니다.',
+    items: [{ type: 'feature', text: 'Java 전용 4지선다 40문제를 모의고사 또는 영역별 연습으로 풀고 해설을 확인합니다.' }],
+  },
+  {
     version: '1.3.0',
     date: '2026-11-24',
     title: '새 채팅 화면과 친구 찾기',
