@@ -136,6 +136,7 @@ sudo -u devcookie nano /srv/devcookie/.env
 | --- | --- |
 | `POSTGRES_PASSWORD` · `PROD_DB_PASSWORD` · `STAGING_DB_PASSWORD` | 각각 `openssl rand -hex 24`로 만든 값(서로 다르게, 영문 · 숫자만) |
 | `PROD_ADMIN_KEY` / `STAGING_ADMIN_KEY` | Render에 쓰던 값을 그대로 쓰거나 `openssl rand -hex 24`로 새로 만든 값(서로 다르게) |
+| `SWAGGER_USER` · `PROD_SWAGGER_PASSWORD` / `STAGING_SWAGGER_PASSWORD` | API 문서(`/api/docs`)를 여는 아이디(기본 `mycookie`)와 비밀번호(`openssl rand -hex 16`). 비밀번호를 비우면 문서는 404로 닫혀 있습니다 |
 | `TUNNEL_TOKEN` | 6번에서 받는 토큰 |
 | `BACKUP_COPY_DIR` | 외장 디스크 마운트 경로(예: `/mnt/backup/devcookie`). 비우면 노트북 안에만 백업 |
 | `NEON_PROD_URL` · `NEON_STAGING_URL` | 8번에서 데이터를 옮길 때만 Neon 연결 문자열을 넣고, 옮긴 뒤 지웁니다 |
