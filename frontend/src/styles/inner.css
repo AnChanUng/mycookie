@@ -110,14 +110,15 @@
 .exam-section {
   border: 1px solid var(--ds-line-strong);
   border-radius: var(--ds-r-xl);
-  padding: var(--ds-s5);
-  gap: var(--ds-s1);
+  padding: var(--ds-s6);
+  gap: var(--ds-s2);
   text-decoration: none;
 }
 .exam-section:hover { border-color: var(--ds-brand); }
-.exam-section .t { font-weight: 700; font-size: var(--ds-fs-body); }
+.exam-section .t { font-weight: 800; font-size: var(--ds-fs-lead); letter-spacing: -0.02em; }
 .exam-section .d { color: var(--ds-text-2); font-size: var(--ds-fs-small); line-height: 1.55; }
-.exam-section .d:last-child { color: var(--ds-brand); font-weight: 600; margin-top: var(--ds-s2); }
+/* 마지막 줄(문제 수 · 바로가기)은 칸 아래쪽에 맞춰 한 줄에 있는 칸끼리 높이가 맞게 한다 */
+.exam-section .d:last-child { color: var(--ds-brand); font-weight: 700; margin-top: auto; padding-top: var(--ds-s3); }
 .exam-section.coding { border-left-width: 1px; }
 
 /* ============================================================
