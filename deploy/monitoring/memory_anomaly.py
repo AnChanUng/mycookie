@@ -69,6 +69,9 @@ ERROR_SELECTOR = '{environment="prod",service="backend",level="ERROR"}'
 # Only report zero where Loki saw backend logs in that window.
 ERROR_QUERY = (f'sum(count_over_time({ERROR_SELECTOR}[5m])) or '
                f'(0 * sum(count_over_time({LOG_SELECTOR}[5m])))')
+API_QUERY = ('sum by (http_class) (count_over_time({environment="prod",service="frontend"} '
+             '| regexp `"[^" ]+ /api/[^" ]* HTTP/[0-9.]+" (?P<http_class>[1-5])[0-9]{2} ` '
+             '| http_class!="" [5m]))')
 
 
 def read_matrix(source, url):
@@ -83,21 +86,29 @@ def read_matrix(source, url):
     return data["data"]["result"]
 
 
-def compare_errors(event, source, threshold, offline):
-    detected = int(datetime.fromisoformat(event["detected"]).timestamp())
-    start, end = detected - 900, detected + 900
-    params = urlencode(dict(query=ERROR_QUERY, start=start * 10**9, end=end * 10**9, step=60))
+def loki_range(query, start, end, step, source, offline):
+    params = urlencode(dict(query=query, start=start * 10**9, end=end * 10**9, step=step))
     path = "/loki/api/v1/query_range?" + params
     link = "https://grafana.mycookie.dev/api/datasources/proxy/uid/loki" + path
-    result = dict(grafana_query=link, threshold=threshold)
+    result = dict(grafana_query=link)
     if offline and not source:
-        return dict(result, status="awaiting_log_export")
+        return dict(result, status="awaiting_log_export"), None
     try:
         matrix = read_matrix(source, "http://loki:3100" + path)
     except OSError as error:
         if source:
             raise
-        return dict(result, status="loki_unavailable", reason=type(error).__name__)
+        return dict(result, status="loki_unavailable", reason=type(error).__name__), None
+    return result, matrix
+
+
+def compare_errors(event, source, threshold, offline):
+    detected = int(datetime.fromisoformat(event["detected"]).timestamp())
+    start, end = detected - 900, detected + 900
+    result, matrix = loki_range(ERROR_QUERY, start, end, 60, source, offline)
+    result["threshold"] = threshold
+    if matrix is None:
+        return result
     if len(matrix) > 1:
         raise ValueError("Expected a single aggregate ERROR count")
     values = {int(t): float(n) for row in matrix for t, n in row["values"]}
@@ -114,11 +125,38 @@ def compare_errors(event, source, threshold, offline):
     return result
 
 
+def api_at_detection(event, source, offline):
+    detected = int(datetime.fromisoformat(event["detected"]).timestamp())
+    # Request two evaluations; use only the five-minute bucket ending at detection.
+    result, matrix = loki_range(API_QUERY, detected - STEP, detected, STEP, source, offline)
+    result.update(requests_in_5m=None, responses_5xx_in_5m=None)
+    if matrix is None:
+        return result
+    counts = {}
+    for row in matrix:
+        group = row["metric"].get("http_class")
+        if group not in ("1", "2", "3", "4", "5"):
+            raise ValueError("Expected Loki API counts grouped by http_class")
+        for timestamp, value in row["values"]:
+            if int(timestamp) == detected:
+                count = float(value)
+                if not count.is_integer() or count < 0 or group in counts:
+                    raise ValueError("Invalid API response count at detection")
+                counts[group] = int(count)
+    total = sum(counts.values())
+    if not total:
+        return dict(result, status="no_observed_requests")
+    failures = counts.get("5", 0)
+    return dict(result, requests_in_5m=total, responses_5xx_in_5m=failures,
+                status="5xx_observed" if failures else "no_5xx_observed")
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--memory-json", type=Path, help="Prometheus range-query export")
     parser.add_argument("--end", type=int, help="last five-minute bucket, Unix seconds (required for an export)")
     parser.add_argument("--errors-json", type=Path, help="Loki range-query export from grafana_query")
+    parser.add_argument("--api-json", type=Path, help="Loki Nginx API counts grouped by http_class")
     parser.add_argument("--error-threshold", type=int, default=10)
     args = parser.parse_args()
     if args.memory_json and args.end is None:
@@ -136,6 +174,7 @@ def main():
         report = analyze(values, start, end)
         for event in report["events"]:
             event["errors"] = compare_errors(event, args.errors_json, args.error_threshold, bool(args.memory_json))
+            event["api"] = api_at_detection(event, args.api_json, bool(args.memory_json))
         print(json.dumps(dict(container=item["metric"].get("name"), unit="MiB",
                               start=utc(start), end=utc(end), **report), indent=2))
 
