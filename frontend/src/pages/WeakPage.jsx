@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { BANKS, allQuestions, companyPath } from '../data/examQuestions';
 import { dailyWrongRows } from '../dailyPracticeRecords';
 import './DailyPracticePage.css';
+import './WeakPage.css';
 
 // 문제은행마다 따로 쌓이는 풀이 기록을 한자리에 모아, 어느 영역이 약한지 보여 준다.
 // 기록은 이 브라우저의 로컬 저장소에만 있으므로 서버를 부르지 않는다
@@ -28,7 +29,7 @@ function collect() {
     const saved = readStats(bank.key);
     const stats = saved.stats || {};
     const questions = allQuestions(bank);
-    let bankSeen = 0, bankC = 0, bankW = 0, bankOpen = 0;
+    let bankSeen = 0, bankC = 0, bankW = 0, bankOpen = 0, bankEver = 0;
 
     for (const q of questions) {
       total++;
@@ -41,6 +42,7 @@ function collect() {
       bankC += s.c;
       bankW += s.w;
       if (s.last === 'w') bankOpen++;
+      if (s.w > 0) bankEver++;
       if ((s.at || 0) > lastAt) lastAt = s.at || 0;
 
       const areaName = bank.sections?.[q.sec]?.name || q.sec || '기타';
@@ -64,7 +66,7 @@ function collect() {
     if (bank.ready !== false) {
       banks.push({
         key: bank.key, name: bank.name, seen: bankSeen, total: questions.length,
-        percent: rate(bankC, bankW), open: bankOpen,
+        percent: rate(bankC, bankW), open: bankOpen, ever: bankEver,
         to: bank.key === 'ncs' ? '/ncs' : companyPath(bank),
       });
     }
@@ -78,6 +80,7 @@ function collect() {
     // 한 번만 푼 주제는 정답률이 0% 아니면 100%라 판단에 쓸 수 없어 2회 이상만 본다
     topics: [...topics.values()].filter(t => t.c + t.w >= 2).sort(byWeakest).slice(0, 15),
     banks: banks.sort((a, b) => b.open - a.open || b.seen - a.seen),
+    everWrong: banks.reduce((n, b) => n + b.ever, 0),
   };
 }
 
@@ -96,8 +99,8 @@ export default function WeakPage() {
       <div className="fade-in">
         <div className="page-header">
           <Link to="/" className="back-link">← 홈으로</Link>
-          <h1>약점 분석</h1>
-          <p>문제를 풀면 영역별 정답률을 모아서 보여 드립니다.</p>
+          <h1>오답노트</h1>
+          <p>틀린 문제를 모아서 다시 풀 수 있어요.</p>
         </div>
         <div className="empty">
           <div className="empty-icon">📊</div>
@@ -118,16 +121,16 @@ export default function WeakPage() {
     <div className="fade-in">
       <div className="page-header">
         <Link to="/" className="back-link">← 홈으로</Link>
-        <h1>약점 분석</h1>
-        <p>
-          모든 문제은행의 풀이 기록을 영역별로 합쳐서 봅니다. 기록은 이 브라우저에만 저장됩니다
-          {s.lastAt ? ` · 마지막 풀이 ${fmtDay(s.lastAt)}` : ''}
-        </p>
+        <h1>오답노트</h1>
+        <p>지금까지 틀린 문제를 모아서 다시 풀어요.</p>
       </div>
+
+      <WrongHero total={s.everWrong} banks={s.banks.filter(b => b.ever > 0)} />
 
       {daily.length > 0 && <DailyWrongSection rows={daily} />}
 
-      {hasExam && <>
+      {hasExam && <details className="weak-analysis">
+      <summary>학습 분석 보기 <small>정답률 · 약한 영역 · 문제은행별 진도{s.lastAt ? ` · 마지막 풀이 ${fmtDay(s.lastAt)}` : ''}</small></summary>
       <div className="exam-stats">
         <Tile k="푼 문제" v={s.seen} unit=" 문제" sub={`전체 ${s.total}문제 중 ${Math.round(s.seen / s.total * 100)}%`} />
         <Tile k="전체 정답률" v={s.percent} unit=" %" sub={`맞힘 ${s.correct} · 틀림 ${s.wrong}`} />
@@ -203,8 +206,24 @@ export default function WeakPage() {
           </tbody>
         </table>
       </div>
-      </>}
+      </details>}
     </div>
+  );
+}
+
+// 틀렸던 문제 전체를 한 번에 다시 풀게 하는 입구. 풀이 엔진은 '전체 오답 다시 풀기'(/account/retry)를 그대로 쓴다
+function WrongHero({ total, banks }) {
+  return (
+    <section className="weak-hero">
+      <p className="weak-hero-k">지금까지 틀린 문제</p>
+      <p className="weak-hero-n"><b>{total.toLocaleString()}</b>문제</p>
+      {total > 0
+        ? <Link className="weak-hero-cta" to="/account/retry">틀린 문제 다시 풀기<span aria-hidden="true">→</span></Link>
+        : <p className="weak-hero-empty">아직 틀린 문제가 없어요. 문제를 풀다 틀리면 여기에 모입니다.</p>}
+      {banks.length > 0 && <ul className="weak-hero-list" aria-label="문제집별 틀린 문제">
+        {banks.map(b => <li key={b.key}><Link to={b.to}><span>{b.name}</span><b>{b.ever}</b></Link></li>)}
+      </ul>}
+    </section>
   );
 }
 
