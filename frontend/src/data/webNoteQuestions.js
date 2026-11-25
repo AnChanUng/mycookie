@@ -40,7 +40,7 @@ export const WEB_NOTE_QUESTIONS = [
     '운영 가능한 서비스는 부하·장애·변경 상황에서도 약속한 품질을 지킨다',
     '운영 가능한 서비스는 서버 대수가 많아 장애가 나지 않는다',
   ], 2, '응답 시간·오류율 목표를 정하고 관측하며 시간 제한, 자원 상한, 백업·복구 연습, 배포 취소 절차를 갖춘다. 온콜은 자동 탐지와 대응 절차를 사람이 보완하는 방식이지 대신하는 수단이 아니다.'),
-  sa('operations', 'direction', '사용자에게 약속한 응답 시간·가용성 같은 서비스 품질 목표를 영문 약자로 무엇이라 하는가? (Service Level ○○○)', 'SLO (Service Level Objective)', ['SLO', 'servicelevelobjective', '서비스수준목표'], 'SLO를 정하고 오류 예산 소모로 알림을 설계한다. SLI는 측정 지표, SLA는 계약상 약속이다.'),
+  sa('operations', 'direction', '사용자에게 약속한 응답 시간·가용성 같은 서비스 품질 목표를 영문 약자로 무엇이라 하는가? (Service Level ○○○○○○○○○)', 'SLO (Service Level Objective)', ['SLO', 'servicelevelobjective', '서비스수준목표'], 'SLO를 정하고 오류 예산 소모로 알림을 설계한다. SLI는 측정 지표, SLA는 계약상 약속이다.'),
 
   mc('learning', 'direction', '백엔드 입문자의 학습 순서로 노트가 권하는 방식은?', [
     '한 언어로 작은 서비스를 끝까지 만들며 HTTP·DB·OS 원리를 연결해 익힌다',
@@ -206,7 +206,7 @@ export const WEB_NOTE_QUESTIONS = [
     '검색 색인은 원본에서 만드는 파생 저장소라 반영 지연이 있다',
     '서명 URL은 한 번 쓰면 자동으로 무효가 되므로 유출돼도 안전하다',
   ], 3, '서명(presigned) URL은 만료 전까지 URL을 아는 누구나 쓸 수 있으므로 로그나 공유로 새지 않게 한다. 색인 지연은 원본 저장 실패와 구분한다.'),
-  sa('files-search', 'data', 'S3에서 짧은 기간 동안 특정 객체에 접근할 수 있도록 서명을 담아 발급하는 URL을 영어로 무엇이라 하는가? (○○○○○○○ URL)', 'Presigned URL (서명된 URL)', ['presigned', 'presignedurl', 'pre-signedurl', '서명url', '서명된url', '사전서명url'], 'Amazon S3 Presigned URL은 만료 시간과 허용 작업 범위를 정해 발급한다.'),
+  sa('files-search', 'data', 'S3에서 짧은 기간 동안 특정 객체에 접근할 수 있도록 서명을 담아 발급하는 URL을 영어로 무엇이라 하는가? (○○○○○○○○○ URL)', 'Presigned URL (서명된 URL)', ['presigned', 'presignedurl', 'pre-signedurl', '서명url', '서명된url', '사전서명url'], 'Amazon S3 Presigned URL은 만료 시간과 허용 작업 범위를 정해 발급한다.'),
 
   // ── 동시성과 실행 모델 ──
   mc('thread-safety', 'conc', 'Spring 싱글턴 서비스에 대한 설명으로 옳은 것은?', [
@@ -379,7 +379,7 @@ export const WEB_NOTE_QUESTIONS = [
     '비밀 정보를 산출물에 함께 넣어 환경마다 다른 설정을 없앤다',
     '커밋과 산출물 식별자를 연결한다',
   ], 2, '비밀 정보와 환경별 설정은 소스·산출물과 분리한다. CI에서 만든 산출물을 환경별 설정과 함께 승격한다.'),
-  sa('builds', 'ops', 'Gradle에서 해석된 의존성 버전을 파일에 기록해 매번 같은 버전을 쓰게 하는 기능은? (Dependency ○○○○○○)', 'Dependency Locking (의존성 잠금)', ['locking', 'dependencylocking', '의존성잠금', '잠금', 'lockfile', '락파일', '잠금파일'], 'Gradle 문서 "Locking dependency versions". 동적 버전을 써도 잠금 파일로 재현성을 확보한다.'),
+  sa('builds', 'ops', 'Gradle에서 해석된 의존성 버전을 파일에 기록해 매번 같은 버전을 쓰게 하는 기능은? (Dependency ○○○○○○○)', 'Dependency Locking (의존성 잠금)', ['locking', 'dependencylocking', '의존성잠금', '잠금', 'lockfile', '락파일', '잠금파일'], 'Gradle 문서 "Locking dependency versions". 동적 버전을 써도 잠금 파일로 재현성을 확보한다.'),
 
   mc('review-ci', 'ops', '검사 실패가 실제로 병합을 막게 하려면 GitHub에서 무엇을 설정해야 하는가?', [
     '보호 브랜치의 필수 상태 검사',
@@ -412,7 +412,7 @@ export const WEB_NOTE_QUESTIONS = [
     '평균 응답 시간만 보면 p99 같은 긴 꼬리 지연까지 충분히 알 수 있다',
     'JFR·GC 로그로 할당량과 정지 시간을 확인하고 병목을 고친다',
   ], 3, 'CPU·메모리·GC 정지, 스레드·연결 풀 대기, DB·외부 호출 시간을 함께 본다. 힙 외에 스레드 스택·메타스페이스·직접 메모리도 필요해 컨테이너 메모리 전체를 힙으로 주면 프로세스가 종료될 수 있다.'),
-  sa('jvm-gc', 'ops', 'JDK에 내장된 저부하 프로파일링·이벤트 기록 도구로, 영문 약자 JFR의 풀네임은? (Java ○○○○○ Recorder)', 'Java Flight Recorder', ['flight', 'javaflightrecorder', 'flightrecorder'], 'Oracle의 Java Flight Recorder API 문서. GC 로그와 함께 할당량과 오래 사는 객체를 확인한다.'),
+  sa('jvm-gc', 'ops', 'JDK에 내장된 저부하 프로파일링·이벤트 기록 도구로, 영문 약자 JFR의 풀네임은? (Java ○○○○○○ Recorder)', 'Java Flight Recorder', ['flight', 'javaflightrecorder', 'flightrecorder'], 'Oracle의 Java Flight Recorder API 문서. GC 로그와 함께 할당량과 오래 사는 객체를 확인한다.'),
 
   mc('performance', 'ops', '성능 테스트에 대한 설명으로 옳지 않은 것은?', [
     '워밍업 뒤 부하를 점진적으로 높인다',
