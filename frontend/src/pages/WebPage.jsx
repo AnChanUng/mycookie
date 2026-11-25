@@ -18,7 +18,6 @@ const GROUPS = [
     items: [
       { to: '/web-essentials', icon: '🌐', t: '웹노트', d: 'HTTP · 쿠키와 세션 · CORS · 인증 등 핵심 질문', m: `${WEB_ESSENTIALS.items.length}문답`, go: '읽으러 가기' },
       { to: '/web/webnote', icon: '✍️', t: '웹노트 문제풀이', d: '웹노트로 객관식 · 단답형 풀기 · 틀리면 노트로 바로 복습', m: `${WEB_NOTE_QUESTIONS.length}문항`, go: '문제 풀기' },
-      { to: '/tech-blogs', icon: '📰', t: '기업 기술 블로그', desc: '실무에서 쓰는 기술을 회사 블로그로 읽어요.', go: '블로그 모음 보기' },
     ],
   },
 ];

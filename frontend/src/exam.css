@@ -424,7 +424,7 @@
 }
 
 /* 작은 문제집 첫 화면(Spring 핵심 실전) */
-.sp-home { max-width: 760px; margin: 0 auto; padding-bottom: 56px; }
+.sp-home { max-width: 860px; margin: 0 auto; padding-bottom: 56px; }
 .sp-head { margin: 20px 0 24px; }
 .sp-eyebrow { margin: 0 0 8px; font-size: 13px; font-weight: 700; color: var(--ds-brand); letter-spacing: .02em; }
 .sp-head h1 { margin: 0; font-size: var(--ds-fs-h2); font-weight: 800; letter-spacing: -0.02em; color: var(--ds-text); }
@@ -2165,3 +2165,14 @@ a.exam-search-bank:hover { color: var(--accent-blue); }
   .exam-stat:nth-child(3) { border-left: 0; }
   .exam-stat:nth-child(n+3) { border-top: 1px solid var(--ds-line, var(--border-color)); }
 }
+
+/* 모든 문제집 첫 화면: 모의고사 큰 카드 + 다시 풀기 두 칸. 웹 화면 폭을 꽉 채운다 */
+.exam-home { max-width: 860px; margin: 0 auto; }
+.exam-hero { margin: 4px 0 0; }
+.sp-facts { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+.exam-hero .section-title { margin-top: 4px; }
+.exam-hero .exam-sections { margin-bottom: 0; }
+.exam-again { margin-bottom: 36px; }
+.exam-home .exam-source { margin-top: 0; }
+.exam-areas { margin: -6px 0 22px; }
+.exam-home .exam-sections { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }

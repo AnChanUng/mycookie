@@ -25,7 +25,7 @@ const startsWithAny = (p, list) => list.some(x => p === x || p.startsWith(x + '/
 const NAV = [
   { to: '/study-coach', label: 'AI 학습 코치', beta: true, match: p => startsWithAny(p, ['/study-coach']) },
   { to: '/ai', label: 'AI', match: p => startsWithAny(p, ['/ai']) },
-  { to: '/web', label: '웹 개발', match: p => startsWithAny(p, ['/web', '/web-essentials', '/tech-blogs']) },
+  { to: '/web', label: '웹 개발', match: p => startsWithAny(p, ['/web', '/web-essentials']) },
   { to: '/exam', label: '전공필기', match: p => startsWithAny(p, ['/exam', '/duel', '/topics', '/calc', '/major', '/major-exam', '/ssafy', '/promotion-exam']) },
   { to: '/aptitude', label: '인적성', menu: 'aptitude', match: p => startsWithAny(p, ['/aptitude', '/ncs']) },
   { to: '/certifications', label: '자격증', match: p => startsWithAny(p, ['/certifications']) },
