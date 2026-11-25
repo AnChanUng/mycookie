@@ -73,7 +73,8 @@ class LoungeAndRankTest {
             Thread.sleep(10);
         }
         String events = connection.getResponse().getContentAsString();
-        org.junit.jupiter.api.Assertions.assertTrue(events.contains("event:messages"));
+        org.junit.jupiter.api.Assertions.assertTrue(events.contains("event:messages"));   // 처음 연결 때 전체 목록
+        org.junit.jupiter.api.Assertions.assertTrue(events.contains("event:message\n"));   // 새 글은 그 글 하나만
         org.junit.jupiter.api.Assertions.assertTrue(events.contains("sse-live-delivery"));
     }
 
