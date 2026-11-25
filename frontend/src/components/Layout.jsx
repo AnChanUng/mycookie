@@ -23,7 +23,7 @@ const FOOTER_PATHS = [/^\/$/, /^\/(intro|changelog|terms|privacy|feedback)(\/|$)
 // 주 메뉴. 하위 화면에 있어도 해당 메뉴가 켜져 보이게 경로 묶음으로 판단한다
 const startsWithAny = (p, list) => list.some(x => p === x || p.startsWith(x + '/'));
 const NAV = [
-  { to: '/study-coach', label: 'AI 학습 코치', match: p => startsWithAny(p, ['/study-coach']) },
+  { to: '/study-coach', label: 'AI 학습 코치', beta: true, match: p => startsWithAny(p, ['/study-coach']) },
   { to: '/ai', label: 'AI', match: p => startsWithAny(p, ['/ai']) },
   { to: '/web', label: '웹 개발', match: p => startsWithAny(p, ['/web', '/web-essentials', '/tech-blogs']) },
   { to: '/exam', label: '전공필기', match: p => startsWithAny(p, ['/exam', '/duel', '/topics', '/calc', '/major', '/major-exam', '/ssafy', '/promotion-exam']) },
@@ -100,7 +100,7 @@ export default function Layout() {
               ) : (
                 <Link key={n.to} to={n.to} className={n.match(location.pathname) ? 'active' : ''}
                   aria-current={n.match(location.pathname) ? 'page' : undefined}>
-                  {n.label}
+                  {n.label}{n.beta && <span className="nav-beta">베타</span>}
                 </Link>
               ))}
             </nav>
