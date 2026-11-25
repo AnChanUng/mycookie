@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { Link, Navigate, useParams } from 'react-router-dom';
+import { Link, Navigate, useLocation, useParams } from 'react-router-dom';
 import { COMPANIES, CPP_GROUPS, EXAM_CATEGORIES, SOURCE_KINDS } from '../data/examQuestions';
 import { track } from '../track';
 import ReportButton from '../components/ReportButton';
@@ -95,6 +95,9 @@ export function CompanyExamWithProgress({ company, back, progress, initialIds })
   const { data, save } = progress;
   // 풀던 문제는 새로고침하거나 탭을 닫아도 이어서 풀 수 있게 문제은행마다 한 건씩 저장해 둔다
   const RESUME_KEY = `exam-resume:${company.key}`;
+  // 이어서 풀 주소는 이 화면의 주소로 적는다. 다른 화면으로 넘어가며 마지막으로 저장할 때는 주소창이 이미 다음 화면이라
+  // window.location을 쓰면 엉뚱한 화면(예: 마지막으로 본 자격증 페이지)이 적혔다(이슈 #299)
+  const { pathname: pagePath } = useLocation();
   const [saved, setSaved] = useState(() => {
     try {
       const r = JSON.parse(localStorage.getItem(RESUME_KEY));
@@ -112,7 +115,7 @@ export function CompanyExamWithProgress({ company, back, progress, initialIds })
   // 첫 화면은 문제 데이터를 읽지 않으므로, 거기서 보여 줄 이름 · 주소 · 풀이 종류를 함께 적어 둔다
   const saveResume = (state) => {
     try {
-      localStorage.setItem(RESUME_KEY, JSON.stringify({ ...state, name: company.name, to: window.location.pathname, label: label(state.mode, state.sec), at: Date.now() }));
+      localStorage.setItem(RESUME_KEY, JSON.stringify({ ...state, name: company.name, to: pagePath, label: label(state.mode, state.sec), at: Date.now() }));
     } catch { /* 저장 공간이 없으면 이어풀기만 포기한다 */ }
   };
   // 마지막으로 연 문제집. 풀던 문제가 없을 때 첫 화면이 이쪽으로 이어 준다

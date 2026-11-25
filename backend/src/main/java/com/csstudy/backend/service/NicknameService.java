@@ -90,6 +90,13 @@ public class NicknameService {
         String key=key(name);
         var existing=claims.findById(key);
         if(existing.isPresent() && existing.get().getOwner().equals(owner)) return;
+        // 로그인한 회원이 자기 계정 닉네임을 쓰는 것은 언제나 허용한다. 로그인 전 다른 기기가 같은 이름을 먼저 잡아 두었어도
+        // 그 이름의 주인을 계정으로 옮긴다(채팅 입장 /lounge/presence 409, 이슈 #299 · 순위 중복 #297)
+        if(owner.startsWith("u:") && ownAccountName(owner,key)) {
+            if(existing.isEmpty()) claims.insertClaim(key,owner);
+            else { existing.get().setOwner(owner); claims.saveAndFlush(existing.get()); }
+            return;
+        }
         for(User u:users.findAll()) {
             if(key(u.getNickname()).equals(key) && !owner.equals("u:"+u.getId())) conflict();
         }
@@ -109,5 +116,10 @@ public class NicknameService {
         if(old==null||key(old).equals(key(name)))return;
         claims.findById(key(old)).filter(c->c.getOwner().equals(owner)).ifPresent(claims::delete);
     }
-    private void conflict(){throw new ResponseStatusException(HttpStatus.CONFLICT,"이미 사용 중인 닉네임입니다.");}
+    private boolean ownAccountName(String owner,String key) {
+        try {
+            return users.findById(Long.valueOf(owner.substring(2))).map(u->key(u.getNickname()).equals(key)).orElse(false);
+        } catch(NumberFormatException e) { return false; }
+    }
+    private void conflict(){throw new com.csstudy.backend.exception.CookieException(com.csstudy.backend.exception.CookieErrorCode.NICKNAME_DUPLICATED);}
 }
