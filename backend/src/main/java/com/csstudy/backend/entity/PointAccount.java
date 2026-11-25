@@ -45,6 +45,10 @@ public class PointAccount {
     @Column(name = "quest_claimed")
     private Integer questClaimed;
 
+    // 그날 처음 정산할 때의 solvedCredited. 하루에 포인트로 인정하는 새 풀이 수(PointService.DAILY_SOLVED_CAP)를 이 값에서 센다. 나중에 생긴 칸이라 비어 있을 수 있다
+    @Column(name = "credited_base")
+    private Long creditedBase;
+
     @Column(name = "updated_at")
     private Instant updatedAt;
 }
