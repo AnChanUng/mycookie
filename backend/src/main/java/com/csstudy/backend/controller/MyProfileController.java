@@ -6,6 +6,9 @@ import com.csstudy.backend.entity.UserTier;
 import com.csstudy.backend.service.MembershipService;
 import com.csstudy.backend.repository.UserProfileRepository;
 import com.csstudy.backend.service.AuthService;
+import com.csstudy.backend.service.PointService;
+import com.csstudy.backend.exception.CookieErrorCode;
+import com.csstudy.backend.exception.CookieException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -41,12 +44,13 @@ public class MyProfileController {
     private final AuthService auth;
     private final UserProfileRepository profiles;
     private final MembershipService membership;
+    private final PointService points;
 
     @GetMapping
     @Transactional(readOnly = true)
     public Map<String, Object> get(HttpServletRequest request) {
         User me = auth.requireUser(request);
-        return view(profiles.findByUserId(me.getId()).orElse(null));
+        return view(profiles.findByUserId(me.getId()).orElse(null), points.owned(me.getId()));
     }
 
     @PutMapping
@@ -54,7 +58,8 @@ public class MyProfileController {
     public Map<String, Object> save(@RequestBody Map<String, Object> body, HttpServletRequest request) {
         User me = auth.requireUser(request);
         String avatar = body.get("avatar") instanceof String a && !a.isBlank() ? a : null;
-        if (avatar != null && !AVATARS.contains(avatar)) throw bad("고를 수 없는 아이콘이에요.");
+        Set<String> owned = points.owned(me.getId());
+        if (avatar != null && !AVATARS.contains(avatar)) shopItem("avatar", avatar, owned, "아이콘");
         List<String> interests = new ArrayList<>();
         if (body.get("interests") instanceof List<?> list) {
             for (Object o : list) {
@@ -64,8 +69,8 @@ public class MyProfileController {
         }
         if (interests.size() > MAX_INTERESTS) throw bad("관심 분야는 " + MAX_INTERESTS + "개까지 고를 수 있어요.");
         UserTier tier = membership.membership(me).tier();
-        String theme = unlocked(body.get("theme"), THEMES, tier, "테마");
-        String frame = unlocked(body.get("frame"), FRAMES, tier, "테두리");
+        String theme = unlocked(body.get("theme"), THEMES, tier, "theme", owned, "테마");
+        String frame = unlocked(body.get("frame"), FRAMES, tier, "frame", owned, "테두리");
         UserProfile p = profiles.findByUserId(me.getId()).orElseGet(() -> { UserProfile n = new UserProfile(); n.setUserId(me.getId()); return n; });
         p.setAvatar(avatar);
         p.setBio(text(body.get("bio")));
@@ -74,10 +79,10 @@ public class MyProfileController {
         p.setTheme(theme);
         p.setFrame(frame);
         p.setUpdatedAt(Instant.now());
-        return view(profiles.saveAndFlush(p));
+        return view(profiles.saveAndFlush(p), owned);
     }
 
-    private static Map<String, Object> view(UserProfile p) {
+    private static Map<String, Object> view(UserProfile p, Set<String> owned) {
         Map<String, Object> out = new LinkedHashMap<>();
         out.put("avatar", p == null ? null : p.getAvatar());
         out.put("bio", p == null ? null : p.getBio());
@@ -85,15 +90,25 @@ public class MyProfileController {
         out.put("interests", p == null || p.getInterests() == null ? List.of() : List.of(p.getInterests().split(",")));
         out.put("theme", p == null ? null : p.getTheme());
         out.put("frame", p == null ? null : p.getFrame());
+        // 포인트 상점에서 산 아이템("theme:sakura"처럼). 꾸미기 화면이 잠금을 풀어 보여 준다
+        out.put("owned", List.copyOf(owned));
         return out;
     }
 
-    // 고른 테마 · 테두리가 목록에 있고, 지금 등급으로 열려 있는지 확인한다. 비우면 기본값(null)
-    private static String unlocked(Object v, Map<String, UserTier> options, UserTier tier, String what) {
+    // 고른 테마 · 테두리가 목록에 있고, 지금 등급으로 열려 있는지 확인한다. 상점 아이템이면 산 것만 쓴다. 비우면 기본값(null)
+    private static String unlocked(Object v, Map<String, UserTier> options, UserTier tier, String kind, Set<String> owned, String what) {
         if (!(v instanceof String key) || key.isBlank()) return null;
         UserTier need = options.get(key);
-        if (need == null) throw bad("고를 수 없는 " + what + "예요.");
+        if (need == null) return shopItem(kind, key, owned, what);
         if (tier == null || tier.ordinal() < need.ordinal()) throw bad(need.label() + "부터 쓸 수 있는 " + what + "예요.");
+        return key;
+    }
+
+    // 상점에서 파는 아이템이면 산 사람만 쓸 수 있다. 상점에도 없으면 고를 수 없는 값이다
+    private static String shopItem(String kind, String key, Set<String> owned, String what) {
+        String item = kind + ":" + key;
+        if (!PointService.SHOP.containsKey(item)) throw bad("고를 수 없는 " + what + "예요.");
+        if (!owned.contains(item)) throw new CookieException(CookieErrorCode.PROFILE_ITEM_LOCKED);
         return key;
     }
 

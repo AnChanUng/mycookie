@@ -1,16 +1,12 @@
 import { useEffect, useState, useSyncExternalStore } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { account, changeNickname, changePassword, emailStatus, onAccountChange, passwordStatus, requestEmailVerification, requestPasswordReset, signIn, signOut } from '../sync';
-import { loadAccountRecords, summarizeAccount } from '../accountRecords';
-import { CS_NOTES, migrateNotesCompletion } from '../data/csNotes';
-import { WEB_ESSENTIALS } from '../data/webEssentials';
-import QuestionExplanation from '../components/QuestionExplanation';
+import { loadAccountRecords } from '../accountRecords';
 import SocialLogin from '../components/SocialLogin';
 import { buildAccountRetry } from '../accountRetry';
 import './AccountPage.css';
-import TierBadge from '../components/TierBadge';
 import ProfileCard from '../components/ProfileCard';
-import { membershipHeaders, TIER_NAMES, useMembership } from '../membership';
+import { membershipHeaders, useMembership } from '../membership';
 import { savedNickname } from '../nickname';
 import api from '../api';
 
@@ -43,10 +39,6 @@ function AccountDashboard({ user, openForgot }) {
   const [message, setMessage] = useState('');
   const [result, setResult] = useState({ records: {}, failed: [] });
   const [loading, setLoading] = useState(true);
-  const [revision, setRevision] = useState(0);
-  const [query, setQuery] = useState('');
-  const [wrongOnly, setWrongOnly] = useState(false);
-  const [limit, setLimit] = useState(20);
   const [badges, setBadges] = useState({ loading: true, values: [], error: false });
   useEffect(() => {
     if (!user) return;
@@ -55,8 +47,8 @@ function AccountDashboard({ user, openForgot }) {
       .then(({ data }) => { if (!controller.signal.aborted) setBadges({ loading: false, values: Array.isArray(data) ? data : [], error: false }); })
       .catch(() => { if (!controller.signal.aborted) setBadges({ loading: false, values: [], error: true }); });
     return () => controller.abort();
-  }, [user, revision]);
-  const tierStatus = useMembership(revision);
+  }, [user]);
+  const tierStatus = useMembership(0);
   useEffect(() => {
     const controller = new AbortController();
     if (!user) return;
@@ -64,7 +56,7 @@ function AccountDashboard({ user, openForgot }) {
       if (!controller.signal.aborted) { setResult(next); setLoading(false); }
     });
     return () => controller.abort();
-  }, [user, revision]);
+  }, [user]);
   // 새 가입은 간편 로그인으로만 받는다. 여기서는 이미 있는 계정만 닉네임 또는 인증한 이메일로 로그인한다
   async function authenticate() {
     setAuthBusy(true); setMessage('');
@@ -97,14 +89,17 @@ function AccountDashboard({ user, openForgot }) {
       setMessage(error?.response?.data?.error || '비밀번호를 변경하지 못했습니다. 잠시 후 다시 시도해 주세요.');
     } finally { setAuthBusy(false); }
   }
-  const { rows, attempts, correct, wrong } = summarizeAccount(result.records);
-  const retryCount = buildAccountRetry(result.records).company.questions.length;
-  const filtered = rows.filter(r => (!wrongOnly || r.last === 'w') && `${r.bank} ${r.title}`.toLowerCase().includes(query.trim().toLowerCase()));
-  const noteRecords = migrateNotesCompletion(result.records['cs-notes-v1']?.completed);
-  const completed = [...CS_NOTES.flatMap(s => s.items), ...WEB_ESSENTIALS.items].filter(e => noteRecords[e.id]?.done);
+  const retryCount = result.failed.length ? 0 : buildAccountRetry(result.records).company.questions.length;
   return <div className="account-page fade-in">
-    {user && <header className="page-header"><h1>내 계정</h1><p>{user.nickname}님의 학습 기록</p></header>}
+    {user && <header className="page-header"><h1>내 계정</h1><p>프로필과 로그인 설정</p></header>}
     {user && <ProfileCard user={user} tier={tierStatus} />}
+    {user && <section className="account-links" aria-label="학습 바로가기">
+      <Link to="/stats"><b>내 학습</b><span>푼 문제 · 정답률 · 전공노트 진도</span></Link>
+      <Link to="/shop"><b>포인트 상점</b><span>출석 · 풀이 · 승급 포인트로 프로필 꾸미기</span></Link>
+      {retryCount > 0
+        ? <Link to="/account/retry"><b>오답 다시 풀기</b><span>계정에 남은 오답 {retryCount}문제</span></Link>
+        : <Link to="/weak"><b>오답노트</b><span>{loading ? '기록을 불러오는 중…' : '틀린 문제를 모아 봐요'}</span></Link>}
+    </section>}
     <section className="account-auth" id="settings" tabIndex={-1}>
       {user && <h2>본인 설정</h2>}
       {user ? <><div className="account-actions"><span className="acc-avatar" aria-hidden="true">{user.nickname.slice(0, 1)}</span><strong>{user.nickname}</strong><button className="exam-btn sm" disabled={authBusy} onClick={async () => { setAuthBusy(true); await signOut(); }}>로그아웃</button></div>
@@ -184,35 +179,5 @@ function AccountDashboard({ user, openForgot }) {
       </div>}
       {user && message && <p role="alert">{message}</p>}
     </section>
-    {user && <>
-    <section className="membership-panel">
-      <h2>내 등급 {tierStatus.membership && <TierBadge tier={tierStatus.membership.tier} division={tierStatus.membership.division} />}<Link to="/tiers" className="acc-tier-up">등급 올리기 →</Link></h2>
-      {tierStatus.loading ? <p role="status">등급을 불러오는 중…</p> : tierStatus.error ? <p role="alert">등급을 불러오지 못했습니다. 새로고침해 주세요.</p> : <p>
-        누적 {tierStatus.membership.solvedCount.toLocaleString()}문제
-        {tierStatus.membership.nextTier ? ` · ${tierStatus.membership.nextTierName || TIER_NAMES[tierStatus.membership.nextTier]} 승급 기준: 누적 ${tierStatus.membership.nextThreshold.toLocaleString()}문제 이상 · 앞으로 ${tierStatus.membership.remaining.toLocaleString()}문제` : ' · 최고 등급입니다!'}
-      </p>}
-      <details className="account-fold"><summary>등급 기준 보기</summary>
-      <p>동 쿠키: 처음 시작 · 은 쿠키: 50문제 · 금 쿠키: 150문제 · 다이아 쿠키: 300문제 · 루비 쿠키: 1,000문제</p>
-      <p>같은 문제의 반복 풀이는 1문제로 집계합니다.</p>
-      <p>금 쿠키 Ⅴ·Ⅳ·Ⅲ·Ⅱ·Ⅰ은 각각 누적 150·170·200·230·260문제부터입니다. 시험 승급으로 획득한 최소 등급은 유지됩니다.</p>
-      </details>
-    </section>
-    <div className="account-record-heading"><p>{user ? '계정에 저장된 기록' : '현재 브라우저의 비로그인 풀이 기록'} · 문제집별 문항 기준</p><button className="exam-btn sm" disabled={loading} onClick={() => { setLoading(true); setRevision(v => v + 1); }}>새로고침</button></div>
-    {loading && <p role="status">학습 기록을 불러오는 중… 서버가 깨어나는 데 시간이 걸릴 수 있습니다.</p>}
-    {!!result.failed.length && <p role="alert">{result.failed.length}개 기록을 불러오지 못했습니다. 아래는 불러온 기록만 표시합니다. 새로고침하거나 다시 로그인해 주세요.</p>}
-    <div className="account-metrics">
-      {[[rows.length, '풀어본 문항'], [attempts, '총 풀이 횟수'], [attempts ? `${Math.round(correct / attempts * 100)}%` : '—', '누적 정답률'], [wrong, '최근 오답 문항'], [completed.length, '전공노트 완료']].map(([value, label]) => <div key={label}><strong>{loading ? '…' : value}</strong><span>{label}</span></div>)}
-    </div>
-    <section className="account-history">
-      {!loading && !result.failed.length && retryCount > 0 && <p><Link className="exam-btn primary" to="/account/retry">오답 전체 다시 풀기 ({retryCount}문제)</Link></p>}
-      <details className="account-fold"><summary>풀었던 문제 {!loading && `(${rows.length})`}</summary>
-      <div className="account-filters"><input aria-label="풀이 기록 검색" placeholder="문제 또는 문제집 검색" value={query} onChange={e => { setQuery(e.target.value); setLimit(20); }} /><label><input type="checkbox" checked={wrongOnly} onChange={e => { setWrongOnly(e.target.checked); setLimit(20); }} /> 최근 오답만</label></div>
-      {!loading && !filtered.length && <p>표시할 풀이 기록이 없습니다.</p>}
-      {filtered.slice(0, limit).map(row => <details className="account-question" key={row.key}><summary><span className="account-result">{row.last === 'r' ? '정답' : '오답'}</span><span>{row.bank} · {row.title}</span></summary><div><p>총 {row.c + row.w}회 · 정답 {row.c}회 / 오답 {row.w}회{row.at > 0 && ` · 최근 풀이 ${new Date(row.at).toLocaleString('ko-KR')}`}</p>{row.question && <QuestionExplanation q={row.question} />}<Link to={row.path}>해당 문제집 열기 →</Link></div></details>)}
-      {filtered.length > limit && <button className="exam-btn" onClick={() => setLimit(n => n + 20)}>20개 더 보기 ({Math.min(limit, filtered.length)}/{filtered.length})</button>}
-      </details>
-    </section>
-    <section className="account-notes"><details className="account-fold"><summary>학습 완료한 전공노트 ({completed.length})</summary>{completed.length ? <ul>{completed.map(entry => <li key={entry.id}><Link to={`${entry.id.startsWith('web-') ? '/web-essentials' : '/notes'}#${entry.id}`}>✓ {entry.title}</Link></li>)}</ul> : <p>아직 완료한 지식이 없습니다.</p>}<Link to="/notes">전공노트 공부하기 →</Link></details></section>
-    </>}
   </div>;
 }

@@ -1,5 +1,7 @@
 // 프로필 꾸미기에서 고를 수 있는 것. 서버(MyProfileController)와 같은 목록이어야 한다
 export const PROFILE_AVATARS = ['🍪', '🧑‍💻', '🐱', '🐶', '🦊', '🐼', '🐧', '🦉', '🐻', '🐰', '🚀', '🔥', '🌱', '⭐', '🎯', '📚'];
+// 포인트 상점에서 사야 쓸 수 있는 아이콘(가격은 서버 PointService.SHOP이 정한다)
+export const SHOP_AVATARS = ['🦄', '🐲', '👑', '🍩', '🧠', '💎'];
 
 export const PROFILE_INTERESTS = [
   { key: 'backend', label: '백엔드' },
@@ -32,6 +34,12 @@ export const PROFILE_THEMES = [
   { key: 'diamond', label: '다이아', color: '#1a9ad0', minTier: 'DIAMOND' },
   { key: 'night', label: '밤하늘', color: '#5b5cf6', minTier: 'DIAMOND' },
   { key: 'ruby', label: '루비', color: '#ce355e', minTier: 'RUBY' },
+  // 아래는 포인트 상점 테마(shop: true). 등급과 상관없이 사면 열린다
+  { key: 'sakura', label: '벚꽃', color: '#e0679a', shop: true },
+  { key: 'ocean', label: '바다', color: '#0f9fb5', shop: true },
+  { key: 'forest', label: '숲', color: '#2f9e44', shop: true },
+  { key: 'grape', label: '포도', color: '#8b5cf6', shop: true },
+  { key: 'ink', label: '먹물', color: '#3b4252', shop: true },
 ];
 
 // 아이콘 테두리
@@ -41,4 +49,10 @@ export const PROFILE_FRAMES = [
   { key: 'gold', label: '금 테두리', minTier: 'GOLD' },
   { key: 'diamond', label: '다이아 반짝', minTier: 'DIAMOND' },
   { key: 'ruby', label: '루비 빛', minTier: 'RUBY' },
+  { key: 'flame', label: '불꽃 고리', shop: true },
+  { key: 'rainbow', label: '무지개 고리', shop: true },
 ];
+
+// 상점 아이템 키("theme:sakura")와 보유 여부. 등급 보상은 등급으로, 상점 아이템은 산 것만 열린다
+export const itemKey = (kind, key) => `${kind}:${key}`;
+export const canUse = (kind, option, tier, owned) => option.shop ? (owned || []).includes(itemKey(kind, option.key)) : isUnlocked(option.minTier, tier);

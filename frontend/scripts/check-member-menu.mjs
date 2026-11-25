@@ -122,9 +122,10 @@ try {
     window.dispatchEvent(new Event('sync:change'));
   });
   assert.ok(text(view.toJSON()).includes('본인 설정'));
-  assert.ok(text(view.toJSON()).includes('누적 125문제'));
+  assert.ok(/누적 문제\s*125/.test(text(view.toJSON())), '내 계정에 누적 문제 수가 보인다');
   assert.ok(text(view.root.findByProps({ 'aria-label': '내 교육생 배지' })).includes('16기 대전 4반'));
-  assert.ok(text(view.toJSON()).includes('풀었던 문제'));
+  // 풀이 기록과 전공노트 진도는 '내 학습'으로 옮겼고, 내 계정에는 바로가기만 둔다
+  for (const label of ['내 학습', '포인트 상점']) assert.ok(text(view.toJSON()).includes(label), label);
   await unmount();
   const { default: Gate } = await server.ssrLoadModule('/src/components/RoleGate.jsx');
   for (const [nickname, token, allowed] of [['소유자', 'cookie-owner', true], ['다른이름', 'cookie-owner', true], ['일반', 'ordinary-user', false], ['일반2', 'other-user', false]]) {

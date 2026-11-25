@@ -1,13 +1,17 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import api from '../api';
 import { membershipHeaders, TIER_NAMES } from '../membership';
-import { PROFILE_AVATARS, PROFILE_FRAMES, PROFILE_INTERESTS, PROFILE_MAX_INTERESTS, PROFILE_MAX_TEXT, PROFILE_THEMES, TIER_ORDER, isUnlocked } from '../data/profileOptions';
+import { PROFILE_AVATARS, PROFILE_FRAMES, PROFILE_INTERESTS, PROFILE_MAX_INTERESTS, PROFILE_MAX_TEXT, PROFILE_THEMES, SHOP_AVATARS, TIER_ORDER, canUse, isUnlocked, itemKey } from '../data/profileOptions';
 import TierBadge from './TierBadge';
 import './ProfileCard.css';
 import '../styles/profile-frames.css';
 import { setMyProfile } from '../profileStore';
 
-const EMPTY = { avatar: null, bio: null, goal: null, interests: [], theme: null, frame: null };
+const EMPTY = { avatar: null, bio: null, goal: null, interests: [], theme: null, frame: null, owned: [] };
+// 등급 보상(상점 아이템 제외)
+const TIER_THEMES = PROFILE_THEMES.filter(t => !t.shop);
+const TIER_FRAMES = PROFILE_FRAMES.filter(f => !f.shop);
 const labelOf = key => PROFILE_INTERESTS.find(i => i.key === key)?.label || key;
 const length = text => [...(text || '')].length;
 // 등급마다 이름표 색(배너의 등급 문장, 보상 칸의 잠금 표시에 쓴다)
@@ -24,8 +28,8 @@ function progressOf(m) {
 function nextRewards(tier) {
   const next = TIER_ORDER[TIER_ORDER.indexOf(tier || 'BRONZE') + 1];
   if (!next) return null;
-  const items = [...PROFILE_THEMES.filter(t => t.minTier === next).map(t => `${t.label} 테마`),
-    ...PROFILE_FRAMES.filter(f => f.minTier === next).map(f => f.label)];
+  const items = [...TIER_THEMES.filter(t => t.minTier === next).map(t => `${t.label} 테마`),
+    ...TIER_FRAMES.filter(f => f.minTier === next).map(f => f.label)];
   return items.length ? { tier: next, items } : null;
 }
 
@@ -40,7 +44,7 @@ export default function ProfileCard({ user, tier }) {
   useEffect(() => {
     const controller = new AbortController();
     api.get('/me/profile', { headers: membershipHeaders(), signal: controller.signal })
-      .then(({ data }) => { if (!controller.signal.aborted && data) { setProfile({ ...EMPTY, ...data, interests: Array.isArray(data.interests) ? data.interests : [] }); setMyProfile(data); } })
+      .then(({ data }) => { if (!controller.signal.aborted && data) { setProfile({ ...EMPTY, ...data, interests: Array.isArray(data.interests) ? data.interests : [], owned: Array.isArray(data.owned) ? data.owned : [] }); setMyProfile(data); } })
       .catch(() => { /* 프로필을 못 불러와도 기본 카드는 보여 준다 */ });
     return () => controller.abort();
   }, [user.token]);
@@ -48,8 +52,9 @@ export default function ProfileCard({ user, tier }) {
   const save = async () => {
     setBusy(true); setMessage('');
     try {
-      const { data } = await api.put('/me/profile', draft, { headers: membershipHeaders(), timeout: 15000 });
-      setProfile({ ...EMPTY, ...data, interests: Array.isArray(data.interests) ? data.interests : [] });
+      const { avatar, bio, goal, interests, theme, frame } = draft;
+      const { data } = await api.put('/me/profile', { avatar, bio, goal, interests, theme, frame }, { headers: membershipHeaders(), timeout: 15000 });
+      setProfile({ ...EMPTY, ...data, interests: Array.isArray(data.interests) ? data.interests : [], owned: Array.isArray(data.owned) ? data.owned : [] });
       setMyProfile(data);
       setDraft(null);
       setMessage('프로필을 저장했어요.');
@@ -73,8 +78,11 @@ export default function ProfileCard({ user, tier }) {
   const frame = shown.frame && shown.frame !== 'none' ? shown.frame : null;
   const rewards = m ? nextRewards(m.tier) : null;
   const lockText = minTier => `${TIER_NAMES[minTier]}부터`;
-  const unlockedThemes = PROFILE_THEMES.filter(t => isUnlocked(t.minTier, m?.tier)).length;
-  const unlockedFrames = PROFILE_FRAMES.filter(f => isUnlocked(f.minTier, m?.tier)).length;
+  const unlockedThemes = TIER_THEMES.filter(t => isUnlocked(t.minTier, m?.tier)).length;
+  const unlockedFrames = TIER_FRAMES.filter(f => isUnlocked(f.minTier, m?.tier)).length;
+  const owned = profile.owned || [];
+  const ownedAvatars = SHOP_AVATARS.filter(a => owned.includes(itemKey('avatar', a)));
+  const lockLabel = option => option.shop ? '상점' : lockText(option.minTier);
 
   return (
     <section className="profile-card" aria-label="내 프로필" style={{ '--profile-accent': theme.color, '--tier-color': TIER_COLORS[m?.tier] || TIER_COLORS.BRONZE }}>
@@ -122,10 +130,10 @@ export default function ProfileCard({ user, tier }) {
         <div className="profile-collection">
           <div className="profile-collection-head">
             <strong>등급 보상</strong>
-            <span>테마 {unlockedThemes}/{PROFILE_THEMES.length} · 테두리 {unlockedFrames}/{PROFILE_FRAMES.length}</span>
+            <span>테마 {unlockedThemes}/{TIER_THEMES.length} · 테두리 {unlockedFrames}/{TIER_FRAMES.length}</span>
           </div>
           <ul className="profile-slots" aria-label="등급 보상 모음">
-            {PROFILE_THEMES.map(t => {
+            {TIER_THEMES.map(t => {
               const open = isUnlocked(t.minTier, m?.tier);
               return <li key={`t-${t.key}`} className={`profile-slot${open ? '' : ' locked'}${shown.theme === t.key || (!shown.theme && t.key === 'basic') ? ' on' : ''}`}
                 title={open ? `${t.label} 테마` : `${t.label} 테마 · ${lockText(t.minTier)}`} style={{ '--swatch': t.color, '--lock': TIER_COLORS[t.minTier] }}>
@@ -133,7 +141,7 @@ export default function ProfileCard({ user, tier }) {
                 <span className="sr-only">{open ? `${t.label} 테마` : `${t.label} 테마, ${lockText(t.minTier)}`}</span>
               </li>;
             })}
-            {PROFILE_FRAMES.filter(f => f.key !== 'none').map(f => {
+            {TIER_FRAMES.filter(f => f.key !== 'none').map(f => {
               const open = isUnlocked(f.minTier, m?.tier);
               return <li key={`f-${f.key}`} className={`profile-slot frame-slot${open ? '' : ' locked'}${frame === f.key ? ' on' : ''}`}
                 title={open ? f.label : `${f.label} · ${lockText(f.minTier)}`} style={{ '--lock': TIER_COLORS[f.minTier] }}>
@@ -152,22 +160,22 @@ export default function ProfileCard({ user, tier }) {
               <div className="profile-avatar-grid">
                 <button type="button" className={!draft.avatar ? 'on' : ''} aria-pressed={!draft.avatar} onClick={() => setDraft(d => ({ ...d, avatar: null }))}
                   aria-label="닉네임 첫 글자 쓰기">{initial}</button>
-                {PROFILE_AVATARS.map(a => (
+                {[...PROFILE_AVATARS, ...ownedAvatars].map(a => (
                   <button type="button" key={a} className={draft.avatar === a ? 'on' : ''} aria-pressed={draft.avatar === a}
                     onClick={() => setDraft(d => ({ ...d, avatar: a }))} aria-label={`아이콘 ${a}`}>{a}</button>
                 ))}
               </div>
             </fieldset>
             <fieldset>
-              <legend>카드 테마 <small>등급이 오르면 더 열려요</small></legend>
+              <legend>카드 테마 <small>등급이 오르면 더 열리고, <Link to="/shop">포인트 상점</Link>에서 살 수도 있어요</small></legend>
               <div className="profile-theme-pick">
                 {PROFILE_THEMES.map(t => {
-                  const open = isUnlocked(t.minTier, m?.tier);
+                  const open = canUse('theme', t, m?.tier, owned);
                   const on = (draft.theme || 'basic') === t.key;
                   return <button type="button" key={t.key} className={on ? 'on' : ''} aria-pressed={on} disabled={!open}
                     style={{ '--swatch': t.color }} onClick={() => setDraft(d => ({ ...d, theme: t.key === 'basic' ? null : t.key }))}
-                    aria-label={open ? `${t.label} 테마` : `${t.label} 테마, ${lockText(t.minTier)}`}>
-                    <i aria-hidden="true" /><span>{t.label}</span>{!open && <small>🔒 {lockText(t.minTier)}</small>}
+                    aria-label={open ? `${t.label} 테마` : `${t.label} 테마, ${lockLabel(t)}`}>
+                    <i aria-hidden="true" /><span>{t.label}</span>{!open && <small>{t.shop ? '🛒' : '🔒'} {lockLabel(t)}</small>}
                   </button>;
                 })}
               </div>
@@ -176,13 +184,13 @@ export default function ProfileCard({ user, tier }) {
               <legend>아이콘 테두리</legend>
               <div className="profile-frame-pick">
                 {PROFILE_FRAMES.map(f => {
-                  const open = isUnlocked(f.minTier, m?.tier);
+                  const open = canUse('frame', f, m?.tier, owned);
                   const on = (draft.frame || 'none') === f.key;
                   return <button type="button" key={f.key} className={on ? 'on' : ''} aria-pressed={on} disabled={!open}
                     onClick={() => setDraft(d => ({ ...d, frame: f.key === 'none' ? null : f.key }))}
-                    aria-label={open ? f.label : `${f.label}, ${lockText(f.minTier)}`}>
+                    aria-label={open ? f.label : `${f.label}, ${lockLabel(f)}`}>
                     <span className={`profile-frame-sample pf-small${f.key !== 'none' ? ` frame-${f.key}` : ''}`} aria-hidden="true">{initial}</span>
-                    <span>{f.label}</span>{!open && <small>🔒 {lockText(f.minTier)}</small>}
+                    <span>{f.label}</span>{!open && <small>{f.shop ? '🛒' : '🔒'} {lockLabel(f)}</small>}
                   </button>;
                 })}
               </div>
