@@ -9,8 +9,8 @@ import com.csstudy.backend.exception.CookieException;
 import com.csstudy.backend.repository.PointAccountRepository;
 import com.csstudy.backend.repository.PointHistoryRepository;
 import com.csstudy.backend.repository.UserItemRepository;
+import com.csstudy.backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -82,6 +82,7 @@ public class PointService {
     public record Attend(long earned, int streak, long balance, boolean already) {}
 
     private final PointAccountRepository accounts;
+    private final UserRepository users;
     private final PointHistoryRepository history;
     private final UserItemRepository items;
     private final MembershipService memberships;
@@ -191,13 +192,14 @@ public class PointService {
     private PointAccount lock(Long userId) {
         Optional<PointAccount> found = accounts.findForUpdate(userId);
         if (found.isPresent()) return found.get();
-        try {
+        // 첫 방문에는 잠글 포인트 행이 없다. 사용자 행을 잠근 뒤 다시 확인해 출석과 상점 조회가 겹쳐도 한 번만 만든다.
+        users.findForUpdate(userId).orElseThrow(() -> new CookieException(CookieErrorCode.UNAUTHORIZED));
+        return accounts.findForUpdate(userId).orElseGet(() -> {
             PointAccount created = new PointAccount();
             created.setUserId(userId);
             created.setUpdatedAt(Instant.now());
-            accounts.saveAndFlush(created);
-        } catch (DataIntegrityViolationException raced) { /* 다른 요청이 먼저 만들었다. 아래에서 그 줄을 잠그고 쓴다 */ }
-        return accounts.findForUpdate(userId).orElseThrow(() -> new CookieException(CookieErrorCode.CONFLICT));
+            return accounts.saveAndFlush(created);
+        });
     }
 
     private void credit(PointAccount account, long amount, PointHistory.Reason reason, String memo) {

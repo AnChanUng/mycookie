@@ -11,7 +11,12 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
+import java.util.ArrayList;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasItem;
@@ -46,6 +51,34 @@ class PointShopTest {
     private ResultActions buy(String token, String item) throws Exception {
         return mvc.perform(post("/api/v1/points/shop").header("Authorization", token).contentType(MediaType.APPLICATION_JSON)
                 .content(json.writeValueAsString(Map.of("item", item))));
+    }
+
+    @Test
+    void firstShopVisitCanOverlapAutomaticAttendance() throws Exception {
+        String token = register("동시상점테스터");
+        int requests = 6;
+        var pool = Executors.newFixedThreadPool(requests);
+        var ready = new CountDownLatch(requests);
+        var start = new CountDownLatch(1);
+        try {
+            var results = new ArrayList<Future<Integer>>();
+            for (int i = 0; i < requests; i++) {
+                var request = i % 2 == 0 ? get("/api/v1/points") : post("/api/v1/points/attend");
+                results.add(pool.submit(() -> {
+                    ready.countDown();
+                    start.await();
+                    return mvc.perform(request.header("Authorization", token)).andReturn().getResponse().getStatus();
+                }));
+            }
+            assertThat(ready.await(10, TimeUnit.SECONDS)).isTrue();
+            start.countDown();
+            for (var result : results) assertThat(result.get(15, TimeUnit.SECONDS)).isEqualTo(200);
+            mvc.perform(get("/api/v1/points").header("Authorization", token))
+                    .andExpect(jsonPath("$.balance").value(10)).andExpect(jsonPath("$.shop").isNotEmpty())
+                    .andExpect(jsonPath("$.history.length()").value(1));
+        } finally {
+            pool.shutdownNow();
+        }
     }
 
     @Test
