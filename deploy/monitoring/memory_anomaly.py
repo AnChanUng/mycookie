@@ -158,6 +158,8 @@ def main():
     parser.add_argument("--errors-json", type=Path, help="Loki range-query export from grafana_query")
     parser.add_argument("--api-json", type=Path, help="Loki Nginx API counts grouped by http_class")
     parser.add_argument("--error-threshold", type=int, default=10)
+    parser.add_argument("--observation", action="store_true",
+                        help="emit one JSON line per container and enrich detections from the last day")
     args = parser.parse_args()
     if args.memory_json and args.end is None:
         parser.error("--memory-json requires --end to preserve missing buckets")
@@ -172,11 +174,15 @@ def main():
     for item in series:
         values = {int(ts): float(value) for ts, value in item["values"]}
         report = analyze(values, start, end)
+        if args.observation:
+            # Allow fifteen minutes after detection for the subsequent ERROR-count windows.
+            report["events"] = [event for event in report["events"]
+                                if utc(end - 86400) < event["detected"] <= utc(end - 900)]
         for event in report["events"]:
             event["errors"] = compare_errors(event, args.errors_json, args.error_threshold, bool(args.memory_json))
             event["api"] = api_at_detection(event, args.api_json, bool(args.memory_json))
         print(json.dumps(dict(container=item["metric"].get("name"), unit="MiB",
-                              start=utc(start), end=utc(end), **report), indent=2))
+                              start=utc(start), end=utc(end), **report), indent=None if args.observation else 2))
 
 
 if __name__ == "__main__":

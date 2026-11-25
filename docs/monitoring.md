@@ -107,3 +107,21 @@ sudo GRAFANA_VIEWERS="bomin:처음비밀번호" /srv/devcookie/app/deploy/monito
 {environment="prod", service="backend", level="ERROR"}
 {environment="staging", service="backend"} |= "Exception"
 ```
+## 메모리 이상 관찰 모드
+
+운영 백엔드의 메모리 상승 후보를 15분마다 SQLite에 기록한다. 기존 stats 컨테이너에서 Prometheus와 Loki를 조회한다. 실제 장애 판정과 알림 발송은 운영자가 관찰 결과를 평가한 뒤 결정한다.
+
+관리자는 변경이 반영된 배포 폴더에서 설치한다.
+
+```sh
+cd /srv/devcookie/app/deploy/monitoring
+sudo install -d /usr/local/lib/mycookie-memory-observation
+sudo install -m 0644 memory_anomaly.py observe_memory.py /usr/local/lib/mycookie-memory-observation/
+sudo install -m 0644 mycookie-memory-observation.service mycookie-memory-observation.timer /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl start mycookie-memory-observation.service
+sudo systemctl enable --now mycookie-memory-observation.timer
+systemctl list-timers mycookie-memory-observation.timer
+```
+
+실행 기록은 `journalctl -u mycookie-memory-observation.service`에서 확인한다. DB는 `/var/lib/mycookie-memory-observation/history.sqlite3`에 있다. `runs`에는 각 조회 종료 시점의 7일 검사 범위 통계를, `events`에는 컨테이너와 탐지 시각별로 최초 기록한 근거를 보관한다. 최근 하루에 탐지된 사건 중 이후 15분의 로그를 조회할 수 있는 사건을 수집한다. 하루를 넘는 실행 공백은 별도 과거 재생이 필요하다. 중단하려면 `sudo systemctl disable --now mycookie-memory-observation.timer`를 실행한다.
