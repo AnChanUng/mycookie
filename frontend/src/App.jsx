@@ -63,6 +63,7 @@ const DailyPracticePage = lazy(() => import('./pages/DailyPracticePage'));
 const AuthCallbackPage =lazy(() => import('./pages/AuthCallbackPage'));
 const OnboardingPage = lazy(() => import('./pages/OnboardingPage'));
 const DevLogPage = lazy(() => import('./pages/DevLogPage'));
+const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 const VerifyEmailPage = lazy(() => import('./pages/AuthEmailPage').then(m => ({ default: m.VerifyEmailPage })));
 const ResetPasswordPage = lazy(() => import('./pages/AuthEmailPage').then(m => ({ default: m.ResetPasswordPage })));
 const NewsletterConfirmPage = lazy(() => import('./pages/AuthEmailPage').then(m => ({ default: m.NewsletterConfirmPage })));
@@ -190,6 +191,7 @@ function App() {
           <Route path="changelog" element={<ChangelogPage />} />
           <Route path="terms" element={<LegalPage kind="terms" />} />
           <Route path="privacy" element={<LegalPage kind="privacy" />} />
+          <Route path="*" element={<NotFoundPage />} />
         </Route>
       </Routes>
     </BrowserRouter>

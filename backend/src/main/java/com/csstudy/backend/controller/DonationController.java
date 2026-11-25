@@ -2,7 +2,11 @@ package com.csstudy.backend.controller;
 
 import com.csstudy.backend.entity.Donation;
 import com.csstudy.backend.repository.DonationRepository;
+import com.csstudy.backend.exception.CookieErrorCode;
+import com.csstudy.backend.exception.CookieException;
+import com.csstudy.backend.security.ClientAddress;
 import com.csstudy.backend.service.AdminAuth;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.*;
@@ -15,6 +19,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 사이트의 "자료 기부"로 올라온 파일을 받아 DB에 보관한다.
@@ -41,9 +46,14 @@ public class DonationController {
     // 파일을 DB에 담으므로 무료 플랜 용량을 생각해 넉넉하지 않게 잡는다
     private static final long MAX_BYTES = 10L * 1024 * 1024;
     private static final int PER_VISITOR_PER_DAY = 10;
+    // 방문자 ID는 요청마다 바꿔 보낼 수 있어서, 같은 곳(IP)에서 하루에 올릴 수 있는 수도 따로 막는다. 서버 메모리에만 둔다
+    static final int PER_IP_PER_DAY = 10;
+    private static final int IP_TRACK_MAX = 10_000;
+    private final Map<String, int[]> perIp = new ConcurrentHashMap<>();
 
     private final DonationRepository donationRepository;
     private final AdminAuth adminAuth;
+    private final ClientAddress addresses;
 
     /** 누구나 부르는 기부 엔드포인트 */
     @PostMapping(value = "/donations", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -51,7 +61,8 @@ public class DonationController {
                                       @RequestParam(value = "kind", required = false) String kind,
                                       @RequestParam(value = "label", required = false) String label,
                                       @RequestParam(value = "note", required = false) String note,
-                                      @RequestHeader(value = "X-Visitor-Id", required = false) String visitorId) {
+                                      @RequestHeader(value = "X-Visitor-Id", required = false) String visitorId,
+                                      HttpServletRequest request) {
 
         if (file == null || file.isEmpty()) bad("올릴 파일이 없습니다.");
         if (file.getSize() > MAX_BYTES) bad("파일이 너무 큽니다. 10MB 이하만 올릴 수 있습니다.");
@@ -70,9 +81,9 @@ public class DonationController {
 
         String visitor = (visitorId == null || visitorId.isBlank()) ? "anon" : trim(visitorId, 40);
         LocalDate day = LocalDate.now(KST);
-        if (donationRepository.countByVisitorIdAndDay(visitor, day) >= PER_VISITOR_PER_DAY) {
-            throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS,
-                    "오늘은 더 올릴 수 없습니다. 내일 다시 시도해 주세요.");
+        if (donationRepository.countByVisitorIdAndDay(visitor, day) >= PER_VISITOR_PER_DAY
+                || !allowIp(addresses.resolve(request), day)) {
+            throw new CookieException(CookieErrorCode.DONATION_DAILY_LIMIT);
         }
 
         Donation saved = donationRepository.save(Donation.builder()
@@ -93,9 +104,10 @@ public class DonationController {
         return Map.of("ok", true, "id", saved.getId(), "path", dir + "/" + name);
     }
 
-    /** 기부 장부. 파일 본문은 빼고 목록만 준다 */
+    /** 기부 장부. 파일 본문은 빼고 목록만 준다. 올린 사람이 적은 메모가 들어 있어 관리자만 본다 */
     @GetMapping("/donations")
-    public List<Map<String, Object>> list() {
+    public List<Map<String, Object>> list(@RequestHeader(value = "X-Admin-Key", required = false) String key) {
+        adminAuth.require(key);
         List<Map<String, Object>> out = new ArrayList<>();
         for (Object[] r : donationRepository.summaries()) {
             Map<String, Object> m = new LinkedHashMap<>();
@@ -154,6 +166,18 @@ public class DonationController {
     }
 
     // ===== 잡다한 검사 =====
+
+    // 같은 곳에서 오늘 올린 수를 센다. 날짜가 바뀌면 다시 0부터 센다
+    private boolean allowIp(String ip, LocalDate day) {
+        if (perIp.size() > IP_TRACK_MAX) perIp.clear();
+        int today = (int) day.toEpochDay();
+        int[] window = perIp.compute(String.valueOf(ip), (k, v) -> v == null || v[0] != today ? new int[]{today, 0} : v);
+        synchronized (window) {
+            if (window[1] >= PER_IP_PER_DAY) return false;
+            window[1]++;
+            return true;
+        }
+    }
 
     private byte[] bytes(MultipartFile f) {
         try {
