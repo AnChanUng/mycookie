@@ -29,7 +29,7 @@ const NAV = [
   { to: '/aptitude', label: '인적성', menu: 'aptitude', match: p => startsWithAny(p, ['/aptitude', '/ncs']) },
   { to: '/certifications', label: '자격증', match: p => startsWithAny(p, ['/certifications']) },
   { to: '/algo', label: '코테', menu: 'coding', match: p => startsWithAny(p, ['/algo', '/bug-hunt']) },
-  { to: '/stats', label: '내 학습', match: p => startsWithAny(p, ['/stats', '/weak', '/account', '/all', '/rank']) },
+  { to: '/stats', label: '내 학습', match: p => startsWithAny(p, ['/stats', '/weak', '/account', '/all', '/rank', '/shop']) },
   { to: '/intro', label: '소개', menu: 'about', match: p => startsWithAny(p, ['/intro', '/feedback', '/changelog']) },
 ];
 

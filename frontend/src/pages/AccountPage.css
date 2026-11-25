@@ -199,3 +199,12 @@
 @keyframes auth-spin { to { transform: rotate(360deg); } }
 @media (prefers-reduced-motion: reduce) { .auth-spinner { animation: none; } }
 @media (max-width: 480px) { .account-auth > .auth-card { padding: 36px 22px 30px; } }
+
+/* 학습 바로가기: 기록 · 통계는 "내 학습"에서 보고, 여기는 길만 안내한다 */
+.account-links { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--ds-s3); margin-bottom: var(--ds-s5); }
+.account-links a { display: grid; gap: 2px; padding: var(--ds-s4) var(--ds-s5); border: 1px solid var(--ds-line-strong); border-radius: var(--ds-r-xl); background: var(--ds-surface); color: var(--ds-text); text-decoration: none; transition: border-color var(--ds-fast) var(--ds-ease); }
+.account-links a:hover { border-color: var(--ds-brand); }
+.account-links b { font-size: var(--ds-fs-body); }
+.account-links b::after { content: ' →'; color: var(--ds-brand); }
+.account-links span { font-size: var(--ds-fs-caption); color: var(--ds-text-3); }
+@media (max-width: 640px) { .account-links { grid-template-columns: 1fr; } }
