@@ -16,7 +16,12 @@
 .rk-row.t3 .hr-rank { color: #b8733f; }
 .rk-tier { font-size: var(--ds-fs-caption); color: var(--ds-text-3); white-space: nowrap; }
 .rk-row .hr-count small { margin-left: 2px; font-size: var(--ds-fs-caption); font-weight: 500; color: var(--ds-text-3); }
-.rk-more { display: block; width: 100%; height: 42px; margin-top: var(--ds-s3); border: 1px solid var(--ds-line-strong); border-radius: var(--ds-r-md); background: var(--ds-surface); color: var(--ds-text-2); font-size: var(--ds-fs-small); cursor: pointer; }
-.rk-more:hover { border-color: var(--ds-brand); color: var(--ds-brand); }
+/* 목록 끝: 다음 줄을 이어 그리는 중 표시와 끝 표시 */
+.rk-more { display: flex; align-items: center; justify-content: center; gap: var(--ds-s2); min-height: 42px; margin-top: var(--ds-s3); font-size: var(--ds-fs-small); color: var(--ds-text-3); }
+.rk-more button { height: 32px; padding: 0 var(--ds-s3); border: 1px solid var(--ds-line-strong); border-radius: var(--ds-r-md); background: var(--ds-surface); color: var(--ds-text-2); cursor: pointer; }
+.rk-spinner { width: 14px; height: 14px; border: 2px solid var(--ds-line-strong); border-top-color: var(--ds-brand); border-radius: 50%; animation: rk-spin .8s linear infinite; }
+@keyframes rk-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .rk-spinner { animation: none; } }
+.rk-end { margin: var(--ds-s3) 0 0; text-align: center; font-size: var(--ds-fs-caption); color: var(--ds-text-3); }
 @media (max-width: 520px) { .rk-row { grid-template-columns: 24px 24px minmax(0, 1fr) auto; padding: 10px var(--ds-s4); } .rk-tier { display: none; } }
 .rk-loading { margin: 0; padding: 8px var(--ds-s5); border-bottom: 1px solid var(--ds-line); font-size: var(--ds-fs-caption); color: var(--ds-text-3); }
