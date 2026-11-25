@@ -18,12 +18,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 // 누구나 부르는 자료 기부 업로드. 방문자 ID를 바꿔 가며 보내도 같은 곳(IP)에서는 하루 한도를 넘지 못하고,
 // 올린 사람이 적은 메모가 담긴 장부는 관리자만 본다
-@SpringBootTest(properties = {"app.admin-key=test-admin-key-0123456789abcdef0123", "app.security.trust-forwarded-for=true"})
+// 오락실 · 라운지 테스트와 같은 설정이라 스프링 컨텍스트를 함께 쓴다(테스트 메모리)
+@SpringBootTest(properties = {"app.admin-key=test-admin-key", "app.security.trust-forwarded-for=true"})
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 class DonationLimitTest {
 
-    private static final String KEY = "test-admin-key-0123456789abcdef0123";
+    private static final String KEY = "test-admin-key";
 
     @Autowired MockMvc mvc;
 
