@@ -40,6 +40,7 @@ public class AdminController {
     private final JdbcTemplate jdbcTemplate;
     private final com.csstudy.backend.repository.AdminAuditLogRepository auditLogs;
     private final com.csstudy.backend.service.MailFailures mailFailures;
+    private final com.csstudy.backend.service.DailyPracticeStats dailyPracticeStats;
 
     @Value("${slack.enabled:false}")
     private boolean slackEnabled;
@@ -69,6 +70,13 @@ public class AdminController {
     public Map<String, Object> mailFailures(@RequestHeader(value = "X-Admin-Key", required = false) String key) {
         adminAuth.require(key);
         return mailFailures.summary();
+    }
+
+    // 학습 메일 연습 화면 반응: 세트별로 연 횟수, 끝까지 푼 횟수, 완주율
+    @GetMapping("/daily-practice")
+    public Map<String, Object> dailyPractice(@RequestHeader(value = "X-Admin-Key", required = false) String key) {
+        adminAuth.require(key);
+        return dailyPracticeStats.summary();
     }
 
     // 관리자 작업 기록(최근 100개)
