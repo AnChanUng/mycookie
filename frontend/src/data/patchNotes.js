@@ -8,7 +8,17 @@
 // status: 'released' 배포됨(master) | 'dev' 개발 브랜치에만 있음(release PR을 머지하면 released로 바꾼다)
 export const PATCH_NOTES = [
   {
-    version: '1.7.0', date: '2026-11-25', status: 'dev',
+    version: '1.8.0', date: '2026-11-25', status: 'dev',
+    title: '오늘 할 일과 새 대결 화면',
+    summary: '첫 화면에서 오늘 할 일을 바로 고르고, 친구와 겨루는 대결 화면이 새로워졌습니다.',
+    items: [
+      { type: 'feature', text: '첫 화면 "오늘 할 일": 오늘의 CS · 오늘의 퀘스트 · 친구와 대결을 한곳에 모았습니다.' },
+      { type: 'improve', text: '대결 화면을 새로 꾸몄습니다. 나 VS 친구 구도로 과목과 방식(1:1 · 단체전)을 고르고, 승률을 한눈에 봅니다.' },
+      { type: 'improve', text: '전공필기 화면 맨 위에서 바로 친구와 CS 대결을 시작할 수 있습니다.' },
+    ],
+  },
+  {
+    version: '1.7.0', date: '2026-11-25', status: 'released',
     title: '포인트 상점',
     summary: '출석 · 문제 풀이 · 승급으로 포인트를 모아 상점에서 프로필 꾸미기 아이템을 삽니다. 리본 · 파스텔 · 하트 테두리와 10P짜리 튤립 아이콘도 있어요.',
     items: [
