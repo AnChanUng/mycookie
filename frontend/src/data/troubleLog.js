@@ -4,6 +4,20 @@
 // 수치는 직접 측정한 값만 적는다(측정 환경은 각 항목의 env에 적는다).
 export const TROUBLES = [
   {
+    id: 'checks-outside-ci',
+    date: '2026-11-25',
+    area: '화면 · 자동 검사(CI)',
+    title: 'package.json에 등록되지 않은 검사 13개가 CI에서 한 번도 돌지 않아 3개가 몰래 깨져 있었음',
+    status: 'solved',
+    symptom: 'CI는 package.json의 check:* 검사만 돌리는데, scripts 폴더의 check-*.mjs 53개 중 13개는 등록돼 있지 않았다. 직접 돌려 보니 회사 준비 화면 검사는 "53 !== 51", 1:1 대화 검사는 "suggested.map is not a function", 답변 버전 검사는 스냅샷과 현재 답변이 달라 실패했다.',
+    cause: '검사를 새로 만들 때 package.json 등록을 빠뜨려 CI가 그 파일을 알지 못했다. 그사이 문항이 늘고(51 → 53) 화면에 새 API(접속 중인 친구 추천)가 생겨 고정값과 목업이 낡았다.',
+    fix: '문항 수를 고정값 대신 데이터에서 읽은 개수로 비교하고, 통과하는 11개를 check:*로 등록해 PR마다 돌게 했다. 1:1 대화 검사(화면 리뉴얼 중)와 답변 버전 스냅샷 검사(새 버전 저장 여부를 정해야 함)는 따로 고친다.',
+    result: 'CI 데이터 검사 36개 → 47개',
+    env: 'Node 24 · Vite SSR · react-test-renderer · GitHub Actions',
+    lesson: '검사 파일은 만들기만 하면 끝이 아니라 CI가 실제로 실행하는지까지 확인한다. 개수 같은 값은 고정하지 말고 데이터에서 계산한다.',
+    links: [],
+  },
+  {
     id: 'deploy-timer-stalled',
     date: '2026-11-20',
     area: '인프라 · 자동 배포',

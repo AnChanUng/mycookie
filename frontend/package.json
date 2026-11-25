@@ -44,7 +44,18 @@
     "check:chanung-completion": "node scripts/check-chanung-completion.mjs",
     "check:onboarding-calendar": "node --import ./scripts/extensionless-loader.mjs scripts/check-onboarding-calendar.mjs",
     "check:account-forms": "node --import ./scripts/extensionless-loader.mjs scripts/check-account-forms.mjs",
-    "check:header-subscribe": "node --import ./scripts/extensionless-loader.mjs scripts/check-header-subscribe.mjs"
+    "check:header-subscribe": "node --import ./scripts/extensionless-loader.mjs scripts/check-header-subscribe.mjs",
+    "check:chanung-hidden-reload": "node scripts/check-chanung-hidden-reload.mjs",
+    "check:company-prep": "node scripts/check-company-prep.mjs",
+    "check:duel": "node scripts/check-duel.mjs",
+    "check:experience": "node scripts/check-experience.mjs",
+    "check:interview-camera": "node scripts/check-interview-camera.mjs",
+    "check:loyalty": "node scripts/check-loyalty.mjs",
+    "check:practice-entry": "node scripts/check-practice-entry.mjs",
+    "check:rank-cache": "node scripts/check-rank-cache.mjs",
+    "check:rank": "node scripts/check-rank.mjs",
+    "check:reading-themes": "node scripts/check-reading-themes.mjs",
+    "check:web-menu": "node scripts/check-web-menu.mjs"
   },
   "dependencies": {
     "axios": "^1.14.0",
