@@ -19,7 +19,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest(properties = "app.admin-key=test-admin-key")
+@SpringBootTest(properties = {"app.admin-key=test-admin-key", "app.security.trust-forwarded-for=true"})
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 class ArcadeScoreTest {
@@ -118,5 +118,16 @@ class ArcadeScoreTest {
                 .andExpect(status().isOk());
         mvc.perform(get("/api/v1/arcade/scores").param("game", "breakout"))
                 .andExpect(jsonPath("$.breakout.length()").value(0));
+    }
+
+    // X-Forwarded-For 앞쪽은 누구나 지어 넣을 수 있다. 프록시가 붙인 맨 뒤 주소로 세므로 앞값을 바꿔도 IP당 등록 제한을 넘지 못한다
+    @Test
+    void forgedForwardedForDoesNotBypassThePerNetworkLimit() throws Exception {
+        for (int i = 1; i <= 5; i++) {
+            submit("2048", "visitor-x" + i, "위조" + i, i * 100, "203.0.113." + i + ", 10.7.7.7")
+                    .andExpect(jsonPath("$.saved").value(true));
+        }
+        submit("2048", "visitor-x6", "위조6", 600, "203.0.113.6, 10.7.7.7")
+                .andExpect(status().isBadRequest());
     }
 }

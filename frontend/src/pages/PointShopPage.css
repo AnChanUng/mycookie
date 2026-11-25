@@ -47,7 +47,21 @@
 .ps-history b.minus { color: var(--ds-text-2); }
 .ps-none { font-size: var(--ds-fs-small); color: var(--ds-text-3); }
 
+/* 오늘의 퀘스트: 진행 막대 세 칸 */
+.ps-quests { margin: var(--ds-s5) 0 0; }
+.ps-quests ul { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--ds-s3); margin: 0; padding: 0; list-style: none; }
+.ps-quests li { display: grid; gap: var(--ds-s2); padding: var(--ds-s4) var(--ds-s5); border: 1px solid var(--ds-line-strong); border-radius: var(--ds-r-xl); background: var(--ds-surface); }
+.ps-quests li.done { background: var(--ds-brand-soft); border-color: transparent; }
+.ps-quests li > div { display: flex; justify-content: space-between; align-items: baseline; }
+.ps-quests li b { font-size: var(--ds-fs-body); }
+.ps-quests li > div span { font-size: var(--ds-fs-small); font-weight: 800; color: var(--ds-brand); }
+.ps-quest-bar { display: block; height: 6px; border-radius: 999px; background: var(--ds-surface-2); overflow: hidden; }
+.ps-quest-bar i { display: block; height: 100%; border-radius: inherit; background: var(--ds-brand); transition: width var(--ds-fast) var(--ds-ease); }
+.ps-quests li small { font-size: var(--ds-fs-caption); color: var(--ds-text-3); font-variant-numeric: tabular-nums; }
+.ps-quest-go { display: inline-block; margin-top: var(--ds-s3); font-size: var(--ds-fs-small); font-weight: 700; color: var(--ds-brand); text-decoration: none; }
+
 @media (max-width: 640px) {
+  .ps-quests ul { grid-template-columns: 1fr; }
   .ps-hero, .ps-empty { flex-direction: column; align-items: stretch; }
   .ps-attend { justify-items: stretch; }
   .ps-rules { grid-template-columns: 1fr; }

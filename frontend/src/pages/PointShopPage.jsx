@@ -14,7 +14,7 @@ const RULES = [
   { icon: '✏️', title: '문제 풀이', text: '새로 푼 문제 1개당 1P', sub: '같은 문제는 한 번만' },
   { icon: '🏅', title: '승급', text: '단계마다 10 · 30 · 60 · 100 · 200P', sub: '새 등급에 오르면 100~800P 더' },
 ];
-const REASONS = { ATTEND: '출석', SOLVED: '문제 풀이', TIER_UP: '승급', PURCHASE: '구매' };
+const REASONS = { ATTEND: '출석', SOLVED: '문제 풀이', TIER_UP: '승급', QUEST: '퀘스트', PURCHASE: '구매' };
 const KINDS = [
   { kind: 'avatar', title: '대표 아이콘', note: '프로필 · 채팅 · 순위에 보이는 아이콘' },
   { kind: 'theme', title: '카드 테마', note: '프로필 카드의 강조 색' },
@@ -87,6 +87,21 @@ export default function PointShopPage() {
       {data.error && <p className="ps-message bad" role="alert">{data.error}</p>}
       {message && <p className={`ps-message${message.ok ? '' : ' bad'}`} role={message.ok ? 'status' : 'alert'}>{message.text}</p>}
     </>}
+
+    {s?.quests?.length > 0 && <section className="ps-quests" aria-label="오늘의 퀘스트">
+      <div className="ps-section-head"><h2>오늘의 퀘스트</h2><span>오늘 새로 푼 문제 {s.todaySolved.toLocaleString()}개 · 다 채우면 자동으로 받아요</span></div>
+      <ul>
+        {s.quests.map(q => {
+          const percent = Math.min(100, Math.round(s.todaySolved / q.count * 100));
+          return <li key={q.count} className={q.done ? 'done' : ''}>
+            <div><b>{q.count}문제 풀기</b><span>{q.done ? '✓ 받음' : `+${q.point}P`}</span></div>
+            <span className="ps-quest-bar" role="progressbar" aria-valuemin={0} aria-valuemax={q.count} aria-valuenow={Math.min(q.count, s.todaySolved)} aria-label={`${q.count}문제 퀘스트 진행`}><i style={{ width: `${percent}%` }} /></span>
+            <small>{Math.min(q.count, s.todaySolved)} / {q.count}</small>
+          </li>;
+        })}
+      </ul>
+      <Link to="/exam" className="ps-quest-go">문제 풀러 가기 →</Link>
+    </section>}
 
     <section className="ps-rules" aria-label="포인트 받는 법">
       {RULES.map(r => <div key={r.title}><span className="ps-rule-icon" aria-hidden="true">{r.icon}</span><b>{r.title}</b><p>{r.text}</p><small>{r.sub}</small></div>)}

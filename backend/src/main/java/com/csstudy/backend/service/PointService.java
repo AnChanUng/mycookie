@@ -36,26 +36,36 @@ public class PointService {
     // 등급 단계(Ⅴ→Ⅰ) 하나 오를 때, 그리고 새 등급(Ⅴ)에 들어설 때 더 주는 몫. 순서는 동 · 은 · 금 · 다이아 · 루비
     public static final long[] STEP_POINT = {10, 30, 60, 100, 200};
     public static final long[] TIER_BONUS = {0, 100, 200, 400, 800};
+    // 오늘의 퀘스트: 오늘 새로 푼 문제 수가 기준에 닿으면 자동으로 준다(문제 수, 포인트)
+    public static final long[][] QUESTS = {{5, 20}, {15, 40}, {30, 80}};
 
     // 상점 품목과 가격. 화면(data/profileOptions.js)과 같은 목록이다
     public static final Map<String, Long> SHOP;
     static {
         Map<String, Long> m = new LinkedHashMap<>();
-        for (String a : List.of("🦄", "🐲", "👑", "🍩", "🧠", "💎")) m.put("avatar:" + a, 300L);
+        for (String a : List.of("🦄", "🐲", "👑", "🍩", "🧠", "💎", "🎀", "🌸", "🦋", "🍓", "🧸", "🐹")) m.put("avatar:" + a, 300L);
+        m.put("avatar:🌷", 10L); // 처음 모은 포인트로 바로 살 수 있는 맛보기 아이템
         m.put("theme:sakura", 800L);
         m.put("theme:ocean", 800L);
         m.put("theme:forest", 800L);
         m.put("theme:grape", 1200L);
         m.put("theme:ink", 1200L);
+        m.put("theme:peach", 800L);
+        m.put("theme:lavender", 800L);
+        m.put("theme:rose", 1200L);
         m.put("frame:flame", 1800L);
         m.put("frame:rainbow", 2500L);
+        m.put("frame:pastel", 1800L);
+        m.put("frame:ribbon", 2000L);
+        m.put("frame:heart", 2500L);
         SHOP = Collections.unmodifiableMap(m);
     }
 
     public record Item(String key, long price) {}
     public record Entry(long amount, String reason, String memo, Instant at) {}
+    public record Quest(long count, long point, boolean done) {}
     public record Summary(long balance, int streak, boolean attendedToday, List<String> owned,
-                          List<Entry> history, List<Item> shop) {}
+                          List<Entry> history, List<Item> shop, long todaySolved, List<Quest> quests) {}
     // earned가 0이면 오늘 이미 출석한 것이다(화면이 접속할 때마다 불러도 하루 한 번만 준다)
     public record Attend(long earned, int streak, long balance, boolean already) {}
 
@@ -108,6 +118,10 @@ public class PointService {
         return view(user.getId(), account);
     }
 
+    // 문제 풀이 수가 새로 들어왔을 때(순위 기록) 바로 풀이 · 승급 · 퀘스트 포인트를 정산한다. 부른 쪽 트랜잭션에 같이 묶인다
+    @Transactional
+    public void refresh(User user) { settle(user); }
+
     @Transactional(readOnly = true)
     public Set<String> owned(Long userId) {
         Set<String> out = new TreeSet<>();
@@ -120,6 +134,13 @@ public class PointService {
         PointAccount account = lock(user.getId());
         MembershipService.Membership m = memberships.membership(user);
         long solved = m.solvedCount();
+        // 날짜가 바뀐 뒤 처음 정산할 때 오늘의 출발점을 지금 풀이 수로 잡는다. 그래서 지난 풀이나 소급 지급은 퀘스트에 들어가지 않는다
+        LocalDate today = today();
+        if (!today.equals(account.getQuestDate())) {
+            account.setQuestDate(today);
+            account.setQuestBase(solved);
+            account.setQuestClaimed(0);
+        }
         if (solved > account.getSolvedCredited()) {
             long gained = solved - account.getSolvedCredited();
             account.setSolvedCredited(solved);
@@ -131,6 +152,14 @@ public class PointService {
             for (int l = account.getLevelCredited() + 1; l <= level; l++) sum += levelReward(l);
             account.setLevelCredited(level);
             credit(account, sum, PointHistory.Reason.TIER_UP, "승급 · " + (m.tierName() == null ? m.tier().label() : m.tierName()));
+        }
+        long todaySolved = todaySolved(account, solved);
+        int claimed = account.getQuestClaimed() == null ? 0 : account.getQuestClaimed();
+        for (int i = 0; i < QUESTS.length; i++) {
+            if (todaySolved < QUESTS[i][0] || (claimed & (1 << i)) != 0) continue;
+            claimed |= 1 << i;
+            account.setQuestClaimed(claimed);
+            credit(account, QUESTS[i][1], PointHistory.Reason.QUEST, "오늘의 퀘스트 · " + QUESTS[i][0] + "문제 풀기");
         }
         return account;
     }
@@ -155,11 +184,19 @@ public class PointService {
         history.save(PointHistory.builder().userId(account.getUserId()).amount(amount).reason(reason).memo(memo).createdAt(Instant.now()).build());
     }
 
+    static long todaySolved(PointAccount account, long solved) {
+        return Math.max(0, solved - (account.getQuestBase() == null ? solved : account.getQuestBase()));
+    }
+
     private Summary view(Long userId, PointAccount account) {
         List<Entry> recent = history.findTop30ByUserIdOrderByIdDesc(userId).stream()
                 .map(h -> new Entry(h.getAmount(), h.getReason().name(), h.getMemo(), h.getCreatedAt())).toList();
         List<Item> shop = SHOP.entrySet().stream().map(e -> new Item(e.getKey(), e.getValue())).toList();
+        long todaySolved = todaySolved(account, account.getSolvedCredited());
+        int claimed = account.getQuestClaimed() == null ? 0 : account.getQuestClaimed();
+        List<Quest> quests = new ArrayList<>();
+        for (int i = 0; i < QUESTS.length; i++) quests.add(new Quest(QUESTS[i][0], QUESTS[i][1], (claimed & (1 << i)) != 0));
         return new Summary(account.getBalance(), account.getAttendStreak(), today().equals(account.getLastAttendDate()),
-                List.copyOf(owned(userId)), recent, shop);
+                List.copyOf(owned(userId)), recent, shop, todaySolved, quests);
     }
 }

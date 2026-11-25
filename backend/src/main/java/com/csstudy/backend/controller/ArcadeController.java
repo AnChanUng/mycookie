@@ -48,6 +48,7 @@ public class ArcadeController {
 
     private final ArcadeScoreRepository scoreRepository;
     private final AdminAuth adminAuth;
+    private final com.csstudy.backend.security.ClientAddress addresses;
 
     // game을 주면 그 순위판만, 안 주면 모든 순위판을 돌려준다
     @GetMapping("/arcade/scores")
@@ -166,11 +167,9 @@ public class ArcadeController {
         return t.length() > NICKNAME_MAX ? t.substring(0, NICKNAME_MAX) : t;
     }
 
-    // Render 같은 프록시 뒤에서는 실제 주소가 X-Forwarded-For의 첫 값으로 온다
-    private static String clientIp(HttpServletRequest request) {
-        String forwarded = request.getHeader("X-Forwarded-For");
-        if (forwarded != null && !forwarded.isBlank()) return forwarded.split(",")[0].trim();
-        return request.getRemoteAddr();
+    // 요청한 곳의 주소. X-Forwarded-For의 첫 값은 누구나 지어 넣을 수 있어서, 믿을 수 있는 프록시가 붙인 값만 쓰는 ClientAddress로 고른다
+    private String clientIp(HttpServletRequest request) {
+        return addresses.resolve(request);
     }
 
     private static String hash(String value) {
