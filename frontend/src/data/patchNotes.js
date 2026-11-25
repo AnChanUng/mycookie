@@ -5,6 +5,16 @@
 // status: 'released' 배포됨(master) | 'dev' 개발 브랜치에만 있음(release PR을 머지하면 released로 바꾼다)
 export const PATCH_NOTES = [
   {
+    version: '1.7.0', date: '2026-11-25', status: 'dev',
+    title: '노트 문제풀이',
+    summary: '웹노트와 전공노트를 읽은 뒤 객관식 · 단답형 문제로 확인합니다.',
+    items: [
+      { type: 'feature', text: '웹노트 문제풀이(웹 개발 · CS 메뉴): 웹노트 57문답마다 객관식, 용어로 답하는 단답형 문제를 모의고사 또는 영역별 연습으로 풉니다.' },
+      { type: 'feature', text: '전공노트 문제풀이(CS · 면접 메뉴): 전공노트 169개 개념을 네트워크 · 운영체제 · DB · Java · Spring 등 과목별로 풉니다.' },
+      { type: 'improve', text: '단답형은 띄어쓰기 · 대소문자 · 우리말과 영문 표기와 관계없이 바로 자동 채점하고, 틀리면 "노트 다시 읽기"로 해당 노트에 돌아갑니다.' },
+    ],
+  },
+  {
     version: '1.6.0', date: '2026-11-25', status: 'dev',
     title: '틀린 문제 복습',
     summary: '학습 메일 연습에서 틀린 문제를 오답노트와 첫 화면에서 다시 풀 수 있습니다.',

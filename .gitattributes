@@ -1,0 +1,6 @@
+# 화면 데이터에서 만들어 내는 파일. 검사(npm run check:*)가 만든 결과와 글자 하나까지 비교하므로
+# Windows(core.autocrlf=true)에서도 줄 끝을 LF로 받는다
+backend/src/main/resources/duel-bank.json text eol=lf
+backend/src/main/resources/promotion-bank.json text eol=lf
+backend/src/main/resources/newsletter/web-essentials.json text eol=lf
+frontend/nginx/security-headers.conf.template text eol=lf

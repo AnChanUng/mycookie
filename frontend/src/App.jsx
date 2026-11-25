@@ -114,6 +114,7 @@ function App() {
           <Route path="newsletter/unsubscribe" element={<NewsletterUnsubscribePage />} />
           <Route path="stats" element={<StatsPage />} />
           <Route path="cs" element={<CsHubPage />} />
+          <Route path="cs/:company" element={<ExamCompanyPage />} />
           <Route path="interview" element={<InterviewPracticePage />} />
           {/* AWS · 현대오토에버 면접 자료는 관리자 페이지(다른 사람 면접)로 옮김 */}
           <Route path="technical-interview" element={<Navigate to="/cs" replace />} />
