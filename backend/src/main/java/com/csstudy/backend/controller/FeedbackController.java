@@ -2,13 +2,19 @@ package com.csstudy.backend.controller;
 
 import com.csstudy.backend.entity.Feedback;
 import com.csstudy.backend.entity.User;
+import com.csstudy.backend.exception.CookieErrorCode;
+import com.csstudy.backend.exception.CookieException;
 import com.csstudy.backend.repository.FeedbackRepository;
+import com.csstudy.backend.security.ClientAddress;
+import com.csstudy.backend.security.DailyIpLimit;
 import com.csstudy.backend.service.AuthService;
 import com.csstudy.backend.service.FeedbackEvents;
 import com.csstudy.backend.service.FeedbackProcessor;
+import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -36,6 +42,15 @@ public class FeedbackController {
     private final FeedbackEvents events;
     private final FeedbackProcessor processor;
     private final AuthService authService;
+    private final ClientAddress addresses;
+
+    // 방문자 ID는 바꿔 보낼 수 있어서 같은 곳(IP)에서 하루에 보낼 수 있는 수도 따로 막는다(Slack 알림 · GitHub 이슈 도배 방지)
+    @Value("${app.security.feedback-per-ip-per-day:10}")
+    private int perIpPerDay = 10;
+    private DailyIpLimit perIp;
+
+    @PostConstruct
+    void initLimit() { perIp = new DailyIpLimit(perIpPerDay); }
 
     @PostMapping
     public ResponseEntity<?> create(@RequestBody Map<String, Object> body, HttpServletRequest request) {
@@ -51,8 +66,9 @@ public class FeedbackController {
 
         LocalDate today = LocalDate.now(KST);
         if (feedbacks.countByVisitorIdAndDay(visitorId, today) >= PER_VISITOR_PER_DAY
-                || feedbacks.countByDay(today) >= SITE_PER_DAY) {
-            return ResponseEntity.status(429).body(Map.of("error", "오늘 보낼 수 있는 제보 수를 넘었습니다. 내일 다시 보내 주세요."));
+                || feedbacks.countByDay(today) >= SITE_PER_DAY
+                || !perIp.tryAcquire(addresses.resolve(request), today)) {
+            throw new CookieException(CookieErrorCode.FEEDBACK_DAILY_LIMIT);
         }
 
         String nickname = authService.currentUser(request).map(User::getNickname).orElse(null);

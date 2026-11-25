@@ -5,6 +5,7 @@ import com.csstudy.backend.repository.DonationRepository;
 import com.csstudy.backend.exception.CookieErrorCode;
 import com.csstudy.backend.exception.CookieException;
 import com.csstudy.backend.security.ClientAddress;
+import com.csstudy.backend.security.DailyIpLimit;
 import com.csstudy.backend.service.AdminAuth;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +20,6 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 사이트의 "자료 기부"로 올라온 파일을 받아 DB에 보관한다.
@@ -48,8 +48,7 @@ public class DonationController {
     private static final int PER_VISITOR_PER_DAY = 10;
     // 방문자 ID는 요청마다 바꿔 보낼 수 있어서, 같은 곳(IP)에서 하루에 올릴 수 있는 수도 따로 막는다. 서버 메모리에만 둔다
     static final int PER_IP_PER_DAY = 10;
-    private static final int IP_TRACK_MAX = 10_000;
-    private final Map<String, int[]> perIp = new ConcurrentHashMap<>();
+    private final DailyIpLimit perIp = new DailyIpLimit(PER_IP_PER_DAY);
 
     private final DonationRepository donationRepository;
     private final AdminAuth adminAuth;
@@ -82,7 +81,7 @@ public class DonationController {
         String visitor = (visitorId == null || visitorId.isBlank()) ? "anon" : trim(visitorId, 40);
         LocalDate day = LocalDate.now(KST);
         if (donationRepository.countByVisitorIdAndDay(visitor, day) >= PER_VISITOR_PER_DAY
-                || !allowIp(addresses.resolve(request), day)) {
+                || !perIp.tryAcquire(addresses.resolve(request), day)) {
             throw new CookieException(CookieErrorCode.DONATION_DAILY_LIMIT);
         }
 
@@ -166,18 +165,6 @@ public class DonationController {
     }
 
     // ===== 잡다한 검사 =====
-
-    // 같은 곳에서 오늘 올린 수를 센다. 날짜가 바뀌면 다시 0부터 센다
-    private boolean allowIp(String ip, LocalDate day) {
-        if (perIp.size() > IP_TRACK_MAX) perIp.clear();
-        int today = (int) day.toEpochDay();
-        int[] window = perIp.compute(String.valueOf(ip), (k, v) -> v == null || v[0] != today ? new int[]{today, 0} : v);
-        synchronized (window) {
-            if (window[1] >= PER_IP_PER_DAY) return false;
-            window[1]++;
-            return true;
-        }
-    }
 
     private byte[] bytes(MultipartFile f) {
         try {

@@ -114,6 +114,9 @@ app:
   admin-key: ${ADMIN_KEY:}
   security:
     rate-limit-enabled: true
+    # 누구나 보내는 문제 제보 · 건의를 같은 곳(IP)에서 하루 몇 번까지 받을지. 방문자 ID 한도(제보 20 · 건의 5)와 따로 센다
+    reports-per-ip-per-day: 30
+    feedback-per-ip-per-day: 10
     trust-forwarded-for: ${TRUST_FORWARDED_FOR:${RENDER:false}}
     # 로그인 토큰 유효 기간(일). 지나면 다시 로그인해야 한다
     token-max-age-days: ${TOKEN_MAX_AGE_DAYS:90}
