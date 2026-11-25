@@ -43,14 +43,21 @@ public class PointService {
     public static final Map<String, Long> SHOP;
     static {
         Map<String, Long> m = new LinkedHashMap<>();
-        for (String a : List.of("🦄", "🐲", "👑", "🍩", "🧠", "💎")) m.put("avatar:" + a, 300L);
+        for (String a : List.of("🦄", "🐲", "👑", "🍩", "🧠", "💎", "🎀", "🌸", "🦋", "🍓", "🧸", "🐹")) m.put("avatar:" + a, 300L);
+        m.put("avatar:🌷", 10L); // 처음 모은 포인트로 바로 살 수 있는 맛보기 아이템
         m.put("theme:sakura", 800L);
         m.put("theme:ocean", 800L);
         m.put("theme:forest", 800L);
         m.put("theme:grape", 1200L);
         m.put("theme:ink", 1200L);
+        m.put("theme:peach", 800L);
+        m.put("theme:lavender", 800L);
+        m.put("theme:rose", 1200L);
         m.put("frame:flame", 1800L);
         m.put("frame:rainbow", 2500L);
+        m.put("frame:pastel", 1800L);
+        m.put("frame:ribbon", 2000L);
+        m.put("frame:heart", 2500L);
         SHOP = Collections.unmodifiableMap(m);
     }
 
