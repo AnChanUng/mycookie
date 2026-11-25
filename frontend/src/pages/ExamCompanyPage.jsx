@@ -399,22 +399,14 @@ export function CompanyExamWithProgress({ company, back, progress, initialIds })
         </button>
       </div>
 
-      {!lean && company.source && SOURCE_KINDS[company.source.kind] && (
-        <div className={`exam-source ${company.source.kind}`}>
-          <span className="badge">
-            {SOURCE_KINDS[company.source.kind].icon} {company.source.label || SOURCE_KINDS[company.source.kind].badge}
-          </span>
-          <span className="txt">{company.source.detail || SOURCE_KINDS[company.source.kind].detail}</span>
-        </div>
-      )}
-      {!lean && <p className="exam-lede">{company.lede}</p>}
+      {/* 문제집 설명은 띄우지 않는다. 복기 문제처럼 꼭 알아야 할 것만 한 줄로 */}
+      {SOURCE_KINDS[company.source?.kind]?.short && <p className="exam-source-note">{SOURCE_KINDS[company.source.kind].short}</p>}
       {company.references?.map(ref => <p key={ref.url}><a href={ref.url} target="_blank" rel="noreferrer">{ref.title} ↗</a></p>)}
 
       {/* 실제 시험을 복원한 문제는 예상문제보다 먼저 보이게 맨 위에 둔다 */}
       {RECALL && (
         <>
           <div className="section-title">{RECALL.title}<Kind kind="recall" /></div>
-          <p className="exam-lede">{RECALL.lede}</p>
           <div className="exam-sections">
             <button className="exam-section" onClick={() => start('recall', RECALL.questions.map(q => q.id))}>
               <span className="t">순서대로 풀기</span>
@@ -451,7 +443,6 @@ export function CompanyExamWithProgress({ company, back, progress, initialIds })
       {UNITS && (
         <>
           <div className="section-title">{UNITS.title}</div>
-          <p className="exam-lede">{UNITS.lede}</p>
           <div className="exam-sections">
             {Object.entries(SECTIONS).filter(([, s]) => s.unit).map(([k, s]) => {
               const qs = UNITS.questions.filter(q => q.sec === k);

@@ -257,35 +257,8 @@
 .exam-resume-text strong { font-size: 0.92rem; }
 .exam-resume-text span { font-size: 0.8rem; color: var(--text-secondary); font-variant-numeric: tabular-nums; }
 
-/* 문제집의 근거를 제목 바로 아래에서 알려 준다 */
-.exam-source {
-  display: flex;
-  align-items: baseline;
-  flex-wrap: wrap;
-  gap: 4px 10px;
-  margin-bottom: 14px;
-  padding: 10px 14px;
-  border: 1px solid var(--border-color);
-  border-left: 3px solid var(--text-tertiary);
-  border-radius: var(--radius-md);
-  background: var(--bg-secondary);
-}
-
-.exam-source .badge {
-  font-size: 0.82rem;
-  font-weight: 800;
-  color: var(--text-primary);
-  white-space: nowrap;
-}
-
-.exam-source .txt {
-  font-size: 0.8rem;
-  color: var(--text-secondary);
-  line-height: 1.6;
-}
-
-.exam-source.recall { border-left-color: var(--accent-green); }
-.exam-source.predicted { border-left-color: var(--accent-blue); }
+/* 복기 문제집처럼 꼭 알아야 할 것만 한 줄로 알려 준다 */
+.exam-source-note { margin: 0 0 var(--ds-s4, 14px); font-size: var(--ds-fs-small, 0.85rem); color: var(--ds-text-3, var(--text-secondary)); }
 
 /* 시작 카드와 구역 제목 옆의 복기 / 예상 구분 */
 .exam-kind {
@@ -2173,6 +2146,5 @@ a.exam-search-bank:hover { color: var(--accent-blue); }
 .exam-hero .section-title { margin-top: 4px; }
 .exam-hero .exam-sections { margin-bottom: 0; }
 .exam-again { margin-bottom: 36px; }
-.exam-home .exam-source { margin-top: 0; }
 .exam-areas { margin: -6px 0 22px; }
 .exam-home .exam-sections { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
