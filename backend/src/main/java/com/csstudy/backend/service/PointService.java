@@ -38,6 +38,9 @@ public class PointService {
     public static final long[] TIER_BONUS = {0, 100, 200, 400, 800};
     // 오늘의 퀘스트: 오늘 새로 푼 문제 수가 기준에 닿으면 자동으로 준다(문제 수, 포인트)
     public static final long[][] QUESTS = {{5, 20}, {15, 40}, {30, 80}};
+    // 풀이 수는 브라우저가 알려 주는 값이라 서버가 하나하나 확인할 수 없다. 그래서 하루에 포인트로 인정하는 새 풀이 수를 정해 두고,
+    // 넘는 몫은 버리지 않고 다음 날로 넘긴다(예전 기록이 많은 계정도 며칠에 걸쳐 모두 받는다). 승급 보상과 퀘스트도 인정한 풀이 수를 넘지 않는다
+    public static final long DAILY_SOLVED_CAP = 100;
 
     // 상점 품목과 가격. 화면(data/profileOptions.js)과 같은 목록이다
     public static final Map<String, Long> SHOP;
@@ -64,8 +67,12 @@ public class PointService {
     public record Item(String key, long price) {}
     public record Entry(long amount, String reason, String memo, Instant at) {}
     public record Quest(long count, long point, boolean done) {}
+    // pendingSolved: 하루 인정 수를 넘어 다음 날로 넘어간 풀이 수. dailySolvedCap: 하루에 포인트로 인정하는 새 풀이 수
     public record Summary(long balance, int streak, boolean attendedToday, List<String> owned,
-                          List<Entry> history, List<Item> shop, long todaySolved, List<Quest> quests) {}
+                          List<Entry> history, List<Item> shop, long todaySolved, List<Quest> quests,
+                          long pendingSolved, long dailySolvedCap) {}
+    // 정산 결과. 오늘 퀘스트에 센 풀이 수와 다음 날로 넘어간 풀이 수를 화면에 함께 보여 준다
+    record Settled(PointAccount account, long todaySolved, long pendingSolved) {}
     // earned가 0이면 오늘 이미 출석한 것이다(화면이 접속할 때마다 불러도 하루 한 번만 준다)
     public record Attend(long earned, int streak, long balance, boolean already) {}
 
@@ -93,7 +100,7 @@ public class PointService {
 
     @Transactional
     public Attend attend(User user) {
-        PointAccount account = settle(user);
+        PointAccount account = settle(user).account();
         LocalDate today = today();
         if (today.equals(account.getLastAttendDate())) return new Attend(0, account.getAttendStreak(), account.getBalance(), true);
         int streak = today.minusDays(1).equals(account.getLastAttendDate()) ? account.getAttendStreak() + 1 : 1;
@@ -110,12 +117,13 @@ public class PointService {
     public Summary buy(User user, String itemKey) {
         Long price = itemKey == null ? null : SHOP.get(itemKey);
         if (price == null) throw new CookieException(CookieErrorCode.POINT_ITEM_UNKNOWN);
-        PointAccount account = settle(user);
+        Settled settled = settle(user);
+        PointAccount account = settled.account();
         if (items.existsByUserIdAndItemKey(user.getId(), itemKey)) throw new CookieException(CookieErrorCode.POINT_ITEM_OWNED);
         if (account.getBalance() < price) throw new CookieException(CookieErrorCode.POINT_NOT_ENOUGH);
         items.save(UserItem.builder().userId(user.getId()).itemKey(itemKey).price(price).createdAt(Instant.now()).build());
         credit(account, -price, PointHistory.Reason.PURCHASE, "상점 구매");
-        return view(user.getId(), account);
+        return view(user.getId(), settled);
     }
 
     // 문제 풀이 수가 새로 들어왔을 때(순위 기록) 바로 풀이 · 승급 · 퀘스트 포인트를 정산한다. 부른 쪽 트랜잭션에 같이 묶인다
@@ -129,8 +137,9 @@ public class PointService {
         return out;
     }
 
-    // 계정 줄을 잠그고, 지난번 지급 뒤로 늘어난 풀이 수와 등급 단계만큼 포인트를 준다. 풀이 수가 줄어도 이미 준 포인트는 그대로 둔다
-    PointAccount settle(User user) {
+    // 계정 줄을 잠그고, 지난번 지급 뒤로 늘어난 풀이 수와 등급 단계만큼 포인트를 준다. 풀이 수가 줄어도 이미 준 포인트는 그대로 둔다.
+    // 새 풀이는 하루 DAILY_SOLVED_CAP개까지만 인정하고 나머지는 다음 날 이어서 준다
+    Settled settle(User user) {
         PointAccount account = lock(user.getId());
         MembershipService.Membership m = memberships.membership(user);
         long solved = m.solvedCount();
@@ -140,20 +149,24 @@ public class PointService {
             account.setQuestDate(today);
             account.setQuestBase(solved);
             account.setQuestClaimed(0);
+            account.setCreditedBase(account.getSolvedCredited());
         }
-        if (solved > account.getSolvedCredited()) {
-            long gained = solved - account.getSolvedCredited();
-            account.setSolvedCredited(solved);
+        if (account.getCreditedBase() == null) account.setCreditedBase(account.getSolvedCredited());
+        long room = Math.max(0, DAILY_SOLVED_CAP - (account.getSolvedCredited() - account.getCreditedBase()));
+        if (solved > account.getSolvedCredited() && room > 0) {
+            long gained = Math.min(solved - account.getSolvedCredited(), room);
+            account.setSolvedCredited(account.getSolvedCredited() + gained);
             credit(account, gained * SOLVED_POINT, PointHistory.Reason.SOLVED, "문제 풀이 " + gained + "개");
         }
-        int level = level(m);
+        int level = creditedLevel(user, m, account.getSolvedCredited());
         if (level > account.getLevelCredited()) {
             long sum = 0;
             for (int l = account.getLevelCredited() + 1; l <= level; l++) sum += levelReward(l);
             account.setLevelCredited(level);
             credit(account, sum, PointHistory.Reason.TIER_UP, "승급 · " + (m.tierName() == null ? m.tier().label() : m.tierName()));
         }
-        long todaySolved = todaySolved(account, solved);
+        // 퀘스트는 오늘 새로 푼 문제로 세되, 오늘 포인트로 인정한 풀이 수를 넘지 않는다
+        long todaySolved = Math.min(todaySolved(account, solved), account.getSolvedCredited() - account.getCreditedBase());
         int claimed = account.getQuestClaimed() == null ? 0 : account.getQuestClaimed();
         for (int i = 0; i < QUESTS.length; i++) {
             if (todaySolved < QUESTS[i][0] || (claimed & (1 << i)) != 0) continue;
@@ -161,7 +174,13 @@ public class PointService {
             account.setQuestClaimed(claimed);
             credit(account, QUESTS[i][1], PointHistory.Reason.QUEST, "오늘의 퀘스트 · " + QUESTS[i][0] + "문제 풀기");
         }
-        return account;
+        return new Settled(account, todaySolved, Math.max(0, solved - account.getSolvedCredited()));
+    }
+
+    // 승급 보상을 줄 등급 단계. 풀이 수로 오른 등급은 포인트로 인정한 풀이 수까지만 보고, 승급 시험(서버 채점)으로 얻은 등급은 그대로 인정한다
+    private int creditedLevel(User user, MembershipService.Membership m, long credited) {
+        if (m.solvedCount() <= credited || NicknameService.testTier(user.getNickname()) != null) return level(m);
+        return level(memberships.describe(MembershipService.baseTier(user), credited, "user:" + user.getId()));
     }
 
     private PointAccount lock(Long userId) {
@@ -188,15 +207,15 @@ public class PointService {
         return Math.max(0, solved - (account.getQuestBase() == null ? solved : account.getQuestBase()));
     }
 
-    private Summary view(Long userId, PointAccount account) {
+    private Summary view(Long userId, Settled settled) {
+        PointAccount account = settled.account();
         List<Entry> recent = history.findTop30ByUserIdOrderByIdDesc(userId).stream()
                 .map(h -> new Entry(h.getAmount(), h.getReason().name(), h.getMemo(), h.getCreatedAt())).toList();
         List<Item> shop = SHOP.entrySet().stream().map(e -> new Item(e.getKey(), e.getValue())).toList();
-        long todaySolved = todaySolved(account, account.getSolvedCredited());
         int claimed = account.getQuestClaimed() == null ? 0 : account.getQuestClaimed();
         List<Quest> quests = new ArrayList<>();
         for (int i = 0; i < QUESTS.length; i++) quests.add(new Quest(QUESTS[i][0], QUESTS[i][1], (claimed & (1 << i)) != 0));
         return new Summary(account.getBalance(), account.getAttendStreak(), today().equals(account.getLastAttendDate()),
-                List.copyOf(owned(userId)), recent, shop, todaySolved, quests);
+                List.copyOf(owned(userId)), recent, shop, settled.todaySolved(), quests, settled.pendingSolved(), DAILY_SOLVED_CAP);
     }
 }
