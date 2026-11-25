@@ -424,7 +424,7 @@
 }
 
 /* 작은 문제집 첫 화면(Spring 핵심 실전) */
-.sp-home { max-width: 1080px; margin: 0 auto; padding-bottom: 56px; }
+.sp-home { max-width: 860px; margin: 0 auto; padding-bottom: 56px; }
 .sp-head { margin: 20px 0 24px; }
 .sp-eyebrow { margin: 0 0 8px; font-size: 13px; font-weight: 700; color: var(--ds-brand); letter-spacing: .02em; }
 .sp-head h1 { margin: 0; font-size: var(--ds-fs-h2); font-weight: 800; letter-spacing: -0.02em; color: var(--ds-text); }
@@ -2167,17 +2167,12 @@ a.exam-search-bank:hover { color: var(--accent-blue); }
 }
 
 /* 모든 문제집 첫 화면: 모의고사 큰 카드 + 다시 풀기 두 칸. 웹 화면 폭을 꽉 채운다 */
-.exam-home { max-width: 1080px; margin: 0 auto; }
+.exam-home { max-width: 860px; margin: 0 auto; }
 .exam-hero { margin: 4px 0 0; }
-/* 넓은 화면: 숫자는 왼쪽, 시작 버튼은 오른쪽에 두어 카드가 휑하게 커지지 않게 */
-@media (min-width: 900px) {
-  .sp-hero:not(:has(.exam-sections)) { display: grid; grid-template-columns: minmax(0, 1fr) 280px; grid-template-areas: "facts cta" "facts hint"; column-gap: 24px; align-items: center; padding: 24px; }
-  .sp-hero:not(:has(.exam-sections)) .sp-facts { grid-area: facts; margin: 0; }
-  .sp-hero:not(:has(.exam-sections)) .sp-cta { grid-area: cta; align-self: end; }
-  .sp-hero:not(:has(.exam-sections)) .sp-hint { grid-area: hint; align-self: start; margin-top: 10px; font-size: 12px; }
-}
 .sp-facts { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
 .exam-hero .section-title { margin-top: 4px; }
 .exam-hero .exam-sections { margin-bottom: 0; }
 .exam-again { margin-bottom: 36px; }
 .exam-home .exam-source { margin-top: 0; }
+.exam-areas { margin: -6px 0 22px; }
+.exam-home .exam-sections { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }

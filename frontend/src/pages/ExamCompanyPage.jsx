@@ -353,6 +353,7 @@ export function CompanyExamWithProgress({ company, back, progress, initialIds })
   return (
     <div className="fade-in exam-home">
       {header(company.name)}
+      <ul className="sp-areas exam-areas" aria-label="출제 영역">{Object.values(SECTIONS).filter(sec => !sec.extra && !sec.unit).map(sec => <li key={sec.name}>{sec.name}</li>)}</ul>
       {plan && (
         <div className="exam-plan">
           <b>{plan.name} {plan.left === 0 ? 'D-DAY' : `D-${plan.left}`}</b>
