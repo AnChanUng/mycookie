@@ -299,7 +299,7 @@ export function CompanyExamWithProgress({ company, back, progress, initialIds })
     <>
       {!lean && <div className="section-title">{hasSets ? '회차별 모의고사' : '모의고사'}</div>}
       {hasSets && <p className="exam-lede">{company.setsDescription || <>실제 시험과 같은 문항 수·영역 구성으로 묶은 고정 세트입니다. {splitSets && '복기 기반 회차는 응시 후기에 복원된 문항을 따라 만들었고, 예상문제 회차는 같은 경향으로 새로 만든 문제입니다. '}각 회차는 같은 문제를 같은 순서로 출제하므로 다시 풀었을 때 점수를 비교할 수 있습니다.</>}</p>}
-      <div className={`exam-sections${lean ? ' wide' : ''}`}>
+      <div className={`exam-sections${lean || examSets.length === 1 ? ' wide' : ''}`}>
         {examSets.map(s => {
           const qs = hasSets ? Q.filter(q => q.set === s.key) : Q;
           const done = qs.filter(q => data.stats[q.id]).length;
@@ -424,10 +424,8 @@ export function CompanyExamWithProgress({ company, back, progress, initialIds })
             <span className="exam-mode-count"><b>{wrongIds.length}</b>문항</span>
           </span>
           <span className="t">오답 다시 풀기</span>
-          <span className="d">{wrongIds.length ? '틀리면 자동으로 쌓입니다. 마지막에 틀린 문제만 모아서 다시 풀고, 맞히면 빠집니다.' : '지금은 남은 오답이 없습니다. 문제를 풀다 틀리면 자동으로 여기에 모입니다.'}</span>
+          <span className="d">{wrongIds.length ? '틀리면 자동으로 쌓입니다. 마지막에 마지막에 틀린 문제만 다시 풀고, 맞히면 빠져요.' : '남은 오답이 없어요. 틀린 문제는 자동으로 모입니다.'}</span>
           <span className="exam-mode-foot">
-            <span className="exam-mode-chip">무작위 순서</span>
-            <span className="exam-mode-chip">즉시 채점</span>
             {wrongIds.length > 0 && <span className="exam-mode-go">다시 풀기 →</span>}
           </span>
         </button>
@@ -437,10 +435,8 @@ export function CompanyExamWithProgress({ company, back, progress, initialIds })
             <span className="exam-mode-count"><b>{markedIds.length}</b>문항</span>
           </span>
           <span className="t">북마크 다시 풀기</span>
-          <span className="d">{markedIds.length ? '내가 ★로 직접 고른 문제만 다시 풉니다. 맞혀도 별표를 풀 때까지 남아 있습니다.' : '다시 풀고 싶은 문제에 ☆를 눌러 두면 여기에 모입니다. 틀린문제와는 따로 관리됩니다.'}</span>
+          <span className="d">{markedIds.length ? '내가 ★로 직접 고른 문제만 다시 풉니다. 맞혀도 별표를 풀 때까지 남아 있습니다.' : '☆를 눌러 둔 문제만 따로 모아 풉니다.'}</span>
           <span className="exam-mode-foot">
-            <span className="exam-mode-chip">무작위 순서</span>
-            <span className="exam-mode-chip">즉시 채점</span>
             {markedIds.length > 0 && <span className="exam-mode-go">다시 풀기 →</span>}
           </span>
         </button>
