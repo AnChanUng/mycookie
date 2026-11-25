@@ -35,6 +35,16 @@ public class PointAccount {
     @Column(name = "attend_streak", nullable = false)
     private int attendStreak;
 
+    // 오늘의 퀘스트: 날짜, 그날 처음 정산할 때의 풀이 수(출발점), 받은 퀘스트(비트). 나중에 생긴 칸이라 비어 있을 수 있다
+    @Column(name = "quest_date")
+    private LocalDate questDate;
+
+    @Column(name = "quest_base")
+    private Long questBase;
+
+    @Column(name = "quest_claimed")
+    private Integer questClaimed;
+
     @Column(name = "updated_at")
     private Instant updatedAt;
 }
