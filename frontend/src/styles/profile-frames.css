@@ -1,10 +1,10 @@
 /* 프로필 아이콘 테두리(등급 보상). 프로필 카드 · 채팅 · 순위 · 헤더가 함께 쓴다.
    게임 프로필처럼 금속 결(은 · 금)과 도는 빛(다이아 · 루비)으로 그린다.
    아이콘 바깥에 고리를 하나 덧그린다: --pf-ring(아이콘과 고리 사이 + 고리 두께), --pf-w(고리 두께) */
-.frame-silver, .frame-gold, .frame-diamond, .frame-ruby, .frame-flame, .frame-rainbow { --pf-ring: 5px; --pf-w: 3px; position: relative; isolation: isolate; }
-.pf-small.frame-silver, .pf-small.frame-gold, .pf-small.frame-diamond, .pf-small.frame-ruby, .pf-small.frame-flame, .pf-small.frame-rainbow { --pf-ring: 3px; --pf-w: 2px; }
+.frame-silver, .frame-gold, .frame-diamond, .frame-ruby, .frame-flame, .frame-rainbow, .frame-pastel, .frame-ribbon, .frame-heart { --pf-ring: 5px; --pf-w: 3px; position: relative; isolation: isolate; }
+.pf-small.frame-silver, .pf-small.frame-gold, .pf-small.frame-diamond, .pf-small.frame-ruby, .pf-small.frame-flame, .pf-small.frame-rainbow, .pf-small.frame-pastel, .pf-small.frame-ribbon, .pf-small.frame-heart { --pf-ring: 3px; --pf-w: 2px; }
 
-.frame-silver::after, .frame-gold::after, .frame-diamond::after, .frame-ruby::after, .frame-flame::after, .frame-rainbow::after {
+.frame-silver::after, .frame-gold::after, .frame-diamond::after, .frame-ruby::after, .frame-flame::after, .frame-rainbow::after, .frame-pastel::after, .frame-ribbon::after, .frame-heart::after {
   content: ''; position: absolute; inset: calc(var(--pf-ring) * -1); z-index: 1;
   border-radius: 50%; pointer-events: none;
   -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - var(--pf-w)), #000 calc(100% - var(--pf-w) + .5px));
@@ -28,6 +28,21 @@
 /* 상점: 무지개(여러 색이 천천히 도는 고리) */
 .frame-rainbow::after { background: conic-gradient(#ff5f6d, #ffc371, #f9f871, #4ade80, #38bdf8, #818cf8, #e879f9, #ff5f6d); animation: pf-spin 5s linear infinite; }
 .frame-rainbow { box-shadow: 0 0 12px rgba(129, 140, 248, .4); }
+/* 상점: 파스텔(분홍 · 라일락 · 민트 · 복숭아가 천천히 도는 고리) */
+.frame-pastel::after { background: conic-gradient(#ffc8dd, #cdb4ff, #b8f2e6, #ffd6a5, #ffafcc, #ffc8dd); animation: pf-spin 7s linear infinite; }
+.frame-pastel { box-shadow: 0 0 12px rgba(205, 180, 255, .45); }
+/* 상점: 리본(분홍 · 흰 줄무늬가 감긴 고리) */
+.frame-ribbon::after { background: repeating-conic-gradient(#ff8fb8 0 18deg, #fff 18deg 30deg); animation: pf-spin 9s linear infinite; }
+.frame-ribbon { box-shadow: 0 0 10px rgba(255, 143, 184, .45); }
+/* 상점: 하트 반짝(분홍 고리 + 두근거리듯 번지는 빛) */
+.frame-heart::after { background: conic-gradient(#ffe3ee, #ff5d8f, #ffb3c9, #ff2e6e, #ffc2d6, #ffe3ee); animation: pf-spin 3.6s linear infinite; }
+.frame-heart { animation: pf-heart 1.6s ease-in-out infinite; }
+@keyframes pf-heart {
+  0%, 100% { box-shadow: 0 0 8px rgba(255, 93, 143, .35); }
+  15% { box-shadow: 0 0 18px 3px rgba(255, 93, 143, .6); }
+  30% { box-shadow: 0 0 10px rgba(255, 93, 143, .4); }
+  45% { box-shadow: 0 0 20px 4px rgba(255, 93, 143, .65); }
+}
 
 @keyframes pf-spin { to { transform: rotate(360deg); } }
 @keyframes pf-glow {
@@ -35,7 +50,7 @@
   50% { box-shadow: 0 0 22px 4px rgba(232, 67, 110, .6); }
 }
 @media (prefers-reduced-motion: reduce) {
-  .frame-diamond::after, .frame-ruby::after, .frame-ruby, .frame-flame::after, .frame-rainbow::after { animation: none; }
+  .frame-diamond::after, .frame-ruby::after, .frame-ruby, .frame-flame::after, .frame-rainbow::after, .frame-pastel::after, .frame-ribbon::after, .frame-heart::after { animation: none; }
 }
 
 /* 고른 대표 아이콘(이모지) 동그라미 */

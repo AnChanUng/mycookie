@@ -1,7 +1,7 @@
 // 프로필 꾸미기에서 고를 수 있는 것. 서버(MyProfileController)와 같은 목록이어야 한다
 export const PROFILE_AVATARS = ['🍪', '🧑‍💻', '🐱', '🐶', '🦊', '🐼', '🐧', '🦉', '🐻', '🐰', '🚀', '🔥', '🌱', '⭐', '🎯', '📚'];
 // 포인트 상점에서 사야 쓸 수 있는 아이콘(가격은 서버 PointService.SHOP이 정한다)
-export const SHOP_AVATARS = ['🦄', '🐲', '👑', '🍩', '🧠', '💎'];
+export const SHOP_AVATARS = ['🦄', '🐲', '👑', '🍩', '🧠', '💎', '🎀', '🌸', '🦋', '🍓', '🧸', '🐹', '🌷'];
 
 export const PROFILE_INTERESTS = [
   { key: 'backend', label: '백엔드' },
@@ -40,6 +40,9 @@ export const PROFILE_THEMES = [
   { key: 'forest', label: '숲', color: '#2f9e44', shop: true },
   { key: 'grape', label: '포도', color: '#8b5cf6', shop: true },
   { key: 'ink', label: '먹물', color: '#3b4252', shop: true },
+  { key: 'peach', label: '복숭아', color: '#f0806a', shop: true },
+  { key: 'lavender', label: '라벤더', color: '#9b7be8', shop: true },
+  { key: 'rose', label: '로즈골드', color: '#c47a7f', shop: true },
 ];
 
 // 아이콘 테두리
@@ -51,6 +54,9 @@ export const PROFILE_FRAMES = [
   { key: 'ruby', label: '루비 빛', minTier: 'RUBY' },
   { key: 'flame', label: '불꽃 고리', shop: true },
   { key: 'rainbow', label: '무지개 고리', shop: true },
+  { key: 'pastel', label: '파스텔 고리', shop: true },
+  { key: 'ribbon', label: '리본 고리', shop: true },
+  { key: 'heart', label: '하트 반짝', shop: true },
 ];
 
 // 상점 아이템 키("theme:sakura")와 보유 여부. 등급 보상은 등급으로, 상점 아이템은 산 것만 열린다

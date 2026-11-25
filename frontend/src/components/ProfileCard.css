@@ -51,7 +51,7 @@
   box-shadow: 0 8px 22px -10px rgba(0, 0, 0, .35);
 }
 .profile-avatar.emoji { font-size: 54px; background: var(--ds-surface-2); }
-.profile-avatar.frame-silver, .profile-avatar.frame-gold, .profile-avatar.frame-diamond, .profile-avatar.frame-ruby, .profile-avatar.frame-flame, .profile-avatar.frame-rainbow { --pf-ring: 4px; --pf-w: 5px; }
+.profile-avatar.frame-silver, .profile-avatar.frame-gold, .profile-avatar.frame-diamond, .profile-avatar.frame-ruby, .profile-avatar.frame-flame, .profile-avatar.frame-rainbow, .profile-avatar.frame-pastel, .profile-avatar.frame-ribbon, .profile-avatar.frame-heart { --pf-ring: 4px; --pf-w: 5px; }
 /* 이름은 배너 아래(흰 면)에서 시작한다 */
 .profile-who { flex: 1; min-width: 0; display: grid; gap: 6px; padding-top: 62px; padding-right: 96px; }
 .profile-name { display: flex; flex-wrap: wrap; align-items: center; gap: var(--ds-s2); }
