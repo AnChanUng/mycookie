@@ -9,7 +9,9 @@
 .ps-balance span, .ps-attend span { font-size: var(--ds-fs-small); color: var(--ds-text-3); }
 .ps-balance strong { font-size: 2.25rem; font-weight: 800; letter-spacing: var(--ds-tracking-tight); font-variant-numeric: tabular-nums; color: var(--ds-text); }
 .ps-balance small { margin-left: 4px; font-size: var(--ds-fs-title); color: var(--ds-brand); }
-.ps-attend { display: grid; justify-items: end; gap: var(--ds-s2); }
+.ps-attend { display: grid; justify-items: end; gap: var(--ds-s1); }
+.ps-attend b { padding: 6px var(--ds-s3); border-radius: var(--ds-r-pill, 999px); background: var(--ds-surface-2); font-size: var(--ds-fs-small); color: var(--ds-text-2); }
+.ps-attend b.on { background: var(--ds-brand-soft); color: var(--ds-brand); }
 .ps-message { margin: 0 0 var(--ds-s3); padding: var(--ds-s3) var(--ds-s4); border-radius: var(--ds-r-md); background: var(--ds-brand-soft); color: var(--ds-brand); font-size: var(--ds-fs-small); font-weight: 600; }
 .ps-message.bad { background: var(--ds-surface-2); color: var(--ds-text-2); }
 

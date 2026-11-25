@@ -10,7 +10,7 @@ import './PointShopPage.css';
 // 포인트 상점. 출석 · 문제 풀이 · 승급으로 모은 포인트로 프로필 꾸미기 아이템을 산다.
 // 지급 기준은 서버 PointService와 같은 값이다. 이미 풀었거나 승급한 몫은 처음 열 때 한 번에 들어온다
 const RULES = [
-  { icon: '📅', title: '출석', text: '하루 한 번 10P', sub: '7일 연속마다 50P 더' },
+  { icon: '📅', title: '출석', text: '접속하면 하루 10P 자동', sub: '7일 연속마다 50P 더' },
   { icon: '✏️', title: '문제 풀이', text: '새로 푼 문제 1개당 1P', sub: '같은 문제는 한 번만' },
   { icon: '🏅', title: '승급', text: '단계마다 10 · 30 · 60 · 100 · 200P', sub: '새 등급에 오르면 100~800P 더' },
 ];
@@ -40,23 +40,13 @@ export default function PointShopPage() {
     if (!token) { setData({ loading: false, error: '', summary: null }); return undefined; }
     const controller = new AbortController();
     setData(d => ({ ...d, loading: true, error: '' }));
-    api.get('/points', { headers: membershipHeaders(), signal: controller.signal, timeout: 30000 })
+    // 출석은 접속하면 자동으로 받는다(AutoAttend). 여기서도 먼저 불러 두면 잔액과 출석 표시가 바로 맞는다. 하루 한 번만 들어간다
+    api.post('/points/attend', null, { headers: membershipHeaders(), signal: controller.signal, timeout: 30000 }).catch(() => null)
+      .then(() => api.get('/points', { headers: membershipHeaders(), signal: controller.signal, timeout: 30000 }))
       .then(({ data: summary }) => setData({ loading: false, error: '', summary }))
       .catch(() => { if (!controller.signal.aborted) setData({ loading: false, error: '포인트를 불러오지 못했어요. 새로고침해 주세요.', summary: null }); });
     return () => controller.abort();
   }, [token]);
-
-  const attend = async () => {
-    setBusy('attend'); setMessage(null);
-    try {
-      const { data: r } = await api.post('/points/attend', null, { headers: membershipHeaders(), timeout: 15000 });
-      const { data: summary } = await api.get('/points', { headers: membershipHeaders(), timeout: 15000 });
-      setData({ loading: false, error: '', summary });
-      setMessage({ ok: true, text: `출석 완료! +${r.earned}P (${r.streak}일 연속)` });
-    } catch (error) {
-      setMessage({ ok: false, text: error?.response?.data?.error || '출석하지 못했어요. 잠시 후 다시 시도해 주세요.' });
-    } finally { setBusy(''); }
-  };
 
   const buy = async (item) => {
     const { label } = describe(item.key);
@@ -90,10 +80,8 @@ export default function PointShopPage() {
           <strong>{s ? s.balance.toLocaleString() : data.loading ? '…' : '–'}<small>P</small></strong>
         </div>
         <div className="ps-attend">
-          <span>{s?.streak ? `${s.streak}일 연속 출석 중` : '오늘 첫 출석을 해 보세요'}</span>
-          <button type="button" className="ds-btn ds-btn--primary ds-btn--sm" disabled={!s || s.attendedToday || busy === 'attend'} onClick={attend}>
-            {s?.attendedToday ? '오늘 출석 완료' : busy === 'attend' ? '출석하는 중…' : '출석하고 10P 받기'}
-          </button>
+          <span>{s?.streak ? `${s.streak}일 연속 출석 중` : '출석은 접속하면 자동이에요'}</span>
+          <b className={s?.attendedToday ? 'on' : ''}>{!s ? '…' : s.attendedToday ? '✓ 오늘 출석 완료' : '오늘 출석을 확인하는 중'}</b>
         </div>
       </section>
       {data.error && <p className="ps-message bad" role="alert">{data.error}</p>}

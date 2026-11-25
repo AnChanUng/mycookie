@@ -1,0 +1,10 @@
+/* 자동 출석 알림: 화면 오른쪽 아래에 잠깐 떴다 사라진다 */
+.auto-attend { position: fixed; right: var(--ds-s5); bottom: var(--ds-s5); z-index: 60; display: flex; align-items: center; gap: var(--ds-s3); max-width: calc(100vw - 2 * var(--ds-s5)); padding: var(--ds-s3) var(--ds-s4); border: 1px solid var(--ds-line-strong); border-radius: var(--ds-r-lg); background: var(--ds-surface); box-shadow: 0 8px 24px rgba(0, 0, 0, .12); animation: auto-attend-in .25s var(--ds-ease); }
+.auto-attend > span { font-size: 1.4rem; }
+.auto-attend p { display: grid; gap: 2px; margin: 0; }
+.auto-attend b { font-size: var(--ds-fs-small); color: var(--ds-text); }
+.auto-attend small { font-size: var(--ds-fs-caption); color: var(--ds-text-3); }
+.auto-attend a { font-size: var(--ds-fs-small); font-weight: 700; color: var(--ds-brand); text-decoration: none; white-space: nowrap; }
+.auto-attend button { border: 0; background: none; color: var(--ds-text-3); font-size: 1.1rem; cursor: pointer; }
+@keyframes auto-attend-in { from { opacity: 0; transform: translateY(8px); } }
+@media (prefers-reduced-motion: reduce) { .auto-attend { animation: none; } }

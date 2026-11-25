@@ -21,7 +21,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-// 포인트: 지금까지의 풀이 · 승급 몫을 한 번만 주고, 하루 한 번 출석, 상점에서 산 아이템만 프로필에 쓴다
+// 포인트: 지금까지의 풀이 · 승급 몫을 한 번만 주고, 자동 출석은 하루 한 번, 상점에서 산 아이템만 프로필에 쓴다
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
@@ -71,8 +71,9 @@ class PointShopTest {
 
         mvc.perform(post("/api/v1/points/attend").header("Authorization", t)).andExpect(status().isOk())
                 .andExpect(jsonPath("$.earned").value(10)).andExpect(jsonPath("$.streak").value(1)).andExpect(jsonPath("$.balance").value(720));
-        mvc.perform(post("/api/v1/points/attend").header("Authorization", t)).andExpect(status().isConflict())
-                .andExpect(jsonPath("$.code").value("POINT_ALREADY_ATTENDED"));
+        // 자동 출석이 여러 번 불려도 하루 한 번만 준다
+        mvc.perform(post("/api/v1/points/attend").header("Authorization", t)).andExpect(status().isOk())
+                .andExpect(jsonPath("$.earned").value(0)).andExpect(jsonPath("$.already").value(true)).andExpect(jsonPath("$.balance").value(720));
 
         buy(t, "theme:sakura").andExpect(status().isBadRequest()).andExpect(jsonPath("$.code").value("POINT_NOT_ENOUGH"));
         buy(t, "theme:hacked").andExpect(status().isBadRequest()).andExpect(jsonPath("$.code").value("POINT_ITEM_UNKNOWN"));

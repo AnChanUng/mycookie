@@ -8,6 +8,7 @@ import CookieAssistant from './CookieAssistant';
 import StudyAmbience from './StudyAmbience';
 import StudyCount from './StudyCount';
 import RankWelcome from './RankWelcome';
+import AutoAttend from './AutoAttend';
 import MemberMenu from './MemberMenu';
 import HeaderSubscribe from './HeaderSubscribe';
 import SplashReady from './SplashReady';
@@ -107,6 +108,7 @@ export default function Layout() {
             {!signedIn && <Link to="/account#settings" className="header-login">로그인</Link>}
             <StudyCount />
             <MemberMenu />
+            <AutoAttend />
           </div>
         </div>
         {openMenu && (

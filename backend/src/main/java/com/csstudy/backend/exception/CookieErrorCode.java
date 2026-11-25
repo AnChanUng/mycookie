@@ -48,7 +48,6 @@ public enum CookieErrorCode {
     WEAK_ADMIN_PASSWORD(HttpStatus.BAD_REQUEST, "관리자 비밀번호를 입력해 주세요. 아이디와 같거나 아이디를 포함하면 안 돼요."),
 
     // 포인트 · 상점
-    POINT_ALREADY_ATTENDED(HttpStatus.CONFLICT, "오늘은 이미 출석했어요. 내일 다시 와 주세요."),
     POINT_ITEM_UNKNOWN(HttpStatus.BAD_REQUEST, "상점에 없는 아이템이에요."),
     POINT_ITEM_OWNED(HttpStatus.CONFLICT, "이미 가지고 있는 아이템이에요."),
     POINT_NOT_ENOUGH(HttpStatus.BAD_REQUEST, "포인트가 부족해요. 출석하고 문제를 풀어 모아 보세요."),

@@ -23,6 +23,7 @@ public class PointController {
         return points.summary(auth.requireUser(request));
     }
 
+    // 출석. 화면이 로그인한 접속마다 자동으로 부른다. 오늘 이미 받았으면 0P로 돌려준다
     @PostMapping("/attend")
     public PointService.Attend attend(HttpServletRequest request) {
         return points.attend(auth.requireUser(request));

@@ -56,7 +56,8 @@ public class PointService {
     public record Entry(long amount, String reason, String memo, Instant at) {}
     public record Summary(long balance, int streak, boolean attendedToday, List<String> owned,
                           List<Entry> history, List<Item> shop) {}
-    public record Attend(long earned, int streak, long balance) {}
+    // earned가 0이면 오늘 이미 출석한 것이다(화면이 접속할 때마다 불러도 하루 한 번만 준다)
+    public record Attend(long earned, int streak, long balance, boolean already) {}
 
     private final PointAccountRepository accounts;
     private final PointHistoryRepository history;
@@ -84,7 +85,7 @@ public class PointService {
     public Attend attend(User user) {
         PointAccount account = settle(user);
         LocalDate today = today();
-        if (today.equals(account.getLastAttendDate())) throw new CookieException(CookieErrorCode.POINT_ALREADY_ATTENDED);
+        if (today.equals(account.getLastAttendDate())) return new Attend(0, account.getAttendStreak(), account.getBalance(), true);
         int streak = today.minusDays(1).equals(account.getLastAttendDate()) ? account.getAttendStreak() + 1 : 1;
         long earned = ATTEND_POINT;
         String memo = "출석 " + streak + "일째";
@@ -92,7 +93,7 @@ public class PointService {
         account.setLastAttendDate(today);
         account.setAttendStreak(streak);
         credit(account, earned, PointHistory.Reason.ATTEND, memo);
-        return new Attend(earned, streak, account.getBalance());
+        return new Attend(earned, streak, account.getBalance(), false);
     }
 
     @Transactional
