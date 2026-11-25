@@ -4,6 +4,8 @@ import { Link } from 'react-router-dom';
 import { account, onAccountChange } from '../sync';
 import { CS_NOTES } from '../data/csNotes';
 import { WEB_ESSENTIALS } from '../data/webEssentials';
+import { CS_NOTE_QUESTIONS } from '../data/csNoteQuestions';
+import { WEB_NOTE_QUESTIONS } from '../data/webNoteQuestions';
 import TodayCs from '../components/TodayCs';
 import './MyLearning.css';
 import './CsHub.css';
@@ -32,6 +34,16 @@ export default function CsHubPage() {
       to: '/web-essentials', icon: 'globe', title: '웹 필수지식',
       body: 'HTTP · 쿠키 · 세션 · JWT · CORS처럼 백엔드 면접 단골 질문을 문답으로.',
       total: WEB_ESSENTIALS.items.length, unit: '문답',
+    },
+    {
+      to: '/cs/csnote', icon: 'pencil', title: '전공노트 문제풀이',
+      body: '전공노트로 객관식 · 단답형을 풀고, 틀리면 해당 노트로 바로 돌아가 복습해요.',
+      total: CS_NOTE_QUESTIONS.length, unit: '문항',
+    },
+    {
+      to: '/web/webnote', icon: 'pencil', title: '웹노트 문제풀이',
+      body: '웹 필수지식을 객관식 · 단답형으로 확인해요. 단답형은 바로 자동 채점돼요.',
+      total: WEB_NOTE_QUESTIONS.length, unit: '문항',
     },
     {
       to: '/topics', icon: 'puzzle', title: '주제별 통합 문제집',

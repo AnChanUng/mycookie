@@ -15,14 +15,18 @@ const old = BANKS.filter(b => b.key !== 'pearl').flatMap(allQuestions).filter(th
 const springPractice = BANKS.find(b => b.key === 'spring-practice');
 assert.equal(springPractice.questions.length, 53);
 const springTheory = springPractice.questions.filter(theoryFor);
-const legacyTheory = BANKS.filter(b => !['pearl', 'spring-practice'].includes(b.key)).flatMap(allQuestions).filter(theoryFor);
+// 노트 문제(웹노트 · 전공노트)는 상세 해설 대신 근거 노트로 돌아가는 링크를 단다(check:note-quiz가 링크를 검사)
+const NOTE_BANKS = ['webnote', 'csnote'];
+const noteTheory = BANKS.filter(b => NOTE_BANKS.includes(b.key)).flatMap(allQuestions).filter(theoryFor);
+const legacyTheory = BANKS.filter(b => !['pearl', 'spring-practice', ...NOTE_BANKS].includes(b.key)).flatMap(allQuestions).filter(theoryFor);
 assert.equal(legacyTheory.length, 466);
-assert.equal(old.length, legacyTheory.length + springTheory.length);
+assert.equal(old.length, legacyTheory.length + springTheory.length + noteTheory.length);
+assert.ok(noteTheory.every(q => q.link), '노트 문제에는 근거 노트 링크가 있어야 함');
 // 상세 해설이 아직 없는 문항(짧은 해설 e만 있음). 2026-11-05 CU 문제집 확장 때 들어온 문항 등.
 // 새로 생기는 공백은 실패시키고, 이 목록은 해설을 채우면서 줄여 간다(목표 0개)
 const KNOWN_GAPS = {};  // 2026-11-20 CU 42, SSAFY DB 4문항 상세 해설을 채워 0개
 const gaps = {};
-for (const bank of BANKS.filter(b => b.key !== 'pearl'))
+for (const bank of BANKS.filter(b => b.key !== 'pearl' && !NOTE_BANKS.includes(b.key)))
   for (const q of allQuestions(bank).filter(theoryFor))
     if (!(explanationFor(q)?.length > 70)) gaps[bank.key] = (gaps[bank.key] || 0) + 1;
 for (const [bank, count] of Object.entries(gaps)) assert.ok(count <= (KNOWN_GAPS[bank] || 0), `상세 해설 없는 문항이 늘었음: ${bank} ${count}개(허용 ${KNOWN_GAPS[bank] || 0})`);

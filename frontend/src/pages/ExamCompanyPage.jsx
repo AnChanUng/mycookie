@@ -25,7 +25,7 @@ const Rich = ({ text }) => {
 };
 
 // 따로 상단 메뉴를 가진 분류(hub)에서 풀이 화면을 열었을 때 돌아갈 메뉴 이름
-const HUB_NAMES = { ssafy: 'SSAFY', aptitude: 'NCS/인적성', major: '필기이론', web: '웹', ai: 'AI' };
+const HUB_NAMES = { ssafy: 'SSAFY', aptitude: 'NCS/인적성', major: '필기이론', web: '웹', ai: 'AI', cs: 'CS · 면접' };
 
 const shuffle = (arr) => {
   const a = arr.slice();
@@ -605,10 +605,12 @@ function Quiz({ byId, stats, mode, sec, title, ids, sections, onPractice, onFini
     if (!isExam) onPractice(q.id, isRight(q, i));
   };
 
-  // 단답형은 허용 답안과 글자가 같으면 바로 정답 처리하고, 아니면 모범답안을 보여 주고 스스로 채점하게 한다
+  // 단답형은 허용 답안과 글자가 같으면 바로 정답 처리하고, 아니면 모범답안을 보여 주고 스스로 채점하게 한다.
+  // strict 단답형(노트 문제)은 자동 채점만 한다: 허용 답안과 다르면 바로 오답
   const peek = () => {
     const t = texts[q.id] || '';
     if (q.kind === 'short' && t.trim() && q.acc?.some(x => normAns(x) === normAns(t))) choose('r');
+    else if (q.strict) { if (t.trim()) choose('w'); }
     else setPeeked(p => ({ ...p, [q.id]: true }));
   };
 
@@ -644,8 +646,12 @@ function Quiz({ byId, stats, mode, sec, title, ids, sections, onPractice, onFini
               ? <textarea rows={6} value={texts[q.id] || ''} disabled={shown} placeholder="답안을 적어 보세요. 적지 않고 바로 모범답안을 확인해도 됩니다." onChange={e => setTexts(t => ({ ...t, [q.id]: e.target.value }))} />
               : <input type="text" value={texts[q.id] || ''} disabled={shown} placeholder="답을 입력하세요" onChange={e => setTexts(t => ({ ...t, [q.id]: e.target.value }))} onKeyDown={e => { if (e.key === 'Enter' && !shown && !peeked[q.id]) peek(); }} />}
             {!shown && !peeked[q.id] && (
-              <div className="exam-actions"><button className="exam-btn primary" onClick={peek}>답안 확인</button></div>
+              <div className="exam-actions">
+                <button className="exam-btn primary" disabled={q.strict && !(texts[q.id] || '').trim()} onClick={peek}>{q.strict ? '채점하기' : '답안 확인'}</button>
+                {q.strict && <button className="exam-btn ghost" onClick={() => choose('w')}>모르겠어요</button>}
+              </div>
             )}
+            {q.strict && !shown && <p className="exam-written-hint">띄어쓰기·대소문자는 상관없어요. 우리말과 영문 표기 모두 정답으로 인정해요.</p>}
             {!shown && peeked[q.id] && (
               <div className="exam-expl">
                 <ModelAnswer q={q} />
@@ -676,8 +682,10 @@ function Quiz({ byId, stats, mode, sec, title, ids, sections, onPractice, onFini
         {shown && (
           <div className={`exam-expl ${isRight(q, sel) ? 'ok' : 'bad'}`}>
             <div className="lab">{q.kind ? (isRight(q, sel) ? '정답' : '오답') : sel === q.a ? '정답' : `오답 · 정답은 ${CIRC[q.a]}`}</div>
+            {q.strict && (texts[q.id] || '').trim() && <div className="exam-my-answer">내 답 <b>{texts[q.id]}</b></div>}
             {q.kind && <ModelAnswer q={q} />}
             <div>{q.e}</div>
+            {q.link && <Link className="exam-note-link" to={q.link}>노트 다시 읽기 →</Link>}
             <QuestionSim key={`g${q.id}`} q={q} />
             <QuestionExplanation key={q.id} q={q} />
             {!q.kind && !isRight(q, sel) && <SimilarQuestion key={`s${q.id}`} q={q} />}
@@ -705,7 +713,7 @@ function Quiz({ byId, stats, mode, sec, title, ids, sections, onPractice, onFini
             return <button key={id} className={cls} onClick={() => setIdx(i)}>{i + 1}</button>;
           })}
         </div>
-        <div className="exam-keyhint">키보드: 숫자 1~{q.o?.length || 4} 보기 선택 · ← → 문제 이동</div>
+        <div className="exam-keyhint">{q.kind ? '키보드: 답을 적고 Enter로 채점 · ← → 문제 이동(입력칸 밖에서)' : `키보드: 숫자 1~${q.o?.length || 4} 보기 선택 · ← → 문제 이동`}</div>
       </aside>
       </div>
     </div>
