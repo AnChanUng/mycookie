@@ -187,9 +187,9 @@ try {
   const totals=summarizeAccount({[bank.key]:{stats:{[q.id]:{c:2,w:1,last:'w',at:1000}}}});
   assert.equal(totals.rows.length,1);assert.equal(totals.attempts,3);assert.equal(totals.correct,2);assert.equal(totals.wrong,1);
   await login('alice');await mount(Account,'/account');
-  assert.ok(text(view.toJSON()).includes(q.q));
-  assert.ok(text(view.toJSON()).includes('67%'));
-  assert.ok(view.root.findAllByType('a').some(a=>a.props.href==='/web-essentials#web-csrf'),'Account links target the separate reader');
+  // 풀이 기록 목록은 '내 학습'으로 옮겼다. 내 계정에는 기록 대신 바로가기만 둔다
+  assert.ok(!text(view.toJSON()).includes(q.q),'Account page no longer lists every solved question');
+  assert.ok(view.root.findAllByType('a').some(a=>a.props.href==='/stats'),'Account links to the learning dashboard');
   await login('bob');assert.ok(!text(view.toJSON()).includes(q.q),'Dashboard resets on account switch');
   assert.equal(errors.length,0,errors.join('\n'));
   console.log('PASS: Web essentials levels cover every answer; Basic keyword questions visible by default; answers hidden until explicit reveal, sidebar/deep links stay collapsed; completion hides/restores across reload; account isolation, save retries, dashboard and in-flight switching.');

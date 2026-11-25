@@ -18,6 +18,7 @@ const subscribe = listener => {
 const LINKS = [
   { to: '/stats', label: '내 학습 자세히 보기' },
   { to: '/weak', label: '오답노트' },
+  { to: '/shop', label: '포인트 상점' },
   { to: '/account#settings', label: '계정 설정' },
 ];
 

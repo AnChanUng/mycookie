@@ -8,6 +8,17 @@
 // status: 'released' 배포됨(master) | 'dev' 개발 브랜치에만 있음(release PR을 머지하면 released로 바꾼다)
 export const PATCH_NOTES = [
   {
+    version: '1.7.0', date: '2026-11-25', status: 'dev',
+    title: '포인트 상점',
+    summary: '출석 · 문제 풀이 · 승급으로 포인트를 모아 상점에서 프로필 꾸미기 아이템을 삽니다.',
+    items: [
+      { type: 'feature', text: '포인트 상점: 접속하면 자동 출석 10P(7일 연속마다 50P 더), 새로 푼 문제 1개당 1P, 승급 단계마다 포인트를 받고 아이콘 · 카드 테마 · 움직이는 테두리를 삽니다.' },
+      { type: 'feature', text: '이미 문제를 풀었거나 승급한 계정은 상점을 처음 열 때 지금까지의 몫을 한 번에 받습니다.' },
+      { type: 'improve', text: '내 계정은 프로필과 설정만 남기고, 학습 기록은 "내 학습"으로 가는 바로가기로 정리했습니다.' },
+      { type: 'improve', text: '전체 순위: 아래로 내리면 다음 순위가 이어서 나옵니다.' },
+    ],
+  },
+  {
     version: '1.6.0', date: '2026-11-25', status: 'released',
     title: '노트 문제풀이와 틀린 문제 복습',
     summary: '웹노트 · 전공노트를 읽은 뒤 문제로 확인하고, 틀린 문제는 다시 풀어 봅니다.',

@@ -14,7 +14,8 @@ assert.equal(QUOTES.indexOf(quoteForDay(at('2026-11-22T15:00:00Z'))), (QUOTES.in
 
 // 목록을 한 바퀴 돌면 처음으로 돌아온다
 const day = 24 * 60 * 60 * 1000;
-const start = at('2026-11-22T15:00:00Z');
+// 11/25처럼 문장을 지정한 날은 순환에서 빠지므로, 지정일이 없는 날짜에서 한 바퀴를 센다
+const start = at('2026-12-31T15:00:00Z');
 assert.equal(quoteForDay(start), quoteForDay(start + QUOTES.length * day));
 const seen = new Set(Array.from({ length: QUOTES.length }, (_, i) => quoteForDay(start + i * day).text));
 assert.equal(seen.size, new Set(QUOTES.map(q => q.text)).size, '한 바퀴 동안 모든 문장이 한 번씩 나온다');

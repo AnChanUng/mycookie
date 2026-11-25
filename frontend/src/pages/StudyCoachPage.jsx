@@ -59,7 +59,7 @@ function Coach({ user }) {
   }
   const complete = plan?.tasks.every(taskDone);
   return <main className="coach-page">
-    <header><span className="ds-eyebrow">나에게 맞는 공부 순서</span><h1>AI 학습 코치</h1><p>목표를 정하고, 핵심 노트를 복습한 뒤 바로 문제를 풀어보세요.</p></header>
+    <header><span className="ds-eyebrow">나에게 맞는 공부 순서</span><h1>AI 학습 코치 <span className="nav-beta coach-beta">베타</span></h1><p>목표를 정하고, 핵심 노트를 복습한 뒤 바로 문제를 풀어보세요. 아직 다듬는 중인 기능이라 계획이 어색하면 알려 주세요.</p></header>
     {saveError && <p role="alert">{saveError}</p>}
     {editing ? <form className="coach-form" onSubmit={e => { e.preventDefault(); create(true); }}>
       <h2>{plan ? '학습 계획 수정' : '어떤 시험을 준비하나요?'}</h2>

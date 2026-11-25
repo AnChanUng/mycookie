@@ -1,19 +1,11 @@
 export const JAVA_SECTIONS = {
-  basics: { name: '언어 기초', short: '기초', sub: '자료형 · 연산 · 제어문 · 배열', count: 10 },
+  basics: { name: '언어 기초', short: '기초', sub: '자료형 · 연산 · 제어문 · 배열', count: 8 },
   objects: { name: '클래스와 객체', short: '객체', sub: '생성자 · 상속 · 메서드 · record', count: 10 },
   collections: { name: '컬렉션과 제네릭', short: '컬렉션', sub: 'List · Set · Map · 타입 경계', count: 10 },
   apis: { name: '예외와 표준 API', short: '표준 API', sub: '자원 정리 · 람다 · 스트림 · 동시성', count: 10 },
 };
 
 export const JAVA_QUESTIONS = [
-  {
-    id: 'java01', sec: 'basics', topic: '정수 나눗셈',
-    q: "출력되는 값은?",
-    code: "double x = 7 / 2;\nSystem.out.println(x);",
-    o: ["3.0", "3.5", "3", "4.0"],
-    a: 0,
-    e: "양쪽 피연산자가 int여서 먼저 정수 나눗셈으로 3을 얻는다. 이후 double로 변환해도 이미 버린 소수 부분은 복원되지 않는다.",
-  },
   {
     id: 'java02', sec: 'basics', topic: '문자열 연결',
     q: "다음 식을 출력하면?",
@@ -52,14 +44,6 @@ export const JAVA_QUESTIONS = [
     o: ["[1, 2]", "[2, 4]", "[2, 2]", "[1, 4]"],
     a: 0,
     e: "각 원소의 int 값이 반복 변수 v에 복사된다. v만 변경하므로 배열에 새 값이 기록되지 않는다.",
-  },
-  {
-    id: 'java07', sec: 'basics', topic: '나머지 연산',
-    q: "다음 연산의 결과는?",
-    code: "System.out.println(-7 % 3);",
-    o: ["2", "-2", "1", "-1"],
-    a: 3,
-    e: "Java 정수 나눗셈은 0 방향으로 잘라 몫이 -2다. 나머지는 -7에서 (-2 × 3)을 뺀 -1이다.",
   },
   {
     id: 'java08', sec: 'basics', topic: '지역 변수 추론',

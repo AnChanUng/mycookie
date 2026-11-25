@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../api';
 import { account } from '../sync';
@@ -12,6 +12,7 @@ import '../components/HomeRank.css';
 import './RankPage.css';
 
 // 전체 순위. 첫 화면 순위 카드의 "전체 보기"에서 온다. 푼 문제 수 기준, 같은 문제를 여러 번 풀어도 1문제다
+// 순위는 한 번에 받고, 화면에는 PAGE줄씩 그리다가 목록 끝이 보이면 다음 줄을 이어 그린다
 const PAGE = 50;
 
 export default function RankPage() {
@@ -40,6 +41,23 @@ export default function RankPage() {
   const looks = usePublicLooks(rows.map(r => r.nickname));
   const shown = rows.filter(r => r.nickname.toLowerCase().includes(query.trim().toLowerCase()));
   const me = rows.find(r => r.me) || state.data?.me;
+  const hasMore = shown.length > limit;
+
+  // 목록 끝 표시가 화면 가까이 오면 다음 묶음을 그린다. 한 번 늘린 뒤에는 새 줄이 그려질 때까지 다시 늘리지 않는다
+  const sentinel = useRef(null);
+  const growing = useRef(false);
+  useEffect(() => { growing.current = false; }, [limit]);
+  useEffect(() => {
+    const el = sentinel.current;
+    if (!el || !hasMore || !('IntersectionObserver' in window)) return;
+    const io = new IntersectionObserver(([entry]) => {
+      if (!entry.isIntersecting || growing.current) return;
+      growing.current = true;
+      setLimit(n => n + PAGE);
+    }, { rootMargin: '400px 0px' });
+    io.observe(el);
+    return () => io.disconnect();
+  }, [hasMore, limit]);
 
   return <div className="rk fade-in">
     <header className="page-header">
@@ -70,6 +88,10 @@ export default function RankPage() {
         </li>)}
       </ol>
     </div>
-    {shown.length > limit && <button type="button" className="rk-more" onClick={() => setLimit(n => n + PAGE)}>더 보기 ({limit}/{shown.length})</button>}
+    {hasMore && <div ref={sentinel} className="rk-more" role="status">
+      <span className="rk-spinner" aria-hidden="true" />다음 순위를 보여 주는 중… ({limit.toLocaleString()}/{shown.length.toLocaleString()})
+      {!('IntersectionObserver' in window) && <button type="button" onClick={() => setLimit(n => n + PAGE)}>더 보기</button>}
+    </div>}
+    {!hasMore && !state.loading && shown.length > PAGE && <p className="rk-end">{query.trim() ? `찾은 ${shown.length.toLocaleString()}명을 모두 봤어요.` : `${shown.length.toLocaleString()}명 모두 봤어요.`}</p>}
   </div>;
 }
