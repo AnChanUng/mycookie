@@ -5,9 +5,9 @@ const server=await createServer({server:{middlewareMode:true,hmr:false},appType:
 try{
 const {default:Page,selectFocus}=await server.ssrLoadModule('/src/pages/DeloitteAiFocusPage.jsx');
 const {default:Hub}=await server.ssrLoadModule('/src/pages/CompanyPrepPage.jsx');
-assert.equal(selectFocus('전체','').length,51);assert.ok(selectFocus('보안·협업','권한').length);
+const total=selectFocus('전체','').length;assert.ok(total>=51,'문항이 줄지 않았는지');assert.ok(selectFocus('보안·협업','권한').length);
 await act(async()=>{v=R.create(React.createElement(MemoryRouter,null,React.createElement(Page)));});
-assert.equal(v.root.findAllByType('article').length,51);assert.equal(v.root.findAllByProps({className:'prep-answer'}).length,0);
+assert.equal(v.root.findAllByType('article').length,total);assert.equal(v.root.findAllByProps({className:'prep-answer'}).length,0);
 await act(async()=>v.root.findAllByProps({className:'prep-answer-toggle'})[0].props.onClick());
 assert.equal(v.root.findAllByProps({className:'prep-answer'}).length,1);
 await act(async()=>v.root.findByType('input').props.onChange({target:{value:'no-such-question-xyz'}}));assert.equal(v.root.findAllByType('article').length,0);
