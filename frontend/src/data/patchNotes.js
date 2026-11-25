@@ -8,6 +8,12 @@
 // status: 'released' 배포됨(master) | 'dev' 개발 브랜치에만 있음(release PR을 머지하면 released로 바꾼다)
 export const PATCH_NOTES = [
   {
+    version: '1.6.1', date: '2026-11-25', status: 'dev',
+    title: '전체 순위 무한 스크롤',
+    summary: '전체 순위를 버튼 없이 스크롤로 이어서 봅니다.',
+    items: [{ type: 'improve', text: '전체 순위: "더 보기"를 누르지 않아도 아래로 내리면 다음 순위가 이어서 나오고, 끝까지 보면 끝 표시가 나옵니다.' }],
+  },
+  {
     version: '1.6.0', date: '2026-11-25', status: 'released',
     title: '노트 문제풀이와 틀린 문제 복습',
     summary: '웹노트 · 전공노트를 읽은 뒤 문제로 확인하고, 틀린 문제는 다시 풀어 봅니다.',
