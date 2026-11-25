@@ -21,7 +21,14 @@ export const QUOTES = [
 const DAY_MS = 24 * 60 * 60 * 1000;
 const KST_MS = 9 * 60 * 60 * 1000;
 
+// 특정 날짜(한국 시간, YYYY-MM-DD)에 보여 줄 문장을 고정한다. 목록 번호는 순서가 바뀔 수 있어 문장 내용으로 찾는다.
+const PINNED = { '2026-11-25': '오랫동안 꿈을 그리는 사람은 마침내 그 꿈을 닮아간다.' };
+
 export function quoteForDay(now = Date.now()) {
-  const day = Math.floor((now + KST_MS) / DAY_MS);
+  const kst = now + KST_MS;
+  const pinned = PINNED[new Date(kst).toISOString().slice(0, 10)];
+  const found = pinned && QUOTES.find((q) => q.text === pinned);
+  if (found) return found;
+  const day = Math.floor(kst / DAY_MS);
   return QUOTES[day % QUOTES.length];
 }
