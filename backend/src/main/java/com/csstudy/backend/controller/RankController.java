@@ -55,6 +55,7 @@ public class RankController {
     private final com.csstudy.backend.service.PointService pointService;
 
     private final com.csstudy.backend.service.RankWelcomeService welcomeService;
+    private final com.csstudy.backend.repository.NicknameClaimRepository nicknameClaims;
 
     @PostMapping("/rank/welcome")
     public Map<String, Object> welcome(HttpServletRequest request) {
@@ -183,6 +184,27 @@ public class RankController {
         return row;
     }
 
+    // 같은 사람의 기기인데 풀이 보고가 계정에 묶이지 않은 방문자(로그인 전에 풀었거나 보고를 놓친 기기)는
+    // 순위에 계정 줄과 방문자 줄로 두 번 나온다(이슈 #297). 닉네임은 계정과 방문자를 통틀어 한 주인만 가질 수 있으므로,
+    // 방문자 닉네임의 주인이 계정(u:번호)이면 그 기기를 그 계정의 기기로 합친다
+    private void linkDevicesByNickname(Map<String, Long> counts, Map<Long, List<String>> devices) {
+        Set<String> linked = new HashSet<>();
+        devices.values().forEach(linked::addAll);
+        List<String> loose = counts.keySet().stream().filter(id -> !linked.contains(id)).toList();
+        Map<String, String> names = profileService.nicknames(loose);
+        if (names.isEmpty()) return;
+        Map<String, String> ownerOf = new HashMap<>();
+        nicknameClaims.findAllById(names.values().stream().map(com.csstudy.backend.service.NicknameService::key).distinct().toList())
+                .forEach(c -> ownerOf.put(c.getName(), c.getOwner()));
+        names.forEach((visitorId, name) -> {
+            String owner = ownerOf.get(com.csstudy.backend.service.NicknameService.key(name));
+            if (owner == null || !owner.startsWith("u:")) return;
+            try {
+                devices.computeIfAbsent(Long.valueOf(owner.substring(2)), k -> new ArrayList<>()).add(visitorId);
+            } catch (NumberFormatException ignored) { /* 형식이 다른 주인 값은 방문자 줄로 둔다 */ }
+        });
+    }
+
     // 집계는 기록 전체를 훑으므로 잠깐 들고 있는다
     private Board board() {
         Board board = cached;
@@ -203,6 +225,7 @@ public class RankController {
         Map<Long, Long> saved = membershipService.savedCounts();
         // 기기 보고가 없어도 계정에 저장된 풀이 기록이 있으면 순위에 포함한다.
         saved.keySet().forEach(id -> devices.computeIfAbsent(id, key -> new ArrayList<>()));
+        linkDevicesByNickname(counts, devices);
         Map<Long, User> accounts = new HashMap<>();
         userRepository.findAllById(devices.keySet()).forEach(u -> accounts.put(u.getId(), u));
         Map<String, UserTier> visitorTiers = new HashMap<>();

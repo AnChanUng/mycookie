@@ -9,6 +9,8 @@ import LineIcon from '../components/LineIcon';
 import StudyCoachEntry from '../components/StudyCoachEntry';
 import HomeRank from '../components/HomeRank';
 import HomeReview from '../components/HomeReview';
+import MentalTraining from '../components/MentalTraining';
+import DailyFortune from '../components/DailyFortune';
 import { quoteForDay } from '../data/quotes';
 import './Main.css';
 
@@ -80,6 +82,7 @@ export default function Main() {
   const today = factForDay(day);
   const [quote] = useState(quoteForDay);
   const [todayDone] = useState(() => readTodayDone(day));
+  const [dockOpen, setDockOpen] = useState(false);
   const now = new Date();
   const dateLabel = `${now.getMonth() + 1}월 ${now.getDate()}일 ${WEEKDAYS[now.getDay()]}요일`;
 
@@ -169,6 +172,13 @@ export default function Main() {
         </div>
       </Section>
 
+      {/* 왼쪽 아래 도크: 멘탈 기르기 · 오늘의 운세(예전 홈에 있던 것을 새 첫 화면에도, 이슈 #298).
+          좁은 화면에서는 맨 아래에 숨겨 두고 "더보기"를 눌러야 나온다 */}
+      <div className={`home-dock ${dockOpen ? 'open' : ''}`}>
+        <button type="button" className="home-dock-more" onClick={() => setDockOpen(o => !o)} aria-expanded={dockOpen}>{dockOpen ? '접기' : '더보기'}</button>
+        <MentalTraining />
+        <DailyFortune />
+      </div>
     </div>
   );
 }

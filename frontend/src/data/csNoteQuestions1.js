@@ -82,7 +82,7 @@ export const CS_NOTE_PART1 = [
       '물리 → 데이터 링크 → 네트워크 → 전송 → 표현 → 세션 → 응용',
       '물리 → 데이터 링크 → 네트워크 → 전송 → 세션 → 표현 → 응용',
     ], 3, 'TCP/IP 4계층은 링크·인터넷·전송·응용. IP는 인터넷(OSI 3), TCP·UDP는 전송(4), HTTP·DNS는 응용 계층이다.'),
-    S('OSI 7계층에서 IP가 속하는 계층 이름은? (○○○ 계층)', '네트워크 계층 (3계층)', ['네트워크', '네트워크계층', 'network', 'networklayer', '3계층', '3'], 'TCP/IP 모델에서는 인터넷 계층에 해당한다.')],
+    S('OSI 7계층에서 IP가 속하는 계층 이름은? (○○○○ 계층)', '네트워크 계층 (3계층)', ['네트워크', '네트워크계층', 'network', 'networklayer', '3계층', '3'], 'TCP/IP 모델에서는 인터넷 계층에 해당한다.')],
   ['ksundong-4961713e80d1ce4e',
     M('Nginx 같은 웹 서버의 HTTP 처리 기능은 OSI 몇 계층에 해당하는가?', [
       '7계층(응용)',
@@ -264,7 +264,7 @@ export const CS_NOTE_PART1 = [
       '거래 데이터 정합성을 위한 관계형 DB를 그대로 대체한다',
       '모든 쿼리가 관계형 DB보다 빠르다',
     ], 1, '색인 후 검색 반영까지 갱신(refresh) 주기가 있어 근실시간(near real-time) 검색이라 한다.'),
-    S('색인 후 짧은 갱신 주기를 거쳐 검색에 반영되는 Elasticsearch의 검색 특성을 무엇이라 하는가? (○○○ 검색, 영문 약자 NRT)', '근실시간 검색 (Near Real-Time)', ['근실시간', '근실시간검색', 'nearrealtime', 'nrt', '준실시간', '거의실시간'], 'Elasticsearch 문서 "Near real-time search".')],
+    S('색인 후 짧은 갱신 주기를 거쳐 검색에 반영되는 Elasticsearch의 검색 특성을 무엇이라 하는가? (○○○○ 검색, 영문 약자 NRT)', '근실시간 검색 (Near Real-Time)', ['근실시간', '근실시간검색', 'nearrealtime', 'nrt', '준실시간', '거의실시간'], 'Elasticsearch 문서 "Near real-time search".')],
   ['ksundong-6740f6e9e4ad6177',
     M('Elasticsearch의 텍스트 검색이 주로 쓰는 인덱스 구조는?', [
       '단어 → 문서 목록을 잇는 역색인',
