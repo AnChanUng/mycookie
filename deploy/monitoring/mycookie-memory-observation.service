@@ -1,0 +1,11 @@
+[Unit]
+Description=Record MyCookie backend memory observations
+After=docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/python3 /usr/local/lib/mycookie-memory-observation/observe_memory.py /var/lib/mycookie-memory-observation/history.sqlite3
+StateDirectory=mycookie-memory-observation
+StateDirectoryMode=0700
+UMask=0077
+TimeoutStartSec=15min
