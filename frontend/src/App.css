@@ -4101,7 +4101,8 @@ button.member-menu:hover { background: var(--ds-surface-2); }
 .solve-rank-name .tier-badge, .solve-rank-name em { flex-shrink: 0; }
 .solve-rank-name .tier-badge { width: 14px; height: 18px; padding: 0; }
 /* 순위 옆 "등급 안내" 버튼과 가운데 큰 설명 창(웹 화면 기준) */
-.tier-guide { position: static; flex-shrink: 0; }
+.tier-guide { position: static; flex-shrink: 0; display: inline-flex; align-items: center; gap: 6px; }
+.tier-guide-shop { display: inline-flex; align-items: center; text-decoration: none; }
 .tier-guide-toggle { height: 30px; padding: 0 12px; border: 1px solid var(--ds-line-strong, var(--border-color)); border-radius: 999px; background: var(--ds-surface-2, var(--bg-secondary)); color: var(--ds-brand, var(--accent-blue)); font: inherit; font-size: 13px; font-weight: 700; white-space: nowrap; cursor: pointer; }
 .tier-guide-toggle:hover { background: var(--ds-brand-soft, var(--bg-secondary)); }
 .tier-guide-toggle:focus-visible { outline: 2px solid var(--accent-blue); outline-offset: 3px; }

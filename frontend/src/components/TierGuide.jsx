@@ -1,8 +1,9 @@
 import { useEffect, useId, useState } from 'react';
+import { Link } from 'react-router-dom';
 import TierBadge from './TierBadge';
 import { TIER_NAMES } from '../membership';
 
-// 순위 제목 옆 "등급 안내" 버튼. 누르면 순위 올리는 법과 등급별 기준표를 가운데 큰 창으로 보여 준다(웹 화면 기준)
+// 순위 제목 옆 "등급 안내" 버튼과 포인트 상점 바로가기. 누르면 순위 올리는 법과 등급별 기준표를 가운데 큰 창으로 보여 준다(웹 화면 기준)
 // 숫자는 지금까지 푼 "서로 다른 문제"의 누적 개수. 기준은 백엔드 등급 계산과 같아야 한다
 const DIVISIONS = ['Ⅴ', 'Ⅳ', 'Ⅲ', 'Ⅱ', 'Ⅰ'];
 const TIERS = [
@@ -34,6 +35,7 @@ export default function TierGuide() {
     <button type="button" className="tier-guide-toggle" aria-label="티어 기준 보기" title="등급 기준과 순위 올리는 법"
       aria-expanded={open} aria-controls={id} onClick={() => setOpen(value => !value)}
       onKeyDown={event => { if (event.key === 'Escape') setOpen(false); }}>등급 안내</button>
+    <Link to="/shop" className="tier-guide-toggle tier-guide-shop" title="포인트로 꾸미기 아이템 사기">상점</Link>
     {open && <div className="tier-guide-backdrop" onClick={() => setOpen(false)}>
       <section id={id} className="tier-guide-panel" role="dialog" aria-modal="true" aria-label="티어 등급 기준" onClick={event => event.stopPropagation()}>
         <header className="tier-guide-head">
