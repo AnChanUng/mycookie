@@ -34,7 +34,7 @@ const CAREER_STUDY = [
   { to: '/certifications', icon: 'book', name: '추천 자격증', sub: '개발 · 데이터 · AI · 클라우드' },
   { to: '/news', icon: 'chart', name: '기업 소식', sub: '기술 블로그 · 뉴스룸 새 글' },
 ];
-// 오늘의 CS · 대결 · 이어서 하기 카드 묶음. 쓰임새를 다시 정할 때까지 숨긴다
+// 맨 위 "오늘의 목표" 고리 카드(오늘 할 일 구역과 겹쳐 숨긴다)
 const SHOW_TODAY_STUDY = false;
 const SHOW_COACH_ENTRY = false;
 const PRACTICE = [
@@ -59,26 +59,6 @@ function readTodayDone(day) {
 }
 
 // 마지막으로 풀다 만 문제(또는 최근 본 문제집)
-function readContinue() {
-  const visible = to => typeof to === 'string' && !/^\/(ssafy|exam\/ssafy)/.test(to);
-  try {
-    let best = null;
-    for (const key of Object.keys(localStorage)) {
-      if (!key.startsWith('exam-resume:')) continue;
-      try {
-        const r = JSON.parse(localStorage.getItem(key));
-        if (visible(r?.to) && Array.isArray(r.ids) && (!best || (r.at || 0) > (best.at || 0))) best = r;
-      } catch { /* 깨진 항목은 건너뛴다 */ }
-    }
-    if (best) {
-      const answered = Object.keys(best.answers || {}).length;
-      return { to: `${best.to}?resume=1`, name: best.name, detail: `${answered} / ${best.ids.length} 답변`, pct: Math.round(answered / best.ids.length * 100) };
-    }
-    const last = JSON.parse(localStorage.getItem('exam:last'));
-    if (visible(last?.to) && last.name) return { to: last.to, name: last.name, detail: '최근에 본 문제집' };
-  } catch { /* 저장소를 못 쓰면 없음 */ }
-  return null;
-}
 
 function Ring({ value, max }) {
   const r = 26, c = 2 * Math.PI * r, pct = max ? Math.min(1, value / max) : 0;
@@ -96,7 +76,6 @@ export default function Main() {
   const user = account();
   const { membership } = useMembership();
   const [learning, setLearning] = useState(null);
-  const [resume] = useState(readContinue);
   const day = koreanDay();
   const today = factForDay(day);
   const [quote] = useState(quoteForDay);
@@ -153,31 +132,14 @@ export default function Main() {
       {/* AI 학습 코치 바로가기: 첫 화면에서는 숨긴다(상단 메뉴 /study-coach로 들어간다) */}
       {SHOW_COACH_ENTRY && <StudyCoachEntry />}
 
-      {/* 오늘의 학습: 쓰임새를 다시 정할 때까지 숨겨 둔다(SHOW_TODAY_STUDY) */}
-      {SHOW_TODAY_STUDY && <Section id="mn-today" title="오늘의 학습">
+      {/* 오늘 할 일: 출석 → 오늘의 CS 5문제 → 오늘의 퀘스트 포인트, 그리고 친구와 대결 */}
+      <Section id="mn-today" title="오늘 할 일">
         <div className="mn-cards">
-          <Link to="/cs" className="ds-card mn-feature mn-feature--brand">
-            <span className="mn-tag">오늘의 CS</span>
-            <b className="mn-feature-title">{today.t}</b>
-            <p className="ds-clamp-2">{today.s}</p>
-            <span className="mn-more">오늘의 5문제 풀기 <LineIcon name="chevron" size={16} /></span>
-          </Link>
-          <Link to="/duel" className="ds-card mn-feature">
-            <span className="mn-tag mn-tag--live">실시간 대결</span>
-            <b className="mn-feature-title">같은 10문제로 지금 겨뤄요</b>
-            <p>1:1 대결과 단체전. 점수는 서버가 직접 채점해요.</p>
-            <span className="mn-more">대결 시작하기 <LineIcon name="chevron" size={16} /></span>
-          </Link>
-          <Link to={resume?.to || '/exam'} className="ds-card mn-feature">
-            <span className="mn-tag">{resume ? '이어서 하기' : '처음이라면'}</span>
-            <b className="mn-feature-title ds-clamp-2">{resume ? resume.name : '실전 문제부터 풀어 봐요'}</b>
-            {resume?.pct != null
-              ? <span className="ds-bar" aria-label={`진행 ${resume.pct}%`}><i style={{ width: `${Math.max(resume.pct, 4)}%` }} /></span>
-              : <p>{resume ? resume.detail : '기업별, 주제별 문제집으로 바로 시작해요.'}</p>}
-            <span className="mn-more">{resume ? '이어서 풀기' : '문제집 고르기'} <LineIcon name="chevron" size={16} /></span>
-          </Link>
+          <Category to="/cs" icon="bolt" name="오늘의 CS" sub={goalDone ? `오늘 ${TODAY_GOAL}문제 완료!` : `${todayDone} / ${TODAY_GOAL} · ${today.t}`} />
+          <Category to="/shop" icon="chart" name="오늘의 퀘스트" sub="하루 5 · 15 · 30문제 풀고 포인트 받기" />
+          <Category to="/duel" icon="swords" name="친구와 CS 대결" sub="같은 10문제로 1:1 실시간 대결" />
         </div>
-      </Section>}
+      </Section>
 
       {/* 학습 메일 연습에서 틀린 문제가 있으면 하루 3개 복습(없으면 안 보인다) */}
       <HomeReview />

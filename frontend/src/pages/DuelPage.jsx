@@ -8,6 +8,7 @@ import { visitorId } from '../track';
 import Code from '../components/Code';
 import { account } from '../sync';
 import './DuelPage.css';
+import './DuelLobby.css';
 
 const CIRC = ['①', '②', '③', '④', '⑤'];
 const SIZE = 10;
@@ -96,56 +97,97 @@ function Lobby() {
     }
   };
 
+  const subjectName = subject === 'all' ? '전체 과목' : TOPICS.sections[subject].name;
+  const rate = record?.total ? Math.round(record.wins / record.total * 100) : 0;
   return (
-    <div className="fade-in">
-      <div className="page-header">
-        <Link to="/" className="back-link">← 홈으로</Link>
-        <h1>대결</h1>
-        <p>같은 {SIZE}문제를 풀고 점수를 겨룹니다. 친구와 붙으려면 1:1 방을, 여럿이 붙으려면 누구나 들어오는 단체전을 여세요.</p>
-      </div>
+    <div className="fade-in dl">
+      <Link to="/" className="back-link">← 홈으로</Link>
 
-      <section className="duel-career" aria-label="누적 대결 전적">
-        <h2>나의 누적 전적</h2>
-        <p>현재 브라우저 참가 기록 · 2명 이상이 모두 완료한 대결 기준</p>
-        {!record && <p>{recordError ? '전적을 불러오지 못했습니다. 새로고침해 주세요.' : '전적을 불러오는 중…'}</p>}
-        {record && <><div className="duel-stats"><div><b>{record.total}</b><span>총 대결</span></div><div className="win"><b>{record.wins}</b><span>승리</span></div><div className="loss"><b>{record.losses}</b><span>패배</span></div><div><b>{record.draws}</b><span>무승부</span></div><div><b>{record.total ? Math.round(record.wins/record.total*100) : 0}%</b><span>승률</span></div></div>
-        <div className="duel-recent">{record.recent.map(r => <Link key={r.code} to={`/duel/${r.code}`}><strong className={r.result}>{({win:'승리',loss:'패배',draw:'무승부'})[r.result]}</strong><span>{r.code} · {r.score}점 · {fmt(r.seconds)}</span><span>결과 보기 →</span></Link>)}</div>
-        {!record.total && <p>첫 대결을 완료하고 전적을 쌓아 보세요.</p>}</>}
+      {/* 첫 화면: 나 VS 친구, 링크 하나로 바로 붙는 느낌 */}
+      <section className="dl-hero">
+        <div className="dl-hero-text">
+          <p className="dl-eyebrow">실시간 CS 대결</p>
+          <h1>친구랑 한 판, <br />누가 더 잘 알까?</h1>
+          <p className="dl-sub">같은 {SIZE}문제를 동시에 풀어요. 많이 맞힌 사람이 이기고, 같으면 더 빨리 끝낸 사람이 이겨요.</p>
+        </div>
+        <div className="dl-versus" aria-hidden="true">
+          <span className="dl-player me"><i>🍪</i><b>나</b></span>
+          <span className="dl-vs">VS</span>
+          <span className="dl-player you"><i>🔥</i><b>친구</b></span>
+        </div>
       </section>
 
-      <div className="section-title">과목 고르기</div>
-      <div className="exam-filters">
-        <button type="button" className={`exam-btn sm ${subject === 'all' ? 'on' : ''}`} onClick={() => setSubject('all')}>전체</button>
-        {Object.entries(TOPICS.sections).map(([k, s]) => (
-          <button key={k} type="button" className={`exam-btn sm ${subject === k ? 'on' : ''}`} onClick={() => setSubject(k)}>{s.name}</button>
-        ))}
-      </div>
-      <div className="exam-actions">
-        <button type="button" className="exam-btn primary" disabled={busy} onClick={() => create(true)}>{busy ? '방 만드는 중…' : '단체전 열기 (누구나 참가)'}</button>
-        <button type="button" className="exam-btn" disabled={busy} onClick={() => create(false)}>1:1 방 만들기 (링크로 초대)</button>
-      </div>
-      {error && <p className="exam-note">{error}</p>}
-
-      <div className="section-title">열려 있는 단체전</div>
-      {rooms === null && <p className="exam-note">목록을 불러오는 중입니다…</p>}
-      {rooms?.length === 0 && <p className="exam-note">지금 열려 있는 단체전이 없습니다. 위에서 하나 열어 보세요.</p>}
-      {rooms?.length > 0 && (
-        <div className="exam-sections">
-          {rooms.map(r => (
-            <Link key={r.code} to={`/duel/${r.code}`} className="exam-section duel-room">
-              <span className="t">{r.title || '대결'}</span>
-              <span className="d">{r.total}문제 · {r.players}명 참가 중</span>
-              <span className="d">방 {r.code} · {clock(r.createdAt)}에 열림</span>
-            </Link>
+      <section className="dl-panel" aria-label="대결 만들기">
+        <h2>1. 과목 고르기</h2>
+        <div className="dl-subjects">
+          <button type="button" className={subject === 'all' ? 'on' : ''} onClick={() => setSubject('all')}>전체</button>
+          {Object.entries(TOPICS.sections).map(([k, sec]) => (
+            <button key={k} type="button" className={subject === k ? 'on' : ''} onClick={() => setSubject(k)}>{sec.name}</button>
           ))}
         </div>
-      )}
+        <h2>2. 방식 고르기</h2>
+        <div className="dl-modes">
+          <button type="button" className="dl-mode friend" disabled={busy} onClick={() => create(false)}>
+            <span className="dl-mode-icon" aria-hidden="true">🤝</span>
+            <b>1:1 친구 대결</b>
+            <small>방을 만들고 링크를 보내면 친구가 바로 들어와요</small>
+            <span className="dl-mode-go">{busy ? '방 만드는 중…' : `${subjectName}로 방 만들기 →`}</span>
+          </button>
+          <button type="button" className="dl-mode crowd" disabled={busy} onClick={() => create(true)}>
+            <span className="dl-mode-icon" aria-hidden="true">🏟️</span>
+            <b>단체전</b>
+            <small>누구나 들어오는 방. 여럿이 함께 순위를 겨뤄요</small>
+            <span className="dl-mode-go">{busy ? '방 만드는 중…' : '단체전 열기 →'}</span>
+          </button>
+        </div>
+        {error && <p className="exam-note">{error}</p>}
+        <form className="dl-join" onSubmit={e => { e.preventDefault(); if (join.trim()) navigate(`/duel/${join.trim().toUpperCase()}`); }}>
+          <span>친구한테 방 번호를 받았나요?</span>
+          <input type="text" placeholder="방 번호 6자리" aria-label="방 번호" maxLength={8} value={join} onChange={e => setJoin(e.target.value)} />
+          <button type="submit" disabled={!join.trim()}>들어가기</button>
+        </form>
+      </section>
 
-      <div className="section-title">받은 방 번호로 들어가기</div>
-      <form className="exam-sync-form" onSubmit={e => { e.preventDefault(); if (join.trim()) navigate(`/duel/${join.trim().toUpperCase()}`); }}>
-        <input type="text" placeholder="방 번호 6자리" maxLength={8} value={join} onChange={e => setJoin(e.target.value)} />
-        <button type="submit" className="exam-btn sm" disabled={!join.trim()}>들어가기</button>
-      </form>
+      <div className="dl-grid">
+        <section className="dl-card" aria-label="열려 있는 단체전">
+          <h2>지금 열린 단체전 {rooms?.length > 0 && <em className="dl-live">{rooms.length}</em>}</h2>
+          {rooms === null && <p className="dl-empty">목록을 불러오는 중…</p>}
+          {rooms?.length === 0 && <p className="dl-empty">지금 열린 단체전이 없어요. 하나 열어 보세요!</p>}
+          {rooms?.length > 0 && <ul className="dl-rooms">
+            {rooms.map(r => (
+              <li key={r.code}><Link to={`/duel/${r.code}`}>
+                <span><b>{r.title || '대결'}</b><small>{r.total}문제 · {clock(r.createdAt)}에 열림</small></span>
+                <span className="dl-room-players">{r.players}명</span>
+                <span className="dl-room-go">참가</span>
+              </Link></li>
+            ))}
+          </ul>}
+        </section>
+
+        <section className="dl-card" aria-label="누적 대결 전적">
+          <h2>나의 누적 전적</h2>
+          {!record && <p className="dl-empty">{recordError ? '전적을 불러오지 못했습니다. 새로고침해 주세요.' : '전적을 불러오는 중…'}</p>}
+          {record && <>
+            <div className="dl-record">
+              <div className="dl-rate" style={{ '--rate': `${rate * 3.6}deg` }}><b>{rate}%</b><small>승률</small></div>
+              <dl>
+                <div className="win"><dt>승</dt><dd>{record.wins}</dd></div>
+                <div className="loss"><dt>패</dt><dd>{record.losses}</dd></div>
+                <div><dt>무</dt><dd>{record.draws}</dd></div>
+                <div><dt>총</dt><dd>{record.total}</dd></div>
+              </dl>
+            </div>
+            {record.recent.length > 0 && <ul className="dl-recent">{record.recent.map(r => (
+              <li key={r.code}><Link to={`/duel/${r.code}`}>
+                <strong className={r.result}>{({ win: '승리', loss: '패배', draw: '무승부' })[r.result]}</strong>
+                <span>{r.score}점 · {fmt(r.seconds)}</span><small>{r.code}</small>
+              </Link></li>
+            ))}</ul>}
+            {!record.total && <p className="dl-empty">첫 대결을 끝내면 여기에 전적이 쌓여요.</p>}
+            <p className="dl-note">현재 브라우저 기준 · 2명 이상이 모두 끝낸 대결만 셉니다</p>
+          </>}
+        </section>
+      </div>
     </div>
   );
 }
