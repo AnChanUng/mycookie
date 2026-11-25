@@ -132,15 +132,6 @@ export default function Main() {
       {/* AI 학습 코치 바로가기: 첫 화면에서는 숨긴다(상단 메뉴 /study-coach로 들어간다) */}
       {SHOW_COACH_ENTRY && <StudyCoachEntry />}
 
-      {/* 오늘 할 일: 출석 → 오늘의 CS 5문제 → 오늘의 퀘스트 포인트, 그리고 친구와 대결 */}
-      <Section id="mn-today" title="오늘 할 일">
-        <div className="mn-cards">
-          <Category to="/cs" icon="bolt" name="오늘의 CS" sub={goalDone ? `오늘 ${TODAY_GOAL}문제 완료!` : `${todayDone} / ${TODAY_GOAL} · ${today.t}`} />
-          <Category to="/shop" icon="chart" name="오늘의 퀘스트" sub="하루 5 · 15 · 30문제 풀고 포인트 받기" />
-          <Category to="/duel" icon="swords" name="친구와 CS 대결" sub="같은 10문제로 1:1 실시간 대결" />
-        </div>
-      </Section>
-
       {/* 학습 메일 연습에서 틀린 문제가 있으면 하루 3개 복습(없으면 안 보인다) */}
       <HomeReview />
 
@@ -167,6 +158,15 @@ export default function Main() {
 
       <Section id="mn-career" title="취업 준비">
         <div className="mn-cards">{CAREER_STUDY.map(item => <Category key={item.to} {...item} />)}</div>
+      </Section>
+
+      {/* 오늘 할 일: 출석 → 오늘의 CS 5문제 → 오늘의 퀘스트 포인트, 그리고 친구와 대결 */}
+      <Section id="mn-today" title="오늘 할 일">
+        <div className="mn-cards">
+          <Category to="/cs" icon="bolt" name="오늘의 CS" sub={goalDone ? `오늘 ${TODAY_GOAL}문제 완료!` : `${todayDone} / ${TODAY_GOAL} · ${today.t}`} />
+          <Category to="/shop" icon="chart" name="오늘의 퀘스트" sub="하루 5 · 15 · 30문제 풀고 포인트 받기" />
+          <Category to="/duel" icon="swords" name="친구와 CS 대결" sub="같은 10문제로 1:1 실시간 대결" />
+        </div>
       </Section>
 
     </div>
