@@ -1,6 +1,8 @@
 // 프로필 꾸미기에서 고를 수 있는 것. 서버(MyProfileController)와 같은 목록이어야 한다
 export const PROFILE_AVATARS = ['🍪', '🧑‍💻', '🐱', '🐶', '🦊', '🐼', '🐧', '🦉', '🐻', '🐰', '🚀', '🔥', '🌱', '⭐', '🎯', '📚'];
 // 포인트 상점에서 사야 쓸 수 있는 아이콘(가격은 서버 PointService.SHOP이 정한다)
+// 상점 아이콘 이름(상점 카드에 "아이콘 🦄" 대신 보여 준다)
+export const SHOP_AVATAR_NAMES = { '🦄': '유니콘', '🐲': '용', '👑': '왕관', '🍩': '도넛', '🧠': '두뇌', '💎': '다이아몬드', '🎀': '리본', '🌸': '벚꽃', '🦋': '나비', '🍓': '딸기', '🧸': '곰인형', '🐹': '햄스터', '🌷': '튤립' };
 export const SHOP_AVATARS = ['🦄', '🐲', '👑', '🍩', '🧠', '💎', '🎀', '🌸', '🦋', '🍓', '🧸', '🐹', '🌷'];
 
 export const PROFILE_INTERESTS = [
@@ -57,6 +59,8 @@ export const PROFILE_FRAMES = [
   { key: 'pastel', label: '파스텔 고리', shop: true },
   { key: 'ribbon', label: '리본 고리', shop: true },
   { key: 'heart', label: '하트 반짝', shop: true },
+  { key: 'aurora', label: '오로라', shop: true, rarity: '레어' },
+  { key: 'galaxy', label: '은하수', shop: true, rarity: '전설' },
 ];
 
 // 상점 아이템 키("theme:sakura")와 보유 여부. 등급 보상은 등급으로, 상점 아이템은 산 것만 열린다

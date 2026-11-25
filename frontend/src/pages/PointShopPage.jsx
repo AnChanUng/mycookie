@@ -3,15 +3,15 @@ import { Link } from 'react-router-dom';
 import api from '../api';
 import { account, onAccountChange } from '../sync';
 import { membershipHeaders } from '../membership';
-import { PROFILE_FRAMES, PROFILE_THEMES } from '../data/profileOptions';
+import { PROFILE_FRAMES, PROFILE_THEMES, SHOP_AVATAR_NAMES } from '../data/profileOptions';
 import '../styles/profile-frames.css';
 import './PointShopPage.css';
 
 // 포인트 상점. 출석 · 문제 풀이 · 승급으로 모은 포인트로 프로필 꾸미기 아이템을 산다.
-// 지급 기준은 서버 PointService와 같은 값이다. 이미 풀었거나 승급한 몫은 처음 열 때 한 번에 들어온다
+// 지급 기준은 서버 PointService와 같은 값이다. 새 풀이는 하루 100문제까지 인정하고, 넘는 몫(예전 기록 포함)은 다음 날 이어서 들어온다
 const RULES = [
   { icon: '📅', title: '출석', text: '접속하면 하루 10P 자동', sub: '7일 연속마다 50P 더' },
-  { icon: '✏️', title: '문제 풀이', text: '새로 푼 문제 1개당 1P', sub: '같은 문제는 한 번만' },
+  { icon: '✏️', title: '문제 풀이', text: '새로 푼 문제 1개당 1P', sub: '같은 문제는 한 번만 · 하루 100문제까지' },
   { icon: '🏅', title: '승급', text: '단계마다 10 · 30 · 60 · 100 · 200P', sub: '새 등급에 오르면 100~800P 더' },
 ];
 const REASONS = { ATTEND: '출석', SOLVED: '문제 풀이', TIER_UP: '승급', QUEST: '퀘스트', PURCHASE: '구매' };
@@ -24,10 +24,10 @@ const snapshot = () => account()?.token || '';
 
 function describe(key) {
   const [kind, value] = key.split(':');
-  if (kind === 'avatar') return { kind, value, label: `아이콘 ${value}` };
+  if (kind === 'avatar') return { kind, value, label: SHOP_AVATAR_NAMES[value] ? `${SHOP_AVATAR_NAMES[value]} 아이콘` : `아이콘 ${value}` };
   if (kind === 'theme') { const t = PROFILE_THEMES.find(o => o.key === value); return { kind, value, label: `${t?.label || value} 테마`, color: t?.color }; }
   const f = PROFILE_FRAMES.find(o => o.key === value);
-  return { kind, value, label: f?.label || value };
+  return { kind, value, label: f?.label || value, rarity: f?.rarity };
 }
 
 export default function PointShopPage() {
@@ -71,7 +71,7 @@ export default function PointShopPage() {
     </header>
 
     {!token ? <div className="ps-card ps-empty">
-      <p>포인트는 로그인한 계정에 쌓여요. 지금까지 푼 문제와 승급한 몫도 로그인하면 한 번에 받아요.</p>
+      <p>포인트는 로그인한 계정에 쌓여요. 지금까지 푼 문제와 승급한 몫도 로그인하면 하루 100문제씩 이어서 받아요.</p>
       <Link to="/account#settings" className="ds-btn ds-btn--primary ds-btn--sm">로그인하기</Link>
     </div> : <>
       <section className="ps-hero" aria-label="내 포인트">
@@ -84,6 +84,7 @@ export default function PointShopPage() {
           <b className={s?.attendedToday ? 'on' : ''}>{!s ? '…' : s.attendedToday ? '✓ 오늘 출석 완료' : '오늘 출석을 확인하는 중'}</b>
         </div>
       </section>
+      {s?.pendingSolved > 0 && <p className="ps-message" role="status">하루에 {s.dailySolvedCap.toLocaleString()}문제까지 포인트로 쌓여요. 남은 {s.pendingSolved.toLocaleString()}문제 몫은 내일부터 이어서 들어와요.</p>}
       {data.error && <p className="ps-message bad" role="alert">{data.error}</p>}
       {message && <p className={`ps-message${message.ok ? '' : ' bad'}`} role={message.ok ? 'status' : 'alert'}>{message.text}</p>}
     </>}
@@ -117,7 +118,8 @@ export default function PointShopPage() {
             const d = describe(item.key);
             const has = owned.includes(item.key);
             const short = s.balance < item.price;
-            return <li key={item.key} className={`ps-item${has ? ' owned' : ''}`}>
+            return <li key={item.key} className={`ps-item${has ? ' owned' : ''}${d.rarity === '전설' ? ' legend' : d.rarity ? ' rare' : ''}`}>
+              {d.rarity && <span className="ps-rarity">{d.rarity}</span>}
               <div className="ps-preview" style={d.color ? { '--swatch': d.color } : undefined} aria-hidden="true">
                 {kind === 'avatar' && <span className="ps-emoji">{d.value}</span>}
                 {kind === 'theme' && <span className="ps-swatch" />}

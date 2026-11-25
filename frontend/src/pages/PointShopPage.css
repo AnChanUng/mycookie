@@ -68,3 +68,15 @@
   .ps-history li { grid-template-columns: 60px minmax(0, 1fr) auto; }
   .ps-history time { display: none; }
 }
+
+/* 레어 · 전설 아이템: 카드부터 다르게 */
+.ps-item { position: relative; }
+.ps-rarity { position: absolute; top: 10px; left: 10px; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 800; letter-spacing: .02em; color: #fff; }
+.ps-item.rare { border-color: transparent; background: linear-gradient(var(--ds-surface), var(--ds-surface)) padding-box, linear-gradient(135deg, #7bf1d6, #b98cff, #ff8fd8) border-box; border-width: 2px; }
+.ps-item.rare .ps-rarity { background: linear-gradient(135deg, #2dd4bf, #a78bfa); }
+.ps-item.legend { border-color: transparent; border-width: 2px; background: radial-gradient(120% 90% at 50% 0%, rgba(122, 76, 255, .12), transparent 70%) padding-box, linear-gradient(var(--ds-surface), var(--ds-surface)) padding-box, conic-gradient(from var(--ps-a, 0deg), #ffd24d, #ff6fb5, #7a4cff, #1f5fbf, #ffd24d) border-box; animation: ps-legend 4s linear infinite; box-shadow: 0 10px 30px -14px rgba(122, 76, 255, .6); }
+.ps-item.legend .ps-rarity { background: linear-gradient(135deg, #f59e0b, #ec4899, #7c3aed); }
+.ps-item.legend .ps-price { background: linear-gradient(90deg, #f59e0b, #ec4899, #7c3aed); -webkit-background-clip: text; background-clip: text; color: transparent; }
+@property --ps-a { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
+@keyframes ps-legend { to { --ps-a: 360deg; } }
+@media (prefers-reduced-motion: reduce) { .ps-item.legend { animation: none; } }

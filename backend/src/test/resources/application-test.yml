@@ -18,6 +18,9 @@ app:
     password-signup-enabled: true
   security:
     rate-limit-enabled: false
+    # 테스트끼리 같은 주소(127.0.0.1)로 보내므로 넉넉하게 둔다. IP 한도는 ReportFeedbackIpLimitTest가 낮춰서 확인한다
+    reports-per-ip-per-day: 100000
+    feedback-per-ip-per-day: 100000
     min-admin-key-length: 0
   duel:
     # 테스트용 정답표. 모든 문제의 정답은 0번 보기다
