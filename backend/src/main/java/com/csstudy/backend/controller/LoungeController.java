@@ -68,10 +68,13 @@ public class LoungeController {
 
     // after를 주면 그 뒤에 올라온 글만, 안 주면 최근 글을 모두 돌려준다
     @GetMapping(value = "/lounge/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public synchronized SseEmitter stream(jakarta.servlet.http.HttpServletResponse response) {
+    // synchronized를 걸지 않는다: 몰릴 때 연결이 한 줄로 서지 않게, 목록 읽기(messages)만 잠근다
+    public SseEmitter stream(jakarta.servlet.http.HttpServletResponse response) {
         response.setHeader("Cache-Control", "no-cache");
         response.setHeader("X-Accel-Buffering", "no");
-        return streamService.subscribe(messages(null));
+        SseEmitter emitter = streamService.subscribe(messages(null));
+        // 상한을 넘으면 오류 대신 "가득 참"을 알려 화면이 몇 초마다 조회로 바꾸게 한다(ERROR 로그와 긴급 알림을 만들지 않음)
+        return emitter != null ? emitter : streamService.full();
     }
 
     @GetMapping("/lounge/messages")
@@ -93,7 +96,7 @@ public class LoungeController {
     }
 
     @PostMapping("/lounge/presence")
-    public synchronized ResponseEntity<?> joinChat(@RequestBody Map<String, Object> body, HttpServletRequest request) {
+    public ResponseEntity<?> joinChat(@RequestBody Map<String, Object> body, HttpServletRequest request) {
         String id = str(body.get("visitorId"), 40);
         if (id == null) return ResponseEntity.badRequest().build();
         String name = authService.currentUser(request).map(com.csstudy.backend.entity.User::getNickname)
@@ -102,14 +105,15 @@ public class LoungeController {
         profileService.remember(id,name,authService.currentUser(request).map(com.csstudy.backend.entity.User::getId).orElse(null));
         String self = presenceService.joinChat(id, name);
         if (self == null) return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build();
-        streamService.publish(messages(null));
+        // 입장은 참여자 목록만 알린다(전체 글 목록을 모두에게 다시 보내지 않는다)
+        streamService.publishPresence(presenceService.count(), presenceService.chatMembers());
         return ResponseEntity.ok(Map.of("self", self, "participants", presenceService.chatMembers()));
     }
 
     @DeleteMapping("/lounge/presence")
-    public synchronized Map<String, Object> leaveChat(@RequestBody Map<String, Object> body) {
+    public Map<String, Object> leaveChat(@RequestBody Map<String, Object> body) {
         presenceService.leaveChat(str(body.get("visitorId"), 40));
-        streamService.publish(messages(null));
+        streamService.publishPresence(presenceService.count(), presenceService.chatMembers());
         return Map.of("ok", true);
     }
 
@@ -151,7 +155,8 @@ public class LoungeController {
                     .visitorId(visitorId).clientId(clientId).nickname(nickname).text(text).ipHash(ipHash).createdAt(now).build());
             recent.addLast(saved);
             while (recent.size() > RECENT) reactions.remove(recent.removeFirst().getId());
-            streamService.publish(messages(null));
+            // 새 글은 그 글 하나만 보낸다(예전에는 최근 100개 전체를 접속자마다 다시 보냈다)
+            streamService.publishMessage(row(saved), epoch);
         }
         return ResponseEntity.ok(liveRow(saved));
     }

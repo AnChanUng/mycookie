@@ -142,9 +142,27 @@ export default function LoungeChat({ open, online, onClose, onOnline, onUnread, 
         setStreaming(true);
       } catch { setStreaming(false); }
     });
+    // 새 글은 그 글 하나만 온다. 목록 번호(epoch)가 바뀌었으면 지워진 글이 있으니 처음부터 다시 받는다
+    source.addEventListener('message', event => {
+      try {
+        const data = JSON.parse(event.data);
+        if (epoch.current !== null && data.epoch !== epoch.current) { epoch.current = null; poll(); return; }
+        if (data.message) take([data.message], false);
+      } catch { /* 다음 조회가 메운다 */ }
+    });
+    // 입장과 퇴장은 참여자 목록만 온다
+    source.addEventListener('presence', event => {
+      try {
+        const data = JSON.parse(event.data);
+        onOnline(data.online);
+        if (Array.isArray(data.participants)) setParticipants(data.participants);
+      } catch { /* 무시 */ }
+    });
+    // 실시간 연결이 가득 찼다: 다시 붙으려 하지 않고 몇 초마다 조회로 바꾼다
+    source.addEventListener('full', () => { source.close(); setStreaming(false); });
     source.onerror = () => setStreaming(false); // EventSource reconnects; polling covers the gap.
     return () => { source.close(); setStreaming(false); };
-  }, [open, take, onOnline]);
+  }, [open, take, onOnline, poll]);
 
   // Site presence stays active while the chat panel is closed.
   useEffect(() => {

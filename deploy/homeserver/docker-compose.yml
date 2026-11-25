@@ -83,6 +83,8 @@ x-backend: &backend
     STUDY_COACH_MODEL: ${STUDY_COACH_MODEL:-gemini-flash-lite-latest}
     INTERVIEW_GEMINI_MODEL: ${INTERVIEW_GEMINI_MODEL:-gemini-flash-lite-latest}
     ALERT_GEMINI_MODEL: ${ALERT_GEMINI_MODEL:-gemini-flash-lite-latest}
+    # 라운지 실시간 연결 상한(넘치면 3초마다 조회로 대체)
+    LOUNGE_MAX_STREAMS: ${LOUNGE_MAX_STREAMS:-1000}
     ALERT_ERROR_THRESHOLD: ${ALERT_ERROR_THRESHOLD:-10}
     ALERT_MAIL_FAILURE_THRESHOLD: ${ALERT_MAIL_FAILURE_THRESHOLD:-5}
   healthcheck:
