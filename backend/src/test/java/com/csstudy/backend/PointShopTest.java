@@ -82,15 +82,15 @@ class PointShopTest {
 
         buy(t, "frame:rainbow").andExpect(status().isBadRequest()).andExpect(jsonPath("$.code").value("POINT_NOT_ENOUGH"));
         buy(t, "theme:hacked").andExpect(status().isBadRequest()).andExpect(jsonPath("$.code").value("POINT_ITEM_UNKNOWN"));
-        buy(t, "avatar:🦄").andExpect(status().isOk()).andExpect(jsonPath("$.balance").value(210))
-                .andExpect(jsonPath("$.owned", hasItem("avatar:🦄")));
-        buy(t, "avatar:🦄").andExpect(status().isConflict()).andExpect(jsonPath("$.code").value("POINT_ITEM_OWNED"));
+        buy(t, "avatar:🍩").andExpect(status().isOk()).andExpect(jsonPath("$.balance").value(210))
+                .andExpect(jsonPath("$.owned", hasItem("avatar:🍩")));
+        buy(t, "avatar:🍩").andExpect(status().isConflict()).andExpect(jsonPath("$.code").value("POINT_ITEM_OWNED"));
 
         // 산 아이콘은 프로필에 쓸 수 있고, 사지 않은 상점 테마는 못 쓴다
         var profile = org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put("/api/v1/me/profile").header("Authorization", t)
                 .contentType(MediaType.APPLICATION_JSON);
-        mvc.perform(profile.content(json.writeValueAsString(Map.of("avatar", "🦄")))).andExpect(status().isOk())
-                .andExpect(jsonPath("$.avatar").value("🦄")).andExpect(jsonPath("$.owned", hasItem("avatar:🦄")));
+        mvc.perform(profile.content(json.writeValueAsString(Map.of("avatar", "🍩")))).andExpect(status().isOk())
+                .andExpect(jsonPath("$.avatar").value("🍩")).andExpect(jsonPath("$.owned", hasItem("avatar:🍩")));
         mvc.perform(profile.content(json.writeValueAsString(Map.of("theme", "sakura")))).andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("PROFILE_ITEM_LOCKED"));
 
@@ -142,7 +142,7 @@ class PointShopTest {
         String t = register("포인트남");
         var profile = org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put("/api/v1/me/profile").header("Authorization", t)
                 .contentType(MediaType.APPLICATION_JSON);
-        mvc.perform(profile.content(json.writeValueAsString(Map.of("avatar", "🦄")))).andExpect(status().isBadRequest())
+        mvc.perform(profile.content(json.writeValueAsString(Map.of("avatar", "🍩")))).andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("PROFILE_ITEM_LOCKED"));
         mvc.perform(profile.content(json.writeValueAsString(Map.of("frame", "rainbow")))).andExpect(status().isBadRequest());
     }

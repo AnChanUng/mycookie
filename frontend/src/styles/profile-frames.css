@@ -1,10 +1,10 @@
 /* 프로필 아이콘 테두리(등급 보상). 프로필 카드 · 채팅 · 순위 · 헤더가 함께 쓴다.
    게임 프로필처럼 금속 결(은 · 금)과 도는 빛(다이아 · 루비)으로 그린다.
    아이콘 바깥에 고리를 하나 덧그린다: --pf-ring(아이콘과 고리 사이 + 고리 두께), --pf-w(고리 두께) */
-.frame-silver, .frame-gold, .frame-diamond, .frame-ruby, .frame-flame, .frame-rainbow, .frame-pastel, .frame-ribbon, .frame-heart { --pf-ring: 5px; --pf-w: 3px; position: relative; isolation: isolate; }
-.pf-small.frame-silver, .pf-small.frame-gold, .pf-small.frame-diamond, .pf-small.frame-ruby, .pf-small.frame-flame, .pf-small.frame-rainbow, .pf-small.frame-pastel, .pf-small.frame-ribbon, .pf-small.frame-heart { --pf-ring: 3px; --pf-w: 2px; }
+.frame-silver, .frame-gold, .frame-diamond, .frame-ruby, .frame-flame, .frame-rainbow, .frame-pastel, .frame-ribbon, .frame-heart, .frame-aurora, .frame-galaxy { --pf-ring: 5px; --pf-w: 3px; position: relative; isolation: isolate; }
+.pf-small.frame-silver, .pf-small.frame-gold, .pf-small.frame-diamond, .pf-small.frame-ruby, .pf-small.frame-flame, .pf-small.frame-rainbow, .pf-small.frame-pastel, .pf-small.frame-ribbon, .pf-small.frame-heart, .pf-small.frame-aurora, .pf-small.frame-galaxy { --pf-ring: 3px; --pf-w: 2px; }
 
-.frame-silver::after, .frame-gold::after, .frame-diamond::after, .frame-ruby::after, .frame-flame::after, .frame-rainbow::after, .frame-pastel::after, .frame-ribbon::after, .frame-heart::after {
+.frame-silver::after, .frame-gold::after, .frame-diamond::after, .frame-ruby::after, .frame-flame::after, .frame-rainbow::after, .frame-pastel::after, .frame-ribbon::after, .frame-heart::after, .frame-aurora::after, .frame-galaxy::after {
   content: ''; position: absolute; inset: calc(var(--pf-ring) * -1); z-index: 1;
   border-radius: 50%; pointer-events: none;
   -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - var(--pf-w)), #000 calc(100% - var(--pf-w) + .5px));
@@ -42,6 +42,40 @@
   15% { box-shadow: 0 0 18px 3px rgba(255, 93, 143, .6); }
   30% { box-shadow: 0 0 10px rgba(255, 93, 143, .4); }
   45% { box-shadow: 0 0 20px 4px rgba(255, 93, 143, .65); }
+}
+
+/* 레어 · 전설 테두리는 고리를 더 굵게 */
+.frame-aurora, .frame-galaxy { --pf-ring: 7px; --pf-w: 5px; }
+.pf-small.frame-aurora, .pf-small.frame-galaxy { --pf-ring: 4px; --pf-w: 3px; }
+/* 레어(5,000P): 오로라. 민트 · 보라 · 분홍 빛이 색을 바꾸며 돌고, 부드럽게 번진다 */
+.frame-aurora::after { background: conic-gradient(#7bf1d6, #6ea8ff, #b98cff, #ff8fd8, #ffd38a, #7bf1d6); animation: pf-spin 4s linear infinite, pf-hue 6s linear infinite; }
+.frame-aurora { animation: pf-aurora 3s ease-in-out infinite; }
+@keyframes pf-hue { to { filter: hue-rotate(360deg); } }
+@keyframes pf-aurora {
+  0%, 100% { box-shadow: 0 0 12px 2px rgba(123, 241, 214, .45), 0 0 24px 4px rgba(185, 140, 255, .25); }
+  50% { box-shadow: 0 0 18px 4px rgba(255, 143, 216, .5), 0 0 32px 8px rgba(110, 168, 255, .3); }
+}
+/* 전설(10,000P): 은하수. 밤하늘 고리에 별이 박혀 돌고, 금빛 별 하나가 아이콘 둘레를 돈다 */
+.frame-galaxy::after {
+  background:
+    radial-gradient(circle at 20% 30%, #fff 0 1.2px, transparent 2px),
+    radial-gradient(circle at 75% 20%, #fff 0 1px, transparent 1.8px),
+    radial-gradient(circle at 85% 70%, #ffe9a8 0 1.4px, transparent 2.2px),
+    radial-gradient(circle at 30% 85%, #fff 0 1px, transparent 1.8px),
+    radial-gradient(circle at 55% 50%, #cfe1ff 0 .9px, transparent 1.6px),
+    conic-gradient(#1b1440, #4b2a9a, #1f5fbf, #b44be1, #ff6fb5, #3a1d7a, #1b1440);
+  animation: pf-spin 6s linear infinite;
+}
+.frame-galaxy { animation: pf-galaxy 2.8s ease-in-out infinite; }
+.frame-galaxy::before {
+  content: '✦'; position: absolute; z-index: 2; inset: calc(var(--pf-ring) * -1 - 4px); pointer-events: none;
+  display: flex; justify-content: center; align-items: flex-start; line-height: 1;
+  color: #ffe08a; font-size: calc(var(--pf-ring) * 2.4 + 4px); text-shadow: 0 0 6px #ffd24d, 0 0 12px rgba(255, 210, 77, .8);
+  animation: pf-spin 5s linear infinite;
+}
+@keyframes pf-galaxy {
+  0%, 100% { box-shadow: 0 0 14px 3px rgba(122, 76, 255, .5), 0 0 28px 6px rgba(255, 111, 181, .25); }
+  50% { box-shadow: 0 0 22px 6px rgba(255, 210, 77, .45), 0 0 40px 10px rgba(122, 76, 255, .35); }
 }
 
 @keyframes pf-spin { to { transform: rotate(360deg); } }

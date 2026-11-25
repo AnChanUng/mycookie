@@ -31,7 +31,7 @@
   font-size: 28px; font-weight: 800; line-height: 1;
 }
 .profile-pop-avatar.emoji { font-size: 34px; background: var(--ds-surface-2); }
-.profile-pop-avatar.frame-silver, .profile-pop-avatar.frame-gold, .profile-pop-avatar.frame-diamond, .profile-pop-avatar.frame-ruby, .profile-pop-avatar.frame-flame, .profile-pop-avatar.frame-rainbow, .profile-pop-avatar.frame-pastel, .profile-pop-avatar.frame-ribbon, .profile-pop-avatar.frame-heart { --pf-ring: 3px; --pf-w: 4px; }
+.profile-pop-avatar.frame-silver, .profile-pop-avatar.frame-gold, .profile-pop-avatar.frame-diamond, .profile-pop-avatar.frame-ruby, .profile-pop-avatar.frame-flame, .profile-pop-avatar.frame-rainbow, .profile-pop-avatar.frame-pastel, .profile-pop-avatar.frame-ribbon, .profile-pop-avatar.frame-heart, .profile-pop-avatar.frame-aurora, .profile-pop-avatar.frame-galaxy { --pf-ring: 3px; --pf-w: 4px; }
 .profile-pop-tier .tier-badge { width: 32px; height: 32px; margin: 0 0 4px; }
 .profile-pop-name { margin-top: 4px; font-size: 18px; font-weight: 800; letter-spacing: -0.02em; overflow-wrap: anywhere; }
 .profile-pop-meta { margin: 0; font-size: var(--ds-fs-caption); color: var(--ds-text-3); }

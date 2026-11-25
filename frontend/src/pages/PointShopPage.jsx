@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import api from '../api';
 import { account, onAccountChange } from '../sync';
 import { membershipHeaders } from '../membership';
-import { PROFILE_FRAMES, PROFILE_THEMES } from '../data/profileOptions';
+import { PROFILE_FRAMES, PROFILE_THEMES, SHOP_AVATAR_NAMES } from '../data/profileOptions';
 import '../styles/profile-frames.css';
 import './PointShopPage.css';
 
@@ -24,10 +24,10 @@ const snapshot = () => account()?.token || '';
 
 function describe(key) {
   const [kind, value] = key.split(':');
-  if (kind === 'avatar') return { kind, value, label: `아이콘 ${value}` };
+  if (kind === 'avatar') return { kind, value, label: SHOP_AVATAR_NAMES[value] ? `${SHOP_AVATAR_NAMES[value]} 아이콘` : `아이콘 ${value}` };
   if (kind === 'theme') { const t = PROFILE_THEMES.find(o => o.key === value); return { kind, value, label: `${t?.label || value} 테마`, color: t?.color }; }
   const f = PROFILE_FRAMES.find(o => o.key === value);
-  return { kind, value, label: f?.label || value };
+  return { kind, value, label: f?.label || value, rarity: f?.rarity };
 }
 
 export default function PointShopPage() {
@@ -118,7 +118,8 @@ export default function PointShopPage() {
             const d = describe(item.key);
             const has = owned.includes(item.key);
             const short = s.balance < item.price;
-            return <li key={item.key} className={`ps-item${has ? ' owned' : ''}`}>
+            return <li key={item.key} className={`ps-item${has ? ' owned' : ''}${d.rarity === '전설' ? ' legend' : d.rarity ? ' rare' : ''}`}>
+              {d.rarity && <span className="ps-rarity">{d.rarity}</span>}
               <div className="ps-preview" style={d.color ? { '--swatch': d.color } : undefined} aria-hidden="true">
                 {kind === 'avatar' && <span className="ps-emoji">{d.value}</span>}
                 {kind === 'theme' && <span className="ps-swatch" />}
