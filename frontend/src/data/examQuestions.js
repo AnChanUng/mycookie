@@ -359,10 +359,10 @@ export const COMPANIES = [
     lede: "데이터베이스 14문제, 자료구조·알고리즘 12문제, 소프트웨어공학 6문제, AI·보안 7문제. 총 39문제, 55분, 5지선다. 응시 후기에서 확인한 출제 경향을 따라 새로 만든 예상문제입니다. DB와 자료구조 비중이 높고 딥러닝 기초가 함께 나옵니다.",
   },
   {
-    key: "java", category: "stack", abbr: "Java", name: "Java 핵심 문법", meta: "Java 17 · 40문제 · 4지선다", ready: true,
+    key: "java", category: "stack", abbr: "Java", name: "Java 핵심 문법", meta: "Java 17 · 38문제 · 4지선다", ready: true,
     source: { kind: "predicted", label: "자체 제작 문제", detail: "Java SE 17 기준입니다. 코드 조각은 필요한 import와 둘러싸는 클래스·메서드가 있다고 가정합니다." },
     questions: JAVA_QUESTIONS, sections: JAVA_SECTIONS, minutes: 40,
-    lede: "언어 기초, 클래스와 객체, 컬렉션과 제네릭, 예외와 표준 API를 영역별 10문제씩 풀어요.",
+    lede: "언어 기초 8문제, 클래스와 객체·컬렉션과 제네릭·예외와 표준 API 각 10문제를 풀어요.",
   },
   {
     key: "spring-practice", category: "stack", abbr: "Spring", name: "Spring 핵심 실전", meta: "IoC·DI · AOP · MVC · MyBatis · Security 53문제 · 4지선다", ready: true,
