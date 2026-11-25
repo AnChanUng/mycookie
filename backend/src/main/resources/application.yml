@@ -161,6 +161,11 @@ app:
 gemini:
   api-key: ${GEMINI_API_KEY:}
 
+# 라운지 실시간 연결(SSE) 상한과 전송 스레드 수. 넘친 사람은 몇 초마다 조회로 바뀐다
+app.lounge:
+  max-streams: ${LOUNGE_MAX_STREAMS:1000}
+  delivery-threads: ${LOUNGE_DELIVERY_THREADS:4}
+
 # 운영에서는 상태 확인만 연다. 커넥션 풀 같은 내부 지표는 로컬 부하테스트 프로필에서만 연다
 management:
   endpoints:

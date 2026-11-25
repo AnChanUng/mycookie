@@ -22,6 +22,7 @@ const ip = n => `198.18.${Math.floor(n / 250)}.${(n % 250) + 1}`;
 const run = Date.now().toString(36);
 
 const sent = new Map();   // seq → 보낸 시각
+const sendFail = {};
 const clients = [];
 let refused = 0, refusedReasons = {};
 
@@ -49,7 +50,7 @@ async function openClient(n, slow) {
     clients.push(c);
     // 입장(참여자 목록에 이름 올리기)도 함께 몰린다
     fetch(`${API}/lounge/presence`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Forwarded-For': ip(n) },
-      body: JSON.stringify({ visitorId: `lt-${run}-v${n}`, nickname: `부하${n}` }) }).catch(() => {});
+      body: JSON.stringify({ visitorId: `lt-${run}-v${n}`, nickname: `p${n}${run.slice(-4)}` }) }).catch(() => {});
     (async () => {
       const decoder = new TextDecoder(); let buf = '';
       try {
@@ -83,9 +84,9 @@ async function sender(s, until) {
     try {
       const res = await fetch(`${API}/lounge/messages`, { method: 'POST',
         headers: { 'Content-Type': 'application/json', 'X-Forwarded-For': ip(10000 + s) },
-        body: JSON.stringify({ visitorId: `lt-${run}-s${s}`, nickname: `보내기${s}`, text: `lt-${run}-${seq}`, clientId: `${run}-${seq}` }) });
-      if (res.ok) sent.set(seq, at); else await res.body?.cancel();
-    } catch { /* 실패는 보낸 것으로 세지 않음 */ }
+        body: JSON.stringify({ visitorId: `lt-${run}-s${s}`, nickname: `s${s}${run.slice(-4)}`, text: `lt-${run}-${seq}`, clientId: `${run}-${seq}` }) });
+      if (res.ok) sent.set(seq, at); else { sendFail[res.status] = (sendFail[res.status] || 0) + 1; await res.body?.cancel(); }
+    } catch (e) { const k = String(e.cause?.code || e.message).slice(0, 40); sendFail[k] = (sendFail[k] || 0) + 1; }
     await sleep(Math.max(0, SEND_EVERY_MS - (Date.now() - at)));
   }
 }
@@ -124,7 +125,7 @@ const pct = (arr, p) => { if (!arr.length) return null; const s = [...arr].sort(
   const result = {
     label: LABEL, clients: CLIENTS, slow: SLOW, connected: clients.length, refused, refusedReasons,
     disconnectedDuringRun: dropped,
-    messagesSent: msgs, sendRatePerSec: +(msgs / DURATION_S).toFixed(2),
+    messagesSent: msgs, sendFail, sendRatePerSec: +(msgs / DURATION_S).toFixed(2),
     lossRate: expected ? +(1 - got / expected).toFixed(4) : null, expected, received: got,
     latencyMs: { p50: pct(lat, 50), p95: pct(lat, 95), p99: pct(lat, 99), max: pct(lat, 100) },
     latencyMsNormalClients: { p50: pct(latFast, 50), p95: pct(latFast, 95), p99: pct(latFast, 99) },
