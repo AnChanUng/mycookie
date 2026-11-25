@@ -84,19 +84,21 @@ public class NicknameService {
         rejectReserved(name);
         String owner=userId==null?"v:"+visitorId:"u:"+userId;
         String old=profiles.findByVisitorId(visitorId).map(VisitorProfile::getNickname).orElse(null);
+        // 로그인한 기기가 이미 가입 · 변경 검사를 통과한 자기 계정 닉네임을 기록하는 것은 막지 않는다.
+        // 로그인 전 다른 기기가 같은 이름을 먼저 잡아 두었어도 그 이름의 주인을 계정으로 옮긴다
+        // (채팅 입장 /lounge/presence 409, 이슈 #299 · 순위 중복 #297). 가입 · 닉네임 변경은 이 길을 타지 않는다
+        if(userId!=null && ownAccountName(owner,key(name))) { takeForAccount(key(name),owner); release(old,name,owner); return; }
         claim(name,owner,visitorId);release(old,name,owner);
+    }
+    private void takeForAccount(String key,String owner) {
+        var existing=claims.findById(key);
+        if(existing.isEmpty()) claims.insertClaim(key,owner);
+        else if(!existing.get().getOwner().equals(owner)) { existing.get().setOwner(owner); claims.saveAndFlush(existing.get()); }
     }
     private void claim(String name,String owner,String visitorId) {
         String key=key(name);
         var existing=claims.findById(key);
         if(existing.isPresent() && existing.get().getOwner().equals(owner)) return;
-        // 로그인한 회원이 자기 계정 닉네임을 쓰는 것은 언제나 허용한다. 로그인 전 다른 기기가 같은 이름을 먼저 잡아 두었어도
-        // 그 이름의 주인을 계정으로 옮긴다(채팅 입장 /lounge/presence 409, 이슈 #299 · 순위 중복 #297)
-        if(owner.startsWith("u:") && ownAccountName(owner,key)) {
-            if(existing.isEmpty()) claims.insertClaim(key,owner);
-            else { existing.get().setOwner(owner); claims.saveAndFlush(existing.get()); }
-            return;
-        }
         for(User u:users.findAll()) {
             if(key(u.getNickname()).equals(key) && !owner.equals("u:"+u.getId())) conflict();
         }
