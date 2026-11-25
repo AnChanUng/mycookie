@@ -52,6 +52,7 @@ public class RankController {
     private final MembershipService membershipService;
     private final VisitorTierGrantRepository grants;
     private final com.csstudy.backend.service.PromotionNoticeService notices;
+    private final com.csstudy.backend.service.PointService pointService;
 
     private final com.csstudy.backend.service.RankWelcomeService welcomeService;
 
@@ -143,6 +144,8 @@ public class RankController {
                 solvedRepository.saveAndFlush(solved);
                 var after=account.isPresent()?membershipService.membership(account.get()):membershipService.visitor(visitorId);
                 notices.announce(account.isPresent()?"user:"+account.get().getId():"visitor:"+visitorId,before,after);
+                // 로그인한 계정이면 새로 푼 문제 · 승급 · 오늘의 퀘스트 포인트를 바로 준다
+                if (account.isPresent()) pointService.refresh(account.get());
                 cached = null;   // 방금 알려 준 숫자가 바로 순위에 보이게 한다
             } catch (DataIntegrityViolationException e) {
                 // 같은 방문자의 요청이 겹쳤다. 먼저 들어간 값을 그대로 둔다

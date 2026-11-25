@@ -62,22 +62,24 @@ class PointShopTest {
         String t = register("포인트테스터");
         mvc.perform(get("/api/v1/points").header("Authorization", t)).andExpect(status().isOk()).andExpect(jsonPath("$.balance").value(0));
 
-        // 160문제 = 금 쿠키 Ⅴ. 풀이 160 + 승급(동 Ⅳ~Ⅰ 40, 은 Ⅴ 130, 은 Ⅳ~Ⅰ 120, 금 Ⅴ 260) = 710
+        // 오늘 처음 연 뒤 160문제(금 쿠키 Ⅴ)를 풀었다. 풀이 160 + 승급(동 Ⅳ~Ⅰ 40, 은 Ⅴ 130, 은 Ⅳ~Ⅰ 120, 금 Ⅴ 260)
+        // + 오늘의 퀘스트(5 · 15 · 30문제: 20 + 40 + 80) = 850
         solved(t, "point-device-1", 160);
-        mvc.perform(get("/api/v1/points").header("Authorization", t)).andExpect(jsonPath("$.balance").value(710));
+        mvc.perform(get("/api/v1/points").header("Authorization", t)).andExpect(jsonPath("$.balance").value(850))
+                .andExpect(jsonPath("$.todaySolved").value(160)).andExpect(jsonPath("$.quests[2].done").value(true));
         // 다시 열어도 두 번 주지 않는다
-        mvc.perform(get("/api/v1/points").header("Authorization", t)).andExpect(jsonPath("$.balance").value(710))
+        mvc.perform(get("/api/v1/points").header("Authorization", t)).andExpect(jsonPath("$.balance").value(850))
                 .andExpect(jsonPath("$.attendedToday").value(false));
 
         mvc.perform(post("/api/v1/points/attend").header("Authorization", t)).andExpect(status().isOk())
-                .andExpect(jsonPath("$.earned").value(10)).andExpect(jsonPath("$.streak").value(1)).andExpect(jsonPath("$.balance").value(720));
+                .andExpect(jsonPath("$.earned").value(10)).andExpect(jsonPath("$.streak").value(1)).andExpect(jsonPath("$.balance").value(860));
         // 자동 출석이 여러 번 불려도 하루 한 번만 준다
         mvc.perform(post("/api/v1/points/attend").header("Authorization", t)).andExpect(status().isOk())
-                .andExpect(jsonPath("$.earned").value(0)).andExpect(jsonPath("$.already").value(true)).andExpect(jsonPath("$.balance").value(720));
+                .andExpect(jsonPath("$.earned").value(0)).andExpect(jsonPath("$.already").value(true)).andExpect(jsonPath("$.balance").value(860));
 
-        buy(t, "theme:sakura").andExpect(status().isBadRequest()).andExpect(jsonPath("$.code").value("POINT_NOT_ENOUGH"));
+        buy(t, "frame:rainbow").andExpect(status().isBadRequest()).andExpect(jsonPath("$.code").value("POINT_NOT_ENOUGH"));
         buy(t, "theme:hacked").andExpect(status().isBadRequest()).andExpect(jsonPath("$.code").value("POINT_ITEM_UNKNOWN"));
-        buy(t, "avatar:🦄").andExpect(status().isOk()).andExpect(jsonPath("$.balance").value(420))
+        buy(t, "avatar:🦄").andExpect(status().isOk()).andExpect(jsonPath("$.balance").value(560))
                 .andExpect(jsonPath("$.owned", hasItem("avatar:🦄")));
         buy(t, "avatar:🦄").andExpect(status().isConflict()).andExpect(jsonPath("$.code").value("POINT_ITEM_OWNED"));
 
@@ -91,7 +93,21 @@ class PointShopTest {
 
         // 더 풀면 늘어난 만큼만 준다(161번째 문제 1점)
         solved(t, "point-device-1", 161);
-        mvc.perform(get("/api/v1/points").header("Authorization", t)).andExpect(jsonPath("$.balance").value(421));
+        mvc.perform(get("/api/v1/points").header("Authorization", t)).andExpect(jsonPath("$.balance").value(561));
+    }
+
+    @Test
+    void questsCountOnlyTodaysNewSolves() throws Exception {
+        String t = register("퀘스트테스터");
+        // 처음 기록이 들어올 때가 오늘의 출발점: 지난 160문제는 소급 지급만 하고 퀘스트에는 넣지 않는다
+        solved(t, "quest-device-1", 160);
+        mvc.perform(get("/api/v1/points").header("Authorization", t)).andExpect(jsonPath("$.balance").value(710))
+                .andExpect(jsonPath("$.todaySolved").value(0)).andExpect(jsonPath("$.quests[0].done").value(false));
+        // 오늘 6문제를 더 풀면 풀이 6 + 5문제 퀘스트 20. 순위 기록만 보내도 바로 들어온다
+        solved(t, "quest-device-1", 166);
+        mvc.perform(get("/api/v1/points").header("Authorization", t)).andExpect(jsonPath("$.balance").value(736))
+                .andExpect(jsonPath("$.todaySolved").value(6)).andExpect(jsonPath("$.quests[0].done").value(true))
+                .andExpect(jsonPath("$.quests[1].done").value(false));
     }
 
     @Test

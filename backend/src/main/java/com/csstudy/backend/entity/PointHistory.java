@@ -15,7 +15,7 @@ import java.time.Instant;
 @Builder
 public class PointHistory {
 
-    public enum Reason { ATTEND, SOLVED, TIER_UP, PURCHASE }
+    public enum Reason { ATTEND, SOLVED, TIER_UP, QUEST, PURCHASE }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
