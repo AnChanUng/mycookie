@@ -14,6 +14,7 @@
     "build": "vite build && node --import ./scripts/extensionless-loader.mjs scripts/prerender-seo.mjs",
     "lint": "eslint .",
     "check:questions": "node --import ./scripts/extensionless-loader.mjs scripts/check-questions.mjs",
+    "check:note-quiz": "node --import ./scripts/extensionless-loader.mjs scripts/check-note-quiz.mjs",
     "preview": "vite preview",
     "check:explanations": "node --import ./scripts/extensionless-loader.mjs scripts/check-explanations.mjs",
     "check:exam-flow": "node --import ./scripts/extensionless-loader.mjs scripts/check-exam-flow.mjs",

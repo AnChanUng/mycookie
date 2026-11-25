@@ -23,6 +23,10 @@ import { KINFA_SECTIONS, KINFA_QUESTIONS } from './kinfaQuestions';
 import { SPRING_SECTIONS, SPRING_QUESTIONS } from './springQuestions';
 import { JAVA_SECTIONS, JAVA_QUESTIONS } from './javaQuestions';
 import { SPRING_PRACTICE_SECTIONS, SPRING_PRACTICE_QUESTIONS } from './springPracticeQuestions';
+import { WEB_NOTE_SECTIONS, WEB_NOTE_QUESTIONS } from './webNoteQuestions';
+import { WEB_ESSENTIALS } from './webEssentials';
+import { CS_NOTE_SECTIONS, CS_NOTE_QUESTIONS } from './csNoteQuestions';
+import { CS_NOTES } from './csNotes';
 import { BOK_SECTIONS, BOK_QUESTIONS } from './bokQuestions';
 import { KSD_SECTIONS, KSD_QUESTIONS } from './ksdQuestions';
 import { KDIC_SECTIONS, KDIC_QUESTIONS } from './kdicQuestions';
@@ -146,6 +150,8 @@ export const EXAM_CATEGORIES = [
   { key: "major", name: "SSAFY 과목평가", desc: "SSAFY 과목평가 · 객관식 · 단답형 · 서술형", unit: "과목", hub: "ssafy" },
   { key: "ai", name: "AI", desc: "딥러닝 · 머신러닝 · 빅데이터 AI", unit: "과목", hub: "ai" },
   { key: "monthly", name: "월말평가", desc: "SSAFY 월말평가 서술형 (구현 문제 제외)", unit: "과목", hub: "ssafy" },
+  // 전공노트 문제풀이는 CS · 면접 메뉴(/cs) 아래에 둔다
+  { key: "csnote", name: "전공노트 문제풀이", desc: "전공노트 기반 객관식 · 단답형", unit: "과목", hub: "cs" },
   { key: "aptitude", name: "인적성검사", desc: "기업별 인적성검사 · 언어 · 수리 · 추리 · 문제해결", hub: "aptitude" },
 ];
 
@@ -369,6 +375,24 @@ export const COMPANIES = [
     source: { kind: "predicted", label: "자체 제작 문제", detail: "사이트의 스프링 이론 글과 기술 면접에서 자주 나오는 주제를 바탕으로 새로 만든 문제입니다. Spring Boot 3 / Spring 6 동작 기준입니다." },
     questions: SPRING_QUESTIONS, sections: SPRING_SECTIONS, minutes: 60,
     lede: "스프링 코어 15문제, 웹 MVC·시큐리티 15문제, JPA·트랜잭션 18문제, 스프링 부트·테스트·설계 12문제. 총 60문제, 60분, 4지선다. IoC·DI, 빈 스코프, AOP, MVC 요청 흐름, 필터·인터셉터·AOP 구분, 영속성 컨텍스트, N+1과 fetch join, OSIV, @Transactional 전파·롤백 규칙과 프록시 내부 호출, 자동 설정과 슬라이스 테스트를 다룹니다. 개념 문제에 코드를 읽고 동작 결과를 예측하는 문제 16개를 섞었습니다.",
+  },
+  {
+    key: "webnote", category: "stack", abbr: "웹노트", name: "웹노트 문제풀이", ready: true,
+    meta: `웹노트 ${WEB_ESSENTIALS.items.length}문답 기반 ${WEB_NOTE_QUESTIONS.length}문제 · 객관식 · 단답형`,
+    source: { kind: "predicted", label: "웹노트 기반 자체 제작 문제", detail: "웹노트(웹 필수지식)의 각 문답과 그 근거 공식 문서(RFC, Spring, OWASP, PostgreSQL 등)를 바탕으로 새로 만든 문제입니다. 단답형은 띄어쓰기·대소문자와 관계없이 허용 답안과 같으면 정답으로 자동 채점합니다." },
+    questions: WEB_NOTE_QUESTIONS, sections: WEB_NOTE_SECTIONS, minutes: 30, practiceSize: 10,
+    draw: { direction: 2, comm: 3, data: 3, conc: 2, security: 3, test: 2, design: 2, ops: 2, spring: 1 },
+    examSub: "영역마다 고르게 20문제를 뽑아 출제 · 안 푼 문제와 틀린 문제를 먼저 냅니다",
+    lede: "웹노트에서 읽은 내용을 객관식과 단답형으로 확인해요. 단답형은 용어를 직접 써 보고 바로 채점되며, 틀리면 해당 노트로 돌아가 다시 읽을 수 있어요.",
+  },
+  {
+    key: "csnote", category: "csnote", abbr: "전공노트", name: "전공노트 문제풀이", ready: true,
+    meta: `전공노트 ${CS_NOTES.reduce((n, s) => n + s.items.length, 0)}개념 기반 ${CS_NOTE_QUESTIONS.length}문제 · 객관식 · 단답형`,
+    source: { kind: "predicted", label: "전공노트 기반 자체 제작 문제", detail: "전공노트의 각 개념(네트워크 · 운영체제 · DB · 자료구조 · Java · Spring 등)을 바탕으로 새로 만든 문제입니다. 단답형은 띄어쓰기·대소문자와 관계없이 허용 답안과 같으면 정답으로 자동 채점합니다." },
+    questions: CS_NOTE_QUESTIONS, sections: CS_NOTE_SECTIONS, minutes: 30, practiceSize: 10,
+    draw: { network: 2, os: 2, db: 2, algo: 2, security: 2, java: 2, spring: 2, lang: 1, eng: 2, infra: 1, bigdata: 2 },
+    examSub: "과목마다 고르게 20문제를 뽑아 출제 · 안 푼 문제와 틀린 문제를 먼저 냅니다",
+    lede: "전공노트에서 읽은 개념을 객관식과 단답형으로 확인해요. 단답형은 용어를 직접 써 보고 바로 채점되며, 틀리면 해당 노트로 돌아가 다시 읽을 수 있어요.",
   },
   {
     key: "ssafydb", category: "major", abbr: "SSAFY", name: "DB", meta: "객관식 30문제 · 4지선다", ready: true,
