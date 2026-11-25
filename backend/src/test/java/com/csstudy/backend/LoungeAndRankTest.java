@@ -28,7 +28,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest(properties = "app.admin-key=test-admin-key")
+@SpringBootTest(properties = {"app.admin-key=test-admin-key", "app.security.trust-forwarded-for=true"})
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 class LoungeAndRankTest {

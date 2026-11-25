@@ -52,6 +52,7 @@ public class LoungeController {
     private final LoungeStreamService streamService;
     private final AuthService authService;
     private final ChatReactionService reactionService;
+    private final com.csstudy.backend.security.ClientAddress addresses;
 
     // 최근 글에 달린 반응. 글 ID → (이모지 → 방문자 ID). 조회가 DB를 깨우지 않도록 메모리에 둔다
     private final Map<Long, Map<String, LinkedHashSet<String>>> reactions = new HashMap<>();
@@ -274,11 +275,9 @@ public class LoungeController {
         return t.isEmpty() ? null : t;
     }
 
-    // Render 같은 프록시 뒤에서는 실제 주소가 X-Forwarded-For의 첫 값으로 온다
-    private static String clientIp(HttpServletRequest request) {
-        String forwarded = request.getHeader("X-Forwarded-For");
-        if (forwarded != null && !forwarded.isBlank()) return forwarded.split(",")[0].trim();
-        return request.getRemoteAddr();
+    // 요청한 곳의 주소. X-Forwarded-For의 첫 값은 누구나 지어 넣을 수 있어서, 믿을 수 있는 프록시가 붙인 값만 쓰는 ClientAddress로 고른다
+    private String clientIp(HttpServletRequest request) {
+        return addresses.resolve(request);
     }
 
     private static String hash(String value) {
