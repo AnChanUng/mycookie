@@ -351,7 +351,7 @@ export function CompanyExamWithProgress({ company, back, progress, initialIds })
   }
 
   return (
-    <div className="fade-in">
+    <div className="fade-in exam-home">
       {header(company.name)}
       {plan && (
         <div className="exam-plan">
@@ -376,6 +376,28 @@ export function CompanyExamWithProgress({ company, back, progress, initialIds })
           <button className="exam-btn ghost" onClick={() => { if (confirm('풀던 기록을 지울까요? 모의고사는 답한 내용이 채점되지 않고 사라집니다.')) clearResume(); }}>지우기</button>
         </div>
       )}
+      {/* 모의고사 시작을 맨 위 큰 카드 하나로: 숫자 몇 개 + 시작 버튼(회차가 있으면 회차 목록) */}
+      <section className="sp-hero exam-hero" aria-label="모의고사">
+        <dl className="sp-facts">
+          <div><dt>{hasSets ? '회차' : '문항'}</dt><dd>{hasSets ? `${examSets.length}회` : examCount}</dd></div>
+          <div><dt>응시</dt><dd>{exams.length}회</dd></div>
+          <div><dt>최고 점수</dt><dd>{best ? `${best.score} / ${best.total}` : '–'}</dd></div>
+          <div><dt>최근 점수</dt><dd>{last ? `${last.score} / ${last.total}` : '–'}</dd></div>
+        </dl>
+        {hasSets ? setsBlock : <>
+          <button type="button" className="sp-cta" onClick={() => start('exam', examIds())}>모의고사 시작하기<span aria-hidden="true">→</span></button>
+          <p className="sp-hint">{examSets[0].sub} · 시간 제한 없음 · 다 풀면 한 번에 채점하고 해설을 보여 줘요.</p>
+        </>}
+      </section>
+      <div className="sp-again exam-again">
+        <button type="button" className="sp-chip" disabled={!wrongIds.length} onClick={() => start('wrong', shuffle(wrongIds))}>
+          <span className="sp-chip-icon wrong" aria-hidden="true">↺</span>오답 다시 풀기<b>{wrongIds.length}</b>
+        </button>
+        <button type="button" className="sp-chip" disabled={!markedIds.length} onClick={() => start('marked', shuffle(markedIds))}>
+          <span className="sp-chip-icon mark" aria-hidden="true">★</span>북마크 다시 풀기<b>{markedIds.length}</b>
+        </button>
+      </div>
+
       {!lean && company.source && SOURCE_KINDS[company.source.kind] && (
         <div className={`exam-source ${company.source.kind}`}>
           <span className="badge">
@@ -407,40 +429,6 @@ export function CompanyExamWithProgress({ company, back, progress, initialIds })
           </div>
         </>
       )}
-
-      {setsBlock}
-
-      {!lean && <div className="exam-stats">
-        <StatTile k="모의고사 응시" v={exams.length} unit="회" />
-        <StatTile k="최고 점수" v={best?.score ?? '–'} of={best?.total ?? examCount} />
-        <StatTile k="최근 점수" v={last?.score ?? '–'} of={last?.total ?? examCount} />
-        <StatTile k="현재 오답" v={wrongIds.length} unit="문제" />
-      </div>}
-
-      <div className={`exam-modes${lean ? ' compact' : ''}`}>
-        <button className={`exam-mode wrong${wrongIds.length ? '' : ' empty'}`} disabled={!wrongIds.length} onClick={() => start('wrong', shuffle(wrongIds))}>
-          <span className="exam-mode-head">
-            <span className="exam-mode-icon" aria-hidden="true">{wrongIds.length ? '↺' : '✓'}</span>
-            <span className="exam-mode-count"><b>{wrongIds.length}</b>문항</span>
-          </span>
-          <span className="t">오답 다시 풀기</span>
-          <span className="d">{wrongIds.length ? '틀리면 자동으로 쌓입니다. 마지막에 마지막에 틀린 문제만 다시 풀고, 맞히면 빠져요.' : '남은 오답이 없어요. 틀린 문제는 자동으로 모입니다.'}</span>
-          <span className="exam-mode-foot">
-            {wrongIds.length > 0 && <span className="exam-mode-go">다시 풀기 →</span>}
-          </span>
-        </button>
-        <button className={`exam-mode mark${markedIds.length ? '' : ' empty'}`} disabled={!markedIds.length} onClick={() => start('marked', shuffle(markedIds))}>
-          <span className="exam-mode-head">
-            <span className="exam-mode-icon" aria-hidden="true">{markedIds.length ? '★' : '☆'}</span>
-            <span className="exam-mode-count"><b>{markedIds.length}</b>문항</span>
-          </span>
-          <span className="t">북마크 다시 풀기</span>
-          <span className="d">{markedIds.length ? '내가 ★로 직접 고른 문제만 다시 풉니다. 맞혀도 별표를 풀 때까지 남아 있습니다.' : '☆를 눌러 둔 문제만 따로 모아 풉니다.'}</span>
-          <span className="exam-mode-foot">
-            {markedIds.length > 0 && <span className="exam-mode-go">다시 풀기 →</span>}
-          </span>
-        </button>
-      </div>
 
       {!lean && <div className="section-title">영역별 연습<Kind kind={mainKind} /></div>}
       {!lean && <div className="exam-sections">
