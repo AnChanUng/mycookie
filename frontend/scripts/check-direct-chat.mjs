@@ -31,14 +31,17 @@ try {
       if (!failed) { failed = true; throw new Error('lost response'); }
       rows = [{id:1,mine:true,text:body.text,at:new Date().toISOString()}];
     }
-    const data = config.url === '/direct' ? [{id:1,nickname:'친구',friendship,unread:0}] : config.url.endsWith('/messages') ? rows : {ok:true};
+    const data = config.url === '/direct/members' ? [] : config.url === '/direct' ? [{id:1,nickname:'친구',friendship,unread:0}] : config.url.endsWith('/messages') ? rows : {ok:true};
     return {data,status:200,statusText:'OK',headers:{},config};
   };
   await act(() => { view = TestRenderer.create(React.createElement(MemoryRouter,null,React.createElement(Direct,props))); });
   const button = label => view.root.findAllByType('button').find(b => text(b) === label);
   await act(() => button('수락').props.onClick());
+  // 대화를 열고 ⋯(친구 관리) 메뉴에서 친구 삭제가 보이면 수락된 것이다
+  await act(() => view.root.findAll(n => n.type === 'button' && String(n.props.className || '').includes('direct-row'))[0].props.onClick());
+  await act(() => view.root.findByProps({'aria-label':'친구 관리'}).props.onClick());
   assert.ok(button('친구 삭제'));
-  await act(() => button('친구').props.onClick());
+  await act(() => view.root.findByProps({'aria-label':'친구 관리'}).props.onClick());
   const input = () => view.root.findByProps({'aria-label':'1:1 메시지'});
   await act(() => input().props.onChange({target:{value:'안녕하세요'}}));
   const submit = () => view.root.findByType('form').props.onSubmit({preventDefault(){}});
