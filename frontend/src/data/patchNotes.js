@@ -5,7 +5,7 @@
 // status: 'released' 배포됨(master) | 'dev' 개발 브랜치에만 있음(release PR을 머지하면 released로 바꾼다)
 export const PATCH_NOTES = [
   {
-    version: '1.7.0', date: '2026-11-25', status: 'dev',
+    version: '1.7.0', date: '2026-11-25', status: 'released',
     title: '노트 문제풀이',
     summary: '웹노트와 전공노트를 읽은 뒤 객관식 · 단답형 문제로 확인합니다.',
     items: [
@@ -15,7 +15,7 @@ export const PATCH_NOTES = [
     ],
   },
   {
-    version: '1.6.0', date: '2026-11-25', status: 'dev',
+    version: '1.6.0', date: '2026-11-25', status: 'released',
     title: '틀린 문제 복습',
     summary: '학습 메일 연습에서 틀린 문제를 오답노트와 첫 화면에서 다시 풀 수 있습니다.',
     items: [
