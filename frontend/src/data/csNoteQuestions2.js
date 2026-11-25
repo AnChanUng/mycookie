@@ -153,7 +153,7 @@ export const CS_NOTE_PART2 = [
       '같은 컨텍스트에서 같은 식별자의 엔티티는 같은 인스턴스로 관리된다',
       '변경 감지는 엔티티의 setter 호출 즉시 UPDATE를 실행한다',
     ], 2, '이점: 1차 캐시, 동일성 보장, 쓰기 지연, 변경 감지, 지연 로딩. flush는 변경을 DB에 동기화하는 것이며 commit과 다르다.'),
-    S('관리 중인 엔티티의 값이 바뀐 것을 flush 때 찾아 UPDATE를 만들어 주는 JPA 기능은? (영어로 dirty ○○○○○○○)', '변경 감지 (Dirty Checking)', ['변경감지', 'dirtychecking', '더티체킹', 'dirtycheck'], '스냅샷과 현재 상태를 비교해 바뀐 엔티티의 UPDATE를 만든다.')],
+    S('관리 중인 엔티티의 값이 바뀐 것을 flush 때 찾아 UPDATE를 만들어 주는 JPA 기능은? (영어로 dirty ○○○○○○○○)', '변경 감지 (Dirty Checking)', ['변경감지', 'dirtychecking', '더티체킹', 'dirtycheck'], '스냅샷과 현재 상태를 비교해 바뀐 엔티티의 UPDATE를 만든다.')],
   ['ksundong-f391501a81a7d15a',
     M('기존 트랜잭션을 보류하고 항상 별도의 새 트랜잭션을 시작하는 전파 속성은?', [
       'REQUIRED',
@@ -177,7 +177,7 @@ export const CS_NOTE_PART2 = [
       '배치 로딩(batch size)으로 쿼리 수를 줄인다',
       '모든 연관관계를 즉시 로딩(EAGER)으로 바꾼다',
     ], 3, '즉시 로딩과 지연 로딩 모두 조회 방식에 따라 N+1이 생길 수 있다. 컬렉션 fetch join과 페이징 조합은 행 중복·메모리 페이징 문제가 생길 수 있다.'),
-    S('JPQL에서 연관 엔티티를 한 번의 SQL로 함께 가져오도록 지정하는 조인 방식은? (○○○○ join)', 'fetch join', ['fetchjoin', 'fetch', '페치조인', '패치조인'], '예: select o from Order o join fetch o.member')],
+    S('JPQL에서 연관 엔티티를 한 번의 SQL로 함께 가져오도록 지정하는 조인 방식은? (○○○○○ join)', 'fetch join', ['fetchjoin', 'fetch', '페치조인', '패치조인'], '예: select o from Order o join fetch o.member')],
 
   // ── Node.js · Python ──
   ['ksundong-74ddb3cf4548fe5d',
@@ -273,7 +273,7 @@ export const CS_NOTE_PART2 = [
       '[9]',
       '[1, 9]',
     ], 1, 'append는 같은 리스트 객체를 바꾸므로 호출자도 관찰한다. a = [9]는 함수 안의 이름만 새 객체에 다시 바인딩해 호출자에게 영향이 없다.'),
-    S('Python의 인자 전달 방식을 일컫는 말로, 매개변수 이름을 전달된 객체에 바인딩하는 방식은? (Call by ○○○○○○○○○)', 'Call by Assignment (Call by Object Sharing)', ['callbyassignment', 'assignment', 'callbysharing', 'callbyobjectsharing', 'objectsharing', 'sharing'], '객체를 자동 복사하지 않는다. 객체 변경과 이름 재대입을 구분하는 것이 핵심이다.')],
+    S('Python의 인자 전달 방식을 일컫는 말로, 매개변수 이름을 전달된 객체에 바인딩하는 방식은? (Call by ○○○○○○○○○○)', 'Call by Assignment (Call by Object Sharing)', ['callbyassignment', 'assignment', 'callbysharing', 'callbyobjectsharing', 'objectsharing', 'sharing'], '객체를 자동 복사하지 않는다. 객체 변경과 이름 재대입을 구분하는 것이 핵심이다.')],
   ['ksundong-36e85f6e60256cad',
     M('Python의 접근 제어에 대한 설명으로 옳은 것은?', [
       'private 키워드로 외부 접근을 막는다',
@@ -306,7 +306,7 @@ export const CS_NOTE_PART2 = [
       '모든 요청을 그대로 DB로 보낸다',
       '최근 배포가 원인이면 롤백한다',
     ], 2, '모든 요청을 DB로 보내면 DB까지 과부하될 수 있다. 타임아웃·재시도 상한·서킷 브레이커로 장애 전파를 줄이고 복구 후 지표로 효과를 확인한다.'),
-    S('장애가 난 외부 호출을 일정 시간 차단해 장애 전파를 막는 패턴 이름은? (서킷 ○○○)', '서킷 브레이커 (Circuit Breaker)', ['서킷브레이커', '브레이커', 'circuitbreaker', '회로차단기', '회로차단'], '실패가 일정 비율을 넘으면 호출을 열린(open) 상태로 막았다가 반열림 상태에서 시험해 본다.')],
+    S('장애가 난 외부 호출을 일정 시간 차단해 장애 전파를 막는 패턴 이름은? (서킷 ○○○○)', '서킷 브레이커 (Circuit Breaker)', ['서킷브레이커', '브레이커', 'circuitbreaker', '회로차단기', '회로차단'], '실패가 일정 비율을 넘으면 호출을 열린(open) 상태로 막았다가 반열림 상태에서 시험해 본다.')],
   ['ksundong-8fc7b5ea59a38fae',
     M('싱글톤 패턴에 대한 설명으로 옳은 것은?', [
       '인스턴스를 하나만 만들면 메서드 호출도 자동으로 스레드 안전하다',
