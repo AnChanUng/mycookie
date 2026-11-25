@@ -16,6 +16,7 @@ const PATHS = {
   bolt: 'M13 2 4 14h7l-1 8 9-12h-7z',
   chevron: 'M9 6l6 6-6 6',
   external: 'M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5',
+  pencil: 'M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16zM13.5 6.5l4 4',
 };
 
 export default function LineIcon({ name, size = 22, className = '' }) {

@@ -27,7 +27,7 @@ const RULES = [
 const subjectOf = (text) => RULES.find(([, re]) => re.test(text || ''))?.[0];
 
 // 전산 전공 필기가 아닌 문제은행(NCS · 인적성 · 경제/금융상식 · SSAFY 서술형 · Spring 같은 개발 스택)은 뺀다
-const SOURCES = [...COMPANIES.filter(c => c.ready && c.category !== 'aptitude' && c.category !== 'major' && c.category !== 'monthly' && c.category !== 'stack')];
+const SOURCES = [...COMPANIES.filter(c => c.ready && c.category !== 'aptitude' && c.category !== 'major' && c.category !== 'monthly' && c.category !== 'stack' && c.category !== 'csnote')];
 
 const QUESTIONS = SOURCES.flatMap(bank => allQuestions(bank)
   .filter(q => !q.kind && Array.isArray(q.o))

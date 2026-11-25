@@ -6,6 +6,7 @@
   "scripts": {
     "check:chatbot-corpus": "node --import ./scripts/extensionless-loader.mjs scripts/export-chatbot.mjs --check",
     "check:study-coach": "node --import ./scripts/extensionless-loader.mjs scripts/check-study-coach.mjs",
+    "check:daily-practice": "node scripts/check-daily-practice.mjs",
     "check:feedback": "node --import ./scripts/extensionless-loader.mjs scripts/check-feedback.mjs",
     "check:interview-audio": "node scripts/check-interview-audio.mjs",
     "check:chanung": "node scripts/check-chanung.mjs",
@@ -13,6 +14,7 @@
     "build": "vite build && node --import ./scripts/extensionless-loader.mjs scripts/prerender-seo.mjs",
     "lint": "eslint .",
     "check:questions": "node --import ./scripts/extensionless-loader.mjs scripts/check-questions.mjs",
+    "check:note-quiz": "node --import ./scripts/extensionless-loader.mjs scripts/check-note-quiz.mjs",
     "preview": "vite preview",
     "check:explanations": "node --import ./scripts/extensionless-loader.mjs scripts/check-explanations.mjs",
     "check:exam-flow": "node --import ./scripts/extensionless-loader.mjs scripts/check-exam-flow.mjs",
@@ -43,7 +45,20 @@
     "check:chanung-completion": "node scripts/check-chanung-completion.mjs",
     "check:onboarding-calendar": "node --import ./scripts/extensionless-loader.mjs scripts/check-onboarding-calendar.mjs",
     "check:account-forms": "node --import ./scripts/extensionless-loader.mjs scripts/check-account-forms.mjs",
-    "check:header-subscribe": "node --import ./scripts/extensionless-loader.mjs scripts/check-header-subscribe.mjs"
+    "check:header-subscribe": "node --import ./scripts/extensionless-loader.mjs scripts/check-header-subscribe.mjs",
+    "check:chanung-hidden-reload": "node scripts/check-chanung-hidden-reload.mjs",
+    "check:company-prep": "node scripts/check-company-prep.mjs",
+    "check:duel": "node scripts/check-duel.mjs",
+    "check:experience": "node scripts/check-experience.mjs",
+    "check:interview-camera": "node scripts/check-interview-camera.mjs",
+    "check:loyalty": "node scripts/check-loyalty.mjs",
+    "check:practice-entry": "node scripts/check-practice-entry.mjs",
+    "check:rank-cache": "node scripts/check-rank-cache.mjs",
+    "check:rank": "node scripts/check-rank.mjs",
+    "check:reading-themes": "node scripts/check-reading-themes.mjs",
+    "check:web-menu": "node scripts/check-web-menu.mjs",
+    "check:chanung-versions": "node scripts/check-chanung-versions.mjs",
+    "check:direct-chat": "node scripts/check-direct-chat.mjs"
   },
   "dependencies": {
     "axios": "^1.14.0",

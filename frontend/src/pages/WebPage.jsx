@@ -1,4 +1,6 @@
 import { HubCard, HubHeader, HubSection } from '../components/Hub';
+import { WEB_ESSENTIALS } from '../data/webEssentials';
+import { WEB_NOTE_QUESTIONS } from '../data/webNoteQuestions';
 
 // 웹 개발 공부 첫 화면. 분야(백엔드 · 웹 기본기)별로 문제집과 정리 글을 고른다
 const GROUPS = [
@@ -14,7 +16,8 @@ const GROUPS = [
   {
     title: '웹 기본기',
     items: [
-      { to: '/web-essentials', icon: '🌐', t: '웹노트', d: 'HTTP · 쿠키와 세션 · CORS · 인증 등 핵심 질문', m: '57문답', go: '읽으러 가기' },
+      { to: '/web-essentials', icon: '🌐', t: '웹노트', d: 'HTTP · 쿠키와 세션 · CORS · 인증 등 핵심 질문', m: `${WEB_ESSENTIALS.items.length}문답`, go: '읽으러 가기' },
+      { to: '/web/webnote', icon: '✍️', t: '웹노트 문제풀이', d: '웹노트로 객관식 · 단답형 풀기 · 틀리면 노트로 바로 복습', m: `${WEB_NOTE_QUESTIONS.length}문항`, go: '문제 풀기' },
       { to: '/tech-blogs', icon: '📰', t: '기업 기술 블로그', desc: '실무에서 쓰는 기술을 회사 블로그로 읽어요.', go: '블로그 모음 보기' },
     ],
   },
@@ -25,7 +28,7 @@ const count = items => items.reduce((n, i) => n + (/(\d+)문제/.exec(i.m || '')
 export default function WebPage() {
   return <div className="fade-in">
     <HubHeader eyebrow="웹 개발" title="웹 개발" desc="백엔드 문제풀이와 웹 필수지식을 한곳에서 공부하세요."
-      stats={[{ value: count(GROUPS[0].items), label: '백엔드 문제' }, { value: GROUPS[0].items.length, label: '백엔드 문제집' }, { value: 57, label: '웹노트 문답' }]} />
+      stats={[{ value: count(GROUPS[0].items), label: '백엔드 문제' }, { value: GROUPS[0].items.length, label: '백엔드 문제집' }, { value: WEB_ESSENTIALS.items.length, label: '웹노트 문답' }]} />
     {GROUPS.map(g => <HubSection key={g.title} title={g.title}>
       {g.items.map(i => <HubCard key={i.to} to={i.to} icon={i.icon} badge={i.m} title={i.t} topics={i.d} desc={i.desc} go={i.go} />)}
     </HubSection>)}

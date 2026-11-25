@@ -100,6 +100,7 @@ function AdminControls({ back, viaLogin }) {
   const [chat, setChat] = useState(null);
   const [audit, setAudit] = useState(null);
   const [mailFailures, setMailFailures] = useState(null);
+  const [dailyStats, setDailyStats] = useState(null);
   const [updatedAt, setUpdatedAt] = useState(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(() => viaLogin || !!savedKey());
@@ -122,6 +123,9 @@ function AdminControls({ back, viaLogin }) {
     api.get('/admin/mail-failures', options)
       .then(res => { if (!stale) setMailFailures(res.data); })
       .catch(() => { if (!stale) setMailFailures(null); });
+    api.get('/admin/daily-practice', options)
+      .then(res => { if (!stale) setDailyStats(res.data); })
+      .catch(() => { if (!stale) setDailyStats(null); });
     api.get('/admin/lounge/messages', options)
       .then(res => { if (!stale) setChat(res.data); })
       .catch(() => { if (!stale) setChat(null); });
@@ -243,6 +247,7 @@ function AdminControls({ back, viaLogin }) {
             {sys ? <Accounts sys={sys} /> : <SysMissing />}
           </>}
           {tab === 'audit' && (audit ? <AuditLog rows={audit} /> : <p className="exam-note">작업 기록을 불러오지 못했습니다. 백엔드 배포가 끝난 뒤 새로고침해 주세요.</p>)}
+          {tab === 'mail' && dailyStats && <DailyPracticeStats data={dailyStats} />}
           {tab === 'mail' && (mailFailures ? <MailFailures data={mailFailures} /> : <p className="exam-note">메일 발송 현황을 불러오지 못했습니다. 백엔드 배포가 끝난 뒤 새로고침해 주세요.</p>)}
           {tab === 'system' && (sys ? <System sys={sys} events={data.server.events} /> : <SysMissing />)}
         </>
@@ -773,6 +778,31 @@ function AuditLog({ rows }) {
         </div>
       ) : <p className="exam-note">아직 기록된 작업이 없습니다.</p>}
       <p className="exam-note">최근 100개까지 보여 줍니다. 계정 생성과 권한 부여·회수가 기록됩니다.</p>
+    </>
+  );
+}
+
+// 학습 메일 연습 반응: 메일 버튼을 눌러 연습 화면을 연 횟수와 5문제를 끝까지 푼 비율(개인 정보 없이 횟수만 센다)
+function DailyPracticeStats({ data }) {
+  return (
+    <>
+      <div className="section-title">학습 메일 연습 반응</div>
+      <div className="exam-stats">
+        <Tile k="연습 화면 열기" v={data.opens} unit=" 회" sub="메일 버튼을 눌러 들어온 수에 가까움" />
+        <Tile k="끝까지 풀기" v={data.finishes} unit=" 회" sub="5문제를 풀고 결과를 본 수" />
+        <Tile k="완주율" v={data.rate ?? '–'} unit={data.rate == null ? '' : ' %'} sub="끝까지 푼 수 ÷ 연 수" />
+      </div>
+      {data.sets.length ? (
+        <div className="exam-table-wrap">
+          <table className="exam-table admin-table">
+            <thead><tr><th>세트</th><th>주제</th><th>열기</th><th>끝까지</th><th>완주율</th></tr></thead>
+            <tbody>
+              {data.sets.map(r => <tr key={r.day}><td className="num">{r.day}</td><td>{r.theme}</td><td className="num">{r.opens}</td><td className="num">{r.finishes}</td><td className="num">{r.rate == null ? '–' : `${r.rate}%`}</td></tr>)}
+            </tbody>
+          </table>
+        </div>
+      ) : <p className="exam-note">아직 연습 화면을 연 사람이 없습니다.</p>}
+      <p className="exam-note">같은 사람이 여러 번 열면 그만큼 늘어납니다. 구독자 수가 적을 때는 숫자가 크게 흔들립니다.</p>
     </>
   );
 }

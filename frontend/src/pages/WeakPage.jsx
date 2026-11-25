@@ -1,6 +1,8 @@
 import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { BANKS, allQuestions, companyPath } from '../data/examQuestions';
+import { dailyWrongRows } from '../dailyPracticeRecords';
+import './DailyPracticePage.css';
 
 // 문제은행마다 따로 쌓이는 풀이 기록을 한자리에 모아, 어느 영역이 약한지 보여 준다.
 // 기록은 이 브라우저의 로컬 저장소에만 있으므로 서버를 부르지 않는다
@@ -87,8 +89,9 @@ const fmtDay = (ts) => {
 
 export default function WeakPage() {
   const s = useMemo(() => collect(), []);
+  const daily = useMemo(() => dailyWrongRows(), []);
 
-  if (!s.seen) {
+  if (!s.seen && !daily.length) {
     return (
       <div className="fade-in">
         <div className="page-header">
@@ -109,6 +112,7 @@ export default function WeakPage() {
   }
 
   const worst = s.areas[0];
+  const hasExam = s.seen > 0;
 
   return (
     <div className="fade-in">
@@ -121,6 +125,9 @@ export default function WeakPage() {
         </p>
       </div>
 
+      {daily.length > 0 && <DailyWrongSection rows={daily} />}
+
+      {hasExam && <>
       <div className="exam-stats">
         <Tile k="푼 문제" v={s.seen} unit=" 문제" sub={`전체 ${s.total}문제 중 ${Math.round(s.seen / s.total * 100)}%`} />
         <Tile k="전체 정답률" v={s.percent} unit=" %" sub={`맞힘 ${s.correct} · 틀림 ${s.wrong}`} />
@@ -196,7 +203,31 @@ export default function WeakPage() {
           </tbody>
         </table>
       </div>
+      </>}
     </div>
+  );
+}
+
+const MARKS = ['①', '②', '③', '④'];
+
+// 학습 메일 "오늘 주제 5문제"에서 마지막에 틀린 문제. 같은 문제를 다시 맞히면 목록에서 빠진다
+function DailyWrongSection({ rows }) {
+  return (
+    <>
+      <div className="section-title">학습 메일 연습 오답 ({rows.length}문제)</div>
+      <p className="exam-lede">메일의 "오늘 주제 5문제"에서 틀린 문제입니다. 다시 풀어 맞히면 이 목록에서 빠집니다.</p>
+      <div className="weak-daily">
+        {rows.map(r => (
+          <details key={r.id} className="weak-daily-item">
+            <summary>{r.question.title} <small>· {r.theme}</small></summary>
+            <p>{r.question.prompt}</p>
+            <p><b>정답 {MARKS[r.question.answer]}</b> {r.question.options[r.question.answer]}</p>
+            {r.question.explanation.map((line, i) => <p key={i}>{line}</p>)}
+            <Link className="exam-btn sm" to={`/daily/${r.day}`}>이 주제 다시 풀기</Link>
+          </details>
+        ))}
+      </div>
+    </>
   );
 }
 

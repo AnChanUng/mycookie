@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import api from '../api';
+import { recordDailyAnswer } from '../dailyPracticeRecords';
 import './DailyPracticePage.css';
 
 const MARKS = ['①', '②', '③', '④'];
@@ -13,6 +14,11 @@ function scoreMessage(correct, total) {
 }
 
 // 학습 메일의 "오늘 주제 5문제 더 풀기"로 들어오는 화면. 한 문제씩 풀고 바로 정답과 해설을 본다
+// 세트별 반응 집계(열었는지, 끝까지 풀었는지). 개인 정보 없이 횟수만 보내고, 실패해도 풀이에는 영향이 없다
+function sendEvent(day, type) {
+  api.post(`/daily/${encodeURIComponent(day)}/events`, { type }).catch(() => {});
+}
+
 // day가 바뀌면 key로 상태를 통째로 새로 시작한다
 export default function DailyPracticePage() {
   const { day } = useParams();
@@ -22,42 +28,50 @@ export default function DailyPracticePage() {
 function DailyPractice({ day }) {
   const [data, setData] = useState(null);
   const [error, setError] = useState('');
-  const [index, setIndex] = useState(0);
+  // order: 이번 회차에 풀 문제 번호(0부터). 처음엔 전부, "틀린 문제만 다시"를 누르면 틀린 것만
+  const [order, setOrder] = useState(null);
+  const [step, setStep] = useState(0);
   const [picked, setPicked] = useState(null);
-  const [results, setResults] = useState([]);
+  const [results, setResults] = useState({});
+  const [done, setDone] = useState(false);
+  const counted = useRef({ open: false, finish: false });
+
 
   useEffect(() => {
     let stale = false;
     api.get(`/daily/${encodeURIComponent(day)}`)
-      .then(({ data: body }) => { if (!stale) setData(body); })
+      .then(({ data: body }) => { if (!stale) { setData(body); setOrder(body.practice.map((_, i) => i)); if (!counted.current.open) { counted.current.open = true; sendEvent(day, 'open'); } } })
       .catch(e => { if (!stale) setError(e?.response?.status === 404 ? '이 날짜의 연습 문제를 찾을 수 없어요.' : '문제를 불러오지 못했어요. 잠시 뒤 다시 열어 주세요.'); });
     return () => { stale = true; };
   }, [day]);
 
   if (error) return <div className="daily-page fade-in"><p role="alert">{error}</p><Link className="exam-btn sm" to="/">첫 화면으로</Link></div>;
-  if (!data) return <div className="daily-page fade-in"><p role="status">문제를 불러오는 중…</p></div>;
+  if (!data || !order) return <div className="daily-page fade-in"><p role="status">문제를 불러오는 중…</p></div>;
 
   const total = data.practice.length;
-  const finished = results.length === total;
-  const correct = results.filter(Boolean).length;
-  const q = data.practice[Math.min(index, total - 1)];
+  const current = order[Math.min(step, order.length - 1)];
+  const q = data.practice[current];
   const answered = picked !== null;
+  const correct = Object.values(results).filter(Boolean).length;
+  const wrongIdx = data.practice.map((_, i) => i).filter(i => results[i] === false);
 
   const choose = i => {
     if (answered) return;
+    const ok = i === q.answer;
     setPicked(i);
-    setResults(prev => [...prev, i === q.answer]);
+    setResults(prev => ({ ...prev, [current]: ok }));
+    recordDailyAnswer(data.day, current + 1, data.theme, q, ok);
   };
-  const next = () => { setIndex(index + 1); setPicked(null); };
-  const restart = () => { setIndex(0); setPicked(null); setResults([]); };
+  const next = () => { setStep(step + 1); setPicked(null); };
+  const start = list => { setOrder(list); setStep(0); setPicked(null); setDone(false); if (list.length === total) setResults({}); };
 
   return <div className="daily-page fade-in">
     <header className="page-header">
       <p className="daily-kicker">오늘 주제 · {data.theme}</p>
-      <h1>{finished ? '결과' : `${index + 1} / ${total}번 문제`}</h1>
+      <h1>{done ? '결과' : `${step + 1} / ${order.length}번 문제`}</h1>
     </header>
 
-    {!finished && <section className="daily-card" aria-live="polite">
+    {!done && <section className="daily-card" aria-live="polite">
       <h2 className="daily-title">{q.title}</h2>
       {q.context && <p className="daily-context">{q.context}</p>}
       <p className="daily-prompt">{q.prompt}</p>
@@ -72,19 +86,28 @@ function DailyPractice({ day }) {
         })}
       </ul>
       {answered && <div className="daily-explain" role="status">
-        <strong>{picked === q.answer ? '정답이에요' : `아쉬워요. 정답은 ${MARKS[q.answer]}번`}</strong>
+        {/* 해설이 길어도 스크롤 없이 넘어가도록 버튼을 해설 위, 보기 바로 아래에 둔다 */}
+        <div className="daily-verdict">
+          <strong>{picked === q.answer ? '정답이에요' : `아쉬워요. 정답은 ${MARKS[q.answer]}번`}</strong>
+          {step + 1 < order.length
+            ? <button type="button" className="exam-btn sm" onClick={next} autoFocus>다음 문제</button>
+            : <button type="button" className="exam-btn sm" onClick={() => { setDone(true); if (!counted.current.finish) { counted.current.finish = true; sendEvent(day, 'finish'); } }} autoFocus>결과 보기</button>}
+        </div>
         {q.explanation.map((line, i) => <p key={i}>{line}</p>)}
-        {index + 1 < total
-          ? <button type="button" className="exam-btn sm" onClick={next}>다음 문제</button>
-          : <button type="button" className="exam-btn sm" onClick={() => setIndex(total)}>결과 보기</button>}
       </div>}
     </section>}
 
-    {finished && <section className="daily-card">
+    {done && <section className="daily-card">
       <p className="daily-score"><strong>{correct}</strong> / {total}</p>
       <p>{scoreMessage(correct, total)}</p>
+      <ul className="daily-review">
+        {data.practice.map((item, i) => <li key={i} className={results[i] === false ? 'wrong' : results[i] ? 'right' : ''}>
+          <span aria-hidden="true">{results[i] === false ? '✕' : results[i] ? '○' : '–'}</span> {item.title}
+        </li>)}
+      </ul>
       <div className="daily-actions">
-        <button type="button" className="exam-btn sm" onClick={restart}>다시 풀기</button>
+        {wrongIdx.length > 0 && <button type="button" className="exam-btn sm primary" onClick={() => start(wrongIdx)}>틀린 {wrongIdx.length}문제만 다시 풀기</button>}
+        <button type="button" className="exam-btn sm" onClick={() => start(data.practice.map((_, i) => i))}>처음부터 다시</button>
         {data.blog?.url && <a className="exam-btn sm" href={data.blog.url} target="_blank" rel="noopener noreferrer">{data.blog.company} 기술블로그 읽기</a>}
         <Link className="exam-btn sm" to="/">첫 화면으로</Link>
       </div>

@@ -13,12 +13,15 @@ import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import org.springframework.http.MediaType;
+
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 // 학습 메일의 "오늘 주제 5문제 더 풀기" 연습 문제: 30세트마다 5문제, 공개 API, 정답이 길이로 짐작되지 않게 출제했는지 검사
-@SpringBootTest
+@SpringBootTest(properties = "app.admin-key=test-admin-key-0123456789abcdef-xyz")
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 class DailyPracticeTest {
@@ -68,5 +71,23 @@ class DailyPracticeTest {
                 .andExpect(jsonPath("$.blog.url").isNotEmpty());
         mvc.perform(get("/api/v1/daily/999")).andExpect(status().isNotFound());
         mvc.perform(get("/api/v1/daily/0")).andExpect(status().isNotFound());
+    }
+
+    @Test
+    void reactionCountsOpensAndFinishesWithoutPersonalData() throws Exception {
+        String url = "/api/v1/daily/2/events";
+        mvc.perform(post(url).contentType(MediaType.APPLICATION_JSON).content("{\"type\":\"open\"}")).andExpect(status().isNoContent());
+        mvc.perform(post(url).contentType(MediaType.APPLICATION_JSON).content("{\"type\":\"open\"}")).andExpect(status().isNoContent());
+        mvc.perform(post(url).contentType(MediaType.APPLICATION_JSON).content("{\"type\":\"finish\"}")).andExpect(status().isNoContent());
+        // 알 수 없는 종류와 없는 세트는 거절
+        mvc.perform(post(url).contentType(MediaType.APPLICATION_JSON).content("{\"type\":\"x\"}")).andExpect(status().isBadRequest());
+        mvc.perform(post("/api/v1/daily/999/events").contentType(MediaType.APPLICATION_JSON).content("{\"type\":\"open\"}")).andExpect(status().isNotFound());
+
+        mvc.perform(get("/api/v1/admin/daily-practice")).andExpect(status().isUnauthorized());
+        mvc.perform(get("/api/v1/admin/daily-practice").header("X-Admin-Key", "test-admin-key-0123456789abcdef-xyz"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.sets[?(@.day==2)].opens").value(org.hamcrest.Matchers.hasItem(2)))
+                .andExpect(jsonPath("$.sets[?(@.day==2)].finishes").value(org.hamcrest.Matchers.hasItem(1)))
+                .andExpect(jsonPath("$.sets[?(@.day==2)].rate").value(org.hamcrest.Matchers.hasItem(50)));
     }
 }

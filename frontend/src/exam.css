@@ -1401,6 +1401,12 @@ a.exam-search-bank:hover { color: var(--accent-blue); }
 .exam-model .ans { white-space: pre-line; font-weight: 600; }
 .exam-model ul { margin: 0; padding-left: 18px; }
 .exam-model li { margin: 2px 0; }
+/* 노트 문제: 자동 채점 단답형과 노트로 돌아가는 링크 */
+.exam-written-hint { margin: 8px 0 0; font-size: 0.8rem; color: var(--text-secondary); }
+.exam-my-answer { margin: 4px 0 2px; font-size: 0.88rem; color: var(--text-secondary); }
+.exam-my-answer b { margin-left: 6px; color: var(--text-primary); font-weight: 700; }
+.exam-note-link { display: inline-block; margin-top: 10px; font-size: 0.88rem; font-weight: 700; color: var(--accent-blue); text-decoration: none; }
+.exam-note-link:hover { text-decoration: underline; }
 
 /* ===== SSAFY 허브 ===== */
 .ssafy { --ssafy: #1D6FE0; --ssafy-2: #3AA0FF; --ssafy-light: rgba(29, 111, 224, 0.08); }
