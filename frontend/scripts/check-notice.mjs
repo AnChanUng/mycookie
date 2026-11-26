@@ -15,7 +15,6 @@ let view;
 const text = node => typeof node === 'string' ? node : (Array.isArray(node) ? node : node?.children || []).map(text).join('');
 try {
   const { default: StudyNotice } = await server.ssrLoadModule('/src/components/StudyNotice.jsx');
-  const { CHANGELOG } = await server.ssrLoadModule('/src/data/changelog.js');
   // 공지에 바로가기 링크가 있어 라우터 안에서 그린다
   const Notice = () => React.createElement(MemoryRouter, null, React.createElement(StudyNotice));
   const { daysLeft, loadExams, saveExams, examFor } = await server.ssrLoadModule('/src/schedule.js');
@@ -40,12 +39,10 @@ try {
   const modal = { open: false, showModal() { this.open = true; }, close() { this.open = false; } };
   await act(()=>{view=TestRenderer.create(React.createElement(Notice),{createNodeMock: el => el.type==='dialog' ? modal : null});});
   assert.equal(modal.open,true,'Notice opens on first render');
-  // 공지는 공개 패치노트의 한 버전을 버전 번호와 함께 보여 준다
-  const shown = text(view.toJSON());
-  const release = CHANGELOG.flatMap(y => y.months).find(m => shown.includes(`v${m.version}`));
-  assert.ok(release, 'Notice shows a changelog version');
-  assert.ok(shown.includes(release.title));
-  assert.deepEqual(view.root.findAllByType('li').map(text), release.items.slice(0, 3));
+  // 공지는 짧게 한 가지 소식만: 제목 하나와 바로가기 하나, 긴 목록은 없다
+  assert.equal(view.root.findAllByType('h2').length, 1, 'Notice has one headline');
+  assert.ok(text(view.root.findByType('h2')).trim().length > 0);
+  assert.equal(view.root.findAllByType('li').length, 0, 'Notice has no long item list');
   assert.ok(!text(view.toJSON()).includes('오늘 시험'));
   assert.ok(!text(view.toJSON()).includes('D-DAY'));
   assert.ok(!text(view.toJSON()).includes('지난 시험'));
