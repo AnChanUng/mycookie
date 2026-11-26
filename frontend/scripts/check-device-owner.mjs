@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { createServer } from 'vite';
 
-// 한 기기에서 계정을 바꿀 때 앞 계정 풀이 기록이 새 계정에 섞이지 않게 묻는지 본다(sync.js claimDeviceRecords)
+// 한 기기에서 계정을 바꿀 때 앞 계정 풀이 기록이 새 계정에 섞이지 않는지 본다(sync.js claimDeviceRecords)
 const values = new Map();
 globalThis.localStorage = {
   getItem: key => (values.has(key) ? values.get(key) : null),
@@ -16,44 +16,32 @@ const server = await createServer({ server: { middlewareMode: true, hmr: false }
 try {
   const { _claimDeviceRecordsForTest: claim, deviceRecords } = await server.ssrLoadModule('/src/sync.js');
   const solvedTwo = JSON.stringify({ stats: { 1: { c: 1 }, 2: { c: 0 } }, history: [], marks: {} });
-  const asked = [];
-  const ask = answer => async question => { asked.push(question); return answer; };
 
-  // 로그인 전에 푼 기록(주인 없음)은 묻지 않고 첫 계정이 이어 받는다
+  // 한 번도 로그인하지 않고 푼 기록(주인 없음)은 첫 계정이 이어 받는다
   values.set('exam-progress:kdb', solvedTwo);
-  await claim({ id: 1, nickname: '첫계정' }, ask(true));
-  assert.equal(asked.length, 0, 'guest records are adopted without asking');
+  claim({ id: 1, nickname: '첫계정' });
+  assert.equal(deviceRecords().solved, 2, 'guest records are adopted');
   assert.equal(values.get('sync:records-owner'), 'user:1');
 
-  // 같은 계정으로 다시 로그인하면 묻지 않는다
-  await claim({ id: 1, nickname: '첫계정' }, ask(true));
-  assert.equal(asked.length, 0);
+  // 같은 계정으로 다시 로그인하면 기록이 남는다
+  claim({ id: 1, nickname: '첫계정' });
+  assert.equal(deviceRecords().solved, 2, 'same account keeps records');
 
-  // 다른 계정 + 기록 있음 → 묻는다. 합치면 기록이 남고 주인이 바뀐다
-  await claim({ id: 2, nickname: '둘째' }, ask(true));
-  assert.equal(asked.length, 1);
-  assert.equal(asked[0].solved, 2);
-  assert.equal(asked[0].nickname, '둘째');
-  assert.equal(deviceRecords().solved, 2, 'merge keeps device records');
+  // 다른 계정이면 이 기기 기록(예전 계정별 키 포함)을 지우고, 기록이 아닌 값은 남긴다
+  values.set('exam-progress:kdb:1', solvedTwo);
+  values.set('theme', 'dark');
+  claim({ id: 2, nickname: '둘째' });
+  assert.deepEqual(deviceRecords(), { keys: [], solved: 0 }, 'other account clears records');
+  assert.equal(values.get('theme'), 'dark');
   assert.equal(values.get('sync:records-owner'), 'user:2');
 
-  // 다른 계정 + 합치지 않기 → 이 기기 기록(예전 계정별 키 포함)을 지운다
-  values.set('exam-progress:kdb:2', solvedTwo);
-  await claim({ id: 3, nickname: '셋째' }, ask(false));
-  assert.equal(asked.length, 2);
-  assert.deepEqual(deviceRecords(), { keys: [], solved: 0 }, 'declining clears device records');
-  assert.equal(values.get('sync:records-owner'), 'user:3');
-
-  // 기록이 없으면 다른 계정이어도 묻지 않는다
-  await claim({ id: 4, nickname: '넷째' }, ask(false));
-  assert.equal(asked.length, 2, 'no prompt without records');
-  assert.equal(values.get('sync:records-owner'), 'user:4');
-
-  // 물어볼 수 없는 환경(confirm 실패)은 예전처럼 합친다
+  // 예전에 닉네임으로 적어 둔 주인은 닉네임이 같으면 같은 계정이다
+  values.set('sync:records-owner', 'nickname:셋째');
   values.set('exam-progress:kdb', solvedTwo);
-  await claim({ id: 5, nickname: '다섯' }, async () => { throw new Error('no dialog'); });
-  assert.equal(deviceRecords().solved, 2);
-  console.log('PASS: guest records adopted, same account silent, other account asked (merge keeps / decline clears incl. legacy keys), no prompt without records, fallback merges.');
+  claim({ id: 3, nickname: '셋째' });
+  assert.equal(deviceRecords().solved, 2, 'legacy nickname owner keeps records');
+  assert.equal(values.get('sync:records-owner'), 'user:3');
+  console.log('PASS: guest records adopted, same account keeps, other account clears (incl. legacy keys), legacy nickname owner kept.');
 } finally {
   await server.close();
 }
