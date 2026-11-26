@@ -22,3 +22,6 @@
   .private-layout { grid-template-columns: minmax(0, 1fr); }
   .private-blog { position: static; }
 }
+
+/* 블로그 바로가기 안의 두 번째 묶음(이력서 블로그) */
+.private-blog-sub { margin-top: var(--ds-s3, 12px); }

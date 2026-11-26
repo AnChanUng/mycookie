@@ -22,7 +22,7 @@ try {
 
   const topics = [
     { id: 'a', title: '주제 A', source: '이력서 문장 A', levels: [
-      { depth: 1, questions: [{ q: 'A 기본 질문', intent: '의도 A', points: ['포인트 1', '포인트 2'] }] },
+      { depth: 1, questions: [{ q: 'A 기본 질문', intent: '의도 A', answer: '결론 한 줄\n상황: 예시 상황', points: ['포인트 1', '포인트 2'] }] },
       { depth: 2, questions: [{ q: 'A 꼬리질문', points: ['포인트 3'] }] },
       { depth: 4, questions: [{ q: 'A 한계 질문' }] },
     ] },
@@ -48,8 +48,9 @@ try {
 
   // 답변 포인트는 눌러야 보인다
   assert.ok(!all().includes('포인트 1'));
-  await act(() => buttons('기억 안 나요 · 답변 포인트 보기')[0].props.onClick());
+  await act(() => buttons('기억 안 나요 · 모범답안 보기')[0].props.onClick());
   assert.ok(all().includes('포인트 1') && all().includes('의도 A'));
+  assert.ok(all().includes('모범답안') && all().includes('결론 한 줄') && all().includes('상황: 예시 상황'), '모범답안을 줄마다 나눠 보여 준다');
 
   // 직접 적어보기는 이 브라우저에 저장된다
   const box = view.root.findAllByType('textarea').find(n => String(n.props.id).startsWith('draft-a-1-0'));
