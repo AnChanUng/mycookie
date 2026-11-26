@@ -99,7 +99,7 @@ export default function Main() {
       <section className="mn-top">
         <div className="mn-hello">
           <p className="ds-eyebrow">{dateLabel}</p>
-          <h1 className="mn-h1">{user?.nickname ? `${user.nickname}님, 오늘은 뭘 공부해 볼까요?` : '개발자 공부, 여기 다 있어요'}</h1>
+          <h1 className="mn-h1">{user?.nickname ? <>{user.nickname}님,<br />오늘은 뭘 공부해 볼까요?</> : '개발자 공부, 여기 다 있어요'}</h1>
           <p className="mn-sub">AI, 웹 개발, 컴퓨터공학 모든 공부를 한곳에서</p>
           <div className="mn-chips">
             {membership && <Link to="/account" className="ds-chip"><TierBadge tier={membership.tier} division={membership.division} />{TIER_NAMES[membership.tier]}</Link>}
