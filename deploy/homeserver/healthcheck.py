@@ -9,6 +9,7 @@
 로그는 보내기 전에 이메일, IP, 토큰 같은 값을 가린다. 키와 웹훅은 /srv/devcookie/.env에서 읽는다.
 """
 import json
+import os
 import re
 import subprocess
 import time
@@ -18,6 +19,7 @@ from pathlib import Path
 ROOT = Path("/srv/devcookie")
 ENV = ROOT / ".env"
 STATE = ROOT / ".health-state.json"
+DISK_STATE = ROOT / ".log-disk-alerted"
 FAILS_BEFORE_ALERT = 3
 CHECKS = [
     ("운영 백엔드(내부)", "http://127.0.0.1:8080/api/v1/categories"),
@@ -102,10 +104,43 @@ def summarize(evidence):
         return ""
 
 
+def check_log_disk(webhook):
+    # Compose의 실제 바인드 마운트를 사용해 MONITORING_DATA를 바꾼 서버도 같은 디스크를 확인한다.
+    source = subprocess.check_output(
+        ["docker", "inspect", "--format",
+         '{{range .Mounts}}{{if eq .Destination "/loki"}}{{.Source}}{{end}}{{end}}',
+         "mycookie-monitoring-loki-1"], text=True, timeout=5, stderr=subprocess.DEVNULL).strip()
+    if not source or not Path(source).is_absolute():
+        raise ValueError("Loki mount unavailable")
+    fs = os.statvfs(source)
+    used = fs.f_blocks - fs.f_bfree
+    available = fs.f_bavail
+    capacity = used + available  # df처럼 예약 블록은 일반 사용자의 가용 용량에서 제외한다.
+    if capacity <= 0:
+        raise ValueError("Invalid filesystem capacity")
+    if used * 100 <= capacity * 80:
+        DISK_STATE.unlink(missing_ok=True)
+        return
+    if DISK_STATE.exists():
+        return
+    gib = fs.f_frsize / (1024 ** 3)
+    text = (f"#### :warning: Loki 로그 저장 디스크 사용률 80% 초과\n"
+            f"사용률 {100 * used / capacity:.2f}% · 사용 {used * gib:.1f} GiB · "
+            f"남은 공간 {available * gib:.1f} GiB\n"
+            f"확인 경로: `{source}`\n"
+            "같은 파일시스템의 전체 사용량입니다. Loki 로그와 DB·백업·Docker 파일의 용량 변화를 함께 확인하세요.")
+    post(webhook, {"username": "나의쿠키", "text": text})
+    DISK_STATE.touch()
+
+
 def main():
     webhook = env("MATTERMOST_WEBHOOK_URL")
     if not webhook:
         return
+    try:
+        check_log_disk(webhook)
+    except Exception as e:
+        print(f"로그 디스크 확인 또는 알림 실패({type(e).__name__})")
     # 배포 중에는 백엔드가 잠깐 내려가므로 확인하지 않는다
     if run(["systemctl", "is-active", "devcookie-deploy.service"]).strip() in ("activating", "active"):
         return
