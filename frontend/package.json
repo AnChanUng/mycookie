@@ -29,6 +29,7 @@
     "check:pearl-answers": "node scripts/check-pearl-answers.mjs",
     "check:notes": "node scripts/check-notes.mjs",
     "check:notice": "node scripts/check-notice.mjs",
+    "check:device-owner": "node scripts/check-device-owner.mjs",
     "import:notes": "node scripts/import-interview-notes.mjs",
     "check:imported-notes": "node scripts/check-imported-notes.mjs",
     "check:revised-notes": "node scripts/check-revised-notes.mjs",

@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
+import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -109,13 +110,16 @@ public class MailService {
             return;
         }
         try {
-            MimeMessage message = smtp.createMimeMessage();
+            InternetAddress fromAddress = fromAddress();
+            MimeMessage message = newMessage(smtp, fromAddress);
             MimeMessageHelper helper = new MimeMessageHelper(message, mail.html() != null, "UTF-8");
-            if (!from.isBlank()) helper.setFrom(from);
+            if (fromAddress != null) helper.setFrom(fromAddress);
             helper.setTo(mail.to());
             helper.setSubject(mail.subject());
             if (mail.html() != null) helper.setText(mail.text(), mail.html());
             else helper.setText(mail.text());
+            // 사람이 아니라 서버가 보낸 메일임을 알린다(자동 응답 · 부재중 답장이 돌아오지 않게)
+            message.setHeader("Auto-Submitted", "auto-generated");
             if (mail.unsubscribeUrl() != null) {
                 message.setHeader("List-Unsubscribe", "<" + mail.unsubscribeUrl() + ">");
             }
@@ -127,5 +131,31 @@ public class MailService {
             failures.record(mail.to(), mail.subject(), e);
             events.publishEvent(new MailDelivery(mail.to(), mail.subject(), e));
         }
+    }
+
+    static final String SENDER_NAME = "나의쿠키";
+
+    // 보내는 사람. MAIL_FROM에 이름이 없으면 "나의쿠키"를 붙인다(주소만 보이는 메일은 스팸 점수가 오른다)
+    InternetAddress fromAddress() throws java.io.UnsupportedEncodingException, jakarta.mail.internet.AddressException {
+        if (from.isBlank()) return null;
+        InternetAddress address = new InternetAddress(from.trim(), true);
+        if (address.getPersonal() == null || address.getPersonal().isBlank()) {
+            address = new InternetAddress(address.getAddress(), SENDER_NAME, "UTF-8");
+        }
+        return address;
+    }
+
+    // Message-ID를 보내는 사람 도메인으로 만든다. 기본값은 컨테이너 이름(예: …@3f2a1b9c)이라 스팸 필터가 수상하게 본다
+    static MimeMessage newMessage(JavaMailSender smtp, InternetAddress sender) {
+        String address = sender == null ? null : sender.getAddress();
+        int at = address == null ? -1 : address.lastIndexOf('@');
+        if (at < 0 || !(smtp instanceof org.springframework.mail.javamail.JavaMailSenderImpl impl)) return smtp.createMimeMessage();
+        String domain = address.substring(at + 1);
+        return new MimeMessage(impl.getSession()) {
+            @Override
+            protected void updateMessageID() throws jakarta.mail.MessagingException {
+                setHeader("Message-ID", "<" + java.util.UUID.randomUUID() + "@" + domain + ">");
+            }
+        };
     }
 }
