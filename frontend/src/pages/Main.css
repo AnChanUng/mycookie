@@ -1,9 +1,9 @@
 /* 메인 화면(웹 스타일). 섹션 제목 + 고른 카드 그리드, 얇은 테두리, 선 아이콘.
    색 · 글자 · 카드 모양은 styles/ds.css(디자인 시스템)를 따른다 */
-.mn { max-width: var(--page-max, 1280px); margin: 0 auto; padding: 0 0 96px; color: var(--ds-text); }
+.mn { max-width: var(--page-max, 1280px); margin: 0 auto; padding: 0; color: var(--ds-text); }
 
 /* 첫 줄 명언 */
-.mn-quote { margin: 32px auto 28px; text-align: center; }
+.mn-quote { margin: 32px auto; text-align: center; }
 .mn-quote blockquote { margin: 0 auto; max-width: 760px; text-wrap: balance; word-break: keep-all; font-family: 'Nanum Myeongjo', 'Noto Serif KR', serif; font-size: clamp(18px, 2vw, 22px); font-weight: 400; letter-spacing: 0.04em; color: var(--ds-text-2); }
 .mn-quote figcaption { margin-top: 8px; font-size: 13px; color: var(--ds-text-3); }
 
@@ -34,11 +34,10 @@
 .mn-section-more { display: inline-flex; align-items: center; gap: 2px; margin-left: auto; font-size: 14px; font-weight: 600; color: var(--ds-text-2); text-decoration: none; }
 .mn-section-more:hover { color: var(--ds-brand); }
 
-/* 카드 그리드: 3열(코딩테스트는 4열) */
+/* 카드 그리드: 3열 */
 .mn-cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
 .mn-cards--2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .mn-cards.mn-cards--single { grid-template-columns: 1fr; }
-.mn-cards--4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 
 /* 오늘의 학습 카드 */
 .mn-feature { gap: 8px; padding: 22px 24px; min-height: 196px; }
@@ -72,24 +71,20 @@ a:hover > .mn-chev { color: var(--ds-brand); transform: translateX(3px); }
 
 /* 태블릿 */
 @media (max-width: 1024px) {
-  .mn-cards, .mn-cards--4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .mn-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   /* 카드가 홀수 개면 마지막 카드가 혼자 반쪽만 차지하지 않게 한 줄을 다 쓴다 */
   .mn-cards:not(.mn-cards--single) > :last-child:nth-child(odd) { grid-column: 1 / -1; }
 }
 
 /* 휴대폰 */
 @media (max-width: 640px) {
-  .mn { padding-bottom: 64px; }
-  .mn-quote { margin: 28px auto 24px; }
+  .mn-quote { margin: 28px auto; }
   .mn-top { flex-direction: column; align-items: stretch; gap: 16px; padding-bottom: 20px; }
   .mn-h1 { font-size: 22px; }
   .mn-section { margin-top: 32px; }
   .mn-section-head h2 { font-size: 19px; }
   .mn-note { display: none; }
-  .mn-cards, .mn-cards--2, .mn-cards--4 { grid-template-columns: 1fr; gap: 10px; }
-  .mn-cards--4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .mn-cards--4 .mn-cat { flex-direction: column; align-items: flex-start; gap: 10px; padding: 16px; }
-  .mn-cards--4 .mn-chev { display: none; }
+  .mn-cards, .mn-cards--2 { grid-template-columns: 1fr; gap: 10px; }
   .mn-feature { min-height: 0; padding: 18px; }
   .mn-cat { padding: 16px; min-height: 0; }
   .mn-intro { flex-direction: column; align-items: flex-start; margin-top: 40px; }

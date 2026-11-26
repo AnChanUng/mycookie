@@ -1,7 +1,6 @@
 import { Link, Navigate, useParams } from 'react-router-dom';
 import { COMPANIES, EXAM_CATEGORIES, SOURCE_KINDS, allQuestions, companyPath } from '../data/examQuestions';
 import { HubCard, HubHeader, HubSection } from '../components/Hub';
-import './DuelBanner.css';
 
 const CATEGORY_ICONS = { finance: '🏦', public: '🏢' };
 
@@ -40,11 +39,6 @@ function CategoryPicker() {
     <div className="fade-in">
       <HubHeader eyebrow="전공필기" title="기업별 기출문제" desc="공기업 IT직무 전공필기 문제집을 즉시 채점, 오답노트, 북마크와 함께 풀어요."
         stats={[{ value: companyCount, label: '기업 문제집' }, { value: categories.length, label: '분류' }, { value: '즉시', label: '채점 · 해설' }]} />
-      <Link to="/duel" className="duel-banner">
-        <span className="duel-banner-vs" aria-hidden="true">VS</span>
-        <span className="duel-banner-text"><b>친구와 CS 대결</b><small>같은 10문제를 동시에 풀고 점수로 겨뤄요. 링크만 보내면 바로 시작!</small></span>
-        <span className="duel-banner-go">대결하기 →</span>
-      </Link>
       <HubSection title="분류별로 고르기">
         {categories.map(cat => (
           <HubCard key={cat.key} to={`/exam/category/${cat.key}`} icon={CATEGORY_ICONS[cat.key] || '📚'}
