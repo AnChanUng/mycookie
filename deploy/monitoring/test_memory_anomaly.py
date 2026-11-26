@@ -34,6 +34,20 @@ class MemoryDetectionTest(unittest.TestCase):
 class ApiEvidenceTest(unittest.TestCase):
     detected = 1795439100
 
+    def test_latest_completed_deployment_per_service_at_detection(self):
+        event = dict(detected="2026-11-23T13:05+00:00")
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder, "prod-deployments.tsv")
+            reports = [dict(events=[event])]
+            observer.attach_deployments(reports, path)
+            self.assertEqual(event["latest_deployments"], {})
+            path.write_text("".join(f"2026-11-23T13:{minute}:00Z\t{service}\t{key * 40}\n"
+                                    for minute, service, key in [("04", "backend", "a"), ("06", "backend", "b"),
+                                                                 ("05", "frontend", "c"), ("00", "backend", "d")]))
+            observer.attach_deployments(reports, path)
+            self.assertEqual(event["latest_deployments"]["backend"]["commit"], "a" * 40)
+            self.assertEqual(event["latest_deployments"]["frontend"]["commit"], "c" * 40)
+
     def summarize(self, matrix):
         with patch.object(detector, "read_matrix", return_value=matrix):
             return detector.api_at_detection({"detected": detector.utc(self.detected)}, None, False)
