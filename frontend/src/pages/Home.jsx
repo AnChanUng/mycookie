@@ -6,7 +6,6 @@ import MentalTraining from '../components/MentalTraining';
 import SolveRank from '../components/SolveRank';
 import ContinueCard from '../components/ContinueCard';
 import TodayCs from '../components/TodayCs';
-import StudyNotice from '../components/StudyNotice';
 
 const MENUS = [
   { to: '/exam', tone: 'indigo', tag: '전공필기', title: '기업별 기출문제', desc: '금융공기업, 공기업, 컴퓨터일반 기출 모의고사' },
@@ -19,7 +18,6 @@ export default function Home() {
   const [more, setMore] = useState(false);
   return (
     <div className="fade-in home">
-      <StudyNotice />
       {/* 왼쪽은 소개와 시험 일정, 오른쪽은 문제 많이 푼 사람 순위 */}
       <div className="home-top">
         <div className="hero">

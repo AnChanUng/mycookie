@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import React from 'react';
 import TestRenderer, { act } from 'react-test-renderer';
+import { MemoryRouter } from 'react-router-dom';
 import { createServer } from 'vite';
 
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
@@ -13,7 +14,10 @@ console.error = (...args) => { if (!String(args[0]).startsWith('react-test-rende
 let view;
 const text = node => typeof node === 'string' ? node : (Array.isArray(node) ? node : node?.children || []).map(text).join('');
 try {
-  const { default: Notice } = await server.ssrLoadModule('/src/components/StudyNotice.jsx');
+  const { default: StudyNotice } = await server.ssrLoadModule('/src/components/StudyNotice.jsx');
+  const { CHANGELOG } = await server.ssrLoadModule('/src/data/changelog.js');
+  // 공지에 바로가기 링크가 있어 라우터 안에서 그린다
+  const Notice = () => React.createElement(MemoryRouter, null, React.createElement(StudyNotice));
   const { daysLeft, loadExams, saveExams, examFor } = await server.ssrLoadModule('/src/schedule.js');
   assert.deepEqual(loadExams(), [], 'new visitors start without schedules');
   values.set('study:exams', JSON.stringify([{name:'기업은행',date:'2099-10-17',to:'/exam/ibk'},{name:'코스콤',date:'2099-10-24'}]));
@@ -36,7 +40,12 @@ try {
   const modal = { open: false, showModal() { this.open = true; }, close() { this.open = false; } };
   await act(()=>{view=TestRenderer.create(React.createElement(Notice),{createNodeMock: el => el.type==='dialog' ? modal : null});});
   assert.equal(modal.open,true,'Notice opens on first render');
-  assert.deepEqual(view.root.findAllByType('li').map(text),['기업별 예상문제집','주제별 통합 문제집','전공노트 복습']);
+  // 공지는 공개 패치노트의 한 버전을 버전 번호와 함께 보여 준다
+  const shown = text(view.toJSON());
+  const release = CHANGELOG.flatMap(y => y.months).find(m => shown.includes(`v${m.version}`));
+  assert.ok(release, 'Notice shows a changelog version');
+  assert.ok(shown.includes(release.title));
+  assert.deepEqual(view.root.findAllByType('li').map(text), release.items.slice(0, 3));
   assert.ok(!text(view.toJSON()).includes('오늘 시험'));
   assert.ok(!text(view.toJSON()).includes('D-DAY'));
   assert.ok(!text(view.toJSON()).includes('지난 시험'));

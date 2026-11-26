@@ -24,6 +24,14 @@ checkout() {
   git -C "$ROOT/$dir" fetch --quiet origin "$branch"
 }
 
+record_deployment() {
+  local tag=$1 service=$2 commit=$3
+  if [ "$tag" = prod ]; then
+    printf '%s\t%s\t%s\n' "$(date -u '+%Y-%m-%dT%H:%M:%SZ')" "$service" "$commit" >> "$ROOT/prod-deployments.tsv" ||
+      echo "운영 배포 기록 저장 실패: $service" >&2
+  fi
+}
+
 deploy() {
   local dir=$1 branch=$2 tag=$3 env=$4
   checkout "$dir" "$branch"
@@ -43,11 +51,13 @@ deploy() {
   if [ "$need_backend" = 1 ]; then
     docker build --quiet -t "devcookie-backend:$tag" "$ROOT/$dir/backend"
     "${service_compose[@]}" up -d --no-deps "backend-$tag"
+    record_deployment "$tag" backend "$target"
   fi
   if [ "$need_frontend" = 1 ]; then
     docker build --quiet -t "devcookie-frontend:$tag" \
       --build-arg VITE_DEPLOY_ENV="$env" --build-arg GIT_COMMIT="$target" "$ROOT/$dir/frontend"
     "${service_compose[@]}" up -d --no-deps "frontend-$tag"
+    record_deployment "$tag" frontend "$target"
   fi
 }
 

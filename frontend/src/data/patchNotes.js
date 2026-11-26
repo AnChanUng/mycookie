@@ -8,7 +8,7 @@
 // status: 'released' 배포됨(master) | 'dev' 개발 브랜치에만 있음(release PR을 머지하면 released로 바꾼다)
 export const PATCH_NOTES = [
   {
-    version: '1.8.0', date: '2026-11-25', status: 'dev',
+    version: '1.8.0', date: '2026-11-25', status: 'released',
     title: '오늘 할 일과 새 대결 화면',
     summary: '첫 화면에서 오늘 할 일을 바로 고르고, 친구와 겨루는 대결 화면이 새로워졌습니다.',
     items: [
