@@ -1,16 +1,11 @@
-.study-notice { position: fixed; inset: 12px 12px auto auto; box-sizing: border-box; width: min(320px, calc(100vw - 24px)); max-height: calc(100dvh - 24px); margin: 0; overflow-y: auto; padding: 12px 14px; border: 1px solid var(--border-color); border-radius: 10px; background: var(--bg-secondary); color: var(--text-primary); box-shadow: 0 8px 28px #0003; }
-.study-notice::backdrop { background: #02061766; }
-.study-notice-label { color: var(--text-secondary); font-size: .7rem; }
-.study-notice h2 { display: flex; align-items: center; gap: 6px; margin: 4px 0 8px; font-size: .88rem; line-height: 1.4; }
-.study-notice-version { flex-shrink: 0; padding: 1px 6px; border-radius: 6px; background: var(--accent-blue); color: white; font-size: .68rem; font-weight: 700; font-variant-numeric: tabular-nums; }
-.study-notice-items { margin: 0 0 10px; padding-left: 16px; font-size: .75rem; line-height: 1.6; word-break: keep-all; overflow-wrap: anywhere; }
-.study-notice-items li + li { margin-top: 4px; }
-.study-notice-items li::marker { color: var(--accent-blue); }
-.study-notice-links { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 10px; font-size: .75rem; }
-.study-notice-go { color: var(--accent-blue); font-weight: 700; text-decoration: none; }
-.study-notice-more { color: var(--text-secondary); text-decoration: none; }
-.study-notice-go:hover, .study-notice-more:hover { text-decoration: underline; }
-.study-notice-actions { display: flex; align-items: center; justify-content: space-between; gap: 10px; border-top: 1px solid var(--border-color); padding-top: 6px; }
-.study-notice-dismiss { border: 0; background: transparent; color: var(--text-secondary); font-size: .7rem; padding: 7px 0; cursor: pointer; }
-.study-notice-confirm { padding: 7px 12px; border: 0; border-radius: 6px; background: var(--accent-blue); color: white; font-size: .75rem; cursor: pointer; }
+/* 첫 화면 공지: 화면 가운데에 짧은 카드 하나 */
+.study-notice { position: fixed; inset: 0; box-sizing: border-box; width: min(340px, calc(100vw - 32px)); max-height: calc(100dvh - 32px); margin: auto; overflow-y: auto; padding: 24px 22px 16px; border: 1px solid var(--border-color); border-radius: 16px; background: var(--bg-secondary); color: var(--text-primary); box-shadow: 0 16px 48px #0004; text-align: center; }
+.study-notice::backdrop { background: #02061773; }
+.study-notice-label { color: var(--text-secondary); font-size: .8rem; }
+.study-notice h2 { margin: 8px 0 18px; font-size: 1.35rem; font-weight: 800; line-height: 1.35; word-break: keep-all; }
+.study-notice-go { display: block; padding: 12px; border-radius: 10px; background: var(--accent-blue); color: white; font-size: 1rem; font-weight: 700; text-decoration: none; }
+.study-notice-go:hover { filter: brightness(1.06); }
+.study-notice-actions { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 10px; }
+.study-notice-dismiss, .study-notice-confirm { border: 0; background: transparent; color: var(--text-secondary); font-size: .85rem; padding: 8px 4px; cursor: pointer; }
+.study-notice-confirm { color: var(--text-primary); font-weight: 600; }
 .study-notice a:focus-visible, .study-notice button:focus-visible { outline: 2px solid var(--accent-blue); outline-offset: 3px; }
