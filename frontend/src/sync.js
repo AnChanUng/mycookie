@@ -38,9 +38,15 @@ export function deviceRecords() {
   return { keys, solved };
 }
 
+// 묻는 창. 화면이 DeviceRecordsPrompt를 띄워 두면 그 창으로 묻고({ solved, nickname } → Promise<boolean>),
+// 없으면 브라우저 기본 확인 창으로 묻는다
+let asker = null;
+export function setDeviceRecordsAsker(fn) { asker = fn; }
+const defaultAsk = ({ solved, nickname }) => window.confirm(`이 기기에 다른 계정으로 푼 기록이 ${solved}문제 있어요.\n\n지금 로그인한 계정(${nickname || '새 계정'})에 합칠까요?\n\n[확인] 이 계정에 합치기\n[취소] 합치지 않기 (이 기기의 다른 계정 기록을 지우고 이 계정 기록만 불러와요)`);
+
 // 다른 계정으로 로그인하기 직전에 부른다. 합치기로 하면 그대로 두고, 아니면 이 기기 기록을 지운다
 // (앞 계정 기록은 그 계정으로 로그인했을 때 이미 서버에 올라가 있다)
-function claimDeviceRecords(value, ask = message => window.confirm(message)) {
+async function claimDeviceRecords(value, ask = asker || defaultAsk) {
   const next = ownerOf(value);
   if (!next) return;
   let owner = null;
@@ -49,9 +55,7 @@ function claimDeviceRecords(value, ask = message => window.confirm(message)) {
     const { keys, solved } = deviceRecords();
     if (solved > 0) {
       let merge = true;
-      try {
-        merge = ask(`이 기기에 다른 계정으로 푼 기록이 ${solved}문제 있어요.\n\n지금 로그인한 계정(${value.nickname || '새 계정'})에 합칠까요?\n\n[확인] 이 계정에 합치기\n[취소] 합치지 않기 (이 기기의 다른 계정 기록을 지우고 이 계정 기록만 불러와요)`);
-      } catch { /* 물어볼 수 없으면 예전처럼 합친다 */ }
+      try { merge = !!(await ask({ solved, nickname: value.nickname })); } catch { /* 물어볼 수 없으면 예전처럼 합친다 */ }
       if (!merge) keys.forEach(key => { try { localStorage.removeItem(key); } catch { /* skip */ } });
     }
   }
@@ -62,9 +66,10 @@ export { claimDeviceRecords as _claimDeviceRecordsForTest };
 // 이 기능이 들어가기 전부터 로그인해 있던 기기는 지금 계정을 주인으로 적어 둔다
 try { if (!localStorage.getItem(OWNER) && account()) localStorage.setItem(OWNER, ownerOf(account())); } catch { /* storage unavailable */ }
 
-function setAccount(value) {
+// 로그인 상태를 바꾼다. 다른 계정으로 바뀔 때는 기록을 합칠지 답을 받은 뒤에 바꾼다(그 전에 동기화가 시작되지 않게)
+async function setAccount(value) {
   // 같은 계정의 닉네임 변경 · 토큰 갱신은 묻지 않는다. 로그아웃(null)은 기록과 주인을 그대로 둔다
-  if (value && ownerOf(value) !== ownerOf(account())) claimDeviceRecords(value);
+  if (value && ownerOf(value) !== ownerOf(account())) await claimDeviceRecords(value);
   try {
     if (value) localStorage.setItem(KEY, JSON.stringify(value));
     else localStorage.removeItem(KEY);
@@ -90,7 +95,7 @@ const auth = () => ({ headers: { Authorization: `Bearer ${account()?.token}` }, 
 // 새 가입은 간편 로그인으로만 받으므로 화면에서는 'login'만 쓴다(서버도 기본으로 닉네임 · 비밀번호 가입을 닫아 둔다)
 export async function signIn(mode, identifier, password) {
   const { data } = await api.post(`/auth/${mode}`, { nickname: identifier, identifier, password }, { timeout: 90000, headers: { 'X-Visitor-Id': visitorId() } });
-  setAccount({ id: data.id, nickname: data.nickname, token: data.token });
+  await setAccount({ id: data.id, nickname: data.nickname, token: data.token });
 }
 
 // ===== 소셜(구글 · 카카오) · 깃허브 로그인 =====
@@ -117,7 +122,7 @@ export async function finishOAuth(code, state) {
   try { saved = JSON.parse(sessionStorage.getItem(OAUTH_STATE)); sessionStorage.removeItem(OAUTH_STATE); } catch { /* 아래에서 거절 */ }
   if (!saved || saved.state !== state) throw new Error('로그인 요청이 올바르지 않습니다. 처음부터 다시 시도해 주세요.');
   const { data } = await api.post(`/auth/oauth/${saved.provider}/callback`, { code, state, redirectUri: callbackUri() }, { timeout: 90000 });
-  if (data.status === 'ok') setAccount({ id: data.user.id, nickname: data.user.nickname, token: data.user.token });
+  if (data.status === 'ok') await setAccount({ id: data.user.id, nickname: data.user.nickname, token: data.user.token });
   return data;
 }
 
@@ -126,12 +131,12 @@ export async function linkOAuth(ticket, nickname, password) {
   const current = account();
   const headers = { 'X-Visitor-Id': visitorId(), ...(current ? { Authorization: `Bearer ${current.token}` } : {}) };
   const { data } = await api.post('/auth/oauth/link', current ? { ticket } : { ticket, nickname, password }, { timeout: 90000, headers });
-  setAccount({ id: data.id, nickname: data.nickname, token: data.token });
+  await setAccount({ id: data.id, nickname: data.nickname, token: data.token });
 }
 
 export async function signUpOAuth(ticket, nickname) {
   const { data } = await api.post('/auth/oauth/signup', { ticket, nickname }, { timeout: 90000, headers: { 'X-Visitor-Id': visitorId() } });
-  setAccount({ id: data.id, nickname: data.nickname, token: data.token });
+  await setAccount({ id: data.id, nickname: data.nickname, token: data.token });
 }
 
 export async function linkedProviders() {
@@ -143,7 +148,7 @@ export async function changeNickname(nickname) {
   const current = account();
   if (!current) throw new Error('로그인이 필요합니다.');
   const { data } = await api.put('/auth/nickname', { nickname }, { ...auth(), headers: { ...auth().headers, 'X-Visitor-Id': visitorId() } });
-  if (account()?.token === current.token) setAccount({ ...current, nickname: data.nickname });
+  if (account()?.token === current.token) await setAccount({ ...current, nickname: data.nickname });
   return data.nickname;
 }
 
@@ -157,7 +162,7 @@ export async function changePassword(currentPassword, newPassword) {
   const current = account();
   if (!current) throw new Error('로그인이 필요합니다.');
   const { data } = await api.post('/auth/change-password', { currentPassword, newPassword }, { ...auth(), timeout: 90000 });
-  setAccount({ id: data.id, nickname: data.nickname, token: data.token });
+  await setAccount({ id: data.id, nickname: data.nickname, token: data.token });
 }
 
 export async function emailStatus() {
