@@ -1,0 +1,37 @@
+# 새 이슈 제목 앞에 "No.번호"를 붙인다(예: No.41 [기능] 오늘의 운세).
+# 번호는 저장소 이슈를 만든 순서대로 센 값이다(PR은 세지 않는다). GitHub 번호는 PR과 같이 늘어 건너뛰므로 따로 센다.
+# 사이트 제보로 백엔드가 만든 이슈도 포함된다(제보용 토큰으로 만든 이슈도 이 이벤트를 일으킨다).
+# 이슈 이벤트는 기본 브랜치(master)의 워크플로로 돈다
+name: 이슈 번호 붙이기
+
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  issues: write
+
+# 이슈가 한꺼번에 열려도 하나씩 처리한다
+concurrency:
+  group: issue-number
+  cancel-in-progress: false
+
+jobs:
+  number:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: 제목 앞에 번호 붙이기
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          NUMBER: ${{ github.event.issue.number }}
+          TITLE: ${{ github.event.issue.title }}
+        run: |
+          # 이미 번호가 있으면 그대로 둔다
+          if printf '%s' "$TITLE" | grep -Eq '^No\.[0-9]+ '; then exit 0; fi
+          # 이 이슈보다 먼저(또는 함께) 만들어진 이슈 수 = 이 이슈의 순번
+          count=$(gh api --paginate "repos/$REPO/issues?state=all&per_page=100" \
+            --jq ".[] | select(.pull_request == null) | select(.number <= $NUMBER) | .number" | wc -l)
+          [ "$count" -gt 0 ] || { echo "::warning::이슈 수를 세지 못해 번호를 붙이지 않았어요"; exit 0; }
+          gh api -X PATCH "repos/$REPO/issues/$NUMBER" -f "title=No.$count $TITLE" --silent
