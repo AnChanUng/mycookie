@@ -63,3 +63,9 @@ a.hub-card:hover .hub-card-go { color: var(--ds-brand); }
   .hub-grid { grid-template-columns: minmax(0, 1fr); }
   .hub-stats { gap: var(--ds-s6); }
 }
+
+/* 푸터가 없는 메뉴 첫 화면은 맨 아래 내용이 잘린 것처럼 붙지 않게 여백을 둔다 */
+main.container > .fade-in:has(> .hub-section, > .exam-group) { padding-bottom: 96px; }
+@media (max-width: 640px) {
+  main.container > .fade-in:has(> .hub-section, > .exam-group) { padding-bottom: 64px; }
+}

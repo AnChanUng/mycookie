@@ -1,9 +1,0 @@
-/* 전공필기 맨 위: 친구와 CS 대결 배너 */
-.duel-banner { display: flex; align-items: center; gap: 16px; margin: 0 0 28px; padding: 18px 22px; border-radius: 18px; color: #fff; text-decoration: none; background: linear-gradient(110deg, var(--ds-brand, #6366f1) 0%, #8b5cf6 55%, var(--ds-red, #f04452) 100%); box-shadow: 0 12px 30px -16px rgba(99, 102, 241, .8); transition: transform .15s ease; }
-.duel-banner:hover { color: #fff; transform: translateY(-2px); }
-.duel-banner-vs { display: grid; place-items: center; width: 48px; height: 48px; flex: none; border-radius: 14px; background: rgba(255, 255, 255, .18); font-weight: 900; font-style: italic; letter-spacing: -0.04em; }
-.duel-banner-text { display: grid; gap: 2px; flex: 1; min-width: 0; }
-.duel-banner-text b { font-size: 17px; }
-.duel-banner-text small { font-size: 13px; opacity: .9; }
-.duel-banner-go { padding: 8px 14px; border-radius: 999px; background: #fff; color: var(--ds-brand, #6366f1); font-size: 14px; font-weight: 800; white-space: nowrap; }
-@media (max-width: 560px) { .duel-banner-go { display: none; } }
