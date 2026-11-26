@@ -15,7 +15,56 @@ export function account() {
   }
 }
 
+// ===== 이 기기 풀이 기록의 주인 =====
+// 풀이 기록은 계정과 상관없이 브라우저에 두고, 로그인하면 그 계정 기록과 합쳐 서버에 올린다(useExamProgress).
+// 한 기기에서 계정을 바꾸면 앞 계정 기록이 새 계정에 섞이므로, 마지막으로 기록을 합친 계정을 적어 두고
+// 다른 계정으로 로그인할 때 합칠지 묻는다. 주인이 없는 기록(로그인 전에 푼 것)은 묻지 않고 이어 받는다
+const OWNER = 'sync:records-owner';
+const RECORD_PREFIX = 'exam-progress:';
+const ownerOf = value => (value?.id != null ? `user:${value.id}` : value?.nickname ? `nickname:${value.nickname}` : null);
+
+// 이 기기에 남은 풀이 기록 키와 푼 문제 수
+export function deviceRecords() {
+  const keys = [];
+  let solved = 0;
+  try {
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (!key?.startsWith(RECORD_PREFIX)) continue;
+      keys.push(key);
+      try { solved += Object.keys(JSON.parse(localStorage.getItem(key))?.stats || {}).length; } catch { /* 깨진 기록은 세지 않는다 */ }
+    }
+  } catch { /* storage unavailable */ }
+  return { keys, solved };
+}
+
+// 다른 계정으로 로그인하기 직전에 부른다. 합치기로 하면 그대로 두고, 아니면 이 기기 기록을 지운다
+// (앞 계정 기록은 그 계정으로 로그인했을 때 이미 서버에 올라가 있다)
+function claimDeviceRecords(value, ask = message => window.confirm(message)) {
+  const next = ownerOf(value);
+  if (!next) return;
+  let owner = null;
+  try { owner = localStorage.getItem(OWNER); } catch { return; }
+  if (owner && owner !== next) {
+    const { keys, solved } = deviceRecords();
+    if (solved > 0) {
+      let merge = true;
+      try {
+        merge = ask(`이 기기에 다른 계정으로 푼 기록이 ${solved}문제 있어요.\n\n지금 로그인한 계정(${value.nickname || '새 계정'})에 합칠까요?\n\n[확인] 이 계정에 합치기\n[취소] 합치지 않기 (이 기기의 다른 계정 기록을 지우고 이 계정 기록만 불러와요)`);
+      } catch { /* 물어볼 수 없으면 예전처럼 합친다 */ }
+      if (!merge) keys.forEach(key => { try { localStorage.removeItem(key); } catch { /* skip */ } });
+    }
+  }
+  try { localStorage.setItem(OWNER, next); } catch { /* storage unavailable */ }
+}
+export { claimDeviceRecords as _claimDeviceRecordsForTest };
+
+// 이 기능이 들어가기 전부터 로그인해 있던 기기는 지금 계정을 주인으로 적어 둔다
+try { if (!localStorage.getItem(OWNER) && account()) localStorage.setItem(OWNER, ownerOf(account())); } catch { /* storage unavailable */ }
+
 function setAccount(value) {
+  // 같은 계정의 닉네임 변경 · 토큰 갱신은 묻지 않는다. 로그아웃(null)은 기록과 주인을 그대로 둔다
+  if (value && ownerOf(value) !== ownerOf(account())) claimDeviceRecords(value);
   try {
     if (value) localStorage.setItem(KEY, JSON.stringify(value));
     else localStorage.removeItem(KEY);
