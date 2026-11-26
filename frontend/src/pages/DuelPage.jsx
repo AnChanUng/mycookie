@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import api from '../api';
 import { TOPICS } from '../data/topicBank';
 import { myNickname } from '../nickname';
@@ -41,10 +41,198 @@ function tallyOf(record, nickname) {
 }
 const tallyText = (t) => [t.w && `${t.w}승`, t.l && `${t.l}패`, t.d && `${t.d}무`].filter(Boolean).join(' ');
 
-// /duel 은 방 만들기, /duel/:code 는 그 방에서 같은 문제를 풀고 점수를 겨루는 화면
+// 대결에서 고른 답은 주제별 통합 문제집('topics') 풀이 기록에 바로 넣어 푼 문제 수 · 등급 · 포인트에 들어가게 한다.
+// 방마다 몇 번째 문제까지 넣었는지 적어 두어, 새로고침하거나 창을 두 개 열어도 같은 풀이를 두 번 넣지 않는다
+const COUNTED_KEY = 'duel:counted';
+function claimAnswer(code, index) {
+  let counted = {};
+  try { counted = JSON.parse(localStorage.getItem(COUNTED_KEY)) || {}; } catch { /* 깨진 값은 새로 쓴다 */ }
+  if ((counted[code] ?? -1) >= index) return false;
+  // 오래된 방 기록은 최근 100개만 남긴다
+  const next = Object.fromEntries([...Object.entries(counted).filter(([k]) => k !== code).slice(-99), [code, index]]);
+  try { localStorage.setItem(COUNTED_KEY, JSON.stringify(next)); } catch { /* storage unavailable */ }
+  return true;
+}
+
+// 혼자 풀기 최고 기록. 과목별로 많이 맞힌 기록, 같으면 빨리 끝낸 기록을 남긴다
+const BEST_KEY = 'duel:solo-best';
+function loadBest() {
+  try { return JSON.parse(localStorage.getItem(BEST_KEY)) || {}; } catch { return {}; }
+}
+const better = (a, b) => !b || a.score > b.score || (a.score === b.score && a.seconds < b.seconds);
+const subjectName = (subject) => (subject === 'all' || !TOPICS.sections[subject] ? '전체 과목' : TOPICS.sections[subject].name);
+const pickQuestions = (subject, except = []) => {
+  const pool = TOPICS.questions.filter(q => (subject === 'all' || q.sec === subject) && !except.includes(q.id));
+  return shuffle(pool).slice(0, SIZE);
+};
+
+// /duel 은 방 만들기, /duel/solo 는 혼자 풀기, /duel/:code 는 그 방에서 같은 문제를 풀고 점수를 겨루는 화면
 export default function DuelPage() {
   const { code } = useParams();
+  if (code?.toLowerCase() === 'solo') return <Solo />;
   return code ? <Room key={code} code={code.toUpperCase()} /> : <Lobby />;
+}
+
+// 문제 한 개. 보기를 고르면 정답과 해설을 펼친다
+function QuestionCard({ q, picked, onChoose, onNext, last }) {
+  return (
+    <div className="exam-qcard">
+      <div className="exam-qtop">
+        <span className="exam-chip sec">{TOPICS.sections[q.sec].name}</span>
+        <span className="exam-chip">{q.topic}</span>
+      </div>
+      {q.ctx && <div className="exam-ctx">{q.ctx}</div>}
+      {q.code && <Code code={q.code} />}
+      <p className="exam-qtext">{q.q}</p>
+      <ul className="exam-opts">
+        {q.o.map((opt, i) => {
+          let cls = 'exam-opt';
+          if (picked !== null) { if (i === q.a) cls += ' right'; else if (i === picked) cls += ' wrong'; }
+          return (
+            <li key={i}>
+              <button type="button" className={cls} disabled={picked !== null} onClick={() => onChoose(i)}>
+                <span className="no">{i + 1}</span><span className="tx">{opt}</span>
+              </button>
+            </li>
+          );
+        })}
+      </ul>
+      {picked !== null && (
+        <>
+          <div className={`exam-expl ${picked === q.a ? 'ok' : 'bad'}`}>
+            <div className="lab">{picked === q.a ? '정답' : `오답 · 정답은 ${CIRC[q.a]}`}</div>
+            <div>{q.e}</div>
+          </div>
+          <div className="exam-actions">
+            <button type="button" className="exam-btn primary" onClick={onNext}>{last ? '결과 보기' : '다음'}</button>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+// 혼자 풀기: 방을 만들지 않고 이 화면에서 10문제를 풀어 내 최고 기록과 겨룬다. 로그인하지 않아도 된다
+function Solo() {
+  const [params] = useSearchParams();
+  const subject = TOPICS.sections[params.get('s')] ? params.get('s') : 'all';
+  const name = subjectName(subject);
+  const { save: saveTopics } = useExamProgress('topics');
+  const [round, setRound] = useState(() => ({ id: requestKey(), questions: pickQuestions(subject) }));
+  const [started, setStarted] = useState(false);
+  const [idx, setIdx] = useState(0);
+  const [picked, setPicked] = useState(null);
+  const [marks, setMarks] = useState('');
+  const [result, setResult] = useState(null); // { score, seconds, best, newBest }
+  const [openRow, setOpenRow] = useState(null);
+  const startedAt = useRef(0);
+  const { questions } = round;
+  const total = questions.length;
+  const score = [...marks].filter(m => m === '1').length;
+  const best = loadBest()[subject];
+
+  const start = () => { startedAt.current = Date.now(); setStarted(true); };
+  const choose = (i) => {
+    if (picked !== null) return;
+    const q = questions[idx];
+    setPicked(i);
+    setMarks(marks + (i === q.a ? '1' : '0'));
+    if (claimAnswer(`solo:${round.id}`, idx)) saveTopics(prev => ({ ...prev, stats: recordAnswer(prev.stats, q.id, i === q.a) }));
+  };
+  const next = () => {
+    setPicked(null);
+    if (idx + 1 < total) { setIdx(idx + 1); return; }
+    const mine = { score, seconds: Math.floor((Date.now() - startedAt.current) / 1000), at: Date.now() };
+    const all = loadBest();
+    const newBest = better(mine, all[subject]);
+    if (newBest) {
+      try { localStorage.setItem(BEST_KEY, JSON.stringify({ ...all, [subject]: mine })); } catch { /* storage unavailable */ }
+    }
+    setResult({ ...mine, best: all[subject], newBest });
+  };
+  const again = () => {
+    setRound({ id: requestKey(), questions: pickQuestions(subject, questions.map(q => q.id)) });
+    setStarted(true); setIdx(0); setPicked(null); setMarks(''); setResult(null); setOpenRow(null);
+    startedAt.current = Date.now();
+  };
+
+  if (!total) {
+    return (
+      <div className="fade-in">
+        <div className="empty"><div className="empty-icon">📭</div>이 과목에는 풀 문제가 없습니다.</div>
+        <div className="exam-actions"><Link className="exam-btn" to="/duel">대결로 돌아가기</Link></div>
+      </div>
+    );
+  }
+  const q = questions[idx];
+  return (
+    <div className="fade-in exam-quiz duel-page duel-solo">
+      <div className="page-header">
+        <Link to="/duel" className="back-link">← 대결</Link>
+        <h1>혼자 풀기 · {name}</h1>
+        <p>{total}문제 · 많이 맞힐수록, 같으면 빨리 끝낼수록 좋은 기록입니다 · 푼 문제는 풀이 기록에 들어갑니다</p>
+      </div>
+      <div className="exam-quiz-main">
+        {!started && (
+          <div className="exam-qcard duel-ready">
+            <p>{best ? `내 최고 기록은 ${best.score}점 · ${fmt(best.seconds)}입니다. 이 기록을 넘어 보세요.` : '준비되면 시작하세요. 시작하는 순간부터 시간이 흐릅니다.'}</p>
+            <button type="button" className="exam-btn primary" onClick={start}>시작하기</button>
+          </div>
+        )}
+        {started && !result && q && (
+          <>
+            <div className="exam-qhead"><span className="prog">{idx + 1} / {total}</span><span className="prog">맞힘 {score}</span></div>
+            <div className="exam-pbar"><i style={{ width: `${Math.round(idx / total * 100)}%` }} /></div>
+            <QuestionCard q={q} picked={picked} onChoose={choose} onNext={next} last={idx + 1 >= total} />
+          </>
+        )}
+        {result && (
+          <div className={`exam-qcard duel-ready duel-result ${result.newBest ? 'win' : 'draw'}`}>
+            <span className="duel-result-icon" aria-hidden="true">{result.newBest ? '🏆' : '💪'}</span>
+            <h2>{result.newBest ? (result.best ? '최고 기록을 넘었습니다!' : '첫 기록을 세웠습니다!') : '수고했어요!'}</h2>
+            <div className="exam-score"><span className="big">{result.score}</span><span className="of">/ {total}문제</span></div>
+            <p>걸린 시간 {fmt(result.seconds)}{result.best && ` · 이전 최고 기록 ${result.best.score}점 · ${fmt(result.best.seconds)}`}</p>
+            <p>푼 문제는 풀이 기록에 들어갔어요. 틀린 문제는 주제별 통합 문제집의 오답노트에서 다시 풀 수 있어요.</p>
+            <div className="exam-actions">
+              <button type="button" className="exam-btn primary" onClick={again}>새 문제로 한 번 더</button>
+              <Link className="exam-btn" to="/duel">친구와 대결하기</Link>
+            </div>
+          </div>
+        )}
+      </div>
+      {result && (
+        <div className="duel-review">
+          <div className="section-title">문제별 복기</div>
+          <p className="exam-lede">문제를 누르면 정답과 해설이 펼쳐집니다.</p>
+          <div className="exam-table-wrap">
+            <table className="exam-table duel-review-table">
+              <thead><tr><th>#</th><th>문제</th><th className="mk">나</th></tr></thead>
+              <tbody>
+                {questions.map((x, n) => [
+                  <tr key={n} className={openRow === n ? 'open' : ''} onClick={() => setOpenRow(openRow === n ? null : n)}>
+                    <td className="num">{n + 1}</td>
+                    <td><b>{x.topic}</b><span>{x.q}</span></td>
+                    <td className={`mk ${marks[n] === '1' ? 'r' : 'w'}`}>{marks[n] === '1' ? '○' : '✕'}</td>
+                  </tr>,
+                  openRow === n && (
+                    <tr key={`${n}-open`} className="detail">
+                      <td />
+                      <td colSpan={2}>
+                        {x.ctx && <div className="exam-ctx">{x.ctx}</div>}
+                        {x.code && <Code code={x.code} />}
+                        <div className="ans">정답 {CIRC[x.a]} {x.o[x.a]}</div>
+                        <div className="ex">{x.e}</div>
+                      </td>
+                    </tr>
+                  ),
+                ])}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }
 
 function Lobby() {
@@ -85,7 +273,7 @@ function Lobby() {
       const pool = TOPICS.questions.filter(q => subject === 'all' || q.sec === subject);
       attempt.current = { subject, open, key: requestKey(), questionIds: shuffle(pool).slice(0, SIZE).map(q => q.id) };
     }
-    const title = subject === 'all' ? '전체 과목' : TOPICS.sections[subject].name;
+    const title = subjectName(subject);
     const { key, questionIds } = attempt.current;
     try {
       const { data } = await api.post('/duels', { questionIds, open, title }, { ...SLOW, headers: { 'Idempotency-Key': key } });
@@ -97,7 +285,7 @@ function Lobby() {
     }
   };
 
-  const subjectName = subject === 'all' ? '전체 과목' : TOPICS.sections[subject].name;
+  const lobbyName = subjectName(subject);
   const rate = record?.total ? Math.round(record.wins / record.total * 100) : 0;
   return (
     <div className="fade-in dl">
@@ -108,7 +296,7 @@ function Lobby() {
         <div className="dl-hero-text">
           <p className="dl-eyebrow">실시간 CS 대결</p>
           <h1>친구랑 한 판, <br />누가 더 잘 알까?</h1>
-          <p className="dl-sub">같은 {SIZE}문제를 동시에 풀어요. 많이 맞힌 사람이 이기고, 같으면 더 빨리 끝낸 사람이 이겨요.</p>
+          <p className="dl-sub">같은 {SIZE}문제를 동시에 풀어요. 많이 맞힌 사람이 이기고, 같으면 더 빨리 끝낸 사람이 이겨요. 혼자서도 풀 수 있고, 푼 문제는 풀이 기록에 들어가요.</p>
         </div>
         <div className="dl-versus" aria-hidden="true">
           <span className="dl-player me"><i>🍪</i><b>나</b></span>
@@ -131,7 +319,13 @@ function Lobby() {
             <span className="dl-mode-icon" aria-hidden="true">🤝</span>
             <b>1:1 친구 대결</b>
             <small>방을 만들고 링크를 보내면 친구가 바로 들어와요</small>
-            <span className="dl-mode-go">{busy ? '방 만드는 중…' : `${subjectName}로 방 만들기 →`}</span>
+            <span className="dl-mode-go">{busy ? '방 만드는 중…' : `${lobbyName}로 방 만들기 →`}</span>
+          </button>
+          <button type="button" className="dl-mode solo" disabled={busy} onClick={() => navigate(`/duel/solo?s=${subject}`)}>
+            <span className="dl-mode-icon" aria-hidden="true">🎯</span>
+            <b>혼자 풀기</b>
+            <small>상대 없이 바로 시작해요. 내 최고 기록을 넘어 보세요</small>
+            <span className="dl-mode-go">{`${lobbyName} 바로 풀기 →`}</span>
           </button>
           <button type="button" className="dl-mode crowd" disabled={busy} onClick={() => create(true)}>
             <span className="dl-mode-icon" aria-hidden="true">🏟️</span>
@@ -208,9 +402,8 @@ function Room({ code }) {
   const [marks, setMarks] = useState(''); // 내가 푼 순서대로의 정오답 ("1011…")
   const [picks, setPicks] = useState(''); // 내가 푼 순서대로 고른 보기 번호 ("2031…"). 채점은 서버가 한다
   const [openRow, setOpenRow] = useState(null); // 복기 표에서 펼친 문제
-  // 대결 문제는 주제별 통합 문제집의 문제라서, 틀린 것을 그 문제집의 오답으로 넘길 수 있다
+  // 대결 문제는 주제별 통합 문제집의 문제라서, 고른 답을 그 문제집의 풀이 기록에 바로 넣는다
   const { save: saveTopics } = useExamProgress('topics');
-  const [savedWrong, setSavedWrong] = useState(false);
   const navigate = useNavigate();
   const startedAt = useRef(0);
   const lastReport = useRef(null);
@@ -337,6 +530,7 @@ function Room({ code }) {
     const nextPicks = picks + i;
     setPicks(nextPicks);
     report(nextPicks, idx + 1 === total);
+    if (claimAnswer(code, idx)) saveTopics(prev => ({ ...prev, stats: recordAnswer(prev.stats, q.id, i === q.a) }));
   };
   const next = () => {
     setPicked(null);
@@ -373,10 +567,6 @@ function Room({ code }) {
   };
 
   const myWrong = marks.length === total ? room.questions.filter((_, n) => marks[n] === '0') : [];
-  const saveWrong = () => {
-    saveTopics(prev => ({ ...prev, stats: myWrong.reduce((stats, x) => recordAnswer(stats, x.id, false), prev.stats) }));
-    setSavedWrong(true);
-  };
 
   // 다 푼 사람끼리 문제별로 누가 맞고 틀렸는지 견주어 본다. 서버는 끝낸 사람에게만 정오답을 준다
   const reviewers = room.players.filter(p => p.done && typeof p.marks === 'string' && p.marks.length === total);
@@ -390,10 +580,8 @@ function Room({ code }) {
       </p>
       {myWrong.length > 0 && (
         <div className="exam-actions">
-          <button type="button" className="exam-btn primary" disabled={savedWrong} onClick={saveWrong}>
-            {savedWrong ? `오답노트에 저장했습니다 (${myWrong.length}문제)` : `내가 틀린 ${myWrong.length}문제 오답노트에 저장`}
-          </button>
-          {savedWrong && <Link className="exam-btn" to="/topics">주제별 통합에서 다시 풀기 →</Link>}
+          <span className="exam-note">틀린 {myWrong.length}문제는 주제별 통합 문제집 오답노트에 자동으로 들어갔어요.</span>
+          <Link className="exam-btn" to="/topics">주제별 통합에서 다시 풀기 →</Link>
         </div>
       )}
       <div className="exam-table-wrap">
@@ -478,39 +666,7 @@ function Room({ code }) {
             <>
               <div className="exam-qhead"><span className="prog">{idx + 1} / {total}</span><span className="prog">맞힘 {score}</span></div>
               <div className="exam-pbar"><i style={{ width: `${Math.round(idx / total * 100)}%` }} /></div>
-              <div className="exam-qcard">
-                <div className="exam-qtop">
-                  <span className="exam-chip sec">{TOPICS.sections[q.sec].name}</span>
-                  <span className="exam-chip">{q.topic}</span>
-                </div>
-                {q.ctx && <div className="exam-ctx">{q.ctx}</div>}
-                {q.code && <Code code={q.code} />}
-                <p className="exam-qtext">{q.q}</p>
-                <ul className="exam-opts">
-                  {q.o.map((opt, i) => {
-                    let cls = 'exam-opt';
-                    if (picked !== null) { if (i === q.a) cls += ' right'; else if (i === picked) cls += ' wrong'; }
-                    return (
-                      <li key={i}>
-                        <button type="button" className={cls} disabled={picked !== null} onClick={() => choose(i)}>
-                          <span className="no">{i + 1}</span><span className="tx">{opt}</span>
-                        </button>
-                      </li>
-                    );
-                  })}
-                </ul>
-                {picked !== null && (
-                  <>
-                    <div className={`exam-expl ${picked === q.a ? 'ok' : 'bad'}`}>
-                      <div className="lab">{picked === q.a ? '정답' : `오답 · 정답은 ${CIRC[q.a]}`}</div>
-                      <div>{q.e}</div>
-                    </div>
-                    <div className="exam-actions">
-                      <button type="button" className="exam-btn primary" onClick={next}>{idx + 1 < total ? '다음' : '결과 보기'}</button>
-                    </div>
-                  </>
-                )}
-              </div>
+              <QuestionCard q={q} picked={picked} onChoose={choose} onNext={next} last={idx + 1 >= total} />
             </>
           )}
           {reportError && <p role="alert" className="exam-note">진행 기록 전송을 다시 시도하고 있습니다. 저장될 때까지 이 화면을 유지해 주세요.</p>}
@@ -519,7 +675,7 @@ function Room({ code }) {
               <span className="duel-result-icon" aria-hidden="true">{({win:'🏆',loss:'🌱',draw:'🤝',waiting:'⏳'})[outcome]}</span>
               <h2>{({win:'승리했습니다!',loss:'아쉽게 패배했습니다',draw:'무승부입니다!',waiting:'결과를 기다리고 있어요'})[outcome]}</h2>
               <div className="exam-score"><span className="big">{score}</span><span className="of">/ {total}문제</span></div>
-              <p>{settled ? `우승: ${tiedTop.map(p => p.nickname).join(', ')} · ${top.score}점 · ${fmt(top.seconds)}. 점수 우선, 동점이면 소요 시간으로 결정합니다.` : '참가자들이 모두 완료하면 승패가 표시됩니다. 혼자 푼 대결은 전적에 포함되지 않습니다.'}</p>
+              <p>{settled ? `우승: ${tiedTop.map(p => p.nickname).join(', ')} · ${top.score}점 · ${fmt(top.seconds)}. 점수 우선, 동점이면 소요 시간으로 결정합니다.` : '참가자들이 모두 완료하면 승패가 표시됩니다. 혼자 푼 대결은 전적에 포함되지 않지만, 푼 문제는 풀이 기록에 들어갑니다.'}</p>
               {mine?.done && <p>나의 기록 · {fmt(mine.seconds)} · {room.players.length}명 참가</p>}
               <div className="exam-actions">
                 {room.nextCode
