@@ -14,10 +14,17 @@ class LogDiskAlertTest(unittest.TestCase):
         self.marker = Path(folder.name, "alerted")
         self.fs = SimpleNamespace(f_blocks=110, f_bfree=30, f_bavail=20, f_frsize=4096)
         for mock in (patch.object(healthcheck, "DISK_STATE", self.marker),
-                     patch.object(healthcheck.subprocess, "check_output", return_value=folder.name),
+                     patch.object(healthcheck.subprocess, "check_output", return_value="C:\\" ),
                      patch.object(healthcheck.os, "statvfs", return_value=self.fs, create=True)):
             mock.start()
             self.addCleanup(mock.stop)
+
+    @patch.object(healthcheck, "post")
+    def test_other_filesystem_is_not_reported_as_c(self, post):
+        with patch.object(healthcheck.subprocess, "check_output", return_value="/dev/sdc"):
+            with self.assertRaises(ValueError):
+                healthcheck.check_log_disk("mock")
+        post.assert_not_called()
 
     @patch.object(healthcheck, "post")
     def test_crossing_recovery_and_repeat(self, post):
