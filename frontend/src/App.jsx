@@ -3,7 +3,6 @@ import { lazy } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, Outlet, useLocation } from 'react-router-dom';
 import PracticeEntry from './components/PracticeEntry';
 import Layout from './components/Layout';
-import DeviceRecordsPrompt from './components/DeviceRecordsPrompt';
 import Home from './pages/Home';
 import Main from './pages/Main';
 const Landing = lazy(() => import('./pages/Landing'));
@@ -99,8 +98,6 @@ function App() {
   );
   return (
     <BrowserRouter>
-      {/* 다른 계정으로 로그인할 때 이 기기 기록을 합칠지 묻는 창(어느 화면에서 로그인해도 뜬다) */}
-      <DeviceRecordsPrompt />
       <Routes>
         <Route path="/" element={<Layout />}>
           <Route index element={<Main />} />
