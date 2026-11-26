@@ -1,0 +1,33 @@
+/* 추천 자격증 위쪽 시험 일정 달력. 색은 styles/ds.css를 따른다 */
+.cert-cal { margin: var(--ds-s8) 0 var(--ds-s10); padding: var(--ds-s5); border: 1px solid var(--ds-line-strong); border-radius: var(--ds-r-lg); background: var(--ds-surface); color: var(--ds-text); }
+.cert-cal-head { display: flex; align-items: center; justify-content: center; gap: var(--ds-s4); margin-bottom: var(--ds-s4); }
+.cert-cal-head h2 { margin: 0; min-width: 12em; text-align: center; font-size: var(--ds-fs-title); font-weight: 800; letter-spacing: -0.02em; }
+.cert-cal-head button { width: 36px; height: 36px; border: 1px solid var(--ds-line-strong); border-radius: var(--ds-r-md); background: var(--ds-surface); color: var(--ds-text); font-size: 20px; line-height: 1; cursor: pointer; }
+.cert-cal-head button:disabled { opacity: .35; cursor: default; }
+.cert-cal-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 1px; }
+.cert-cal-week { padding: 6px 0; text-align: center; font-size: var(--ds-fs-caption); font-weight: 700; color: var(--ds-text-3); }
+.cert-cal-day { display: flex; flex-direction: column; gap: 3px; min-width: 0; min-height: 84px; padding: 6px; border-top: 1px solid var(--ds-line); }
+.cert-cal-day b { font-size: var(--ds-fs-small); font-weight: 600; color: var(--ds-text-2); }
+.cert-cal-day.today { background: var(--ds-brand-soft); }
+.cert-cal-chip { overflow: hidden; padding: 2px 6px; border-radius: var(--ds-r-sm); font-size: 11px; font-weight: 600; line-height: 1.5; text-overflow: ellipsis; white-space: nowrap; background: var(--ds-surface-2); color: var(--ds-text-2); }
+.cert-cal-chip em { font-style: normal; font-weight: 800; }
+.cert-cal-chip.exam { background: var(--ds-red-soft); color: var(--ds-red); }
+.cert-cal-chip.apply { background: var(--ds-brand-soft); color: var(--ds-brand); }
+.cert-cal-list { display: grid; gap: var(--ds-s2); margin: var(--ds-s4) 0 0; padding: var(--ds-s4) 0 0; border-top: 1px solid var(--ds-line-strong); list-style: none; }
+.cert-cal-list li { display: grid; grid-template-columns: auto 12em minmax(0, 1fr); align-items: center; gap: var(--ds-s3); font-size: var(--ds-fs-small); }
+.cert-cal-list time { color: var(--ds-text-2); font-variant-numeric: tabular-nums; }
+.cert-cal-list a { color: var(--ds-text); text-decoration: none; }
+.cert-cal-list a:hover { color: var(--ds-brand); }
+.cert-cal-empty { margin: var(--ds-s4) 0 0; text-align: center; font-size: var(--ds-fs-small); color: var(--ds-text-3); }
+.cert-cal-note { margin: var(--ds-s3) 0 0; font-size: var(--ds-fs-caption); line-height: 1.7; color: var(--ds-text-3); word-break: keep-all; }
+.cert-cal-note a { color: var(--ds-text-2); }
+
+/* 휴대폰: 칸이 좁아 이름은 빼고 접수 · 시험 · 발표만 적는다(이름은 아래 목록) */
+@media (max-width: 640px) {
+  .cert-cal { padding: var(--ds-s3); }
+  .cert-cal-day { min-height: 62px; padding: 4px 2px; }
+  .cert-cal-day .cert-cal-chip { padding: 1px 2px; font-size: 0; text-align: center; }
+  .cert-cal-day .cert-cal-chip em { font-size: 9px; white-space: nowrap; }
+  .cert-cal-list li { grid-template-columns: auto minmax(0, 1fr); row-gap: 2px; }
+  .cert-cal-list a { grid-column: 1 / -1; }
+}
