@@ -53,22 +53,26 @@ class FeedbackTest {
     @Test
     void bugBecomesLabeledIssueWithoutLiveMentions() throws Exception {
         when(github.enabled()).thenReturn(true);
-        when(github.create(anyString(), anyString(), anyList())).thenReturn(new GitHubIssueClient.Issue(42, "https://github.com/x/y/issues/42"));
+        when(github.nextSequence()).thenReturn(41);
+        when(github.create(anyString(), anyString(), anyList())).thenReturn(new GitHubIssueClient.Issue(316, "https://github.com/x/y/issues/316"));
 
+        // 화면에는 GitHub 번호(316)가 아니라 이슈 제목 앞 순번(#41)을 바로 보여 준다
         send(Map.of("kind", "bug", "title", "채점이\n이상해요 @someone", "content", "#1 문제 정답이 @admin 틀림",
                 "visitorId", "v-1", "path", "/exam/kdb"))
-                .andExpect(status().isOk()).andExpect(jsonPath("$.issue").value(42));
+                .andExpect(status().isOk()).andExpect(jsonPath("$.issue").value(41))
+                .andExpect(jsonPath("$.issueUrl").value("https://github.com/x/y/issues/316"));
 
         ArgumentCaptor<String> title = ArgumentCaptor.forClass(String.class);
         ArgumentCaptor<String> body = ArgumentCaptor.forClass(String.class);
         ArgumentCaptor<List<String>> labels = ArgumentCaptor.forClass(List.class);
         verify(github).create(title.capture(), body.capture(), labels.capture());
-        assertThat(title.getValue()).startsWith("[버그] 채점이 이상해요").doesNotContain("\n").doesNotContain("@someone");
+        assertThat(title.getValue()).startsWith("#41 [버그] 채점이 이상해요").doesNotContain("\n").doesNotContain("@someone");
         assertThat(labels.getValue()).containsExactly("버그");
         assertThat(body.getValue()).contains("/exam/kdb").doesNotContain("@admin").doesNotContain("#1 ").doesNotContain("v-1");
 
         Feedback saved = feedbacks.findAll().get(0);
-        assertThat(saved.getIssueNumber()).isEqualTo(42);
+        assertThat(saved.getIssueNumber()).isEqualTo(316);
+        assertThat(saved.getIssueSeq()).isEqualTo(41);
         verify(mattermost, never()).postNotice(anyString());   // 웹훅이 꺼져 있으면 알리지 않는다
         assertThat(saved.getTitle()).isEqualTo("채점이 이상해요 @someone");
     }
