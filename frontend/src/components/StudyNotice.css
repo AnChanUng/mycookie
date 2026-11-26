@@ -8,6 +8,9 @@
 .study-notice-update { border-top: 1px solid var(--border-color); padding-top: 8px; margin-bottom: 10px; }
 .study-notice-update time { color: var(--text-secondary); font-size: .68rem; }
 .study-notice-update p { margin: 4px 0 0; font-size: .75rem; line-height: 1.6; word-break: keep-all; overflow-wrap: anywhere; }
+.study-notice-body { margin: 0 0 8px; font-size: .78rem; line-height: 1.6; word-break: keep-all; overflow-wrap: anywhere; }
+.study-notice-go { display: inline-block; margin-bottom: 10px; color: var(--accent-blue); font-size: .78rem; font-weight: 700; text-decoration: none; }
+.study-notice-go:hover { text-decoration: underline; }
 .study-notice-actions { display: flex; align-items: center; justify-content: space-between; gap: 10px; border-top: 1px solid var(--border-color); padding-top: 6px; }
 .study-notice-dismiss { border: 0; background: transparent; color: var(--text-secondary); font-size: .7rem; padding: 7px 0; cursor: pointer; }
 .study-notice-confirm { padding: 7px 12px; border: 0; border-radius: 6px; background: var(--accent-blue); color: white; font-size: .75rem; cursor: pointer; }
