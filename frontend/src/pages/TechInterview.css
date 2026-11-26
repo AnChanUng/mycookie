@@ -39,3 +39,10 @@
 .ti-page .ti-edit { margin-top: 28px; }
 @media (max-width: 900px) { .chanung-page.ti-page .notes-layout { grid-template-columns: 230px minmax(0, 1fr); } }
 @media (max-width: 640px) { .chanung-page.ti-page .notes-layout { grid-template-columns: minmax(0, 1fr); } }
+
+/* 모범답안: 첫 줄 결론, 이어서 상황·행동·결과, 마지막 마무리 한 줄 */
+.ti-page .ti-model-answer { margin: 14px 0; padding: 12px 14px; border-left: 3px solid var(--ds-brand, var(--accent-blue)); background: var(--bg-secondary); font-size: .9rem; line-height: 1.75; }
+.ti-page .ti-model-answer strong { display: block; margin-bottom: 6px; }
+.ti-page .ti-model-answer p { margin: 0 0 6px; word-break: keep-all; }
+.ti-page .ti-model-answer p:first-of-type { font-weight: 700; }
+.ti-page .ti-points-title { margin: 12px 0 4px; font-weight: 700; font-size: .85rem; }
