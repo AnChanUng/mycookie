@@ -117,13 +117,13 @@ def check_log_disk(webhook):
     capacity = used + available  # df처럼 예약 블록은 일반 사용자의 가용 용량에서 제외한다.
     if capacity <= 0:
         raise ValueError("Invalid filesystem capacity")
-    if used * 100 <= capacity * 80:
+    if used * 100 <= capacity * 90:
         DISK_STATE.unlink(missing_ok=True)
         return
     if DISK_STATE.exists():
         return
     gib = fs.f_frsize / (1024 ** 3)
-    text = (f"#### :warning: 홈서버 Windows C: 드라이브 사용률 80% 초과\n"
+    text = (f"#### :warning: 홈서버 Windows C: 드라이브 사용률 90% 초과\n"
             f"사용률 {100 * used / capacity:.2f}% · 사용 {used * gib:.1f} GiB · "
             f"남은 공간 {available * gib:.1f} GiB\n"
             f"확인 경로: `{mount}` · Windows 저장소 설정에서 어떤 항목의 용량이 큰지 확인하세요.")

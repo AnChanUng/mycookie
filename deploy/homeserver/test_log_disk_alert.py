@@ -12,7 +12,7 @@ class LogDiskAlertTest(unittest.TestCase):
         folder = tempfile.TemporaryDirectory()
         self.addCleanup(folder.cleanup)
         self.marker = Path(folder.name, "alerted")
-        self.fs = SimpleNamespace(f_blocks=110, f_bfree=30, f_bavail=20, f_frsize=4096)
+        self.fs = SimpleNamespace(f_blocks=10100, f_bfree=1100, f_bavail=1000, f_frsize=4096)
         for mock in (patch.object(healthcheck, "DISK_STATE", self.marker),
                      patch.object(healthcheck.subprocess, "check_output", return_value="C:\\" ),
                      patch.object(healthcheck.os, "statvfs", return_value=self.fs, create=True)):
@@ -29,21 +29,21 @@ class LogDiskAlertTest(unittest.TestCase):
     @patch.object(healthcheck, "post")
     def test_crossing_recovery_and_repeat(self, post):
         healthcheck.check_log_disk("mock")
-        post.assert_not_called()  # 80% exactly
-        self.fs.f_bfree, self.fs.f_bavail = 29, 19
+        post.assert_not_called()  # 90% exactly
+        self.fs.f_bfree, self.fs.f_bavail = 1099, 999
         healthcheck.check_log_disk("mock")
         healthcheck.check_log_disk("mock")
         post.assert_called_once()
-        self.assertIn("81.00%", post.call_args.args[1]["text"])
-        self.fs.f_bfree, self.fs.f_bavail = 30, 20
+        self.assertIn("90.01%", post.call_args.args[1]["text"])
+        self.fs.f_bfree, self.fs.f_bavail = 1100, 1000
         healthcheck.check_log_disk("mock")
-        self.fs.f_bfree, self.fs.f_bavail = 29, 19
+        self.fs.f_bfree, self.fs.f_bavail = 1099, 999
         healthcheck.check_log_disk("mock")
         self.assertEqual(post.call_count, 2)
 
     @patch.object(healthcheck, "post", side_effect=[TimeoutError(), None])
     def test_failed_delivery_is_retried(self, post):
-        self.fs.f_bfree, self.fs.f_bavail = 29, 19
+        self.fs.f_bfree, self.fs.f_bavail = 1099, 999
         with self.assertRaises(TimeoutError):
             healthcheck.check_log_disk("mock")
         self.assertFalse(self.marker.exists())
