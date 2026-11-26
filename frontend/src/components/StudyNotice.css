@@ -1,14 +1,16 @@
-.study-notice { position: fixed; inset: 12px 12px auto auto; box-sizing: border-box; width: min(260px, calc(100vw - 24px)); max-height: calc(100dvh - 24px); margin: 0; overflow-y: auto; padding: 12px 14px; border: 1px solid var(--border-color); border-radius: 10px; background: var(--bg-secondary); color: var(--text-primary); box-shadow: 0 8px 28px #0003; }
+.study-notice { position: fixed; inset: 12px 12px auto auto; box-sizing: border-box; width: min(320px, calc(100vw - 24px)); max-height: calc(100dvh - 24px); margin: 0; overflow-y: auto; padding: 12px 14px; border: 1px solid var(--border-color); border-radius: 10px; background: var(--bg-secondary); color: var(--text-primary); box-shadow: 0 8px 28px #0003; }
 .study-notice::backdrop { background: #02061766; }
 .study-notice-label { color: var(--text-secondary); font-size: .7rem; }
-.study-notice h2 { margin: 4px 0 8px; font-size: .88rem; line-height: 1.4; }
-.study-notice-priorities { padding-left: 18px; margin: 0 0 10px; font-size: .78rem; }
-.study-notice-priorities li { padding: 2px 0 2px 2px; line-height: 1.5; }
-.study-notice-priorities li::marker { color: var(--accent-blue); font-weight: 600; }
-.study-notice-update { border-top: 1px solid var(--border-color); padding-top: 8px; margin-bottom: 10px; }
-.study-notice-update time { color: var(--text-secondary); font-size: .68rem; }
-.study-notice-update p { margin: 4px 0 0; font-size: .75rem; line-height: 1.6; word-break: keep-all; overflow-wrap: anywhere; }
+.study-notice h2 { display: flex; align-items: center; gap: 6px; margin: 4px 0 8px; font-size: .88rem; line-height: 1.4; }
+.study-notice-version { flex-shrink: 0; padding: 1px 6px; border-radius: 6px; background: var(--accent-blue); color: white; font-size: .68rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+.study-notice-items { margin: 0 0 10px; padding-left: 16px; font-size: .75rem; line-height: 1.6; word-break: keep-all; overflow-wrap: anywhere; }
+.study-notice-items li + li { margin-top: 4px; }
+.study-notice-items li::marker { color: var(--accent-blue); }
+.study-notice-links { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 10px; font-size: .75rem; }
+.study-notice-go { color: var(--accent-blue); font-weight: 700; text-decoration: none; }
+.study-notice-more { color: var(--text-secondary); text-decoration: none; }
+.study-notice-go:hover, .study-notice-more:hover { text-decoration: underline; }
 .study-notice-actions { display: flex; align-items: center; justify-content: space-between; gap: 10px; border-top: 1px solid var(--border-color); padding-top: 6px; }
 .study-notice-dismiss { border: 0; background: transparent; color: var(--text-secondary); font-size: .7rem; padding: 7px 0; cursor: pointer; }
 .study-notice-confirm { padding: 7px 12px; border: 0; border-radius: 6px; background: var(--accent-blue); color: white; font-size: .75rem; cursor: pointer; }
-.study-notice button:focus-visible { outline: 2px solid var(--accent-blue); outline-offset: 3px; }
+.study-notice a:focus-visible, .study-notice button:focus-visible { outline: 2px solid var(--accent-blue); outline-offset: 3px; }

@@ -11,6 +11,7 @@ import HomeRank from '../components/HomeRank';
 import HomeReview from '../components/HomeReview';
 import MentalTraining from '../components/MentalTraining';
 import DailyFortune from '../components/DailyFortune';
+import StudyNotice from '../components/StudyNotice';
 import { quoteForDay } from '../data/quotes';
 import './Main.css';
 
@@ -98,6 +99,7 @@ export default function Main() {
 
   return (
     <div className="mn">
+      <StudyNotice />
       {/* 오늘의 명언: 첫 화면 맨 위 가운데 */}
       <figure className="mn-quote ds-rise">
         <blockquote>“{quote.text}”</blockquote>
