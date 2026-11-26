@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import api from '../api';
-import { refreshMembership } from '../membership';
+import { membershipHeaders, refreshMembership } from '../membership';
 import './PromotionAnnouncements.css';
 import { CookieIcon } from './TierBadge';
 import { tierFromName } from '../membership';
@@ -54,17 +54,26 @@ export default function PromotionAnnouncements() {
     if (typeof EventSource === 'undefined') return undefined;
     const source = new EventSource(`${api.defaults.baseURL}/promotions/stream`);
     const seen = new Set();
+    let alive = true;
+    const show = data => { if (alive) setNotices(previous => [...previous, data]); };
     const receive = event => {
       let data;
       try { data = JSON.parse(event.data); } catch { return; }
       if (!data || typeof data.id !== 'string' || typeof data.nickname !== 'string' || typeof data.tierName !== 'string' || seen.has(data.id)) return;
       seen.add(data.id);
       if (seen.size > 300) seen.delete(seen.values().next().value);
-      setNotices(previous => [...previous, data]);
+      // 등급 자체가 오른 승급(금, 다이아, 루비 등)만 모두에게 띄운다. 단계만 오른 승급은 내 것일 때만 띄운다
+      if (data.major === false) {
+        api.get('/membership', { headers: membershipHeaders(), timeout: 15000 })
+          .then(({ data: me }) => { if (me?.nickname && me.nickname === data.nickname) { show(data); refreshMembership(); } })
+          .catch(() => {});
+        return;
+      }
+      show(data);
       refreshMembership();
     };
     source.addEventListener('promotion', receive);
-    return () => { source.removeEventListener('promotion', receive); source.close(); };
+    return () => { alive = false; source.removeEventListener('promotion', receive); source.close(); };
   }, []);
   return notices.length ? <Celebration key={notices[0].id} notice={notices[0]} dismiss={dismiss} /> : null;
 }

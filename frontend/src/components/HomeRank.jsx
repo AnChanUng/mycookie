@@ -68,7 +68,7 @@ export default function HomeRank() {
         {podium.map(r => <li key={r.rank} className={`hr-step p${r.rank}${r.me ? ' me' : ''}`} value={r.rank}>
           <RankMedal rank={r.rank} className="hr-medal" />
           <TierBadge tier={r.tier} division={r.division} />
-          <b className="hr-pname" title={r.nickname}><ProfileAvatar look={looks[r.nickname]} size={20} /><ProfileName nickname={r.nickname} /></b>
+          <b className="hr-pname" title={r.nickname}><ProfileAvatar look={looks[r.nickname]} size={40} /><ProfileName nickname={r.nickname} /></b>
           <span className="hr-pcount">{Number(r.count).toLocaleString()}문제</span>
         </li>)}
       </ol>
