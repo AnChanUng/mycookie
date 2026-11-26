@@ -18,11 +18,12 @@
 .hr-step.p2 { background: color-mix(in srgb, #c7d0da 22%, var(--ds-surface)); }
 .hr-step.p3 { background: color-mix(in srgb, #e3a674 18%, var(--ds-surface)); }
 .hr-step.me { outline: 2px solid var(--ds-brand); outline-offset: -2px; }
-.hr-step .tier-badge { width: 40px; height: 40px; }
-.hr-step.p1 .tier-badge { width: 52px; height: 52px; }
+/* 시상대는 프로필을 크게, 쿠키 등급 아이콘은 작게 */
+.hr-step .tier-badge { width: 22px; height: 22px; }
+.hr-step.p1 .tier-badge { width: 26px; height: 26px; }
 /* 시상대 위 순위 배지: 1위 금, 2위 은, 3위 동 색 숫자(RankMedal) */
 .hr-medal.rank-medal { position: absolute; top: -12px; box-shadow: 0 0 0 2px var(--ds-surface), inset 0 -2px 0 rgb(0 0 0 / .18); }
-.hr-pname { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--ds-fs-small); }
+.hr-pname { display: inline-flex; align-items: center; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--ds-fs-small); }
 .hr-pcount { font-size: var(--ds-fs-caption); color: var(--ds-text-2); font-variant-numeric: tabular-nums; }
 
 /* 4위부터 짧은 줄 */
@@ -48,4 +49,4 @@
 
 /* 프로필 꾸미기에서 고른 아이콘(고른 사람만): 닉네임 앞에 붙인다 */
 .hr-name .pf-avatar { margin-right: 6px; vertical-align: middle; }
-.hr-pname .pf-avatar { margin-right: 4px; vertical-align: middle; }
+.hr-pname .pf-avatar { flex-shrink: 0; margin-right: 6px; }
