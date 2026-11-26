@@ -1,4 +1,5 @@
 import { HubCard, HubHeader, HubSection } from '../components/Hub';
+import CertCalendar from '../components/CertCalendar';
 
 const AWS_BOOKING = 'https://aws.amazon.com/ko/certification/certification-prep/testing/';
 const DATAQ = 'https://www.dataq.or.kr/';
@@ -31,6 +32,7 @@ export default function CertificationsPage() {
     <HubHeader eyebrow="자격증" title="추천 자격증"
       desc="개발 · 데이터 · AI · 클라우드 분야의 자격증을 모았어요. 누르면 공식 접수 사이트가 새 탭에서 열려요."
       stats={[{ value: CERTIFICATIONS.length, label: '추천 자격증' }, { value: ADDITIONAL.length, label: '함께 볼 자격증' }]} />
+    <CertCalendar />
     <HubSection title="추천 자격증"><CertificateCards items={CERTIFICATIONS} /></HubSection>
     <HubSection title="함께 살펴볼 추천 자격증" note="관심 분야에 따라 더해 볼 만한 자격증이에요."><CertificateCards items={ADDITIONAL} /></HubSection>
   </div>;
