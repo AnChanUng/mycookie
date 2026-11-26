@@ -321,6 +321,35 @@ sudo ./account.sh --staging create admin1 ADMIN,TEAM   # 스테이징은 DB와 �
 
 운영, 스테이징 로그는 Grafana에서 봅니다. 띄우는 법과 접속, 계정은 [monitoring.md](monitoring.md)를 참고하세요.
 
+## 메일이 스팸함에 갈 때
+
+받는 메일 서비스(Gmail, 네이버 등)는 "보내는 사람 주소(`MAIL_FROM`)의 도메인이 이 서버에서 보내도 된다고 허락했는지"를 SPF · DKIM · DMARC로 확인합니다. 셋 중 맞는 것이 없으면 스팸함으로 갑니다. 서버 코드는 보내는 사람 이름(`나의쿠키`), Message-ID 도메인, 자동 발송 표시를 맞춰 두었고(`MailService`), 나머지는 아래 설정입니다.
+
+**1. 지금 쓰는 값 확인 (홈서버, 비밀번호 줄은 빼고 본다)**
+
+```bash
+sudo grep -E '^MAIL_(HOST|PORT|FROM|USERNAME)=' /srv/devcookie/.env
+```
+
+**2. 경우별로 맞추기**
+
+| 지금 설정 | 할 일 |
+| --- | --- |
+| `MAIL_HOST=smtp.gmail.com`, `MAIL_FROM`이 **Gmail 주소** | Gmail이 서명해 주므로 도메인 설정은 필요 없습니다. `MAIL_FROM`을 `나의쿠키 <그 Gmail 주소>`로 둡니다. 받는 사람에게 처음 한두 번은 스팸함에 갈 수 있어 "스팸 아님"을 한 번 눌러 달라고 안내합니다. |
+| `MAIL_HOST=smtp.gmail.com`인데 `MAIL_FROM`이 **@mycookie.dev** | 인증이 맞지 않아 거의 항상 스팸함으로 갑니다. `MAIL_FROM`을 Gmail 주소로 되돌리거나, 아래처럼 도메인 메일을 씁니다. |
+| **@mycookie.dev**로 보내고 싶을 때 | 도메인 발송을 지원하는 SMTP 서비스(표준 SMTP로 붙는 것)에 `mycookie.dev`를 등록하고, 그 서비스가 알려 주는 SPF · DKIM 기록을 Cloudflare DNS에 넣습니다. 그다음 DMARC를 넣습니다. |
+
+**3. Cloudflare DNS에 넣는 기록 (도메인으로 보낼 때)**
+
+| 종류 | 이름 | 값 |
+| --- | --- | --- |
+| TXT | `mycookie.dev` | `v=spf1 include:<SMTP 서비스가 알려 준 값> ~all` (SPF 기록은 도메인에 하나만) |
+| TXT 또는 CNAME | SMTP 서비스가 알려 준 이름(예: `xxx._domainkey`) | SMTP 서비스가 알려 준 DKIM 값 |
+| TXT | `_dmarc.mycookie.dev` | `v=DMARC1; p=none; rua=mailto:<받아 볼 주소>` (몇 주 보고 문제없으면 `p=quarantine`) |
+
+- DNS를 넣은 뒤 [mail-tester.com](https://www.mail-tester.com) 같은 곳에 시험 메일을 보내 SPF · DKIM · DMARC가 모두 통과하는지 확인합니다.
+- 2026-11 기준 `mycookie.dev`에는 SPF · DMARC · MX 기록이 없습니다.
+
 ## 등급별 테스트 계정
 
 `admin1~admin5`는 각각 동, 은, 금, 다이아, 루비 등급의 테스트 계정입니다.
