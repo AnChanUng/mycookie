@@ -141,7 +141,7 @@
   transition: transform var(--ds-fast) var(--ds-ease), border-color var(--ds-fast);
 }
 .profile-theme-pick button:hover:not(:disabled), .profile-frame-pick button:hover:not(:disabled) { transform: translateY(-2px); border-color: var(--ds-line-strong); }
-.profile-theme-pick button i { width: 100%; height: 34px; border-radius: 10px; background: linear-gradient(120deg, var(--swatch), color-mix(in srgb, var(--swatch) 70%, #1b1f3a)); }
+.profile-theme-pick button i { width: 100%; height: 34px; border-radius: 10px; background: var(--swatch-bg, linear-gradient(120deg, var(--swatch), color-mix(in srgb, var(--swatch) 70%, #1b1f3a))); }
 .profile-theme-pick button.on, .profile-frame-pick button.on { border-color: var(--profile-accent); background: var(--profile-soft); }
 .profile-theme-pick button:disabled, .profile-frame-pick button:disabled { cursor: default; color: var(--ds-text-3); }
 .profile-theme-pick button:disabled i { filter: grayscale(1); opacity: .4; }
@@ -170,4 +170,31 @@
   .profile-emblem .tier-badge { width: 44px; height: 44px; }
   .profile-edit { top: 10px; right: 10px; }
   .profile-stats { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* 레어 · 전설 카드 테마: 배너가 여러 색으로 천천히 흐르고, 전설은 별이 반짝인다 */
+.profile-card.theme-rare .profile-banner, .profile-card.theme-legend .profile-banner {
+  background:
+    radial-gradient(circle at 1px 1px, rgba(255, 255, 255, .22) 1px, transparent 1.5px) 0 0 / 14px 14px,
+    var(--profile-gradient) 0 0 / 200% 100%;
+  animation: profile-flow 9s ease-in-out infinite alternate;
+}
+.profile-card.theme-legend { border-color: color-mix(in srgb, var(--profile-accent) 45%, var(--ds-line-strong)); box-shadow: 0 14px 36px -16px color-mix(in srgb, var(--profile-accent) 75%, transparent); }
+.profile-card.theme-legend .profile-banner::before {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  background:
+    radial-gradient(1.5px 1.5px at 12% 30%, #fff, transparent), radial-gradient(1px 1px at 28% 70%, #fff, transparent),
+    radial-gradient(2px 2px at 46% 22%, #ffe9a8, transparent), radial-gradient(1px 1px at 63% 58%, #fff, transparent),
+    radial-gradient(1.5px 1.5px at 78% 28%, #fff, transparent), radial-gradient(2px 2px at 90% 66%, #ffe9a8, transparent);
+  animation: profile-twinkle 3s ease-in-out infinite;
+}
+@keyframes profile-flow { to { background-position: 0 0, 100% 0; } }
+@keyframes profile-twinkle { 50% { opacity: .35; } }
+.profile-rarity { margin-left: 4px; padding: 1px 6px; border-radius: var(--ds-r-full); font-size: 10px; font-style: normal; font-weight: 800; color: #fff; background: linear-gradient(135deg, #2dd4bf, #a78bfa); }
+.profile-rarity.legend { background: linear-gradient(135deg, #f59e0b, #ec4899, #7c3aed); }
+.profile-avatar-grid button[data-rarity] { position: relative; }
+.profile-avatar-grid button[data-rarity]::after { content: ''; position: absolute; inset: -2px; border-radius: inherit; pointer-events: none; border: 2px solid transparent; background: linear-gradient(135deg, #2dd4bf, #a78bfa) border-box; -webkit-mask: linear-gradient(#000 0 0) padding-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; }
+.profile-avatar-grid button[data-rarity="legend"]::after { background: linear-gradient(135deg, #f59e0b, #ec4899, #7c3aed) border-box; }
+@media (prefers-reduced-motion: reduce) {
+  .profile-card.theme-rare .profile-banner, .profile-card.theme-legend .profile-banner, .profile-card.theme-legend .profile-banner::before { animation: none; }
 }

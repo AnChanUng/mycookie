@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import api from '../api';
 import { account } from '../sync';
 import { membershipHeaders } from '../membership';
-import { PROFILE_INTERESTS, PROFILE_THEMES } from '../data/profileOptions';
+import { PROFILE_INTERESTS, PROFILE_THEMES, SHOP_AVATAR_RARITY, rarityClass } from '../data/profileOptions';
 import TierBadge from './TierBadge';
 import '../styles/profile-frames.css';
 import './ProfilePopover.css';
@@ -125,11 +125,11 @@ function ProfilePopover({ nickname, anchor, onClose, returnFocus }) {
   const friendLabel = { none: '친구 요청', sent: '요청 보냄', received: '친구 수락', friends: '친구 ✓' }[relation?.friendship || 'none'];
 
   return (
-    <div ref={box} className="profile-pop" role="dialog" aria-label={`${nickname} 프로필`} style={{ top: pos.top, left: pos.left, width: CARD_WIDTH, '--profile-accent': theme.color }}>
+    <div ref={box} className="profile-pop" role="dialog" aria-label={`${nickname} 프로필`} style={{ top: pos.top, left: pos.left, width: CARD_WIDTH, '--profile-accent': theme.color, ...(theme.gradient && { '--profile-gradient': theme.gradient }) }} data-rarity={rarityClass(theme.rarity) || undefined}>
       <div className="profile-pop-banner" aria-hidden="true" />
       <div className="profile-pop-body">
         <div className="profile-pop-head">
-          <span className={`profile-pop-avatar${d?.avatar ? ' emoji' : ''}${frame}`} aria-hidden="true">{d?.avatar || initial}</span>
+          <span className={`profile-pop-avatar${d?.avatar ? ' emoji' : ''}${frame}${SHOP_AVATAR_RARITY[d?.avatar] ? ` avatar-${rarityClass(SHOP_AVATAR_RARITY[d?.avatar])}` : ''}`} aria-hidden="true">{d?.avatar || initial}</span>
           {d && <span className="profile-pop-tier" title={d.tierName}><TierBadge tier={d.tier} division={d.division} /></span>}
         </div>
         <strong className="profile-pop-name">{nickname}</strong>

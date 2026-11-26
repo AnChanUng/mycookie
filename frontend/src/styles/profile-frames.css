@@ -94,3 +94,9 @@
   width: var(--pf-size); height: var(--pf-size); border-radius: 50%;
   background: var(--ds-surface-2); font-size: calc(var(--pf-size) * .62); line-height: 1;
 }
+
+/* 레어 · 전설 대표 아이콘: 아이콘 뒤에서 빛이 퍼진다. 전설은 금빛이 천천히 숨쉰다 */
+.avatar-rare { box-shadow: 0 0 0 2px rgba(167, 139, 250, .55), 0 0 18px 2px rgba(45, 212, 191, .45); }
+.avatar-legend { box-shadow: 0 0 0 2px rgba(245, 158, 11, .7), 0 0 22px 4px rgba(236, 72, 153, .45); animation: avatar-legend 2.6s ease-in-out infinite; }
+@keyframes avatar-legend { 50% { box-shadow: 0 0 0 2px rgba(245, 158, 11, .9), 0 0 30px 8px rgba(124, 58, 237, .5); } }
+@media (prefers-reduced-motion: reduce) { .avatar-legend { animation: none; } }

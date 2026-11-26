@@ -49,3 +49,6 @@
 .profile-pop-btn.primary { border-color: transparent; background: var(--profile-accent); color: #fff; }
 .profile-pop-btn:disabled { opacity: .55; cursor: default; }
 .profile-pop-note { margin: 4px 0 0; font-size: var(--ds-fs-caption); color: var(--ds-text-2); }
+
+/* 레어 · 전설 카드 테마 */
+.profile-pop[data-rarity] .profile-pop-banner { background: radial-gradient(circle at 1px 1px, rgba(255, 255, 255, .22) 1px, transparent 1.5px) 0 0 / 12px 12px, var(--profile-gradient); }
