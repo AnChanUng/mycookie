@@ -125,24 +125,28 @@ def compare_errors(event, source, threshold, offline):
     return result
 
 
-def api_at_detection(event, source, offline):
-    detected = int(datetime.fromisoformat(event["detected"]).timestamp())
-    # Request two evaluations; use only the five-minute bucket ending at detection.
-    result, matrix = loki_range(API_QUERY, detected - STEP, detected, STEP, source, offline)
-    result.update(requests_in_5m=None, responses_5xx_in_5m=None)
-    if matrix is None:
-        return result
-    counts = {}
+def api_buckets(matrix):
+    buckets = {}
     for row in matrix:
         group = row["metric"].get("http_class")
         if group not in ("1", "2", "3", "4", "5"):
             raise ValueError("Expected Loki API counts grouped by http_class")
         for timestamp, value in row["values"]:
-            if int(timestamp) == detected:
-                count = float(value)
-                if not count.is_integer() or count < 0 or group in counts:
-                    raise ValueError("Invalid API response count at detection")
-                counts[group] = int(count)
+            counts = buckets.setdefault(int(timestamp), {})
+            count = float(value)
+            if not count.is_integer() or count < 0 or group in counts:
+                raise ValueError("Invalid API response count")
+            counts[group] = int(count)
+    return buckets
+
+
+def api_at_detection(event, source, offline):
+    detected = int(datetime.fromisoformat(event["detected"]).timestamp())
+    result, matrix = loki_range(API_QUERY, detected - STEP, detected, STEP, source, offline)
+    result.update(requests_in_5m=None, responses_5xx_in_5m=None)
+    if matrix is None:
+        return result
+    counts = api_buckets(matrix).get(detected, {})
     total = sum(counts.values())
     if not total:
         return dict(result, status="no_observed_requests")
@@ -151,12 +155,33 @@ def api_at_detection(event, source, offline):
                 status="5xx_observed" if failures else "no_5xx_observed")
 
 
+def api_observation(end, source):
+    # Overlap timer runs to recover short gaps. Each bucket is uniquely identified by its end.
+    start = end - 11 * STEP
+    result, matrix = loki_range(API_QUERY, start, end, STEP, source, False)
+    result.update(end=utc(end), expected_windows=12, observed_windows=0, events=[])
+    if matrix is None:
+        return result
+    for timestamp, counts in sorted(api_buckets(matrix).items()):
+        total = sum(counts.values())
+        if not start <= timestamp <= end or not total:
+            continue
+        result["observed_windows"] += 1
+        failures = counts.get("5", 0)
+        if failures >= 3 and failures * 100 >= total * 5:
+            result["events"].append(dict(detected=utc(timestamp), requests=total, failures=failures,
+                                         percent=round(100 * failures / total, 2)))
+    result["status"] = "observed" if result["observed_windows"] else "no_observed_requests"
+    return result
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--memory-json", type=Path, help="Prometheus range-query export")
     parser.add_argument("--end", type=int, help="last five-minute bucket, Unix seconds (required for an export)")
     parser.add_argument("--errors-json", type=Path, help="Loki range-query export from grafana_query")
     parser.add_argument("--api-json", type=Path, help="Loki Nginx API counts grouped by http_class")
+    parser.add_argument("--api-observation", action="store_true", help="observe production API errors independently")
     parser.add_argument("--error-threshold", type=int, default=10)
     parser.add_argument("--observation", action="store_true",
                         help="emit one JSON line per container and enrich detections from the last day")
@@ -166,6 +191,9 @@ def main():
     if args.error_threshold < 1 or (args.end is not None and args.end % STEP):
         parser.error("threshold must be positive and end must align to five minutes")
     end = args.end if args.end is not None else int(time.time()) // STEP * STEP - STEP
+    if args.api_observation:
+        print(json.dumps(api_observation(end, args.api_json)))
+        return
     start = end - 7 * 86400 + STEP
     params = urlencode(dict(query=QUERY, start=start, end=end, step=STEP))
     series = read_matrix(args.memory_json, "http://prometheus:9090/api/v1/query_range?" + params)

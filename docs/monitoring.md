@@ -125,3 +125,8 @@ systemctl list-timers mycookie-memory-observation.timer
 ```
 
 실행 기록은 `journalctl -u mycookie-memory-observation.service`에서 확인한다. DB는 `/var/lib/mycookie-memory-observation/history.sqlite3`에 있다. `runs`에는 각 조회 종료 시점의 7일 검사 범위 통계를, `events`에는 컨테이너와 탐지 시각별로 최초 기록한 근거를 보관한다. 최근 하루에 탐지된 사건 중 이후 15분의 로그를 조회할 수 있는 사건을 수집한다. 하루를 넘는 실행 공백은 별도 과거 재생이 필요하다. 중단하려면 `sudo systemctl disable --now mycookie-memory-observation.timer`를 실행한다.
+### 운영 API 5xx 관찰
+
+같은 타이머가 메모리 조회에 앞서 Loki의 운영 Nginx 로그에서 최근 한 시간의 API 응답을 5분 단위로 집계한다. 초기 관찰 기준은 한 구간에 5xx가 3건 이상이면서 전체 API 응답의 5% 이상인 경우다. 임계값은 운영 장애 이력과 대조해 조정한다. 연속 세 구간에서 기준을 넘으면 세 구간이 기록된다.
+
+`api_runs`에는 조회 종료 시각, 상태와 요청이 관측된 구간 수를 남긴다. 요청 기록이 없는 구간만 있으면 `no_observed_requests`, Loki 접속에 실패하면 `loki_unavailable`로 기록한다. `api_events`에는 기준을 넘은 구간의 종료 시각, 최초 저장 시각(UTC), 요청 수와 실패 수를 남긴다. 시간 범위가 겹치는 재조회에서는 같은 구간이 한 번만 저장된다. 타이머가 한 시간 이상 멈추면 오래된 구간은 별도 재생이 필요하다.
