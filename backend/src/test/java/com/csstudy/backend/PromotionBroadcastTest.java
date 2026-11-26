@@ -26,7 +26,7 @@ class PromotionBroadcastTest {
         var other=mvc.perform(get("/api/v1/promotions/stream")).andExpect(request().asyncStarted()).andReturn();
         var tx=new TransactionTemplate(transactions);
         var event=new PromotionNoticeService.Promoted("user:private-test-id",15,
-                new PromotionNoticeService.Notice("broadcast-test-id","승급한사람","다이아 Ⅴ"));
+                new PromotionNoticeService.Notice("broadcast-test-id","승급한사람","다이아 Ⅴ",true));
         tx.executeWithoutResult(s->publisher.publishEvent(event));
         awaitText(first,"broadcast-test-id");awaitText(other,"broadcast-test-id");
         for(var result:new MvcResult[]{first,other}) {
@@ -42,7 +42,7 @@ class PromotionBroadcastTest {
         String content=first.getResponse().getContentAsString();
         assertEquals(content.indexOf("broadcast-test-id"),content.lastIndexOf("broadcast-test-id"));
         tx.executeWithoutResult(s->{publisher.publishEvent(new PromotionNoticeService.Promoted("rollback-test",16,
-                new PromotionNoticeService.Notice("rollback-notice-id","rollback","다이아 Ⅳ")));s.setRollbackOnly();});
+                new PromotionNoticeService.Notice("rollback-notice-id","rollback","다이아 Ⅳ",false)));s.setRollbackOnly();});
         assertFalse(first.getResponse().getContentAsString().contains("rollback-notice-id"));
         for(var result:new MvcResult[]{first,other,late}) result.getRequest().getAsyncContext().complete();
     }
@@ -60,6 +60,16 @@ class PromotionBroadcastTest {
         verifyNoInteractions(events);
         notices.announce("user:1",below,promoted);
         verify(events).publishEvent(argThat((Object value)->value instanceof PromotionNoticeService.Promoted event
-                && event.notice().tierName().equals("다이아 쿠키 Ⅴ")&&event.notice().nickname().equals("nickname")));
+                && event.notice().tierName().equals("다이아 쿠키 Ⅴ")&&event.notice().nickname().equals("nickname")&&event.notice().major()));
+    }
+    @Test void onlyATierChangeIsMajor() {
+        var events=mock(org.springframework.context.ApplicationEventPublisher.class);
+        var notices=new PromotionNoticeService(events);
+        var low=MembershipService.describe(UserTier.DIAMOND,300).withNickname("nickname");
+        var high=MembershipService.describe(UserTier.DIAMOND,350).withNickname("nickname");
+        assertEquals(low.tier(),high.tier());assertTrue(high.division()<low.division());
+        notices.announce("user:1",low,high);
+        verify(events).publishEvent(argThat((Object value)->value instanceof PromotionNoticeService.Promoted event
+                && !event.notice().major()));
     }
 }
