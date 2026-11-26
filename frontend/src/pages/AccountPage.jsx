@@ -154,7 +154,6 @@ function AccountDashboard({ user, openForgot }) {
           <div className="auth-links"><button type="button" onClick={() => { setForgot({ open: false, email: '' }); setMessage(''); }}>← 로그인으로 돌아가기</button></div>
         </> : <>
           <h2 className="auth-title">로그인</h2>
-          <p className="auth-sub">처음이라면 간편 로그인으로 바로 가입돼요. 로그인하면 어느 기기에서든 학습 기록이 이어져요.</p>
           <SocialLogin user={null} />
           <form className="auth-form" onSubmit={e => { e.preventDefault(); authenticate(); }}>
             <label className="auth-field"><span>닉네임 또는 이메일</span>
