@@ -5,6 +5,7 @@ import { Link, Outlet, useLocation } from 'react-router-dom';
 import { warmUpBackend } from '../api';
 import { track } from '../track';
 import CookieAssistant from './CookieAssistant';
+import PrivateBankShortcut from './PrivateBankShortcut';
 import StudyAmbience from './StudyAmbience';
 import StudyCount from './StudyCount';
 import RankWelcome from './RankWelcome';
@@ -165,6 +166,7 @@ export default function Layout() {
       {!loginOnly && <PromotionAnnouncements />}
       {!loginOnly && !location.pathname.startsWith('/admin') && !location.pathname.startsWith('/private') && <RankWelcome />}
       {!loginOnly && <StudyAmbience />}
+      {!loginOnly && <PrivateBankShortcut />}
       <CookieAssistant />
     </>
   );
