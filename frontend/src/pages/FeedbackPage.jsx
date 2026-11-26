@@ -22,19 +22,22 @@ export default function FeedbackPage() {
   const bug = kind === 'bug';
   const filled = form.title.trim() && (bug ? BUG_FIELDS.every(f => form[f.key].trim()) : form.content.trim());
   const content = bug ? bugContent(form, attach ? failures : []) : form.content.trim();
-  const [state, setState] = useState({ busy: false, done: false, error: '' });
+  // done: 보낸 뒤 결과. issue는 이슈 제목 앞 순번(#순번), issueUrl은 GitHub 이슈 주소(못 만들었으면 둘 다 없다)
+  const [state, setState] = useState({ busy: false, done: null, error: '' });
   const current = KINDS.find(k => k.key === kind);
 
   async function submit(e) {
     e.preventDefault();
-    setState({ busy: true, done: false, error: '' });
+    setState({ busy: true, done: null, error: '' });
     try {
       const headers = account() ? { Authorization: `Bearer ${account().token}` } : {};
-      await api.post('/feedback', { kind, title: form.title.trim(), content, visitorId: visitorId(), path: from }, { headers, timeout: 90000 });
-      setState({ busy: false, done: true, error: '' });
+      const { data } = await api.post('/feedback', { kind, title: form.title.trim(), content, visitorId: visitorId(), path: from }, { headers, timeout: 90000 });
+      const issue = Number.isInteger(data?.issue) && data.issue > 0 ? data.issue : null;
+      const issueUrl = typeof data?.issueUrl === 'string' && data.issueUrl.startsWith('https://github.com/') ? data.issueUrl : null;
+      setState({ busy: false, done: { issue, issueUrl }, error: '' });
       setForm(EMPTY);
     } catch (error) {
-      setState({ busy: false, done: false, error: error?.response?.data?.error || '보내지 못했습니다. 잠시 후 다시 시도해 주세요.' });
+      setState({ busy: false, done: null, error: error?.response?.data?.error || '보내지 못했습니다. 잠시 후 다시 시도해 주세요.' });
     }
   }
 
@@ -46,10 +49,12 @@ export default function FeedbackPage() {
     </header>
 
     {state.done ? <div className="fb-card fb-done" role="status">
-      <b>잘 받았어요. 고마워요!</b>
+      {state.done.issue && <span className="fb-issue" aria-label={`이슈 번호 ${state.done.issue}번`}>#{state.done.issue}</span>}
+      <b>{state.done.issue ? '접수됐어요. 고마워요!' : '잘 받았어요. 고마워요!'}</b>
       <p>확인한 뒤 다음 업데이트에 반영할게요. 반영된 내용은 패치노트에서 볼 수 있어요.</p>
       <div className="fb-actions">
-        <button type="button" className="fb-submit" onClick={() => setState({ busy: false, done: false, error: '' })}>하나 더 보내기</button>
+        <button type="button" className="fb-submit" onClick={() => setState({ busy: false, done: null, error: '' })}>하나 더 보내기</button>
+        {state.done.issueUrl && <a href={state.done.issueUrl} target="_blank" rel="noopener noreferrer" className="fb-link">GitHub에서 진행 상황 보기 ↗<span className="sr-only">(새 탭에서 열림)</span></a>}
         <Link to="/changelog" className="fb-link">패치노트 보기</Link>
       </div>
     </div> : <form className="fb-card" onSubmit={submit}>

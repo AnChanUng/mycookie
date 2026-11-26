@@ -63,7 +63,9 @@ class KafkaFeedbackFlowTest {
                         .content(json.writeValueAsString(Map.of("kind", "bug", "title", "채점 오류 @channel",
                                 "content", "정답이 이상해요", "visitorId", "kafka-1", "path", "/exam"))))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.queued").value(true));
+                .andExpect(jsonPath("$.queued").value(true))
+                // Kafka를 켜도 이슈는 요청 안에서 바로 만들어 화면에 알려 준다(소비자는 알림만 맡는다)
+                .andExpect(jsonPath("$.issueUrl").value("https://github.com/x/y/issues/7"));
 
         verify(mattermost, timeout(60_000).times(2)).postNotice(argThat(text -> text.contains("새 버그 제보")
                 && text.contains("issues/7") && !text.contains("@channel")));

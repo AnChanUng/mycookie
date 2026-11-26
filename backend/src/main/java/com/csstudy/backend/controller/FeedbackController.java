@@ -25,8 +25,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 // 건의사항 · 버그 제보. 저장한 뒤 GitHub 이슈로 올리고 Mattermost로 알려 운영자가 바로 개발 · 수정할 수 있게 한다.
-// Kafka를 켜면 이벤트만 넣고 바로 답하며, 이슈와 알림은 소비자가 처리한다(FeedbackEvents, FeedbackProcessor).
-// 제목 앞에 [기능개발] · [버그]를 붙이고 같은 이름의 라벨을 단다
+// 이슈는 요청 안에서 바로 만들어 화면에 #순번을 보여 주고, Kafka를 켜면 알림은 소비자가 처리한다(FeedbackEvents, FeedbackProcessor).
+// 제목은 "#순번 [기능개발] 제목" · "#순번 [버그] 제목"이고 같은 이름의 라벨을 단다
 @Slf4j
 @RestController
 @RequestMapping("/api/v1/feedback")
@@ -81,16 +81,28 @@ public class FeedbackController {
 
         Map<String, Object> out = new LinkedHashMap<>();
         out.put("ok", true);
+        // 이슈는 요청 안에서 바로 만들어 화면에 #순번을 보여 준다. 실패해도 제보는 DB에 있고, 아래 처리(Kafka 소비자 등)가 다시 시도한다
+        Feedback done = null;
+        try {
+            done = processor.ensureIssue(saved.getId());
+        } catch (Exception e) {
+            log.warn("제보 #{} 이슈 생성 실패, 뒤에서 다시 시도합니다: {}", saved.getId(), e.getMessage());
+        }
+        // 알림(과 못 만든 이슈의 재시도)은 Kafka가 켜져 있으면 소비자가 맡고, 아니면 여기서 알림만 보낸다
         if (events.publish(saved.getId())) {
             out.put("queued", true);
         } else {
             try {
-                Feedback done = processor.process(saved.getId());
-                if (done != null && done.getIssueNumber() != null) out.put("issue", done.getIssueNumber());
+                done = processor.notifyOnce(saved.getId());
             } catch (Exception e) {
                 // 이슈 생성이나 알림이 실패해도 제보는 DB에 남아 있으므로 사용자에게는 성공으로 알린다
                 log.warn("제보 #{} 처리 실패: {}", saved.getId(), e.getMessage());
             }
+        }
+        // issue: 이슈 제목 앞 순번(#순번). 순번을 못 정했으면 주소만 준다
+        if (done != null && done.getIssueNumber() != null) {
+            if (done.getIssueSeq() != null) out.put("issue", done.getIssueSeq());
+            out.put("issueUrl", done.getIssueUrl());
         }
         return ResponseEntity.ok(out);
     }

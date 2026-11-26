@@ -53,6 +53,10 @@ public class Feedback {
     @Column(name = "issue_url", length = 300)
     private String issueUrl;
 
+    // 이슈 제목 앞 순번(#순번). 제보 화면에 바로 보여 준다. 순번을 못 정했으면 비어 있다
+    @Column(name = "issue_seq")
+    private Integer issueSeq;
+
     // Mattermost로 알린 시각(다시 처리할 때 두 번 알리지 않는다)
     @Column(name = "notified_at")
     private Instant notifiedAt;
