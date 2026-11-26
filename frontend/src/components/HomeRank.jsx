@@ -67,9 +67,18 @@ export default function HomeRank() {
       <ol className="hr-podium" aria-label="1위부터 3위">
         {podium.map(r => <li key={r.rank} className={`hr-step p${r.rank}${r.me ? ' me' : ''}`} value={r.rank}>
           <RankMedal rank={r.rank} className="hr-medal" />
-          <TierBadge tier={r.tier} division={r.division} />
-          <b className="hr-pname" title={r.nickname}><ProfileAvatar look={looks[r.nickname]} size={40} /><ProfileName nickname={r.nickname} /></b>
-          <span className="hr-pcount">{Number(r.count).toLocaleString()}문제</span>
+          {/* 프로필 아이콘을 크게. 고른 아이콘이 없으면 닉네임 첫 글자 */}
+          <span className="hr-face">
+            {looks[r.nickname]?.avatar
+              ? <ProfileAvatar look={looks[r.nickname]} size={r.rank === 1 ? 56 : 48} />
+              : <span className="hr-initial" aria-hidden="true">{[...String(r.nickname || '?')][0]}</span>}
+          </span>
+          {/* 닉네임 오른쪽에 등급 */}
+          <span className="hr-pname" title={r.nickname}>
+            <b><ProfileName nickname={r.nickname} /></b>
+            <TierBadge tier={r.tier} division={r.division} />
+          </span>
+          <span className="hr-pcount"><b>{Number(r.count).toLocaleString()}</b>문제</span>
         </li>)}
       </ol>
       {me && me.rank > 3 && <Link to="/rank" className="hr-mine">
