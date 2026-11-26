@@ -131,12 +131,7 @@
 :root { --glass-bg: var(--bg-primary); --glass-border: var(--ds-line-strong); }
 
 /* 들리는 효과 제거 */
-body .stats-summary-card:hover, body .category-card:hover, body .submit-btn:hover, body .stat-card:hover,
-body .difficulty-card:hover, body .grade-card:hover, body .home-menu-item:hover, body button.today-cs:hover,
-body .home-continue:hover, body .home-cta-btn.primary:hover, body .login-btn:hover, body .interview-record-btn.start:hover,
-body .exam-company-card:hover, body .exam-book:hover:not(:disabled), body .exam-mode:hover:not(:disabled),
-body .ssafy-card:hover, body .exam-company-grid.compact .exam-company-card:hover, body .cos-item:hover,
-body .mental-sos:hover, body .mental-pick button:hover, body .mental-coach-open:hover {
+body .stats-summary-card:hover, body .category-card:hover, body .submit-btn:hover, body .stat-card:hover, body .difficulty-card:hover, body .grade-card:hover, body .home-menu-item:hover, body button.today-cs:hover, body .home-continue:hover, body .home-cta-btn.primary:hover, body .login-btn:hover, body .interview-record-btn.start:hover, body .exam-company-card:hover, body .exam-book:hover:not(:disabled), body .exam-mode:hover:not(:disabled), body .ssafy-card:hover, body .exam-company-grid.compact .exam-company-card:hover, body .cos-item:hover {
   transform: none;
   box-shadow: var(--card-shadow-hover);
 }
@@ -146,9 +141,7 @@ body .exam-mode:hover:not(:disabled), body .ssafy-card:hover, body .cos-item:hov
 }
 
 /* 버튼: 알약 → 8px */
-body .login-btn, body .logout-btn, body .action-btn, body .submit-btn, body .interview-cat-btn, body .interview-camera-btn,
-body .home-cta-btn, body .exam-report-open, body .lounge-join, body .ssafy-go, body .mental-coach-open, body .goal-edit,
-body .exam-btn {
+body .login-btn, body .logout-btn, body .action-btn, body .submit-btn, body .interview-cat-btn, body .interview-camera-btn, body .home-cta-btn, body .exam-report-open, body .lounge-join, body .ssafy-go, body .goal-edit, body .exam-btn {
   border-radius: 8px;
 }
 
