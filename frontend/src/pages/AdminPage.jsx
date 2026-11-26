@@ -17,7 +17,7 @@ const PAGE_NAMES = {
   ...Object.fromEntries(EXAM_CATEGORIES.map(c => [`/exam/category/${c.key}`, `기업별 기출 · ${c.name}`])),
   ...Object.fromEntries(COMPANIES.map(c => [companyPath(c), c.name])),
 };
-// 홈 코너 버튼 클릭(click) 기록의 경로 · 버튼 이름
+// 내린 홈 코너(멘탈 기르기 · 오늘의 운세)의 예전 클릭 기록을 "최근 활동"에서 이름으로 보여 준다
 const CORNERS = { '/fun/mental': '🧘 멘탈 기르기', '/fun/fortune': '🔮 오늘의 운세' };
 const CORNER_BUTTONS = {
   '/fun/mental': { open: '열기', pass: '합격 맛보기', fail: '탈락 맛보기', comfort: '떨어졌을 때 보시오' },
@@ -449,8 +449,6 @@ function Overview({ data, sys }) {
         </div>
       )}
 
-      <Corners data={data} />
-
       <div className="section-title">일별 추이</div>
       <div className="exam-table-wrap">
         <table className="exam-table admin-table">
@@ -478,41 +476,6 @@ function Overview({ data, sys }) {
           </div>
         ))}
       </div>
-    </>
-  );
-}
-
-// 홈 오른쪽 아래 코너(멘탈 기르기 · 오늘의 운세) 버튼을 누른 횟수
-function Corners({ data }) {
-  const rows = data.clicks || [];
-  const sum = (path, k) => rows.filter(r => r.path === path).reduce((n, r) => n + r[k], 0);
-  return (
-    <>
-      <div className="section-title">홈 코너 클릭</div>
-      <div className="exam-stats">
-        {Object.entries(CORNERS).map(([path, name]) => (
-          <Tile key={path} k={name} v={sum(path, 'today')} unit=" 회" sub={`오늘 · 최근 ${data.days}일 ${sum(path, 'range')}회 · 누적 ${sum(path, 'all')}회`} />
-        ))}
-      </div>
-      {rows.length ? (
-        <div className="exam-table-wrap">
-          <table className="exam-table admin-table">
-            <thead><tr><th>코너</th><th>버튼</th><th>오늘</th><th>최근 {data.days}일</th><th>누적</th><th>누른 사람</th></tr></thead>
-            <tbody>
-              {rows.map(r => (
-                <tr key={r.path + r.detail}>
-                  <td>{CORNERS[r.path] || r.path}</td>
-                  <td>{cornerButton(r.path, r.detail)}</td>
-                  <td className="num">{r.today}</td>
-                  <td className="num">{r.range}</td>
-                  <td className="num">{r.all}</td>
-                  <td className="num">{r.visitors}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      ) : <p className="exam-note">아직 누른 기록이 없습니다. 백엔드 배포 뒤부터 쌓입니다.</p>}
     </>
   );
 }
