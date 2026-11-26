@@ -102,3 +102,64 @@
 @property --ps-a { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
 @keyframes ps-legend { to { --ps-a: 360deg; } }
 @media (prefers-reduced-motion: reduce) { .ps-item.legend { animation: none; } }
+
+/* ── 입체감: 진열대 위 상품처럼. 평면 디자인 위에서 과하지 않게 깊이만 더한다 ── */
+/* 칸이 떠오르고 그림자가 잘리지 않게 위아래 여유를 둔다 */
+.ps-grid { padding: 12px 6px 24px; }
+.ps-item {
+  --rx: 0deg; --ry: 0deg; --lift: 0px;
+  transform: perspective(800px) rotateX(var(--rx)) rotateY(var(--ry)) translateY(var(--lift));
+  transform-style: preserve-3d;
+  box-shadow: 0 1px 0 var(--ds-line), 0 10px 20px -18px rgba(15, 23, 42, .45);
+  transition: transform .18s var(--ds-ease), box-shadow .2s var(--ds-ease), border-color var(--ds-fast) var(--ds-ease);
+}
+.ps-item:hover { --lift: -6px; box-shadow: 0 2px 0 var(--ds-line), 0 22px 34px -20px rgba(15, 23, 42, .55); }
+/* 커서 쪽에서 비치는 빛 */
+.ps-item::after {
+  content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+  background: radial-gradient(circle at var(--mx, 50%) var(--my, 0%), rgba(255, 255, 255, .45), transparent 55%);
+  opacity: 0; transition: opacity .2s var(--ds-ease); mix-blend-mode: soft-light;
+}
+.ps-item:hover::after { opacity: 1; }
+/* 상품 받침: 아래 둥근 그림자 위에 상품이 떠 있고, 올리면 조금 더 뜬다 */
+.ps-preview { position: relative; transform-style: preserve-3d; }
+.ps-preview::after {
+  content: ''; position: absolute; left: 50%; bottom: -6px; width: 46px; height: 10px; margin-left: -23px; border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(15, 23, 42, .28), transparent); transition: transform .25s var(--ds-ease), opacity .25s var(--ds-ease);
+}
+.ps-preview > * { transform: translateZ(24px); transition: transform .25s var(--ds-ease); }
+.ps-item:hover .ps-preview > * { transform: translateZ(36px) translateY(-5px); }
+.ps-item:hover .ps-preview::after { transform: scale(.82); opacity: .7; }
+.ps-emoji { box-shadow: inset 0 -4px 0 rgba(15, 23, 42, .06), inset 0 2px 0 rgba(255, 255, 255, .6); }
+.ps-swatch { box-shadow: inset 0 -6px 10px rgba(0, 0, 0, .18), inset 0 4px 8px rgba(255, 255, 255, .35); }
+/* 산 물건은 진열대에 가만히 둔다 */
+.ps-item.owned:hover { --lift: -2px; }
+/* 전설은 쉴 때도 천천히 떠 있다 */
+.ps-item.legend .ps-preview > * { animation: ps-float 3.2s ease-in-out infinite; }
+@keyframes ps-float { 50% { translate: 0 -4px; } }
+
+/* 내 포인트: 금화 하나가 천천히 돈다 */
+.ps-hero {
+  position: relative; justify-content: flex-start;
+  background: radial-gradient(120% 140% at 0% 0%, var(--ds-brand-soft), transparent 60%), var(--ds-surface);
+  box-shadow: 0 1px 0 var(--ds-line), 0 18px 34px -26px rgba(15, 23, 42, .5);
+}
+.ps-hero .ps-attend { margin-left: auto; }
+.ps-coin { flex: none; perspective: 400px; }
+.ps-coin i {
+  display: grid; place-items: center; width: 54px; height: 54px; border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #fff3b0, #f7c948 45%, #d99a1e 80%);
+  box-shadow: inset 0 -4px 0 #b97b12, inset 0 3px 0 rgba(255, 255, 255, .6), 0 8px 16px -8px rgba(185, 123, 18, .8);
+  color: #8a5a07; font-size: 22px; font-weight: 900; font-style: normal;
+  animation: ps-coin 6s ease-in-out infinite;
+}
+@keyframes ps-coin { 0%, 70%, 100% { transform: rotateY(0); } 85% { transform: rotateY(360deg); } }
+
+/* 터치 화면과 움직임 줄이기 설정에서는 기울기 · 떠오름을 끈다 */
+@media (hover: none), (prefers-reduced-motion: reduce) {
+  .ps-item, .ps-item:hover { transform: none; --lift: 0px; }
+  .ps-item::after { display: none; }
+  .ps-preview > *, .ps-item:hover .ps-preview > * { transform: none; animation: none; }
+  .ps-coin i { animation: none; }
+}
+@media (max-width: 640px) { .ps-hero { flex-direction: row; flex-wrap: wrap; align-items: center; } .ps-hero .ps-attend { margin-left: 0; width: 100%; } }

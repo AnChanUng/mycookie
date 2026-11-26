@@ -50,13 +50,31 @@ function Shelf({ label, rows, children }) {
   }, [measure, children]);
   const move = dir => track.current?.scrollBy({ left: dir * track.current.clientWidth * 0.9, behavior: 'smooth' });
   return <div className={`ps-shelf${edge.start ? '' : ' can-prev'}${edge.end ? '' : ' can-next'}`}>
-    {rows ? <ul ref={track} className="ps-grid ps-pages" onScroll={measure} aria-label={label}>
+    {rows ? <ul ref={track} className="ps-grid ps-pages" onScroll={measure} onPointerMove={tilt} onPointerOut={untilt} aria-label={label}>
       {pagesOf(Children.toArray(children), rows * cols).map((page, i) => <li key={i} className="ps-page"><ul className="ps-page-grid" aria-label={`${i + 1}쪽`}>{page}</ul></li>)}
     </ul>
-      : <ul ref={track} className="ps-grid" onScroll={measure} aria-label={label}>{children}</ul>}
+      : <ul ref={track} className="ps-grid" onScroll={measure} onPointerMove={tilt} onPointerOut={untilt} aria-label={label}>{children}</ul>}
     {!edge.start && <button type="button" className="ps-shelf-btn prev" onClick={() => move(-1)} aria-label={`${label} 이전 칸`}>‹</button>}
     {!edge.end && <button type="button" className="ps-shelf-btn next" onClick={() => move(1)} aria-label={`${label} 다음 칸`}>›</button>}
   </div>;
+}
+
+// 마우스를 올린 상점 칸을 커서 쪽으로 살짝 기울이고 빛을 비춘다. 터치 · 펜은 기울이지 않는다(CSS가 움직임 줄이기 설정도 끈다)
+const MAX_TILT = 7;
+function tilt(event) {
+  if (event.pointerType !== 'mouse') return;
+  const card = event.target.closest?.('.ps-item');
+  if (!card) return;
+  const box = card.getBoundingClientRect();
+  const x = (event.clientX - box.left) / box.width, y = (event.clientY - box.top) / box.height;
+  card.style.setProperty('--rx', `${((0.5 - y) * MAX_TILT * 2).toFixed(2)}deg`);
+  card.style.setProperty('--ry', `${((x - 0.5) * MAX_TILT * 2).toFixed(2)}deg`);
+  card.style.setProperty('--mx', `${(x * 100).toFixed(1)}%`);
+  card.style.setProperty('--my', `${(y * 100).toFixed(1)}%`);
+}
+function untilt(event) {
+  const card = event.target.closest?.('.ps-item');
+  if (card && !card.contains(event.relatedTarget)) for (const p of ['--rx', '--ry', '--mx', '--my']) card.style.removeProperty(p);
 }
 
 const pagesOf = (list, size) => Array.from({ length: Math.ceil(list.length / size) }, (_, i) => list.slice(i * size, i * size + size));
@@ -106,6 +124,7 @@ export default function PointShopPage() {
       <Link to="/account#settings" className="ds-btn ds-btn--primary ds-btn--sm">로그인하기</Link>
     </div> : <>
       <section className="ps-hero" aria-label="내 포인트">
+        <span className="ps-coin" aria-hidden="true"><i>P</i></span>
         <div className="ps-balance">
           <span>내 포인트</span>
           <strong>{s ? s.balance.toLocaleString() : data.loading ? '…' : '–'}<small>P</small></strong>
