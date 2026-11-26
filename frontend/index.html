@@ -29,15 +29,17 @@
     <script src="/theme-init.js"></script>
     <!-- 검색용으로 미리 넣은 본문(scripts/prerender-seo.mjs)이 앱이 뜨기 전 잠깐 보일 때의 최소 모양 -->
     <style>.seo-static{max-width:1280px;margin:0 auto;padding:32px 24px;font-family:system-ui,sans-serif;line-height:1.7}</style>
+    <!-- 대기 화면의 "나의쿠키"가 상단 로고와 같은 글꼴로 보이게 먼저 불러온다(src/index.css와 같은 주소) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
     <!-- 첫 로딩 대기 화면: 화면이 다 준비될 때까지 덮어 두었다가 한 번에 보여 준다(레이아웃 밀림 방지, src/splash.js가 걷어 낸다) -->
     <style>
       #boot-splash{position:fixed;inset:0;z-index:9999;display:grid;place-items:center;background:#f7f8fb;transition:opacity .3s ease}
       html[data-mode=dark] #boot-splash{background:#16181d}
       #boot-splash.boot-out{opacity:0;pointer-events:none}
       .boot-box{display:grid;justify-items:center;gap:18px}
-      .boot-logo{display:flex;align-items:center;gap:12px;font:800 30px/1 system-ui,-apple-system,'Apple SD Gothic Neo','Malgun Gothic',sans-serif;letter-spacing:-.02em;color:#191f28}
-      html[data-mode=dark] .boot-logo{color:#f2f4f6}
-      .boot-logo img{width:52px;height:52px;animation:boot-bob 1.2s ease-in-out infinite}
+      .boot-logo{display:flex;align-items:center;gap:15px;font:800 31px/1 'Pretendard Variable',Pretendard,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;letter-spacing:-.04em;color:#0f172a}
+      html[data-mode=dark] .boot-logo{color:#e5eaf3}
+      .boot-logo img{width:45px;height:45px;animation:boot-bob 1.2s ease-in-out infinite}
       .boot-bar{width:180px;height:6px;border-radius:999px;background:rgba(99,102,241,.15);overflow:hidden}
       .boot-bar i{display:block;width:15%;height:100%;border-radius:inherit;background:#6366f1;transition:width .4s ease}
       @keyframes boot-bob{50%{transform:translateY(-4px) rotate(-6deg)}}
@@ -47,7 +49,7 @@
   <body>
     <div id="boot-splash" role="status" aria-label="나의쿠키를 불러오는 중">
       <div class="boot-box">
-        <div class="boot-logo"><img src="/brand-cookie.svg" alt="" width="52" height="52" />나의쿠키</div>
+        <div class="boot-logo"><img src="/brand-cookie.svg" alt="" width="45" height="45" />나의쿠키</div>
         <div class="boot-bar"><i></i></div>
       </div>
     </div>

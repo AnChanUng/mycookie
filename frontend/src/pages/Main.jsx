@@ -9,7 +9,6 @@ import LineIcon from '../components/LineIcon';
 import StudyCoachEntry from '../components/StudyCoachEntry';
 import HomeRank from '../components/HomeRank';
 import HomeReview from '../components/HomeReview';
-import StudyNotice from '../components/StudyNotice';
 import { quoteForDay } from '../data/quotes';
 import './Main.css';
 
@@ -17,12 +16,6 @@ import './Main.css';
 // 위쪽에서 "오늘 무엇을 할지"와 오늘 목표 진행을, 아래로 내려가며 바로가기를 보여 준다.
 // 학습 기록 요약은 무거운 문제은행 데이터를 쓰므로 화면이 뜬 뒤에 불러온다(첫 화면을 가볍게)
 
-const CODING_SITES = [
-  { name: '백준', sub: '단계별 문제 · 삼성 기출', href: 'https://www.acmicpc.net/' },
-  { name: '프로그래머스', sub: '기업 코딩테스트 연습', href: 'https://school.programmers.co.kr/learn/challenges' },
-  { name: '코드트리', sub: '유형별 커리큘럼', href: 'https://www.codetree.ai/' },
-  { name: '리트코드', sub: '해외 기업 대비', href: 'https://leetcode.com/problemset/' },
-];
 const WEB_STUDY = [
   { to: '/web-essentials', icon: 'globe', name: '웹노트', sub: 'HTTP · 쿠키와 세션 · CORS' },
   { to: '/web', icon: 'code', name: '웹', sub: 'Spring · JPA · DB · Servlet' },
@@ -96,7 +89,6 @@ export default function Main() {
 
   return (
     <div className="mn">
-      <StudyNotice />
       {/* 오늘의 명언: 첫 화면 맨 위 가운데 */}
       <figure className="mn-quote ds-rise">
         <blockquote>“{quote.text}”</blockquote>
@@ -143,19 +135,6 @@ export default function Main() {
 
       <Section id="mn-practice" title="전공필기" more={{ to: '/exam', label: '전체 보기' }}>
         <div className="mn-cards">{PRACTICE.map(item => <Category key={item.to} {...item} />)}</div>
-      </Section>
-
-      <Section id="mn-coding" title="코딩테스트" note="외부 사이트로 새 탭에서 열려요">
-        <div className="mn-cards mn-cards--4">
-          {CODING_SITES.map(site => (
-            <a key={site.name} href={site.href} target="_blank" rel="noopener noreferrer" className="ds-card mn-cat">
-              <span className="mn-cat-icon"><LineIcon name="code" /></span>
-              <span className="mn-cat-text"><b>{site.name}</b><small>{site.sub}</small></span>
-              <LineIcon name="external" size={16} className="mn-chev" />
-              <span className="sr-only">(새 탭에서 열림)</span>
-            </a>
-          ))}
-        </div>
       </Section>
 
       <Section id="mn-career" title="취업 준비">
