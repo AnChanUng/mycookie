@@ -166,3 +166,10 @@ body .interview-title { background: none; -webkit-text-fill-color: currentColor;
 /* 대결 결과의 옅은 파랑, 빨강 그라데이션은 다크 모드에서 바탕만 쓴다 */
 :root[data-mode='dark'] .duel-result,
 :root[data-mode='dark'] .duel-result.loss { background: var(--bg-primary) !important; border-color: var(--border-color) !important; }
+
+/* 모든 화면: 마지막 내용이 화면 끝에 붙어 잘린 것처럼 보이지 않게, 더 내릴 수 있는 빈칸을 둔다.
+   padding을 0으로 덮어쓰는 화면에도 적용되게 padding 대신 빈 블록을 쓴다 */
+main.container::after { content: ''; display: block; height: 96px; }
+@media (max-width: 640px) {
+  main.container::after { height: 64px; }
+}

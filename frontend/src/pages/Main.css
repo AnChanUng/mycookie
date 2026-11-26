@@ -1,6 +1,6 @@
 /* 메인 화면(웹 스타일). 섹션 제목 + 고른 카드 그리드, 얇은 테두리, 선 아이콘.
    색 · 글자 · 카드 모양은 styles/ds.css(디자인 시스템)를 따른다 */
-.mn { max-width: var(--page-max, 1280px); margin: 0 auto; padding: 0 0 96px; color: var(--ds-text); }
+.mn { max-width: var(--page-max, 1280px); margin: 0 auto; padding: 0; color: var(--ds-text); }
 
 /* 첫 줄 명언 */
 .mn-quote { margin: 32px auto; text-align: center; }
@@ -78,7 +78,6 @@ a:hover > .mn-chev { color: var(--ds-brand); transform: translateX(3px); }
 
 /* 휴대폰 */
 @media (max-width: 640px) {
-  .mn { padding-bottom: 64px; }
   .mn-quote { margin: 28px auto; }
   .mn-top { flex-direction: column; align-items: stretch; gap: 16px; padding-bottom: 20px; }
   .mn-h1 { font-size: 22px; }
