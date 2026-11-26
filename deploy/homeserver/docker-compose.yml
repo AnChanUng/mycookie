@@ -136,6 +136,8 @@ services:
     restart: unless-stopped
     mem_limit: 96m
     command: ["redis-server", "--save", "", "--appendonly", "no", "--maxmemory", "64mb", "--maxmemory-policy", "allkeys-lru"]
+    # 노트북 자기 자신에서만 닿는다(바깥에서는 안 닿음). 내 PC의 RedisInsight가 SSH 터널로 본다(docs/homeserver.md "Redis 들여다보기")
+    ports: ["127.0.0.1:16379:6379"]
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s

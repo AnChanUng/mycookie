@@ -66,6 +66,8 @@
 .fb-submit:disabled { opacity: .45; cursor: default; }
 .fb-done { text-align: center; padding: var(--ds-s10) var(--ds-s6); }
 .fb-done b { font-size: var(--ds-fs-title); }
+/* 접수된 이슈 순번(#41): 크게 보여 주고 나중에 찾을 수 있게 한다 */
+.fb-issue { display: inline-block; align-self: center; width: fit-content; margin: 0 auto; margin-bottom: var(--ds-s3); padding: 4px 14px; border-radius: 999px; background: var(--ds-brand-soft); color: var(--ds-brand); font-size: 28px; font-weight: 800; letter-spacing: -.01em; font-variant-numeric: tabular-nums; }
 .fb-done p { margin: 0; color: var(--ds-text-2); font-size: var(--ds-fs-small); }
 .fb-actions { display: flex; justify-content: center; align-items: center; gap: var(--ds-s4); margin-top: var(--ds-s2); }
 .fb-link { font-size: var(--ds-fs-small); color: var(--ds-text-2); }

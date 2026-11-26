@@ -265,6 +265,34 @@ ALTER DEFAULT PRIVILEGES FOR ROLE cookie_prod IN SCHEMA public GRANT SELECT ON T
 - **Test Connection** 뒤 `SELECT 1;`로 확인합니다.
 - 운영 데이터를 바꿔야 하면 DBeaver가 아니라 코드(PR)나, 백업을 뜬 뒤 관리자가 서버에서 직접 처리합니다.
 
+## Redis 들여다보기 (RedisInsight)
+
+Redis에는 짧게 사는 값만 있습니다(키 앞머리 운영 `prod:`, 스테이징 `staging:`): `presence`(공부 중인 사람), `chat:members`(채팅 참여자), `rate:…`(IP별 요청 제한), `alert:…`(알림 쿨다운). 지워져도 되는 값이라 디스크에 남기지 않습니다. 쿠키 도우미 임베딩은 Redis가 아니라 백엔드의 `chatbot/public.json`을 메모리에 올려 씁니다.
+
+Redis는 노트북 자기 자신의 `127.0.0.1:16379`에만 열려 있고 비밀번호가 없습니다. 바깥에서는 닿지 않으니 DB와 같이 **SSH 터널**로 봅니다.
+
+**빠르게 보기 (홈서버에서)**
+
+```bash
+sudo -u devcookie /srv/devcookie/app/deploy/homeserver/compose.sh exec redis redis-cli --scan --pattern 'prod:*'
+sudo -u devcookie /srv/devcookie/app/deploy/homeserver/compose.sh exec redis redis-cli HGETALL prod:presence
+```
+
+**RedisInsight로 보기 (내 PC)**
+
+1. 내 PC에 [RedisInsight](https://redis.io/insight/)(무료)를 설치합니다.
+2. 새 연결 → **Add connection details manually**
+
+| 항목 | 값 |
+| --- | --- |
+| Host / Port | `127.0.0.1` / `16379` (SSH로 들어간 홈서버 기준) |
+| Username / Password | 비움 |
+| SSH Tunnel | 켜기. Host는 홈서버 SSH 주소(Tailscale), Port `22`, 평소 SSH 계정과 **Private Key**(개인 키 파일) |
+
+- RedisInsight의 SSH 기능 대신 터미널로 터널을 열어도 됩니다: `ssh -N -L 16379:127.0.0.1:16379 <홈서버 SSH 주소>` 뒤 RedisInsight에서 `127.0.0.1:16379`로 접속.
+- `rate:…` 키 이름에는 IP가 들어 있을 수 있으니 화면을 캡처해 공유하지 않습니다.
+- 운영 값은 보기만 합니다. 키를 지우거나 바꾸면 접속자 수 · 요청 제한이 바로 흔들립니다.
+
 ## 관리자 계정과 권한
 
 비공개 페이지는 로그인한 계정의 권한으로 막습니다(주소를 숨기는 방식이 아님).

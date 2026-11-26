@@ -9,6 +9,7 @@
 로그는 보내기 전에 이메일, IP, 토큰 같은 값을 가린다. 키와 웹훅은 /srv/devcookie/.env에서 읽는다.
 """
 import json
+import os
 import re
 import subprocess
 import time
@@ -18,6 +19,7 @@ from pathlib import Path
 ROOT = Path("/srv/devcookie")
 ENV = ROOT / ".env"
 STATE = ROOT / ".health-state.json"
+DISK_STATE = ROOT / ".windows-c-disk-alerted"
 FAILS_BEFORE_ALERT = 3
 CHECKS = [
     ("운영 백엔드(내부)", "http://127.0.0.1:8080/api/v1/categories"),
@@ -102,10 +104,41 @@ def summarize(evidence):
         return ""
 
 
+def check_log_disk(webhook):
+    mount = "/mnt/c"
+    source = subprocess.check_output(
+        ["findmnt", "--noheadings", "--mountpoint", mount, "--output", "SOURCE"],
+        text=True, timeout=5, stderr=subprocess.DEVNULL).strip()
+    if source.rstrip("\\/").upper() != "C:":
+        raise ValueError("Windows C: mount unavailable")
+    fs = os.statvfs(mount)
+    used = fs.f_blocks - fs.f_bfree
+    available = fs.f_bavail
+    capacity = used + available  # df처럼 예약 블록은 일반 사용자의 가용 용량에서 제외한다.
+    if capacity <= 0:
+        raise ValueError("Invalid filesystem capacity")
+    if used * 100 <= capacity * 90:
+        DISK_STATE.unlink(missing_ok=True)
+        return
+    if DISK_STATE.exists():
+        return
+    gib = fs.f_frsize / (1024 ** 3)
+    text = (f"#### :warning: 홈서버 Windows C: 드라이브 사용률 90% 초과\n"
+            f"사용률 {100 * used / capacity:.2f}% · 사용 {used * gib:.1f} GiB · "
+            f"남은 공간 {available * gib:.1f} GiB\n"
+            f"확인 경로: `{mount}` · Windows 저장소 설정에서 어떤 항목의 용량이 큰지 확인하세요.")
+    post(webhook, {"username": "나의쿠키", "text": text})
+    DISK_STATE.touch()
+
+
 def main():
     webhook = env("MATTERMOST_WEBHOOK_URL")
     if not webhook:
         return
+    try:
+        check_log_disk(webhook)
+    except Exception as e:
+        print(f"로그 디스크 확인 또는 알림 실패({type(e).__name__})")
     # 배포 중에는 백엔드가 잠깐 내려가므로 확인하지 않는다
     if run(["systemctl", "is-active", "devcookie-deploy.service"]).strip() in ("activating", "active"):
         return
