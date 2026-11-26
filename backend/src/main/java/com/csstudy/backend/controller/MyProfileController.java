@@ -27,7 +27,9 @@ import java.util.*;
 public class MyProfileController {
 
     // 고를 수 있는 대표 아이콘과 관심 분야. 화면(profileOptions.js)과 같은 목록이다
-    static final List<String> AVATARS = List.of("🍪", "🧑‍💻", "🐱", "🐶", "🦊", "🐼", "🐧", "🦉", "🐻", "🐰", "🚀", "🔥", "🌱", "⭐", "🎯", "📚");
+    static final List<String> AVATARS = List.of("🍪", "🐱", "🐶", "🦊", "🐼", "🐧", "🦉", "🐻", "🐰", "🚀");
+    // 기본 목록에서 뺀 아이콘. 이미 고른 사람은 다른 아이콘으로 바꾸기 전까지 그대로 저장할 수 있다
+    static final List<String> RETIRED_AVATARS = List.of("🧑‍💻", "🔥", "🌱", "⭐", "🎯", "📚");
     static final List<String> INTERESTS = List.of("backend", "frontend", "ai", "data", "cloud", "security", "cs", "algo", "public", "finance");
     static final int MAX_INTERESTS = 5, MAX_TEXT = 60;
     // 카드 테마와 아이콘 테두리. 그 등급 이상이 되면 열린다(화면 profileOptions.js와 같은 목록)
@@ -59,7 +61,9 @@ public class MyProfileController {
         User me = auth.requireUser(request);
         String avatar = body.get("avatar") instanceof String a && !a.isBlank() ? a : null;
         Set<String> owned = points.owned(me.getId());
-        if (avatar != null && !AVATARS.contains(avatar)) shopItem("avatar", avatar, owned, "아이콘");
+        UserProfile saved = profiles.findByUserId(me.getId()).orElse(null);
+        boolean kept = avatar != null && RETIRED_AVATARS.contains(avatar) && saved != null && avatar.equals(saved.getAvatar());
+        if (avatar != null && !AVATARS.contains(avatar) && !kept) shopItem("avatar", avatar, owned, "아이콘");
         List<String> interests = new ArrayList<>();
         if (body.get("interests") instanceof List<?> list) {
             for (Object o : list) {
@@ -71,7 +75,8 @@ public class MyProfileController {
         UserTier tier = membership.membership(me).tier();
         String theme = unlocked(body.get("theme"), THEMES, tier, "theme", owned, "테마");
         String frame = unlocked(body.get("frame"), FRAMES, tier, "frame", owned, "테두리");
-        UserProfile p = profiles.findByUserId(me.getId()).orElseGet(() -> { UserProfile n = new UserProfile(); n.setUserId(me.getId()); return n; });
+        UserProfile p = saved != null ? saved : new UserProfile();
+        if (saved == null) p.setUserId(me.getId());
         p.setAvatar(avatar);
         p.setBio(text(body.get("bio")));
         p.setGoal(text(body.get("goal")));
@@ -107,7 +112,7 @@ public class MyProfileController {
     // 상점에서 파는 아이템이면 산 사람만 쓸 수 있다. 상점에도 없으면 고를 수 없는 값이다
     private static String shopItem(String kind, String key, Set<String> owned, String what) {
         String item = kind + ":" + key;
-        if (!PointService.SHOP.containsKey(item)) throw bad("고를 수 없는 " + what + "예요.");
+        if (!PointService.SHOP.containsKey(item) && !PointService.RETIRED.contains(item)) throw bad("고를 수 없는 " + what + "예요.");
         if (!owned.contains(item)) throw new CookieException(CookieErrorCode.PROFILE_ITEM_LOCKED);
         return key;
     }

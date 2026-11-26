@@ -50,6 +50,7 @@
     "check:chanung-hidden-reload": "node scripts/check-chanung-hidden-reload.mjs",
     "check:company-prep": "node scripts/check-company-prep.mjs",
     "check:duel": "node scripts/check-duel.mjs",
+    "check:point-shop": "node --import ./scripts/extensionless-loader.mjs scripts/check-point-shop.mjs",
     "check:experience": "node scripts/check-experience.mjs",
     "check:interview-camera": "node scripts/check-interview-camera.mjs",
     "check:loyalty": "node scripts/check-loyalty.mjs",

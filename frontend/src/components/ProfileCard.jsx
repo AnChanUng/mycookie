@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../api';
 import { membershipHeaders, TIER_NAMES } from '../membership';
-import { PROFILE_AVATARS, PROFILE_FRAMES, PROFILE_INTERESTS, PROFILE_MAX_INTERESTS, PROFILE_MAX_TEXT, PROFILE_THEMES, SHOP_AVATARS, TIER_ORDER, canUse, isUnlocked, itemKey } from '../data/profileOptions';
+import { PROFILE_AVATARS, PROFILE_FRAMES, PROFILE_INTERESTS, PROFILE_MAX_INTERESTS, PROFILE_MAX_TEXT, PROFILE_THEMES, SHOP_AVATARS, SHOP_AVATAR_RARITY, TIER_ORDER, canUse, isUnlocked, itemKey, rarityClass } from '../data/profileOptions';
 import TierBadge from './TierBadge';
 import './ProfileCard.css';
 import '../styles/profile-frames.css';
@@ -85,7 +85,7 @@ export default function ProfileCard({ user, tier }) {
   const lockLabel = option => option.shop ? '상점' : lockText(option.minTier);
 
   return (
-    <section className="profile-card" aria-label="내 프로필" style={{ '--profile-accent': theme.color, '--tier-color': TIER_COLORS[m?.tier] || TIER_COLORS.BRONZE }}>
+    <section className={`profile-card${theme.rarity ? ` theme-${rarityClass(theme.rarity)}` : ''}`} aria-label="내 프로필" style={{ '--profile-accent': theme.color, '--tier-color': TIER_COLORS[m?.tier] || TIER_COLORS.BRONZE, ...(theme.gradient && { '--profile-gradient': theme.gradient }) }}>
       <div className="profile-banner">
         {m && <div className="profile-emblem" aria-hidden="true"><TierBadge tier={m.tier} division={m.division} /></div>}
         {!draft && <button type="button" className="profile-edit" onClick={startEdit}>✏️ 프로필 꾸미기</button>}
@@ -93,7 +93,7 @@ export default function ProfileCard({ user, tier }) {
 
       <div className="profile-body">
         <div className="profile-head">
-          <span className={`profile-avatar${shown.avatar ? ' emoji' : ''}${frame ? ` frame-${frame}` : ''}`} aria-hidden="true">{shown.avatar || initial}</span>
+          <span className={`profile-avatar${shown.avatar ? ' emoji' : ''}${frame ? ` frame-${frame}` : ''}${SHOP_AVATAR_RARITY[shown.avatar] ? ` avatar-${rarityClass(SHOP_AVATAR_RARITY[shown.avatar])}` : ''}`} aria-hidden="true">{shown.avatar || initial}</span>
           <div className="profile-who">
             <div className="profile-name">
               <strong>{user.nickname}</strong>
@@ -162,7 +162,7 @@ export default function ProfileCard({ user, tier }) {
                   aria-label="닉네임 첫 글자 쓰기">{initial}</button>
                 {[...PROFILE_AVATARS, ...ownedAvatars].map(a => (
                   <button type="button" key={a} className={draft.avatar === a ? 'on' : ''} aria-pressed={draft.avatar === a}
-                    onClick={() => setDraft(d => ({ ...d, avatar: a }))} aria-label={`아이콘 ${a}`}>{a}</button>
+                    onClick={() => setDraft(d => ({ ...d, avatar: a }))} aria-label={`아이콘 ${a}${SHOP_AVATAR_RARITY[a] ? `, ${SHOP_AVATAR_RARITY[a]}` : ''}`} data-rarity={rarityClass(SHOP_AVATAR_RARITY[a]) || undefined}>{a}</button>
                 ))}
               </div>
             </fieldset>
@@ -173,9 +173,9 @@ export default function ProfileCard({ user, tier }) {
                   const open = canUse('theme', t, m?.tier, owned);
                   const on = (draft.theme || 'basic') === t.key;
                   return <button type="button" key={t.key} className={on ? 'on' : ''} aria-pressed={on} disabled={!open}
-                    style={{ '--swatch': t.color }} onClick={() => setDraft(d => ({ ...d, theme: t.key === 'basic' ? null : t.key }))}
+                    style={{ '--swatch': t.color, ...(t.gradient && { '--swatch-bg': t.gradient }) }} onClick={() => setDraft(d => ({ ...d, theme: t.key === 'basic' ? null : t.key }))}
                     aria-label={open ? `${t.label} 테마` : `${t.label} 테마, ${lockLabel(t)}`}>
-                    <i aria-hidden="true" /><span>{t.label}</span>{!open && <small>{t.shop ? '🛒' : '🔒'} {lockLabel(t)}</small>}
+                    <i aria-hidden="true" /><span>{t.label}{t.rarity && <em className={`profile-rarity ${rarityClass(t.rarity)}`}>{t.rarity}</em>}</span>{!open && <small>{t.shop ? '🛒' : '🔒'} {lockLabel(t)}</small>}
                   </button>;
                 })}
               </div>
