@@ -3,7 +3,7 @@ import api from '../api';
 import { account } from '../sync';
 import { InterviewRecorder, toWav } from '../interviewAudio';
 
-export default function InterviewAudio({ questionId, recording, saveRecording, gradingDisabled = false, gradingHint = '' }) {
+export default function InterviewAudio({ questionId, recording, saveRecording, gradingDisabled = false, gradingHint = '', onBusyChange }) {
   const [phase, setPhase] = useState('idle');
   const [seconds, setSeconds] = useState(0);
   const [error, setError] = useState('');
@@ -13,6 +13,7 @@ export default function InterviewAudio({ questionId, recording, saveRecording, g
   const controller = useRef(null);
   const live = useRef(true);
   const busy = phase !== 'idle';
+  useEffect(() => { onBusyChange?.(busy); }, [busy, onBusyChange]);
   useEffect(() => {
     live.current = true;
     const statusController = new AbortController();
@@ -77,7 +78,7 @@ export default function InterviewAudio({ questionId, recording, saveRecording, g
       <span aria-live="polite">{phase === 'recording' ? `녹음 중 ${seconds}초 / 180초` : phase === 'permission' ? '마이크 권한 확인 중…' : phase === 'stopping' ? '녹음 정리 중…' : phase === 'transcribing' ? '음성 인식 중…' : phase === 'grading' ? '채점 중…' : ''}</span>
     </div>
     {recording?.blob && url && <div className="audio-playback"><audio controls src={url} aria-label="내 답변 다시 듣기" /><a href={url} download={`${questionId}.${extension}`}>녹음 다운로드</a></div>}
-    {!account() && <p className="audio-hint">녹음·재생은 바로 이용할 수 있습니다. AI 인식·채점은 로그인해 주세요.</p>}
+    {!account() && <p className="audio-hint">녹음·재생은 바로 이용할 수 있습니다. {gradingDisabled ? 'AI 음성 인식은' : 'AI 인식·채점은'} 로그인해 주세요.</p>}
     {availability === 'unreachable' && <p className="audio-hint">AI 서버 상태를 확인하지 못했습니다. 녹음 후 다시 요청할 수 있습니다.</p>}
     {recording?.blob && <button type="button" className="exam-btn sm" disabled={aiDisabled} onClick={() => request('transcribing')}>녹음 내용 인식</button>}
     {recording?.transcribed && <>

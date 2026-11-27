@@ -4,6 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "check:interview-practice": "node --import ./scripts/extensionless-loader.mjs scripts/check-interview-practice.mjs",
     "check:chatbot-corpus": "node --import ./scripts/extensionless-loader.mjs scripts/export-chatbot.mjs --check",
     "check:study-coach": "node --import ./scripts/extensionless-loader.mjs scripts/check-study-coach.mjs",
     "check:daily-practice": "node scripts/check-daily-practice.mjs",

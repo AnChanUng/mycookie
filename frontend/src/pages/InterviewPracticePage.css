@@ -1,0 +1,35 @@
+.interview-practice { max-width: 1140px; margin: 0 auto; }
+.ip-modes { display: flex; gap: 8px; margin: 22px 0; }
+.ip-modes button { padding: 11px 24px; border: 1px solid var(--border-color); border-radius: 10px; background: var(--bg-primary); color: var(--text-primary); font: inherit; cursor: pointer; }
+.ip-modes button[aria-pressed=true] { background: var(--ds-brand-soft, var(--accent-blue-light)); border-color: var(--accent-blue); color: var(--accent-blue); font-weight: 700; }
+.ip-layout { display: grid; grid-template-columns: 270px minmax(0, 1fr); gap: 22px; align-items: start; }
+.ip-settings { display: grid; gap: 18px; position: sticky; top: 82px; }
+.ip-settings h2 { margin: 0; font-size: 1rem; }
+.ip-settings p, .ip-prompt-hint, .ip-personal-hint { color: var(--text-secondary); font-size: .82rem; line-height: 1.75; margin: 0; }
+.ip-settings label { display: grid; gap: 7px; font-size: .85rem; font-weight: 600; }
+.ip-settings select { width: 100%; min-width: 0; padding: 10px; font: inherit; color: var(--text-primary); background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 8px; }
+.ip-settings a, .ip-answer a { color: var(--accent-blue); font-size: .85rem; }
+.ip-progress { display: grid; gap: 8px; font-size: .85rem; }
+.ip-progress progress { width: 100%; height: 7px; accent-color: var(--accent-blue); }
+.ip-question { padding: 28px; }
+.ip-question .notes-question { font-size: clamp(1.15rem, 2.2vw, 1.5rem); margin: 24px 0 12px; line-height: 1.65; word-break: keep-all; overflow-wrap: anywhere; }
+.ip-question .interview-audio { margin: 24px 0; }
+.ip-answer { padding: 20px; margin-top: 16px; background: var(--bg-secondary); border-radius: 10px; }
+.ip-answer h3 { margin: 0 0 12px; font-size: .95rem; color: var(--accent-blue); }
+.ip-answer p { margin-bottom: 14px; white-space: pre-line; }
+.ip-answer ul { padding-left: 20px; overflow-wrap: anywhere; }
+.ip-next { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 28px; padding-top: 20px; border-top: 1px solid var(--border-color); }
+.ip-next span { font-size: .78rem; color: var(--text-secondary); }
+.ip-camera { padding: 16px 20px; border: 1px solid var(--border-color); background: var(--bg-primary); border-radius: 12px; }
+.ip-camera summary { cursor: pointer; font-size: .85rem; }
+.interview-practice button:disabled { opacity: .5; cursor: not-allowed; }
+.interview-practice select:focus-visible, .interview-practice summary:focus-visible { outline: 2px solid var(--accent-blue); outline-offset: 3px; }
+@media (max-width: 760px) {
+  .ip-layout { grid-template-columns: minmax(0, 1fr); gap: 4px; }
+  .ip-settings { position: static; gap: 12px; }
+  .ip-settings p { font-size: .78rem; }
+  .ip-question { padding: 20px; }
+  .ip-modes button { flex: 1; }
+  .ip-answer { padding: 14px; }
+  .ip-question .interview-audio audio { max-width: 100%; }
+}
