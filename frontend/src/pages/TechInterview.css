@@ -46,3 +46,4 @@
 .ti-page .ti-model-answer p { margin: 0 0 6px; word-break: keep-all; }
 .ti-page .ti-model-answer p:first-of-type { font-weight: 700; }
 .ti-page .ti-points-title { margin: 12px 0 4px; font-weight: 700; font-size: .85rem; }
+.ti-page .ti-refs a { overflow-wrap: anywhere; }
