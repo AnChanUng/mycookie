@@ -90,6 +90,20 @@ try {
   let stopped = false;
   await act(async () => { permission({ getTracks: () => [{ stop() { stopped = true; } }] }); });
   assert.ok(stopped, '취소 후 늦게 허용된 마이크를 해제한다');
+  globalThis.MediaRecorder = class {
+    static isTypeSupported() { return true; }
+    constructor(_stream, options) { this.mimeType = options.mimeType; this.state = 'inactive'; }
+    start() { this.state = 'recording'; }
+    stop() { this.state = 'inactive'; this.ondataavailable({ data: new Blob(['answer'], { type: this.mimeType }) }); this.onstop(); }
+  };
+  navigator.mediaDevices.getUserMedia = async () => ({ getTracks: () => [{ stop() {} }] });
+  await act(async () => { await button('녹음 시작').props.onClick(); });
+  assert.equal(view.root.findByProps({'aria-label':'음성 답변 연습'}).props['data-phase'], 'recording');
+  assert.ok(button('녹음 종료') && !button('녹음 시작'), '녹음 중에는 큰 종료 버튼을 표시한다');
+  assert.ok(button('다음 질문').props.disabled);
+  await act(() => button('녹음 종료').props.onClick());
+  assert.equal(view.root.findAllByType('audio').length, 1, '종료한 답변을 같은 영역에서 다시 듣는다');
+  assert.ok(button('다시 녹음') && !button('다음 질문').props.disabled);
   assert.deepEqual([...records], before, '기존 학습·답변 기록을 쓰거나 지우지 않는다');
   console.log('PASS: 화면 모드·카테고리·노트 선택, 17회 무중복·소진·재시작, 모범답안 숨김·초기화, 기존 기록 보존');
 } finally {
