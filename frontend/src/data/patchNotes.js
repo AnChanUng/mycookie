@@ -9,7 +9,16 @@
 // status: 'released' 배포됨(master) | 'dev' 개발 브랜치에만 있음(release PR을 머지하면 released로 바꾼다)
 export const PATCH_NOTES = [
   {
-    version: '1.5.0', date: '2026-11-27', status: 'dev',
+    version: '1.5.1', date: '2026-11-28', status: 'dev',
+    title: '기술블로그를 읽기 좋게',
+    summary: '기업 기술블로그의 새 글을 매일 모아 한 화면에서 골라 읽습니다.',
+    items: [
+      { type: 'improve', text: '기업 기술블로그 화면에서 19개 기업의 새 글을 최신순으로 바로 봅니다. 매일 아침 새 글을 모으고, 가장 새 글 셋은 크게 보여 줍니다.' },
+      { type: 'feature', text: '회사별로 보거나 제목으로 찾고, 책갈피로 "나중에 읽기"에 담아 둡니다. 읽은 글은 흐리게 표시됩니다.' },
+    ],
+  },
+  {
+    version: '1.5.0', date: '2026-11-27', status: 'released',
     title: '혼자 풀기 대결과 레어 · 전설 꾸미기',
     summary: '상대 없이 대결을 혼자 풀고, 상점에서 레어 · 전설 꾸미기 아이템을 삽니다. 승급 포인트도 더 받습니다.',
     items: [

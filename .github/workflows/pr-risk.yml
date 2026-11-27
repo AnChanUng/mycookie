@@ -37,6 +37,7 @@ jobs:
       BASE: ${{ github.event.pull_request.base.ref }}
       HEAD: ${{ github.event.pull_request.head.ref }}
       HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+      HEAD_REPO: ${{ github.event.pull_request.head.repo.full_name }}
       AUTHOR: ${{ github.event.pull_request.user.login }}
       OWNER: ${{ github.repository_owner }}
     steps:
@@ -159,5 +160,15 @@ jobs:
           steps.gate.outputs.ok == 'true' && env.BASE == 'dev' &&
           (steps.risk.outputs.level == 'low' || env.AUTHOR == env.OWNER)
         run: |
+          # 이벤트의 draft 값은 재실행 시 오래된 값일 수 있어 현재 상태를 확인한다.
+          draft=$(gh pr view "$PR" --repo "$REPO" --json isDraft --jq '.isDraft')
+          if [ "$draft" = true ]; then
+            if [ "$AUTHOR" = "$OWNER" ] && [ "$HEAD_REPO" = "$REPO" ]; then
+              gh pr ready "$PR" --repo "$REPO"
+            else
+              echo "작성 중인 PR이에요. Ready for review로 바꾸면 자동 병합을 다시 확인해요."
+              exit 0
+            fi
+          fi
           gh pr merge "$PR" --repo "$REPO" --auto --squash \
-            || echo "::warning::자동 병합을 켜지 못했어요. 저장소 Settings에서 'Allow auto-merge'를 켰는지 확인해 주세요."
+            --match-head-commit "$HEAD_SHA"
