@@ -1,35 +1,66 @@
-.interview-practice { max-width: 1140px; margin: 0 auto; }
-.ip-modes { display: flex; gap: 8px; margin: 22px 0; }
-.ip-modes button { padding: 11px 24px; border: 1px solid var(--border-color); border-radius: 10px; background: var(--bg-primary); color: var(--text-primary); font: inherit; cursor: pointer; }
-.ip-modes button[aria-pressed=true] { background: var(--ds-brand-soft, var(--accent-blue-light)); border-color: var(--accent-blue); color: var(--accent-blue); font-weight: 700; }
-.ip-layout { display: grid; grid-template-columns: 270px minmax(0, 1fr); gap: 22px; align-items: start; }
-.ip-settings { display: grid; gap: 18px; position: sticky; top: 82px; }
-.ip-settings h2 { margin: 0; font-size: 1rem; }
-.ip-settings p, .ip-prompt-hint, .ip-personal-hint { color: var(--text-secondary); font-size: .82rem; line-height: 1.75; margin: 0; }
-.ip-settings label { display: grid; gap: 7px; font-size: .85rem; font-weight: 600; }
-.ip-settings select { width: 100%; min-width: 0; padding: 10px; font: inherit; color: var(--text-primary); background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 8px; }
-.ip-settings a, .ip-answer a { color: var(--accent-blue); font-size: .85rem; }
-.ip-progress { display: grid; gap: 8px; font-size: .85rem; }
-.ip-progress progress { width: 100%; height: 7px; accent-color: var(--accent-blue); }
-.ip-question { padding: 28px; }
-.ip-question .notes-question { font-size: clamp(1.15rem, 2.2vw, 1.5rem); margin: 24px 0 12px; line-height: 1.65; word-break: keep-all; overflow-wrap: anywhere; }
-.ip-question .interview-audio { margin: 24px 0; }
-.ip-answer { padding: 20px; margin-top: 16px; background: var(--bg-secondary); border-radius: 10px; }
-.ip-answer h3 { margin: 0 0 12px; font-size: .95rem; color: var(--accent-blue); }
-.ip-answer p { margin-bottom: 14px; white-space: pre-line; }
+.interview-practice { max-width: 1500px; margin-inline: auto; }
+.ip-random { margin: 22px 0 32px; padding: 28px; border: 1px solid var(--border-color); border-radius: 16px; background: var(--bg-primary); scroll-margin-top: 90px; }
+.ip-random-heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 20px; }
+.ip-eyebrow, .audio-studio-label { color: var(--accent-blue); font-size: .67rem; font-weight: 800; letter-spacing: .13em; }
+.ip-random-heading h2 { margin: 6px 0 0; font-size: 1.3rem; }
+.ip-count { white-space: nowrap; color: var(--text-secondary); font-size: .8rem; font-variant-numeric: tabular-nums; }
+.ip-toolbar { display: flex; align-items: end; flex-wrap: wrap; gap: 12px; padding-bottom: 22px; border-bottom: 1px solid var(--border-color); }
+.ip-toolbar .ip-modes { display: flex; gap: 6px; margin: 0; }
+.ip-toolbar .ip-modes button { padding: 11px 18px; font-size: .85rem; font-weight: 700; min-height: 44px; }
+.ip-filter { display: grid; gap: 5px; color: var(--text-secondary); font-size: .72rem; }
+.ip-filter select { width: 100%; min-width: 160px; max-width: 290px; min-height: 44px; padding: 9px 32px 9px 12px; border: 1px solid var(--border-color); border-radius: 9px; background: var(--bg-secondary); color: var(--text-primary); font: inherit; font-size: .85rem; }
+.ip-toolbar .ip-shuffle { margin-left: auto; min-height: 44px; color: var(--accent-blue); }
+.ip-focus { padding-top: 24px; }
+.ip-focus > h2 { max-width: 960px; margin: 18px 0 26px; font-size: clamp(1.25rem, 2.2vw, 1.8rem); line-height: 1.6; word-break: keep-all; overflow-wrap: anywhere; }
+.ip-question-actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin-top: 20px; }
+.ip-personal-hint, .ip-session-note { color: var(--text-secondary); font-size: .78rem; line-height: 1.7; }
+.ip-session-note { margin: 20px 0 0; }
+.ip-answer { margin-top: 20px; padding: 20px; background: var(--bg-secondary); border-radius: 10px; }
+.ip-answer p { margin: 0 0 14px; white-space: pre-line; }
+.ip-answer a { color: var(--accent-blue); font-size: .85rem; }
 .ip-answer ul { padding-left: 20px; overflow-wrap: anywhere; }
-.ip-next { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 28px; padding-top: 20px; border-top: 1px solid var(--border-color); }
-.ip-next span { font-size: .78rem; color: var(--text-secondary); }
-.ip-camera { padding: 16px 20px; border: 1px solid var(--border-color); background: var(--bg-primary); border-radius: 12px; }
-.ip-camera summary { cursor: pointer; font-size: .85rem; }
+.ip-library-heading { margin-bottom: 20px; }
+.ip-library-heading h2 { font-size: 1.2rem; margin: 0 0 6px; }
+.ip-library-heading small { color: var(--text-secondary); margin-left: 8px; font-size: .8rem; font-weight: 400; }
+.ip-library-heading p { color: var(--text-secondary); font-size: .8rem; margin: 0; }
+.ip-practice-link { background: none; border: 0; color: var(--accent-blue); font: inherit; font-size: .78rem; cursor: pointer; }
 .interview-practice button:disabled { opacity: .5; cursor: not-allowed; }
 .interview-practice select:focus-visible, .interview-practice summary:focus-visible { outline: 2px solid var(--accent-blue); outline-offset: 3px; }
-@media (max-width: 760px) {
-  .ip-layout { grid-template-columns: minmax(0, 1fr); gap: 4px; }
-  .ip-settings { position: static; gap: 12px; }
-  .ip-settings p { font-size: .78rem; }
-  .ip-question { padding: 20px; }
-  .ip-modes button { flex: 1; }
+/* 녹음 화면만 별도로 구성하고 다른 페이지의 공용 녹음 기능은 그대로 유지한다. */
+.interview-practice .audio-studio { padding: 24px; margin: 0; border: 1px solid var(--ds-line-strong, var(--border-color)); border-radius: 14px; background: var(--bg-secondary); }
+.audio-studio-heading { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+.audio-studio .audio-studio-heading h3 { margin: 6px 0; color: var(--text-primary); font-size: 1.08rem; }
+.audio-studio-heading p { margin: 0; font-size: .8rem; color: var(--text-secondary); line-height: 1.6; }
+.audio-studio-clock { display: flex; align-items: center; gap: 9px; font-size: 1.6rem; font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.audio-studio-clock small { color: var(--text-secondary); font-size: .75rem; font-weight: 400; }
+.audio-state-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--text-secondary); opacity: .45; }
+.audio-studio[data-phase=recording] .audio-state-dot { opacity: 1; background: var(--ds-red, #dc2626); animation: ip-record-pulse 1.5s ease-in-out infinite; }
+.audio-studio .chanung-actions { align-items: center; margin-top: 22px; gap: 14px; }
+.audio-studio .chanung-actions > span { font-size: .8rem; color: var(--text-secondary); }
+.audio-studio .exam-btn.audio-record-start, .audio-studio .exam-btn.audio-record-stop { display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 50px; padding: 12px 24px; border: 1px solid var(--accent-blue); background: var(--accent-blue); color: var(--ds-on-brand, #fff); border-radius: 999px; font-size: .95rem; font-weight: 700; box-shadow: 0 4px 12px color-mix(in srgb, var(--accent-blue) 18%, transparent); }
+.audio-record-start svg { width: 20px; height: 20px; }
+.audio-studio .exam-btn.audio-record-stop { background: var(--ds-red, #dc2626); border-color: var(--ds-red, #dc2626); box-shadow: none; }
+.audio-studio .audio-playback { padding-top: 18px; border-top: 1px solid var(--border-color); }
+.audio-studio .audio-playback audio { flex: 1; min-width: 180px; max-width: 600px; }
+.audio-studio .audio-playback a { margin-left: auto; }
+.audio-studio .audio-hint { margin-bottom: 0; }
+@keyframes ip-record-pulse { 50% { opacity: .4; } }
+@media (prefers-reduced-motion: reduce) { .audio-studio[data-phase=recording] .audio-state-dot { animation: none; } }
+@media (max-width: 800px) {
+  .ip-random { padding: 20px; }
+  .audio-studio-heading { align-items: flex-start; flex-direction: column; gap: 16px; }
+  .ip-toolbar .ip-shuffle { margin-left: 0; }
+}
+@media (max-width: 540px) {
+  .ip-random { padding: 16px; margin-top: 16px; }
+  .ip-random-heading { align-items: flex-start; flex-direction: column; gap: 8px; }
+  .ip-random-heading h2 { font-size: 1.12rem; }
+  .ip-toolbar { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; }
+  .ip-toolbar .ip-modes { grid-column: 1 / -1; }
+  .ip-toolbar .ip-modes button { flex: 1; justify-content: center; text-align: center; }
+  .ip-filter select { min-width: 0; max-width: 100%; }
+  .interview-practice .audio-studio { padding: 18px; }
+  .audio-studio .chanung-actions { align-items: stretch; flex-direction: column; }
+  .audio-studio .exam-btn.audio-record-start, .audio-studio .exam-btn.audio-record-stop { width: 100%; }
   .ip-answer { padding: 14px; }
-  .ip-question .interview-audio audio { max-width: 100%; }
 }
