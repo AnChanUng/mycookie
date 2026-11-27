@@ -118,6 +118,15 @@ app:
     reports-per-ip-per-day: 30
     feedback-per-ip-per-day: 10
     trust-forwarded-for: ${TRUST_FORWARDED_FOR:${RENDER:false}}
+    # 같은 IP가 window-minutes 안에 민감 경로 탐색 · 관리자 접근 거부를 threshold번 내면 minutes 동안 모든 /api/ 요청을 403으로 막는다
+    # (Redis TTL, 꺼져 있으면 메모리. 사내망 · 루프백 주소는 막지 않는다)
+    ban:
+      enabled: ${SECURITY_BAN_ENABLED:true}
+      threshold: ${SECURITY_BAN_THRESHOLD:10}
+      window-minutes: ${SECURITY_BAN_WINDOW_MINUTES:10}
+      minutes: ${SECURITY_BAN_MINUTES:60}
+    # 차단 · 로그인 과다 · 질문 대량 조회 Mattermost 알림을 같은 IP · 사유마다 몇 분에 한 번 보낼지
+    alert-cooldown-minutes: ${SECURITY_ALERT_COOLDOWN_MINUTES:60}
     # 로그인 토큰 유효 기간(일). 지나면 다시 로그인해야 한다
     token-max-age-days: ${TOKEN_MAX_AGE_DAYS:90}
   # 등급 구매(토스페이먼츠). 두 키가 모두 있어야 결제가 켜진다. 개발 중에는 test_ck_ · test_sk_ 테스트 키를 쓴다

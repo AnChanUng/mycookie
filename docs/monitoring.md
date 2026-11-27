@@ -138,3 +138,8 @@ systemctl list-timers mycookie-memory-observation.timer
 ### Windows C: 디스크 90% 알림
 
 홈서버의 기존 `devcookie-health.timer`가 1분마다 WSL의 `/mnt/c`가 Windows C:에 마운트되어 있는지 확인한 후 해당 드라이브의 사용률을 읽는다. 사용률이 90%를 초과하면 기존 Mattermost 웹훅으로 사용률·사용량·남은 용량·경로를 보낸다. 사용률이 90% 이하로 돌아오면 다음 초과 때 다시 알린다. 웹훅 전송이 실패하면 다음 검사에서 재시도한다. 운영 체크아웃에 변경된 `healthcheck.py`가 반영되고 기존 타이머와 웹훅이 활성화되어 있어야 동작한다.
+### 보안 자동 차단 · 알림
+
+백엔드 보안 필터(`SecurityRequestFilter`)는 같은 IP가 10분 안에 민감 경로 탐색(`PROBE`)이나 관리자 접근 거부(`ADMIN_DENIED`, 401·403만)를 10번 내면 그 IP를 1시간 동안 모든 `/api/` 요청에서 403(`IP_TEMPORARILY_BLOCKED`)으로 막고 `BANNED`로 기록한다. 차단 목록은 Redis(`{prefix}ban:{ip}`, TTL)에 두고, `REDIS_ENABLED=false`이거나 Redis에 닿지 않으면 그 백엔드의 메모리로 대신한다(재시작하면 메모리 차단은 사라진다). 자동화 도구 표기(`DECLARED_AUTOMATION`)는 세지 않아 검색엔진 봇은 막히지 않고, 루프백 · 사내망 주소(프록시, 헬스체크)도 세지 않는다. 기준은 `SECURITY_BAN_THRESHOLD` · `SECURITY_BAN_WINDOW_MINUTES` · `SECURITY_BAN_MINUTES`, 끄려면 `SECURITY_BAN_ENABLED=false`. 잘못 막힌 IP는 시간이 지나면 풀리고, 바로 풀려면 `redis-cli DEL prod:ban:<ip>`(메모리 대신 중이면 백엔드 재시작).
+
+차단이 새로 걸리거나 한 IP의 로그인 · 가입 과다 요청(`RATE_AUTH`), 질문 대량 조회(`RATE_CONTENT`)가 한도를 넘으면 긴급 알림과 같은 Mattermost 웹훅으로 사유 · 건수 · 경로를 보낸다. IP는 앞 두 칸만 남기고(`203.0.*.*`) 가리며, 같은 IP · 사유는 `SECURITY_ALERT_COOLDOWN_MINUTES`(기본 60)분에 한 번만 보낸다. Grafana 알림은 쓰지 않는다.

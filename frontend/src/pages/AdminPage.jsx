@@ -268,7 +268,7 @@ function SecurityPanel({ adminKey, revision }) {
       .catch(() => { if (!controller.signal.aborted) setError(true); });
     return () => controller.abort();
   }, [adminKey, revision]);
-  const reasons = { DECLARED_AUTOMATION: '자동화 도구 표기 · 크롤링 가능성', ADMIN_DENIED: '관리자 접근 거부', PROBE: '민감 경로 탐색', RATE_AUTH: '로그인·가입 과다 요청', RATE_CONTENT: '질문 대량 조회', RATE_CODE: '코드 실행 과다 요청', RATE_CHAT: '챗봇 과다 요청', RATE_GENERAL: 'API 과다 요청' };
+  const reasons = { DECLARED_AUTOMATION: '자동화 도구 표기 · 크롤링 가능성', ADMIN_DENIED: '관리자 접근 거부', PROBE: '민감 경로 탐색', BANNED: '자동 임시 차단(반복 위반)', RATE_AUTH: '로그인·가입 과다 요청', RATE_CONTENT: '질문 대량 조회', RATE_CODE: '코드 실행 과다 요청', RATE_CHAT: '챗봇 과다 요청', RATE_GENERAL: 'API 과다 요청' };
   return <section aria-label="보안 및 크롤링 의심 기록">
     <h2>보안 · 크롤링 의심 기록</h2>
     <p className="exam-note">새 백엔드 적용 이후 API 요청 중 탐색·과다 요청·자동화 도구 표기를 기록합니다. 최근 7일, 최신 200건을 표시하며 동일 IP·사유는 분당 한 번 표본으로 남깁니다. IP는 사람의 신원이 아니며, User-Agent도 위조할 수 있습니다.</p>
