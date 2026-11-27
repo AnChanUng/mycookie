@@ -69,4 +69,7 @@ dependencies {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+    // 전체 통합 테스트의 Spring 컨텍스트와 검색 인덱스를 담을 테스트 JVM 메모리.
+    // 운영 앱이나 Gradle 데몬의 메모리 설정에는 영향을 주지 않는다.
+    maxHeapSize = "1g"
 }

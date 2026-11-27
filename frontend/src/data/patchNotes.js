@@ -18,7 +18,7 @@ export const PATCH_NOTES = [
     ],
   },
   {
-    version: '1.5.0', date: '2026-11-27', status: 'dev',
+    version: '1.5.0', date: '2026-11-27', status: 'released',
     title: '혼자 풀기 대결과 레어 · 전설 꾸미기',
     summary: '상대 없이 대결을 혼자 풀고, 상점에서 레어 · 전설 꾸미기 아이템을 삽니다. 승급 포인트도 더 받습니다.',
     items: [
