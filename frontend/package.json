@@ -4,6 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "check:admin-monitor": "node scripts/check-admin-monitor.mjs",
     "check:usage-insights": "node scripts/check-usage-insights.mjs",
     "check:interview-practice": "node --import ./scripts/extensionless-loader.mjs scripts/check-interview-practice.mjs",
     "check:chatbot-corpus": "node --import ./scripts/extensionless-loader.mjs scripts/export-chatbot.mjs --check",
