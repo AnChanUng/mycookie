@@ -42,7 +42,7 @@ try {
  await mount('/duel');
  assert.ok(text(view.toJSON()).includes('나의 누적 전적'));
  assert.ok(text(view.toJSON()).includes('50%'));
- const find=(label)=>view.root.findAll(n=>n.type==='button'&&text(n).includes(label))[0];
+ const find=(label)=>view.root.findAll(n=>n.type==='button'&&text(n)===label)[0];
  const stats=()=>JSON.parse(localStorage.getItem('exam-progress:topics')||'{"stats":{}}').stats;
  // 1:1 방에서 고른 답은 주제별 통합 풀이 기록에 바로 들어간다(맞힌 것 · 틀린 것 모두)
  players=[{nickname:'나',me:true,score:0,answered:0,seconds:0,started:false,done:false}];
@@ -58,6 +58,8 @@ try {
  assert.equal(stats()[ids[0]].w,1,'resumed room does not count the same answer twice');
  // 혼자 풀기: 방을 만들지 않고 10문제를 풀면 모두 풀이 기록과 최고 기록에 남는다
  const before=Object.keys(stats()).length;
+ // 실제 보기에도 '다음'이 들어갈 수 있다. 보기와 이동 버튼을 혼동하는 검사를 재현한다.
+ for (const q of TOPICS.questions) q.o = q.o.map((option, i) => i === 0 ? `${option} (다음 단계)` : option);
  await mount('/duel');
  assert.ok(text(view.toJSON()).includes('혼자 풀기'));
  await mount('/duel/solo?s=all');
