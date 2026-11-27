@@ -69,7 +69,7 @@ function PrivateChanung() {
   if (webnoteInterview) return <Suspense fallback={<p role="status">웹노트 질문지를 불러오는 중…</p>}><TechInterview back={{ to: BASE, label: '← 찬웅 전용 페이지' }} doc="webnote-interview" title="웹노트 질문지"
     depthNames={{ 1: 'Lv.1 · 기초', 2: 'Lv.2 · 실무', 3: 'Lv.3 · 심화' }}
     intro="웹노트 문답과 백엔드 실무 주제를 Lv.1 기초, Lv.2 실무, Lv.3 심화로 나눠 연습해요. 왜 썼고, 어떤 상황에서 겪었고, 어떻게 해결했는지로 답해 보세요." /></Suspense>;
-  if (portfolioTech) return <Suspense fallback={<p role="status">포트폴리오 질문을 불러오는 중…</p>}><TechInterview back={{ to: BASE, label: '← 찬웅 전용 페이지' }} doc="portfolio-tech" title="포트폴리오"
+  if (portfolioTech) return <Suspense fallback={<p role="status">포트폴리오 질문을 불러오는 중…</p>}><TechInterview back={{ to: BASE, label: '← 찬웅 전용 페이지' }} doc="portfolio-tech" recording={false} title="포트폴리오"
     intro="이력서에 적은 기술마다 1단계 개념에서 4단계 내부 동작·장애 상황까지 꼬리질문으로 이어서 연습해요. 모범답안 아래에 근거 공식 문서 링크가 있어요." /></Suspense>;
   if (interviews) return <Suspense fallback={<p role="status">면접 자료를 불러오는 중…</p>}><OthersInterviews back={{ to: BASE, label: '← 찬웅 전용 페이지' }} /></Suspense>;
   // 관리자 모니터링은 /admin(관리자 계정)으로 옮겼다

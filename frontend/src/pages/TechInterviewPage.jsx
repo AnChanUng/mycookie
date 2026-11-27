@@ -29,8 +29,8 @@ const safeRefs = refs => (Array.isArray(refs) ? refs : []).filter(r => r && type
 
 const readJson = key => { try { return JSON.parse(localStorage.getItem(key)) || {}; } catch { return {}; } };
 
-// doc: 서버에 저장된 질문 모음 키(소유자 전용). title, intro: 화면 제목과 한 줄 소개
-export default function TechInterviewPage({ back, doc = 'tech-interview', depthNames = DEPTH_NAME, title = '기술면접', intro = '이력서의 경험마다 기본 질문에서 시작해 꼬리질문을 4단계까지 이어서 연습해요.' }) {
+// doc: 서버에 저장된 질문 모음 키(소유자 전용). title, intro: 화면 제목과 한 줄 소개. recording: 녹음 연습을 보일지
+export default function TechInterviewPage({ back, doc = 'tech-interview', recording = true, depthNames = DEPTH_NAME, title = '기술면접', intro = '이력서의 경험마다 기본 질문에서 시작해 꼬리질문을 4단계까지 이어서 연습해요.' }) {
   const DOC = `/private/docs/${doc}`;
   const [state, setState] = useState({ status: 'loading', topics: [] });
   const [draft, setDraft] = useState('');
@@ -75,7 +75,7 @@ export default function TechInterviewPage({ back, doc = 'tech-interview', depthN
       {state.status === 'error' && <p role="alert">질문을 불러오지 못했어요. 로그인 상태와 권한을 확인한 뒤 새로고침해 주세요.</p>}
       {state.status === 'ready' && !questions.length && <p className="ti-empty">아직 등록된 질문이 없어요. 아래 "질문 등록·수정"에 자료를 붙여 넣어 저장하면 돼요.</p>}
 
-      {questions.length > 0 && <Practice key={doc} doc={doc} depthNames={depthNames} topics={state.topics} questions={questions} />}
+      {questions.length > 0 && <Practice key={doc} doc={doc} recordingEnabled={recording} depthNames={depthNames} topics={state.topics} questions={questions} />}
 
       <details className="ti-edit">
         <summary>질문 등록·수정</summary>
@@ -88,7 +88,7 @@ export default function TechInterviewPage({ back, doc = 'tech-interview', depthN
   );
 }
 
-function Practice({ doc, depthNames, topics, questions }) {
+function Practice({ doc, recordingEnabled, depthNames, topics, questions }) {
   const user = account();
   const owner = user ? `user:${user.id || user.nickname}` : 'guest';
   // 기존 기술면접 기록 키는 그대로 두고, 다른 질문 모음은 문서 키로 나눠 저장한다
@@ -121,7 +121,7 @@ function Practice({ doc, depthNames, topics, questions }) {
   };
 
   return <>
-    <p className="notes-list-intro">주제마다 1단계 기본 질문에서 4단계까지 꼬리질문이 이어져요. 먼저 내 말로 녹음해 답해 본 뒤 답변 포인트를 확인하세요. 실제 질문은 면접에 따라 달라질 수 있어요.</p>
+    <p className="notes-list-intro">주제마다 1단계 기본 질문에서 4단계까지 꼬리질문이 이어져요. {recordingEnabled ? '먼저 내 말로 녹음해 답해 본 뒤' : '먼저 내 말로 답해 본 뒤'} 답변 포인트를 확인하세요. 실제 질문은 면접에 따라 달라질 수 있어요.</p>
     <p className="notes-save-status" role="status">{saveError ? '저장에 실패했습니다. 입력한 답변을 따로 복사해 주세요.' : '직접 적은 연습 답변과 학습 완료는 현재 브라우저에 저장됩니다.'}</p>
     <div className="notes-layout">
       <aside className="notes-index">
@@ -145,7 +145,7 @@ function Practice({ doc, depthNames, topics, questions }) {
           return list.length ? <section key={t.id} className="interview-stage">
             <h2>{t.title}</h2>
             {t.source && <p className="ti-source">이력서: {t.source}</p>}
-            {list.map(q => <TechQuestion key={q.id} q={q} depthNames={depthNames} draft={drafts[q.id] || ''} write={write} recording={recordings[q.id]} saveRecording={saveRecording} active={selected?.id === q.id} activate={() => select(q.id)} done={!!done[q.id]} toggleDone={() => toggleDone(q.id)} />)}
+            {list.map(q => <TechQuestion key={q.id} q={q} recordingEnabled={recordingEnabled} depthNames={depthNames} draft={drafts[q.id] || ''} write={write} recording={recordings[q.id]} saveRecording={saveRecording} active={selected?.id === q.id} activate={() => select(q.id)} done={!!done[q.id]} toggleDone={() => toggleDone(q.id)} />)}
           </section> : null;
         })}
         {!visible.length && <p className="notes-empty">표시할 질문이 없습니다. 완료한 질문 표시를 켜거나 검색 조건을 바꿔 주세요.</p>}
@@ -154,12 +154,12 @@ function Practice({ doc, depthNames, topics, questions }) {
   </>;
 }
 
-function TechQuestion({ q, depthNames, draft, write, recording, saveRecording, active, activate, done, toggleDone }) {
+function TechQuestion({ q, recordingEnabled, depthNames, draft, write, recording, saveRecording, active, activate, done, toggleDone }) {
   const [open, setOpen] = useState(false);
   return <article className={`notes-detail-card ${done ? 'is-done' : ''}`} id={q.id}>
     <div className="notes-detail-top"><span>{depthNames[q.depth] || `${q.depth}단계`}</span><label><input type="checkbox" aria-label={`${q.q} 학습 완료`} checked={done} onChange={toggleDone} /> 학습 완료</label></div>
     <h2 className="notes-question">{q.q}</h2>
-    {active ? <InterviewAudio gradingDisabled gradingHint={GRADING_HINT} questionId={q.id} recording={recording} saveRecording={saveRecording} /> : <button type="button" className="exam-btn sm" onClick={activate}>이 질문 녹음 연습</button>}
+    {recordingEnabled && (active ? <InterviewAudio gradingDisabled gradingHint={GRADING_HINT} questionId={q.id} recording={recording} saveRecording={saveRecording} /> : <button type="button" className="exam-btn sm" onClick={activate}>이 질문 녹음 연습</button>)}
     <details className="chanung-draft-panel">
       <summary>직접 적어보기{draft.trim() ? ' · 작성한 답변 있음' : ' (선택)'}</summary>
       <label className="chanung-label" htmlFor={`draft-${q.id}`}>내 연습 답변</label>
