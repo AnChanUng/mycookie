@@ -3,7 +3,7 @@ import api from '../api';
 import { account } from '../sync';
 import { InterviewRecorder, toWav } from '../interviewAudio';
 
-export default function InterviewAudio({ questionId, recording, saveRecording, gradingDisabled = false, gradingHint = '', onBusyChange }) {
+export default function InterviewAudio({ questionId, recording, saveRecording, gradingDisabled = false, gradingHint = '', onBusyChange, studio = false }) {
   const [phase, setPhase] = useState('idle');
   const [seconds, setSeconds] = useState(0);
   const [error, setError] = useState('');
@@ -70,11 +70,12 @@ export default function InterviewAudio({ questionId, recording, saveRecording, g
   const aiDisabled = busy || !account() || availability === 'unconfigured';
   const result = recording?.result;
   const extension = recording?.blob?.type.includes('mp4') ? 'm4a' : recording?.blob?.type.includes('ogg') ? 'ogg' : 'webm';
-  return <section className="interview-audio" aria-label="음성 답변 연습">
+  return <section className={`interview-audio${studio ? ' audio-studio' : ''}`} data-phase={phase} aria-label="음성 답변 연습">
+    {studio && <div className="audio-studio-heading"><div><span className="audio-studio-label">VOICE PRACTICE</span><h3>{phase === 'recording' ? '편하게 말씀해 주세요' : recording?.blob ? '내 답변을 다시 들어 보세요' : '내 목소리로 답해 보세요'}</h3><p>{phase === 'recording' ? '결론을 먼저, 경험과 근거를 이어서 말씀해 주세요.' : '생각이 정리되면 녹음을 시작하세요. 최대 3분까지 담을 수 있어요.'}</p></div><div className="audio-studio-clock" aria-label={`녹음 시간 ${seconds}초`}><span className="audio-state-dot" /><span>{String(Math.floor(seconds / 60)).padStart(2, '0')}:{String(seconds % 60).padStart(2, '0')}</span><small>/ 03:00</small></div></div>}
     <div className="chanung-actions">
-      <button type="button" className="exam-btn sm" disabled={busy} onClick={start}>{recording?.blob ? '다시 녹음' : '녹음 시작'}</button>
+      {(!studio || phase !== 'recording') && <button type="button" className={studio ? 'exam-btn audio-record-start' : 'exam-btn sm'} disabled={busy} onClick={start}>{studio && <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><rect x="9" y="2" width="6" height="12" rx="3" /><path d="M5 10v2a7 7 0 0 0 14 0v-2M12 19v3M8 22h8" /></svg>}{recording?.blob ? '다시 녹음' : '녹음 시작'}</button>}
       {phase === 'permission' && <button type="button" className="exam-btn sm" onClick={() => { recorder.current?.dispose(); setPhase('idle'); }}>요청 취소</button>}
-      {phase === 'recording' && <button type="button" className="exam-btn sm" onClick={() => { setPhase('stopping'); recorder.current?.stop(); }}>녹음 종료</button>}
+      {phase === 'recording' && <button type="button" className={studio ? 'exam-btn audio-record-stop' : 'exam-btn sm'} onClick={() => { setPhase('stopping'); recorder.current?.stop(); }}>녹음 종료</button>}
       <span aria-live="polite">{phase === 'recording' ? `녹음 중 ${seconds}초 / 180초` : phase === 'permission' ? '마이크 권한 확인 중…' : phase === 'stopping' ? '녹음 정리 중…' : phase === 'transcribing' ? '음성 인식 중…' : phase === 'grading' ? '채점 중…' : ''}</span>
     </div>
     {recording?.blob && url && <div className="audio-playback"><audio controls src={url} aria-label="내 답변 다시 듣기" /><a href={url} download={`${questionId}.${extension}`}>녹음 다운로드</a></div>}
@@ -82,12 +83,12 @@ export default function InterviewAudio({ questionId, recording, saveRecording, g
     {availability === 'unreachable' && <p className="audio-hint">AI 서버 상태를 확인하지 못했습니다. 녹음 후 다시 요청할 수 있습니다.</p>}
     {recording?.blob && <button type="button" className="exam-btn sm" disabled={aiDisabled} onClick={() => request('transcribing')}>녹음 내용 인식</button>}
     {recording?.transcribed && <>
-      <label className="chanung-label" htmlFor="audio-transcript">인식된 답변 · 잘못 들린 부분을 수정한 뒤 채점하세요</label>
+      <label className="chanung-label" htmlFor="audio-transcript">{studio && gradingDisabled ? '인식된 답변 · 잘못 들린 부분을 수정해 보세요' : '인식된 답변 · 잘못 들린 부분을 수정한 뒤 채점하세요'}</label>
       <textarea id="audio-transcript" rows={5} maxLength={12000} disabled={busy} value={recording.transcript} onChange={e => update({ transcript: e.target.value, result: null })} />
-      <button type="button" className="exam-btn sm" disabled={aiDisabled || gradingDisabled || !recording.transcript.trim()} onClick={() => request('grading')}>확인한 답변으로 채점</button>
+      {!(studio && gradingDisabled) && <button type="button" className="exam-btn sm" disabled={aiDisabled || gradingDisabled || !recording.transcript.trim()} onClick={() => request('grading')}>확인한 답변으로 채점</button>}
     </>}
     {gradingDisabled && gradingHint && <p className="audio-hint">{gradingHint}</p>}
-    {gradingDisabled && !gradingHint && <p className="audio-hint">저장된 버전에서는 녹음·재생·음성 인식을 사용할 수 있습니다. AI 채점은 최신 답변 기준이므로 최신 버전에서 이용하세요.</p>}
+    {gradingDisabled && !gradingHint && !studio && <p className="audio-hint">저장된 버전에서는 녹음·재생·음성 인식을 사용할 수 있습니다. AI 채점은 최신 답변 기준이므로 최신 버전에서 이용하세요.</p>}
     {error && <p role="alert" className="audio-error">{error}</p>}
     {result && <section className="audio-result" aria-label="음성 답변 채점 결과"><h3>연습 점수 {result.total} / 100</h3>
       <ul><li>핵심 내용 {result.relevance}/40</li><li>정확성 {result.accuracy}/30</li><li>구성 {result.structure}/20</li><li>명료성 {result.clarity}/10</li></ul>

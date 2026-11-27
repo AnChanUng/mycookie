@@ -42,6 +42,10 @@ try {
   await act(async () => { view = TestRenderer.create(React.createElement(MemoryRouter, null, React.createElement(Page))); });
   const button = label => view.root.findAll(n => n.type === 'button' && text(n) === label)[0];
   const change = async (label,value) => act(() => view.root.findByProps({'aria-label':label}).props.onChange({target:{value}}));
+  assert.equal(view.root.findAllByProps({'aria-label':'질문 목차'}).length, 1, '웹노트처럼 질문 목차를 제공한다');
+  assert.equal(view.root.findAllByProps({'aria-label':'랜덤 면접 연습'}).length, 1, '랜덤 출제 영역이 페이지 상단에 있다');
+  assert.ok(!text(view.toJSON()).includes('카메라로 표정 확인하기') && !text(view.toJSON()).includes('질문 출처 · 이용 조건'));
+  assert.equal(view.root.findByProps({'aria-label':'음성 답변 연습'}).props['data-phase'], 'idle');
   assert.ok(button('인성면접') && button('기술면접'), '두 모드를 선택할 수 있다');
   const drawn = new Set();
   const initial = text(view.root.findByProps({'data-testid':'interview-prompt'}));
@@ -70,6 +74,10 @@ try {
   await act(() => button('인성면접').props.onClick());
   await change('질문 카테고리','기본 질문');
   assert.ok(text(view.toJSON()).includes('기본 질문'));
+  const reference = view.root.findAll(n => n.type === 'article' && String(n.props.id).startsWith('reference-') && n.findAll(child => child.type === 'button' && text(child) === '이 질문 연습').length)[0];
+  const referenceText = text(reference.findByType('h3'));
+  await act(() => reference.findByType('button').props.onClick());
+  assert.equal(text(view.root.findByProps({'data-testid':'interview-prompt'})), referenceText, '노트에서 고른 질문으로 상단 녹음 연습을 시작한다');
   // 권한을 기다리는 동안에도 녹음 대상이 바뀌지 않아야 한다.
   let permission;
   globalThis.MediaRecorder = class {};
@@ -82,6 +90,20 @@ try {
   let stopped = false;
   await act(async () => { permission({ getTracks: () => [{ stop() { stopped = true; } }] }); });
   assert.ok(stopped, '취소 후 늦게 허용된 마이크를 해제한다');
+  globalThis.MediaRecorder = class {
+    static isTypeSupported() { return true; }
+    constructor(_stream, options) { this.mimeType = options.mimeType; this.state = 'inactive'; }
+    start() { this.state = 'recording'; }
+    stop() { this.state = 'inactive'; this.ondataavailable({ data: new Blob(['answer'], { type: this.mimeType }) }); this.onstop(); }
+  };
+  navigator.mediaDevices.getUserMedia = async () => ({ getTracks: () => [{ stop() {} }] });
+  await act(async () => { await button('녹음 시작').props.onClick(); });
+  assert.equal(view.root.findByProps({'aria-label':'음성 답변 연습'}).props['data-phase'], 'recording');
+  assert.ok(button('녹음 종료') && !button('녹음 시작'), '녹음 중에는 큰 종료 버튼을 표시한다');
+  assert.ok(button('다음 질문').props.disabled);
+  await act(() => button('녹음 종료').props.onClick());
+  assert.equal(view.root.findAllByType('audio').length, 1, '종료한 답변을 같은 영역에서 다시 듣는다');
+  assert.ok(button('다시 녹음') && !button('다음 질문').props.disabled);
   assert.deepEqual([...records], before, '기존 학습·답변 기록을 쓰거나 지우지 않는다');
   console.log('PASS: 화면 모드·카테고리·노트 선택, 17회 무중복·소진·재시작, 모범답안 숨김·초기화, 기존 기록 보존');
 } finally {
