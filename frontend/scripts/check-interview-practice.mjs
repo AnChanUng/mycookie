@@ -42,6 +42,10 @@ try {
   await act(async () => { view = TestRenderer.create(React.createElement(MemoryRouter, null, React.createElement(Page))); });
   const button = label => view.root.findAll(n => n.type === 'button' && text(n) === label)[0];
   const change = async (label,value) => act(() => view.root.findByProps({'aria-label':label}).props.onChange({target:{value}}));
+  assert.equal(view.root.findAllByProps({'aria-label':'질문 목차'}).length, 1, '웹노트처럼 질문 목차를 제공한다');
+  assert.equal(view.root.findAllByProps({'aria-label':'랜덤 면접 연습'}).length, 1, '랜덤 출제 영역이 페이지 상단에 있다');
+  assert.ok(!text(view.toJSON()).includes('카메라로 표정 확인하기') && !text(view.toJSON()).includes('질문 출처 · 이용 조건'));
+  assert.equal(view.root.findByProps({'aria-label':'음성 답변 연습'}).props['data-phase'], 'idle');
   assert.ok(button('인성면접') && button('기술면접'), '두 모드를 선택할 수 있다');
   const drawn = new Set();
   const initial = text(view.root.findByProps({'data-testid':'interview-prompt'}));
@@ -70,6 +74,10 @@ try {
   await act(() => button('인성면접').props.onClick());
   await change('질문 카테고리','기본 질문');
   assert.ok(text(view.toJSON()).includes('기본 질문'));
+  const reference = view.root.findAll(n => n.type === 'article' && String(n.props.id).startsWith('reference-') && n.findAll(child => child.type === 'button' && text(child) === '이 질문 연습').length)[0];
+  const referenceText = text(reference.findByType('h3'));
+  await act(() => reference.findByType('button').props.onClick());
+  assert.equal(text(view.root.findByProps({'data-testid':'interview-prompt'})), referenceText, '노트에서 고른 질문으로 상단 녹음 연습을 시작한다');
   // 권한을 기다리는 동안에도 녹음 대상이 바뀌지 않아야 한다.
   let permission;
   globalThis.MediaRecorder = class {};
