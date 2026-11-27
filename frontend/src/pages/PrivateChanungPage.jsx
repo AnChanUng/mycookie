@@ -50,15 +50,17 @@ function PrivateChanung() {
   const techInterview = id === 'tech-interview';
   const portfolioInterview = id === 'portfolio-interview';
   const webnoteInterview = id === 'webnote-interview';
+  // 포트폴리오: 기술 항목마다 1~4단계 꼬리질문. 질문은 서버(OWNER 권한)에만 저장한다
+  const portfolioTech = id === 'portfolio-tech';
 
   useEffect(() => {
-    if (data || trouble || admin || interviews || techInterview || portfolioInterview || webnoteInterview) return;
+    if (data || trouble || admin || interviews || techInterview || portfolioInterview || webnoteInterview || portfolioTech) return;
     let alive = true;
     import('../data/privateBanks')
       .then(m => { if (alive) setData(m); })
       .catch(() => { if (alive) setLoadError(true); });
     return () => { alive = false; };
-  }, [data, trouble, admin, interviews, techInterview, portfolioInterview, webnoteInterview]);
+  }, [data, trouble, admin, interviews, techInterview, portfolioInterview, webnoteInterview, portfolioTech]);
 
   if (trouble) return <TroubleLog />;
   if (techInterview) return <Suspense fallback={<p role="status">이력서 면접을 불러오는 중…</p>}><TechInterview back={{ to: BASE, label: '← 찬웅 전용 페이지' }} title="이력서 면접"
@@ -67,6 +69,8 @@ function PrivateChanung() {
   if (webnoteInterview) return <Suspense fallback={<p role="status">웹노트 질문지를 불러오는 중…</p>}><TechInterview back={{ to: BASE, label: '← 찬웅 전용 페이지' }} doc="webnote-interview" title="웹노트 질문지"
     depthNames={{ 1: 'Lv.1 · 기초', 2: 'Lv.2 · 실무', 3: 'Lv.3 · 심화' }}
     intro="웹노트 문답과 백엔드 실무 주제를 Lv.1 기초, Lv.2 실무, Lv.3 심화로 나눠 연습해요. 왜 썼고, 어떤 상황에서 겪었고, 어떻게 해결했는지로 답해 보세요." /></Suspense>;
+  if (portfolioTech) return <Suspense fallback={<p role="status">포트폴리오 질문을 불러오는 중…</p>}><TechInterview back={{ to: BASE, label: '← 찬웅 전용 페이지' }} doc="portfolio-tech" title="포트폴리오"
+    intro="이력서에 적은 기술마다 1단계 개념에서 4단계 내부 동작·장애 상황까지 꼬리질문으로 이어서 연습해요. 모범답안 아래에 근거 공식 문서 링크가 있어요." /></Suspense>;
   if (interviews) return <Suspense fallback={<p role="status">면접 자료를 불러오는 중…</p>}><OthersInterviews back={{ to: BASE, label: '← 찬웅 전용 페이지' }} /></Suspense>;
   // 관리자 모니터링은 /admin(관리자 계정)으로 옮겼다
   if (admin) return <Navigate to="/admin" replace />;
@@ -213,6 +217,11 @@ function PrivateList({ data }) {
             <span className="exam-company-abbr">이력서</span>
             <span className="exam-company-name">이력서 면접</span>
             <span className="exam-company-meta">이력서 · 포트폴리오 기반 꼬리질문 1~4단계 · 기술 · 인성 · 모범답안</span>
+          </Link>
+          <Link to={privatePath("portfolio-tech")} className="exam-company-card">
+            <span className="exam-company-abbr">기술</span>
+            <span className="exam-company-name">포트폴리오</span>
+            <span className="exam-company-meta">이력서 기술 항목별 꼬리질문 1~4단계 · 모범답안 · 공식 문서 근거</span>
           </Link>
         </div>
       </section>

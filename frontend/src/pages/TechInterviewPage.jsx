@@ -11,6 +11,7 @@ import './TechInterview.css';
 // 질문과 답변 포인트는 서버(OWNER 권한)에만 저장해 두고 이 화면이 권한으로 받아 온다. 화면 코드와 저장소에는 두지 않는다.
 // 자료 모양: [{ id, title, source, levels: [{ depth: 1~4, questions: [{ q, intent, answer, points: [..] }] }] }]
 // answer(선택): 모범답안. 줄마다 한 문단이고 첫 줄은 결론(두괄식)이다
+// refs(선택): 근거 문서 [{ label, url }]. https 주소만 링크로 보여 준다
 // 화면 구성은 면접 준비 화면(질문 목차 + 녹음 연습 + 직접 적어보기 + 학습 완료)과 같고, 카메라만 뺐다.
 const DEPTH_NAME = { 1: '1단계 · 기본 질문', 2: '2단계 · 꼬리질문', 3: '3단계 · 깊은 꼬리질문', 4: '4단계 · 한계까지' };
 const GRADING_HINT = '기술면접 답변은 녹음하고 다시 들으며 연습해요. 아래 답변 포인트와 비교해 보세요.';
@@ -22,6 +23,9 @@ const validTopics = data => Array.isArray(data) && data.every(t => t && typeof t
 const flatten = topics => topics.flatMap(t => [...t.levels].sort((a, b) => a.depth - b.depth).flatMap(l => (l.questions || []).map((q, i) => ({
   id: `${t.id}-${l.depth}-${i}`, topicId: t.id, topic: t.title, source: t.source, depth: l.depth, ...q,
 }))));
+
+// 저장된 자료는 손으로 붙여 넣은 JSON이라 https 링크만 남긴다(javascript: 같은 주소를 막는다)
+const safeRefs = refs => (Array.isArray(refs) ? refs : []).filter(r => r && typeof r.url === 'string' && /^https:\/\//.test(r.url));
 
 const readJson = key => { try { return JSON.parse(localStorage.getItem(key)) || {}; } catch { return {}; } };
 
@@ -166,6 +170,7 @@ function TechQuestion({ q, depthNames, draft, write, recording, saveRecording, a
       {q.intent && <p className="chanung-note"><strong>면접관 의도</strong> {q.intent}</p>}
       {typeof q.answer === 'string' && q.answer.trim() && <div className="ti-model-answer"><strong>모범답안</strong>{q.answer.trim().split('\n').filter(line => line.trim()).map((line, j) => <p key={j}>{line}</p>)}</div>}
       {Array.isArray(q.points) && q.points.length > 0 && <><p className="ti-points-title">답변 포인트</p><ul>{q.points.map((p, j) => <li key={j}>{p}</li>)}</ul></>}
+      {safeRefs(q.refs).length > 0 && <><p className="ti-points-title">근거 문서</p><ul className="ti-refs">{safeRefs(q.refs).map((r, j) => <li key={j}><a href={r.url} target="_blank" rel="noopener noreferrer">{r.label || r.url} ↗</a></li>)}</ul></>}
     </section>}</div>
   </article>;
 }
