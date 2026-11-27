@@ -4,6 +4,7 @@ import api from '../api';
 import { COMPANIES, EXAM_CATEGORIES, companyPath } from '../data/examQuestions';
 import { account } from '../sync';
 import UsageInsights from '../components/UsageInsights';
+import './AdminPage.css';
 
 const KEY = 'admin-key';
 const RANGES = [7, 30, 90];
@@ -66,9 +67,11 @@ export default function AdminPage({ back = HOME, viaLogin = false }) {
       .catch(() => { if (active) setMetricsError('공개 이용 통계를 불러오지 못했습니다. 잠시 후 새로고침해 주세요.'); });
     return () => { active = false; };
   }, []);
-  return <>
+  return <div className="admin-monitor">
+    <AdminControls back={back} viaLogin={viaLogin} />
+    <details className="admin-public-metrics"><summary>서비스 전체 지표 <span>공개 집계 보기</span></summary>
     <section className="page-header" aria-label="공개 이용 통계">
-      <h1>서비스 이용 현황</h1>
+      <h2>서비스 이용 현황</h2>
       <p>관리자 키 없이 확인할 수 있는 전체 집계입니다.</p>
       {metrics ? <>
         <div className="exam-stats">
@@ -84,8 +87,8 @@ export default function AdminPage({ back = HOME, viaLogin = false }) {
         <p className="exam-note">{metrics.from} ~ {metrics.through} · {new Date(metrics.asOf).toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' })} KST 기준. 방문자는 페이지를 조회한 익명 브라우저 ID 기준으로, 가입자 수와 다릅니다. 기기 변경·브라우저 초기화 시 중복될 수 있으며 자동화 방문이 포함될 수 있습니다.</p>
       </> : <p role="status">{metricsError || '이용 통계를 불러오는 중입니다. 서버 시작에 1~2분 걸릴 수 있습니다.'}</p>}
     </section>
-    <AdminControls back={back} viaLogin={viaLogin} />
-  </>;
+    </details>
+  </div>;
 }
 
 function AdminControls({ back, viaLogin }) {
@@ -202,18 +205,21 @@ function AdminControls({ back, viaLogin }) {
 
   return (
     <div className="fade-in">
-      <div className="page-header exam-page-header">
+      <div className="page-header exam-page-header admin-hero">
         <Link to={back.to} className="back-link">{back.label}</Link>
-        <div className="exam-toplinks">
-          {RANGES.map(r => <button key={r} type="button" className={days === r ? 'on' : ''} onClick={() => { if (r !== days) { begin(); setDays(r); } }}>최근 {r}일</button>)}
+        <div className="admin-hero-heading">
+          <span className="admin-eyebrow">ADMIN CONSOLE</span>
+          <h1>관리자 모니터링</h1>
+          <p>익명 방문자 ID 기준 · 한국 시간 · 관리자 화면 열람은 집계에서 제외</p>
+        </div>
+        <div className="exam-toplinks admin-toolbar" role="group" aria-label="조회 기간과 갱신">
+          {RANGES.map(r => <button key={r} type="button" aria-pressed={days === r} className={days === r ? 'on' : ''} onClick={() => { if (r !== days) { begin(); setDays(r); } }}>최근 {r}일</button>)}
           <button type="button" onClick={() => { begin(); setTick(t => t + 1); }}>{loading ? '불러오는 중' : '새로고침'}</button>
-          <button type="button" className={auto ? 'on' : ''} onClick={() => setAuto(a => !a)}>자동 {auto ? '켜짐' : '꺼짐'}</button>
+          <button type="button" aria-pressed={auto} className={auto ? 'on' : ''} onClick={() => setAuto(a => !a)}>자동 {auto ? '켜짐' : '꺼짐'}</button>
           {key !== LOGIN && <button type="button" onClick={logout}>이 기기에서 키 지우기</button>}
         </div>
-        <h1>관리자 모니터링</h1>
-        <p>
-          익명 방문자 ID 기준 · 한국 시간 · 관리자 화면 열람은 집계에서 제외
-          {updatedAt && ` · ${fmtClock(updatedAt)} 갱신`}
+        <p className="admin-refresh-status" role="status">
+          {loading ? '자료를 불러오는 중입니다.' : updatedAt ? `${fmtClock(updatedAt)} 갱신` : '자료를 갱신하지 못했습니다.'}
           {auto && ` · ${AUTO_SECONDS}초마다 자동 갱신`}
         </p>
       </div>
@@ -223,15 +229,15 @@ function AdminControls({ back, viaLogin }) {
 
       {data && (
         <>
-          <div className="major-tabs">
+          <div className="admin-workspace"><nav className="admin-navigation" aria-label="모니터링 메뉴"><span className="admin-nav-label">모니터링</span>
             {TABS.map(([k, name]) => (
-              <button key={k} type="button" className={`major-tab${tab === k ? ' active' : ''}`} onClick={() => setTab(k)}>
+              <button key={k} type="button" aria-pressed={tab === k} className={`admin-menu-button${tab === k ? ' active' : ''}`} onClick={() => setTab(k)}>
                 {name}{k === 'reports' && reports?.open ? ` ${reports.open}` : ''}{k === 'mail' && mailFailures?.last24h ? ` ${mailFailures.last24h}` : ''}
               </button>
             ))}
-          </div>
-          <Health sys={sys} />
-          <QuickLinks links={sys?.links} />
+          </nav><div className="admin-workspace-main">
+          <div className="admin-status-strip"><Health sys={sys} />
+          <QuickLinks links={sys?.links} /></div><div className="admin-tab-content" aria-busy={loading}>
           {tab === 'insights' && <UsageInsights data={data} reports={reports} onReports={() => setTab('reports')} />}
           {tab === 'overview' && <Overview data={data} sys={sys} />}
           {tab === 'solves' && <Solves data={data} />}
@@ -252,6 +258,7 @@ function AdminControls({ back, viaLogin }) {
           {tab === 'mail' && dailyStats && <DailyPracticeStats data={dailyStats} />}
           {tab === 'mail' && (mailFailures ? <MailFailures data={mailFailures} /> : <p className="exam-note">메일 발송 현황을 불러오지 못했습니다. 백엔드 배포가 끝난 뒤 새로고침해 주세요.</p>)}
           {tab === 'system' && (sys ? <System sys={sys} events={data.server.events} /> : <SysMissing />)}
+          </div></div></div>
         </>
       )}
     </div>
