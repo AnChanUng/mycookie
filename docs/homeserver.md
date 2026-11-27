@@ -140,7 +140,7 @@ sudo -u devcookie nano /srv/devcookie/.env
 | `BACKUP_COPY_DIR` | 외장 디스크 마운트 경로(예: `/mnt/backup/devcookie`). 비우면 노트북 안에만 백업 |
 | `NEON_PROD_URL` · `NEON_STAGING_URL` | 8번에서 데이터를 옮길 때만 Neon 연결 문자열을 넣고, 옮긴 뒤 지웁니다 |
 | `MAIL_HOST` 외 `MAIL_*` | 메일을 보낼 SMTP 서버. 비우면 이메일 등록, 비밀번호 찾기, 학습 메일만 꺼집니다 |
-| `NEWS_ENABLED` · `NEWS_CRON` | 기업 소식(`/news`). 대기업 기술 블로그와 뉴스룸 RSS를 일주일에 한 번(기본 월요일 오전 7시) 모읍니다. 비우면 켜짐, `false`면 외부 요청을 하지 않습니다. 소스 목록은 `backend/.../news/NewsSources.java` |
+| `NEWS_ENABLED` · `NEWS_CRON` | 기업 소식(`/news`). 기술 블로그(`/tech-blogs`)와 뉴스룸 RSS를 하루에 한 번(기본 오전 7시) 모읍니다. 새로 추가한 소스는 서버를 켤 때 바로 모읍니다. 비우면 켜짐, `false`면 외부 요청을 하지 않습니다. 소스 목록은 `backend/.../news/NewsSources.java` |
 
 ## 6. Cloudflare Tunnel
 

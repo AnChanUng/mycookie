@@ -4,7 +4,7 @@ import api from '../api';
 import { formatNewsDate } from '../newsFormat';
 import './CompanyNews.css';
 
-// 기업 소식(/news). 대기업 기술 블로그와 뉴스룸의 새 글을 일주일에 한 번 모아 최신순으로 20개씩 보여 준다.
+// 기업 소식(/news). 대기업 기술 블로그와 뉴스룸의 새 글을 하루에 한 번 모아 최신순으로 20개씩 보여 준다.
 // "더 보기"를 누르면 더 오래된 글이 이어진다. 제목과 짧은 요약만 보여 주고, 원문은 새 탭에서 연다
 const PAGE_SIZE = 20;
 const params = (page, company) => ({ page, size: PAGE_SIZE, ...(company ? { company } : {}) });
@@ -60,7 +60,7 @@ export default function CompanyNewsPage() {
       <div className="page-header">
         <Link to="/" className="back-link">← 홈으로</Link>
         <h1>기업 소식</h1>
-        <p>대기업 기술 블로그와 뉴스룸의 새 글을 일주일에 한 번 모아 최신순으로 보여 드려요. 제목을 누르면 원문으로 이동합니다.</p>
+        <p>대기업 기술 블로그와 뉴스룸의 새 글을 하루에 한 번 모아 최신순으로 보여 드려요. 제목을 누르면 원문으로 이동합니다.</p>
       </div>
 
       {companies.length > 0 && <div className="cn-filter" role="group" aria-label="회사별로 보기">
@@ -80,7 +80,7 @@ export default function CompanyNewsPage() {
 
       {loading && <p className="cn-state" role="status">소식을 불러오는 중…</p>}
       {!loading && error && <p className="cn-state" role="alert">소식을 불러오지 못했어요. <button type="button" className="cn-retry" onClick={retry}>다시 시도</button></p>}
-      {!loading && !error && items.length === 0 && <p className="cn-state">아직 모인 소식이 없어요. 매주 월요일 아침에 새 글을 모아요.</p>}
+      {!loading && !error && items.length === 0 && <p className="cn-state">아직 모인 소식이 없어요. 매일 아침에 새 글을 모아요.</p>}
       {more.error && <p className="cn-state" role="alert">더 불러오지 못했어요. <button type="button" className="cn-retry" onClick={loadMore}>다시 시도</button></p>}
       {!loading && !error && hasMore && !more.error && <div className="cn-more"><button type="button" className="exam-btn" disabled={more.loading} onClick={loadMore}>{more.loading ? '불러오는 중…' : '더 보기'}</button></div>}
 

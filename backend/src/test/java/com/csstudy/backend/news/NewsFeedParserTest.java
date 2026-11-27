@@ -86,4 +86,17 @@ class NewsFeedParserTest {
         assertThat(text.codePointCount(0, text.length())).isEqualTo(200);
         assertThat(text).endsWith("…");
     }
+
+    @Test
+    void resolvesRelativeLinksAgainstTheFeedAddress() throws Exception {
+        String rss = """
+            <rss version="2.0"><channel>
+              <item><title>상대 주소 글</title><link>/posts/2610-webview/</link></item>
+              <item><title>위험한 링크</title><link>javascript:alert(1)</link></item>
+            </channel></rss>""";
+        var items = NewsFeedParser.parse(utf8(rss), "https://tech.kakaobank.com/index.xml");
+        assertThat(items).extracting(NewsFeedParser.Item::url).containsExactly("https://tech.kakaobank.com/posts/2610-webview/");
+        // 피드 주소를 모르면 예전처럼 상대 주소는 버린다
+        assertThat(NewsFeedParser.parse(utf8(rss))).isEmpty();
+    }
 }

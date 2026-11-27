@@ -8,7 +8,7 @@ const MENUS = [
   { to: '/exam', tone: 'indigo', tag: '전공필기', title: '기업별 기출문제', desc: '금융공기업, 공기업, 컴퓨터일반 기출 모의고사' },
   { to: '/aptitude', tone: 'cyan', tag: '직업기초 · 적성검사', title: 'NCS/인적성', desc: 'NCS · SKCT · 삼성 GSAT' },
   { to: '/web', tone: 'emerald', tag: '웹 개발', title: '웹', desc: 'Spring · JPA 문제풀이와 웹 필수지식', isNew: true },
-  { to: '/tech-blogs', tone: 'violet', tag: '개발 사례', title: '기업 기술블로그', desc: '네이버 · 토스 · 무신사 등 공식 기술블로그' },
+  { to: '/tech-blogs', tone: 'violet', tag: '개발 사례', title: '기업 기술블로그', desc: '19개 기업 기술블로그의 새 글을 매일 모아 읽기' },
 ];
 
 export default function Home() {

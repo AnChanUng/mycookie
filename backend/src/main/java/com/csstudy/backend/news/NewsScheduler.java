@@ -8,9 +8,10 @@ import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-// 일주일에 한 번(기본 월요일 오전 7시, 한국 시간) 기업 소식을 모은다. 처음 켰을 때 글이 하나도 없으면 한 번 바로 모아 둔다.
+// 하루에 한 번(기본 오전 7시, 한국 시간) 기업 소식을 모은다. 서버를 켰을 때 아직 글이 하나도 없는 소스(새로 추가한 곳)는 그곳만 바로 모아 둔다.
 // NEWS_ENABLED=false이면 외부 요청을 하지 않는다(app.news.enabled)
 @Slf4j
 @Component
@@ -21,16 +22,17 @@ public class NewsScheduler {
     private final NewsCollector collector;
     private final NewsArticleRepository articles;
 
-    @Scheduled(cron = "${app.news.cron:0 0 7 * * MON}", zone = "Asia/Seoul")
-    public void weekly() {
+    @Scheduled(cron = "${app.news.cron:0 0 7 * * *}", zone = "Asia/Seoul")
+    public void daily() {
         collector.collectAll();
     }
 
     @EventListener(ApplicationReadyEvent.class)
     public void firstRun() {
-        if (articles.count() > 0) return;
+        List<NewsSources.Source> empty = NewsSources.ALL.stream().filter(s -> !articles.existsBySourceKey(s.key())).toList();
+        if (empty.isEmpty()) return;
         // 시작이 늦어지지 않게 따로 돌린다
-        CompletableFuture.runAsync(collector::collectAll).exceptionally(e -> {
+        CompletableFuture.runAsync(() -> collector.collect(empty)).exceptionally(e -> {
             log.warn("처음 기업 소식 수집이 실패했습니다: {}", e.getClass().getSimpleName());
             return null;
         });

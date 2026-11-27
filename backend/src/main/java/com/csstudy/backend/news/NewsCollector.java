@@ -49,8 +49,13 @@ public class NewsCollector {
 
     /** 모든 소스를 읽고 새로 저장한 글 수를 돌려준다. */
     public int collectAll() {
+        return collect(NewsSources.ALL);
+    }
+
+    /** 고른 소스만 읽고 새로 저장한 글 수를 돌려준다. */
+    public int collect(List<NewsSources.Source> sources) {
         int saved = 0;
-        for (NewsSources.Source source : NewsSources.ALL) {
+        for (NewsSources.Source source : sources) {
             try {
                 saved += collect(source);
             } catch (Exception e) {
@@ -70,7 +75,7 @@ public class NewsCollector {
 
         Instant now = clock.instant();
         int saved = 0;
-        for (NewsFeedParser.Item item : NewsFeedParser.parse(body)) {
+        for (NewsFeedParser.Item item : NewsFeedParser.parse(body, source.feedUrl())) {
             String hash = NewsFeedParser.hash(item.url());
             if (articles.existsByUrlHash(hash)) continue;
             Instant published = item.publishedAt() == null || item.publishedAt().isAfter(now) ? now : item.publishedAt();
