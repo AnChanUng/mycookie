@@ -129,7 +129,7 @@ class PointShopTest {
         // 레어 · 전설 테마와 아이콘도 산 사람만 쓴다
         mvc.perform(profile.content(json.writeValueAsString(Map.of("theme", "nebula")))).andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("PROFILE_ITEM_LOCKED"));
-        mvc.perform(profile.content(json.writeValueAsString(Map.of("avatar", "🐉")))).andExpect(status().isBadRequest())
+        mvc.perform(profile.content(json.writeValueAsString(Map.of("avatar", "🌌")))).andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("PROFILE_ITEM_LOCKED"));
         // 상점에서 내린 아이콘은 더 살 수 없고, 기본 목록에서 뺀 아이콘은 새로 고를 수 없다
         buy(t, "avatar:🧠").andExpect(status().isBadRequest()).andExpect(jsonPath("$.code").value("POINT_ITEM_UNKNOWN"));

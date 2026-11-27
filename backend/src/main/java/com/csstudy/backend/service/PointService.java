@@ -51,7 +51,7 @@ public class PointService {
         m.put("avatar:🦄", 700L);
         m.put("avatar:👑", 1000L);
         m.put("avatar:🔮", 5000L);  // 레어
-        m.put("avatar:🐉", 10000L); // 전설
+        m.put("avatar:🌌", 10000L); // 전설
         m.put("avatar:🌷", 10L); // 처음 모은 포인트로 바로 살 수 있는 맛보기 아이템
         m.put("theme:sakura", 800L);
         m.put("theme:ocean", 800L);
@@ -73,7 +73,7 @@ public class PointService {
         SHOP = Collections.unmodifiableMap(m);
     }
     // 상점에서 내린 품목. 더는 팔지 않지만 이미 산 사람은 계속 쓴다
-    public static final java.util.Set<String> RETIRED = java.util.Set.of("avatar:🧠", "avatar:🐲", "avatar:💎");
+    public static final java.util.Set<String> RETIRED = java.util.Set.of("avatar:🧠", "avatar:🐲", "avatar:💎", "avatar:🐉");
 
     public record Item(String key, long price) {}
     public record Entry(long amount, String reason, String memo, Instant at) {}

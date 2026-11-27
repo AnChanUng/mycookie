@@ -104,14 +104,14 @@ export default function InterviewPracticePage() {
         <label className="ip-filter">카테고리<select aria-label="질문 카테고리" value={category} disabled={audioBusy} onChange={e => switchCategory(e.target.value)}>
           <option value="">전체 카테고리</option>{categories.map(([id, name]) => <option key={id} value={id}>{name}</option>)}
         </select></label>
-        <button type="button" className="exam-btn ip-shuffle" disabled={audioBusy} onClick={() => choose(pool)}>랜덤 질문</button>
+        <button type="button" className="exam-btn ip-shuffle" data-usage-action="random_question" disabled={audioBusy} onClick={() => choose(pool)}>랜덤 질문</button>
       </div>
       {current ? <article className="ip-focus" aria-label="현재 면접 질문">
         <div className="notes-detail-top"><span>{current.category}</span><span>면접관 질문</span></div>
         <h2 id="interview-prompt-heading" ref={promptRef} tabIndex={-1} data-testid="interview-prompt" aria-live="polite">{current.text}</h2>
         <InterviewAudio key={current.id} studio questionId={current.id} recording={recordings[current.id]} saveRecording={(id, recording) => setRecordings(prev => ({ ...prev, [id]: recording }))} onBusyChange={setAudioBusy} gradingDisabled />
         <div className="ip-question-actions">
-          {mode === 'tech' ? <button type="button" className="exam-btn" aria-expanded={open} aria-controls="ip-answer" onClick={() => setOpen(value => !value)}>{open ? '모범답안 접기' : '모범답안 보기'}</button> : <span className="ip-personal-hint">상황 → 행동 → 결과 순으로 실제 경험을 말씀해 주세요.</span>}
+          {mode === 'tech' ? <button type="button" className="exam-btn" aria-expanded={open} aria-controls="ip-answer" data-usage-action="reveal_answer" onClick={() => setOpen(value => !value)}>{open ? '모범답안 접기' : '모범답안 보기'}</button> : <span className="ip-personal-hint">상황 → 행동 → 결과 순으로 실제 경험을 말씀해 주세요.</span>}
           <button type="button" className="exam-btn" disabled={audioBusy} onClick={() => choose(pool)}>다음 질문</button>
         </div>
         {mode === 'tech' && <div id="ip-answer" hidden={!open}>{open && <Answer question={current} label="구술형 모범답안" />}</div>}

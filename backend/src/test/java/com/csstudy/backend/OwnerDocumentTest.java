@@ -61,5 +61,13 @@ class OwnerDocumentTest {
         mvc.perform(put("/api/v1/private/docs/tech-interview").header("Authorization", "Bearer " + owner)
                 .contentType(MediaType.APPLICATION_JSON).content("{\"data\":{}}")).andExpect(status().isBadRequest());
         mvc.perform(get("/api/v1/private/docs/other").header("Authorization", "Bearer " + owner)).andExpect(status().isNotFound());
+
+        // 포트폴리오(기술 항목) 질문 모음도 같은 권한으로만 오간다
+        mvc.perform(get("/api/v1/private/docs/portfolio-tech")).andExpect(status().isUnauthorized());
+        mvc.perform(get("/api/v1/private/docs/portfolio-tech").header("Authorization", "Bearer " + ordinary)).andExpect(status().isForbidden());
+        mvc.perform(put("/api/v1/private/docs/portfolio-tech").header("Authorization", "Bearer " + owner)
+                .contentType(MediaType.APPLICATION_JSON).content(body)).andExpect(status().isOk());
+        mvc.perform(get("/api/v1/private/docs/portfolio-tech").header("Authorization", "Bearer " + owner))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.data[0].id").value("t1"));
     }
 }

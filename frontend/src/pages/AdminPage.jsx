@@ -3,11 +3,12 @@ import { Link } from 'react-router-dom';
 import api from '../api';
 import { COMPANIES, EXAM_CATEGORIES, companyPath } from '../data/examQuestions';
 import { account } from '../sync';
+import UsageInsights from '../components/UsageInsights';
 
 const KEY = 'admin-key';
 const RANGES = [7, 30, 90];
 const AUTO_SECONDS = 60;
-const TABS = [['overview', '개요'], ['solves', '풀이'], ['visitors', '방문자'], ['security', '보안 · 크롤링'], ['reports', '제보'], ['chat', '채팅'], ['accounts', '계정 · 채점'], ['audit', '작업 기록'], ['mail', '메일'], ['system', '시스템']];
+const TABS = [['insights', '이용 분석'], ['overview', '개요'], ['solves', '풀이'], ['visitors', '방문자'], ['security', '보안 · 크롤링'], ['reports', '제보'], ['chat', '채팅'], ['accounts', '계정 · 채점'], ['audit', '작업 기록'], ['mail', '메일'], ['system', '시스템']];
 const REPORT_KINDS = { answer: '정답 오류', typo: '오타', explain: '해설 문제', etc: '기타' };
 const MODES = { exam: '모의고사', set: '회차별 모의고사', unit: '단원별 문제집', practice: '영역별 연습', wrong: '오답 다시 풀기', marked: '북마크 다시 풀기', cpp: 'C++ 문제집', recall: '응시 후기 복원 문제' };
 
@@ -91,7 +92,7 @@ function AdminControls({ back, viaLogin }) {
   const [key, setKey] = useState(() => (viaLogin ? LOGIN : savedKey()));
   const [input, setInput] = useState('');
   const [days, setDays] = useState(30);
-  const [tab, setTab] = useState('overview');
+  const [tab, setTab] = useState('insights');
   const [auto, setAuto] = useState(false);
   const [tick, setTick] = useState(0);
   const [data, setData] = useState(null);
@@ -231,6 +232,7 @@ function AdminControls({ back, viaLogin }) {
           </div>
           <Health sys={sys} />
           <QuickLinks links={sys?.links} />
+          {tab === 'insights' && <UsageInsights data={data} reports={reports} onReports={() => setTab('reports')} />}
           {tab === 'overview' && <Overview data={data} sys={sys} />}
           {tab === 'solves' && <Solves data={data} />}
           {tab === 'visitors' && <Visitors data={data} />}
