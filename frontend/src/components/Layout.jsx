@@ -4,6 +4,7 @@ import SiteFooter from './SiteFooter';
 import { Link, Outlet, useLocation } from 'react-router-dom';
 import { warmUpBackend } from '../api';
 import { track } from '../track';
+import { installUsageClicks } from '../usageInsights';
 import CookieAssistant from './CookieAssistant';
 import StudyAmbience from './StudyAmbience';
 import StudyCount from './StudyCount';
@@ -60,6 +61,7 @@ const CODING_SITES = [
 const tokenSnapshot = () => account()?.token || '';
 
 export default function Layout() {
+  useEffect(() => installUsageClicks(document, window.location, track), []);
   // 로그인하지 않았을 때만 머리말에 로그인 버튼을 보여 준다
   const signedIn = !!useSyncExternalStore(onAccountChange, tokenSnapshot, () => '');
   const location = useLocation();
