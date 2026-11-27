@@ -39,6 +39,11 @@ public final class NewsFeedParser {
     private static final DateTimeFormatter RFC_ZONE = DateTimeFormatter.ofPattern("d MMM yyyy HH:mm:ss zzz", Locale.ENGLISH);
 
     public static List<Item> parse(byte[] xml) throws Exception {
+        return parse(xml, null);
+    }
+
+    // baseUrl은 피드 주소. <link>/posts/1/</link>처럼 상대 주소만 적은 피드(카카오뱅크 등)는 피드 주소를 기준으로 완성한다
+    public static List<Item> parse(byte[] xml, String baseUrl) throws Exception {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
         factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
@@ -55,7 +60,7 @@ public final class NewsFeedParser {
         for (Element e : entries) {
             if (items.size() >= MAX_ITEMS) break;
             String title = clean(text(e, "title"), TITLE_MAX);
-            String url = normalizeUrl(link(e));
+            String url = normalizeUrl(resolve(baseUrl, link(e)));
             if (title.isEmpty() || url == null) continue;
             String summary = clean(firstText(e, "description", "summary", "content:encoded", "content"), SUMMARY_MAX);
             items.add(new Item(title, url, summary.isEmpty() ? null : summary,
@@ -92,6 +97,17 @@ public final class NewsFeedParser {
             }
         }
         return fallback == null ? "" : fallback;
+    }
+
+    // 상대 주소만 피드 주소에 붙인다. javascript: 같은 다른 스킴은 절대 주소라 그대로 두고, 뒤에서 걸러진다
+    static String resolve(String baseUrl, String raw) {
+        if (baseUrl == null || raw == null || raw.isBlank()) return raw;
+        try {
+            URI uri = new URI(raw.trim());
+            return uri.isAbsolute() ? raw : new URI(baseUrl).resolve(uri).toString();
+        } catch (Exception e) {
+            return raw;
+        }
     }
 
     // 중첩된 <source><title> 같은 것을 읽지 않도록 바로 아래 자식만 본다

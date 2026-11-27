@@ -63,7 +63,7 @@ x-backend: &backend
     PRIVATE_BANK_NICKNAMES: ${PRIVATE_BANK_NICKNAMES:-}
     # 기업 소식(기술 블로그 · 뉴스룸 RSS)을 일주일에 한 번 모은다. false면 외부 요청을 하지 않는다
     NEWS_ENABLED: ${NEWS_ENABLED:-true}
-    NEWS_CRON: ${NEWS_CRON:-0 0 7 * * MON}
+    NEWS_CRON: ${NEWS_CRON:-0 0 7 * * *}
     BLOG_KEYWORDS: ${BLOG_KEYWORDS:-나의쿠키,홈서버}
     # 접속자 수, 채팅 참여자, 요청 제한은 Redis에(운영과 스테이징은 키 앞머리로 나눈다)
     REDIS_ENABLED: ${REDIS_ENABLED:-true}

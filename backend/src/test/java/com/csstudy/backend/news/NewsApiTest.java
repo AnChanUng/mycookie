@@ -108,4 +108,35 @@ class NewsApiTest {
         // 목록에 없는 회사 이름은 받지 않는다
         mvc.perform(get("/api/v1/news").param("company", "없는회사")).andExpect(status().isBadRequest());
     }
+
+    @Test
+    void techKindShowsOnlyTechBlogsAndSearchesTitles() throws Exception {
+        save("kakao", "카카오", "Kafka 파티션 늘리기", "2026-11-20T00:00:00Z");
+        save("toss", "토스", "100% 무중단 배포_후기", "2026-11-21T00:00:00Z");
+        save("samsung", "삼성전자", "Kafka 뉴스룸 소식", "2026-11-22T00:00:00Z");
+
+        // 기술 블로그만: 뉴스룸 글과 뉴스룸 회사는 빠진다
+        mvc.perform(get("/api/v1/news").param("kind", "tech"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.total").value(2))
+                .andExpect(jsonPath("$.items[*].title", contains("100% 무중단 배포_후기", "Kafka 파티션 늘리기")))
+                .andExpect(jsonPath("$.companies", hasItem("토스")))
+                .andExpect(jsonPath("$.companies", org.hamcrest.Matchers.not(hasItem("삼성전자"))));
+        // 제목 검색은 대소문자를 가리지 않고, 기술 블로그 안에서만 찾는다
+        mvc.perform(get("/api/v1/news").param("kind", "tech").param("q", " kafka "))
+                .andExpect(jsonPath("$.items[*].title", contains("Kafka 파티션 늘리기")));
+        // %와 _는 글자 그대로 찾는다
+        mvc.perform(get("/api/v1/news").param("kind", "tech").param("q", "100%"))
+                .andExpect(jsonPath("$.total").value(1));
+        mvc.perform(get("/api/v1/news").param("kind", "tech").param("q", "배포_"))
+                .andExpect(jsonPath("$.total").value(1));
+        mvc.perform(get("/api/v1/news").param("kind", "tech").param("q", "_"))
+                .andExpect(jsonPath("$.items[*].title", contains("100% 무중단 배포_후기")));
+        // 기술 블로그 화면에서 뉴스룸 회사를 고르거나, 모르는 종류 · 너무 긴 검색어는 받지 않는다
+        mvc.perform(get("/api/v1/news").param("kind", "tech").param("company", "삼성전자")).andExpect(status().isBadRequest());
+        mvc.perform(get("/api/v1/news").param("kind", "blog")).andExpect(status().isBadRequest());
+        mvc.perform(get("/api/v1/news").param("q", "가".repeat(51))).andExpect(status().isBadRequest());
+        // 종류를 주지 않으면 예전처럼 모두 보여 준다
+        mvc.perform(get("/api/v1/news")).andExpect(jsonPath("$.total").value(3));
+    }
 }
