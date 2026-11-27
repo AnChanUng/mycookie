@@ -1,5 +1,6 @@
 package com.csstudy.backend;
 
+import com.csstudy.backend.security.IpBanList;
 import com.csstudy.backend.security.RedisTrafficGuard;
 import com.csstudy.backend.security.TrafficGuard;
 import com.csstudy.backend.service.PresenceService;
@@ -37,6 +38,7 @@ class RedisStateTest {
     @Autowired PresenceService presence;
     @Autowired TrafficGuard traffic;
     @Autowired StringRedisTemplate redis;
+    @Autowired IpBanList bans;
 
     @BeforeEach
     void clean() {
@@ -77,5 +79,15 @@ class RedisStateTest {
         assertThat(blocked.retrySeconds()).isBetween(1, 60);
         assertThat(traffic.check("5.6.7.8", "POST", "/api/v1/code/java").allowed()).isTrue();   // 다른 IP는 따로 센다
         assertThat(redis.keys("test:rate:1.2.3.4:*")).hasSize(1);
+    }
+
+    @Test
+    void banListLivesInRedisWithTtl() {
+        for (int i = 0; i < 9; i++) assertThat(bans.strike("203.0.113.77").newlyBanned()).isFalse();
+        assertThat(bans.strike("203.0.113.77").newlyBanned()).isTrue();   // 기본 기준 10번
+        assertThat(bans.isBanned("203.0.113.77")).isTrue();
+        assertThat(redis.getExpire("test:ban:203.0.113.77")).isBetween(3500L, 3600L);
+        redis.delete("test:ban:203.0.113.77");                             // TTL이 끝난 것과 같다
+        assertThat(bans.isBanned("203.0.113.77")).isFalse();
     }
 }
