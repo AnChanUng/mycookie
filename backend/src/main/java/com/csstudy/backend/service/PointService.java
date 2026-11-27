@@ -34,8 +34,8 @@ public class PointService {
     public static final long STREAK_BONUS = 50;         // 7일 연속 출석마다
     public static final int STREAK_DAYS = 7;
     // 등급 단계(Ⅴ→Ⅰ) 하나 오를 때, 그리고 새 등급(Ⅴ)에 들어설 때 더 주는 몫. 순서는 동 · 은 · 금 · 다이아 · 루비
-    public static final long[] STEP_POINT = {10, 30, 60, 100, 200};
-    public static final long[] TIER_BONUS = {0, 100, 200, 400, 800};
+    public static final long[] STEP_POINT = {20, 50, 100, 150, 300};
+    public static final long[] TIER_BONUS = {0, 200, 400, 800, 1500};
     // 오늘의 퀘스트: 오늘 새로 푼 문제 수가 기준에 닿으면 자동으로 준다(문제 수, 포인트)
     public static final long[][] QUESTS = {{5, 20}, {15, 40}, {30, 80}};
     // 풀이 수는 브라우저가 알려 주는 값이라 서버가 하나하나 확인할 수 없다. 그래서 하루에 포인트로 인정하는 새 풀이 수를 정해 두고,
@@ -46,10 +46,12 @@ public class PointService {
     public static final Map<String, Long> SHOP;
     static {
         Map<String, Long> m = new LinkedHashMap<>();
-        for (String a : List.of("🍩", "🧠", "🍓", "🧸", "🐹", "🌸")) m.put("avatar:" + a, 300L);
+        for (String a : List.of("🍩", "🍓", "🧸", "🐹", "🌸")) m.put("avatar:" + a, 300L);
         for (String a : List.of("🎀", "🦋")) m.put("avatar:" + a, 500L);
-        for (String a : List.of("🦄", "🐲")) m.put("avatar:" + a, 700L);
-        for (String a : List.of("👑", "💎")) m.put("avatar:" + a, 1000L);
+        m.put("avatar:🦄", 700L);
+        m.put("avatar:👑", 1000L);
+        m.put("avatar:🔮", 5000L);  // 레어
+        m.put("avatar:🐉", 10000L); // 전설
         m.put("avatar:🌷", 10L); // 처음 모은 포인트로 바로 살 수 있는 맛보기 아이템
         m.put("theme:sakura", 800L);
         m.put("theme:ocean", 800L);
@@ -59,6 +61,8 @@ public class PointService {
         m.put("theme:peach", 800L);
         m.put("theme:lavender", 800L);
         m.put("theme:rose", 1200L);
+        m.put("theme:opal", 5000L);    // 레어
+        m.put("theme:nebula", 10000L); // 전설
         m.put("frame:flame", 1800L);
         m.put("frame:rainbow", 2500L);
         m.put("frame:pastel", 1800L);
@@ -68,6 +72,8 @@ public class PointService {
         m.put("frame:galaxy", 10000L);  // 전설
         SHOP = Collections.unmodifiableMap(m);
     }
+    // 상점에서 내린 품목. 더는 팔지 않지만 이미 산 사람은 계속 쓴다
+    public static final java.util.Set<String> RETIRED = java.util.Set.of("avatar:🧠", "avatar:🐲", "avatar:💎");
 
     public record Item(String key, long price) {}
     public record Entry(long amount, String reason, String memo, Instant at) {}

@@ -9,7 +9,8 @@ import './TechInterview.css';
 
 // 기술면접(소유자 전용). 이력서에서 뽑은 주제마다 1~4단계(depth) 꼬리질문을 차례로 연습한다.
 // 질문과 답변 포인트는 서버(OWNER 권한)에만 저장해 두고 이 화면이 권한으로 받아 온다. 화면 코드와 저장소에는 두지 않는다.
-// 자료 모양: [{ id, title, source, levels: [{ depth: 1~4, questions: [{ q, intent, points: [..] }] }] }]
+// 자료 모양: [{ id, title, source, levels: [{ depth: 1~4, questions: [{ q, intent, answer, points: [..] }] }] }]
+// answer(선택): 모범답안. 줄마다 한 문단이고 첫 줄은 결론(두괄식)이다
 // 화면 구성은 면접 준비 화면(질문 목차 + 녹음 연습 + 직접 적어보기 + 학습 완료)과 같고, 카메라만 뺐다.
 const DEPTH_NAME = { 1: '1단계 · 기본 질문', 2: '2단계 · 꼬리질문', 3: '3단계 · 깊은 꼬리질문', 4: '4단계 · 한계까지' };
 const GRADING_HINT = '기술면접 답변은 녹음하고 다시 들으며 연습해요. 아래 답변 포인트와 비교해 보세요.';
@@ -160,10 +161,11 @@ function TechQuestion({ q, depthNames, draft, write, recording, saveRecording, a
       <label className="chanung-label" htmlFor={`draft-${q.id}`}>내 연습 답변</label>
       <textarea id={`draft-${q.id}`} rows={2} value={draft} onChange={e => write(q.id, e.target.value)} placeholder="핵심만 짧게 적어 보세요." />
     </details>
-    <div className="chanung-actions"><button type="button" className="exam-btn sm" aria-expanded={open} aria-controls={`answer-${q.id}`} onClick={() => setOpen(value => !value)}>{open ? '답변 포인트 숨기기' : '기억 안 나요 · 답변 포인트 보기'}</button></div>
-    <div id={`answer-${q.id}`} hidden={!open}>{open && <section className="notes-answer" aria-label="답변 포인트">
+    <div className="chanung-actions"><button type="button" className="exam-btn sm" aria-expanded={open} aria-controls={`answer-${q.id}`} onClick={() => setOpen(value => !value)}>{open ? '모범답안 숨기기' : '기억 안 나요 · 모범답안 보기'}</button></div>
+    <div id={`answer-${q.id}`} hidden={!open}>{open && <section className="notes-answer" aria-label="모범답안과 답변 포인트">
       {q.intent && <p className="chanung-note"><strong>면접관 의도</strong> {q.intent}</p>}
-      {Array.isArray(q.points) && q.points.length > 0 && <ul>{q.points.map((p, j) => <li key={j}>{p}</li>)}</ul>}
+      {typeof q.answer === 'string' && q.answer.trim() && <div className="ti-model-answer"><strong>모범답안</strong>{q.answer.trim().split('\n').filter(line => line.trim()).map((line, j) => <p key={j}>{line}</p>)}</div>}
+      {Array.isArray(q.points) && q.points.length > 0 && <><p className="ti-points-title">답변 포인트</p><ul>{q.points.map((p, j) => <li key={j}>{p}</li>)}</ul></>}
     </section>}</div>
   </article>;
 }

@@ -42,5 +42,38 @@ try {
  await mount('/duel');
  assert.ok(text(view.toJSON()).includes('나의 누적 전적'));
  assert.ok(text(view.toJSON()).includes('50%'));
- console.log('Duel passed: auto-join without starting, waiting participant, win/loss/draw results, cumulative record and win rate.');
+ const find=(label)=>view.root.findAll(n=>n.type==='button'&&text(n)===label)[0];
+ const stats=()=>JSON.parse(localStorage.getItem('exam-progress:topics')||'{"stats":{}}').stats;
+ // 1:1 방에서 고른 답은 주제별 통합 풀이 기록에 바로 들어간다(맞힌 것 · 틀린 것 모두)
+ players=[{nickname:'나',me:true,score:0,answered:0,seconds:0,started:false,done:false}];
+ await mount('/duel/ABC234');
+ await act(()=>find('시작하기').props.onClick());
+ const first=TOPICS.questions.find(q=>q.id===ids[0]);
+ await act(()=>view.root.findAll(n=>n.type==='button'&&n.props.className?.startsWith('exam-opt'))[(first.a+1)%first.o.length].props.onClick());
+ assert.equal(stats()[ids[0]]?.w,1,'wrong duel answer is saved to topics progress');
+ assert.ok(text(view.toJSON()).includes('정답은'),'shared question card shows explanation');
+ // 새로고침 뒤 서버가 1문제 풀었다고 알려 주면 같은 문제를 다시 세지 않는다
+ players=[{nickname:'나',me:true,score:0,answered:1,picks:'x',marks:'0',seconds:3,started:true,done:false}];
+ await mount('/duel/ABC234');
+ assert.equal(stats()[ids[0]].w,1,'resumed room does not count the same answer twice');
+ // 혼자 풀기: 방을 만들지 않고 10문제를 풀면 모두 풀이 기록과 최고 기록에 남는다
+ const before=Object.keys(stats()).length;
+ // 실제 보기에도 '다음'이 들어갈 수 있다. 보기와 이동 버튼을 혼동하는 검사를 재현한다.
+ for (const q of TOPICS.questions) q.o = q.o.map((option, i) => i === 0 ? `${option} (다음 단계)` : option);
+ await mount('/duel');
+ assert.ok(text(view.toJSON()).includes('혼자 풀기'));
+ await mount('/duel/solo?s=all');
+ assert.ok(text(view.toJSON()).includes('혼자 풀기 · 전체 과목'));
+ assert.ok(!text(view.toJSON()).includes('링크 복사'),'solo has no share link');
+ await act(()=>find('시작하기').props.onClick());
+ for(let n=0;n<10;n++){
+  await act(()=>view.root.findAll(n=>n.type==='button'&&n.props.className?.startsWith('exam-opt'))[0].props.onClick());
+  await act(()=>(find('다음')||find('결과 보기')).props.onClick());
+ }
+ assert.ok(text(view.toJSON()).includes('첫 기록을 세웠습니다!'),'first solo run sets a record');
+ assert.ok(Object.keys(stats()).length>=before+9,'solo answers are saved to topics progress');
+ assert.ok(JSON.parse(localStorage.getItem('duel:solo-best')).all,'solo best is saved per subject');
+ await act(()=>find('새 문제로 한 번 더').props.onClick());
+ assert.ok(text(view.toJSON()).includes('1 / 10'),'again starts a new round');
+ console.log('Duel passed: auto-join without starting, waiting participant, win/loss/draw results, cumulative record and win rate, answers saved to progress without double counting, solo mode with best record.');
 }finally{if(view)await act(()=>view.unmount());await server.close();}

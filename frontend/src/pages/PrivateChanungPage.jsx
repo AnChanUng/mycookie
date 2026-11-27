@@ -8,7 +8,8 @@ import './PrivateChanungPage.css';
 
 // AWS · 현대오토에버 면접 복기 자료(다른 사람이 본 면접). 공개 메뉴에서 빼고 여기서만 연다
 const OthersInterviews = lazy(() => import('./TechnicalInterviewPage'));
-// 기술면접: 이력서에서 뽑은 주제별 1~4단계 꼬리질문. 질문은 서버(OWNER 권한)에만 저장한다
+// 이력서 면접: 이력서·포트폴리오에서 뽑은 주제별 1~4단계 꼬리질문과 모범답안. 질문은 서버(OWNER 권한)에만 저장한다
+// 예전 포트폴리오 면접은 이 화면으로 합쳤다(옛 주소로 들어오면 이 화면을 연다)
 const TechInterview = lazy(() => import('./TechInterviewPage'));
 
 // 찬웅 전용 페이지(/private/chanung). 서버가 OWNER 권한을 확인한 계정으로 로그인해야 열린다.
@@ -23,6 +24,12 @@ const BLOG_LINKS = [
   ['네트워크', 'https://cookie.tistory.com/238'],
   ['운영체제', 'https://cookie.tistory.com/234'],
   ['AWS', 'https://cookie.tistory.com/227'],
+];
+// 이력서에 링크로 건 블로그 글. 이력서가 바뀌면 여기도 같이 맞춘다
+const RESUME_BLOG_LINKS = [
+  ['개발 워크플로 자동화와 장애 알림', 'https://cookie.tistory.com/247'],
+  ['신입 개발자 온보딩', 'https://cookie.tistory.com/256'],
+  ['홈서버 구축과 DB 이전', 'https://cookie.tistory.com/258'],
 ];
 
 export default function PrivateChanungPage() {
@@ -54,9 +61,9 @@ function PrivateChanung() {
   }, [data, trouble, admin, interviews, techInterview, portfolioInterview, webnoteInterview]);
 
   if (trouble) return <TroubleLog />;
-  if (techInterview) return <Suspense fallback={<p role="status">기술면접을 불러오는 중…</p>}><TechInterview back={{ to: BASE, label: '← 찬웅 전용 페이지' }} /></Suspense>;
-  if (portfolioInterview) return <Suspense fallback={<p role="status">포트폴리오 면접을 불러오는 중…</p>}><TechInterview back={{ to: BASE, label: '← 찬웅 전용 페이지' }} doc="portfolio-interview" title="포트폴리오 면접"
-    intro="이력서와 포트폴리오에 적은 경험마다 기본 질문, 꼬리질문, 기술 질문, 인성 질문을 단계별로 연습해요." /></Suspense>;
+  if (techInterview) return <Suspense fallback={<p role="status">이력서 면접을 불러오는 중…</p>}><TechInterview back={{ to: BASE, label: '← 찬웅 전용 페이지' }} title="이력서 면접"
+    intro="이력서와 포트폴리오에 적은 경험마다 기본 질문에서 4단계 꼬리질문까지 이어서 연습해요. 모범답안은 첫 줄 결론, 상황·행동·결과, 마무리 순서예요." /></Suspense>;
+  if (portfolioInterview) return <Navigate to={privatePath('tech-interview')} replace />;
   if (webnoteInterview) return <Suspense fallback={<p role="status">웹노트 질문지를 불러오는 중…</p>}><TechInterview back={{ to: BASE, label: '← 찬웅 전용 페이지' }} doc="webnote-interview" title="웹노트 질문지"
     depthNames={{ 1: 'Lv.1 · 기초', 2: 'Lv.2 · 실무', 3: 'Lv.3 · 심화' }}
     intro="웹노트 문답과 백엔드 실무 주제를 Lv.1 기초, Lv.2 실무, Lv.3 심화로 나눠 연습해요. 왜 썼고, 어떤 상황에서 겪었고, 어떻게 해결했는지로 답해 보세요." /></Suspense>;
@@ -197,20 +204,15 @@ function PrivateList({ data }) {
             <span className="exam-company-name">면접준비하기</span>
             <span className="exam-company-meta">딜로이트 면접 예상질문 · 내 답변 · 녹음 연습</span>
           </Link>
-          <Link to={privatePath("portfolio-interview")} className="exam-company-card">
-            <span className="exam-company-abbr">포폴</span>
-            <span className="exam-company-name">포트폴리오 면접</span>
-            <span className="exam-company-meta">이력서 · 포트폴리오 기반 꼬리질문 · 기술 · 인성</span>
-          </Link>
           <Link to={privatePath("webnote-interview")} className="exam-company-card">
             <span className="exam-company-abbr">웹노트</span>
             <span className="exam-company-name">웹노트 질문지</span>
             <span className="exam-company-meta">웹노트 문답 + 백엔드 실무 주제 · Lv.1~3</span>
           </Link>
           <Link to={privatePath("tech-interview")} className="exam-company-card">
-            <span className="exam-company-abbr">기술</span>
-            <span className="exam-company-name">기술면접</span>
-            <span className="exam-company-meta">이력서 기반 질문 · 꼬리질문 1~4단계</span>
+            <span className="exam-company-abbr">이력서</span>
+            <span className="exam-company-name">이력서 면접</span>
+            <span className="exam-company-meta">이력서 · 포트폴리오 기반 꼬리질문 1~4단계 · 기술 · 인성 · 모범답안</span>
           </Link>
         </div>
       </section>
@@ -238,6 +240,10 @@ function PrivateList({ data }) {
       <nav className="private-blog" aria-label="내 블로그 바로가기">
         <span className="private-blog-title">블로그 바로가기</span>
         {BLOG_LINKS.map(([name, url]) => (
+          <a key={url} href={url} target="_blank" rel="noopener noreferrer">{name}<span aria-hidden="true">↗</span></a>
+        ))}
+        <span className="private-blog-title private-blog-sub">이력서 블로그</span>
+        {RESUME_BLOG_LINKS.map(([name, url]) => (
           <a key={url} href={url} target="_blank" rel="noopener noreferrer">{name}<span aria-hidden="true">↗</span></a>
         ))}
       </nav>

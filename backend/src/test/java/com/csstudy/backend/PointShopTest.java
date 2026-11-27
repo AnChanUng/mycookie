@@ -84,10 +84,10 @@ class PointShopTest {
     @Test
     void levelRewardsFollowTheRules() {
         assertThat(PointService.levelReward(0)).isZero();
-        assertThat(PointService.levelReward(1)).isEqualTo(10);   // 동 쿠키 Ⅳ
-        assertThat(PointService.levelReward(5)).isEqualTo(130);  // 은 쿠키 Ⅴ: 단계 30 + 등급 보너스 100
-        assertThat(PointService.levelReward(10)).isEqualTo(260); // 금 쿠키 Ⅴ: 60 + 200
-        assertThat(PointService.levelReward(24)).isEqualTo(200); // 루비 쿠키 Ⅰ
+        assertThat(PointService.levelReward(1)).isEqualTo(20);   // 동 쿠키 Ⅳ
+        assertThat(PointService.levelReward(5)).isEqualTo(250);  // 은 쿠키 Ⅴ: 단계 50 + 등급 보너스 200
+        assertThat(PointService.levelReward(10)).isEqualTo(500); // 금 쿠키 Ⅴ: 100 + 400
+        assertThat(PointService.levelReward(24)).isEqualTo(300); // 루비 쿠키 Ⅰ
         assertThat(PointService.levelReward(25)).isZero();
     }
 
@@ -98,24 +98,24 @@ class PointShopTest {
         mvc.perform(get("/api/v1/points").header("Authorization", t)).andExpect(status().isOk()).andExpect(jsonPath("$.balance").value(0));
 
         // 오늘 처음 연 뒤 160문제를 풀었다고 알려 왔다. 풀이 수는 브라우저가 보내는 값이라 하루 100문제까지만 인정한다.
-        // 풀이 100 + 승급은 인정한 100문제(은 쿠키 Ⅱ)까지(동 Ⅳ~Ⅰ 40, 은 Ⅴ 130, 은 Ⅳ~Ⅱ 90) + 오늘의 퀘스트(20 + 40 + 80) = 500
+        // 풀이 100 + 승급은 인정한 100문제(은 쿠키 Ⅱ)까지(동 Ⅳ~Ⅰ 80, 은 Ⅴ 250, 은 Ⅳ~Ⅱ 150) + 오늘의 퀘스트(20 + 40 + 80) = 720
         solved(t, "point-device-1", 160);
-        mvc.perform(get("/api/v1/points").header("Authorization", t)).andExpect(jsonPath("$.balance").value(500))
+        mvc.perform(get("/api/v1/points").header("Authorization", t)).andExpect(jsonPath("$.balance").value(720))
                 .andExpect(jsonPath("$.todaySolved").value(100)).andExpect(jsonPath("$.quests[2].done").value(true))
                 .andExpect(jsonPath("$.pendingSolved").value(60)).andExpect(jsonPath("$.dailySolvedCap").value(100));
         // 다시 열어도 두 번 주지 않는다
-        mvc.perform(get("/api/v1/points").header("Authorization", t)).andExpect(jsonPath("$.balance").value(500))
+        mvc.perform(get("/api/v1/points").header("Authorization", t)).andExpect(jsonPath("$.balance").value(720))
                 .andExpect(jsonPath("$.attendedToday").value(false));
 
         mvc.perform(post("/api/v1/points/attend").header("Authorization", t)).andExpect(status().isOk())
-                .andExpect(jsonPath("$.earned").value(10)).andExpect(jsonPath("$.streak").value(1)).andExpect(jsonPath("$.balance").value(510));
+                .andExpect(jsonPath("$.earned").value(10)).andExpect(jsonPath("$.streak").value(1)).andExpect(jsonPath("$.balance").value(730));
         // 자동 출석이 여러 번 불려도 하루 한 번만 준다
         mvc.perform(post("/api/v1/points/attend").header("Authorization", t)).andExpect(status().isOk())
-                .andExpect(jsonPath("$.earned").value(0)).andExpect(jsonPath("$.already").value(true)).andExpect(jsonPath("$.balance").value(510));
+                .andExpect(jsonPath("$.earned").value(0)).andExpect(jsonPath("$.already").value(true)).andExpect(jsonPath("$.balance").value(730));
 
         buy(t, "frame:rainbow").andExpect(status().isBadRequest()).andExpect(jsonPath("$.code").value("POINT_NOT_ENOUGH"));
         buy(t, "theme:hacked").andExpect(status().isBadRequest()).andExpect(jsonPath("$.code").value("POINT_ITEM_UNKNOWN"));
-        buy(t, "avatar:🍩").andExpect(status().isOk()).andExpect(jsonPath("$.balance").value(210))
+        buy(t, "avatar:🍩").andExpect(status().isOk()).andExpect(jsonPath("$.balance").value(430))
                 .andExpect(jsonPath("$.owned", hasItem("avatar:🍩")));
         buy(t, "avatar:🍩").andExpect(status().isConflict()).andExpect(jsonPath("$.code").value("POINT_ITEM_OWNED"));
 
@@ -126,15 +126,23 @@ class PointShopTest {
                 .andExpect(jsonPath("$.avatar").value("🍩")).andExpect(jsonPath("$.owned", hasItem("avatar:🍩")));
         mvc.perform(profile.content(json.writeValueAsString(Map.of("theme", "sakura")))).andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("PROFILE_ITEM_LOCKED"));
+        // 레어 · 전설 테마와 아이콘도 산 사람만 쓴다
+        mvc.perform(profile.content(json.writeValueAsString(Map.of("theme", "nebula")))).andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("PROFILE_ITEM_LOCKED"));
+        mvc.perform(profile.content(json.writeValueAsString(Map.of("avatar", "🐉")))).andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("PROFILE_ITEM_LOCKED"));
+        // 상점에서 내린 아이콘은 더 살 수 없고, 기본 목록에서 뺀 아이콘은 새로 고를 수 없다
+        buy(t, "avatar:🧠").andExpect(status().isBadRequest()).andExpect(jsonPath("$.code").value("POINT_ITEM_UNKNOWN"));
+        mvc.perform(profile.content(json.writeValueAsString(Map.of("avatar", "🔥")))).andExpect(status().isBadRequest());
 
         // 오늘 인정 수를 다 썼으므로 더 알려 와도 오늘은 그대로이고, 다음 날로 넘어간다
         solved(t, "point-device-1", 161);
-        mvc.perform(get("/api/v1/points").header("Authorization", t)).andExpect(jsonPath("$.balance").value(210))
+        mvc.perform(get("/api/v1/points").header("Authorization", t)).andExpect(jsonPath("$.balance").value(430))
                 .andExpect(jsonPath("$.pendingSolved").value(61));
 
-        // 다음 날: 넘어간 61문제 + 승급(은 Ⅰ 30, 금 Ⅴ 260)을 받는다. 지난 풀이는 오늘의 퀘스트에 넣지 않는다
+        // 다음 날: 넘어간 61문제 + 승급(은 Ⅰ 50, 금 Ⅴ 500)을 받는다. 지난 풀이는 오늘의 퀘스트에 넣지 않는다
         yesterday("포인트테스터");
-        mvc.perform(get("/api/v1/points").header("Authorization", t)).andExpect(jsonPath("$.balance").value(561))
+        mvc.perform(get("/api/v1/points").header("Authorization", t)).andExpect(jsonPath("$.balance").value(1041))
                 .andExpect(jsonPath("$.pendingSolved").value(0)).andExpect(jsonPath("$.todaySolved").value(0))
                 .andExpect(jsonPath("$.quests[0].done").value(false));
     }
@@ -144,11 +152,11 @@ class PointShopTest {
         String t = register("퀘스트테스터");
         // 처음 기록이 들어올 때가 오늘의 출발점: 지난 160문제는 소급 지급만 하고(오늘은 100문제 몫) 퀘스트에는 넣지 않는다
         solved(t, "quest-device-1", 160);
-        mvc.perform(get("/api/v1/points").header("Authorization", t)).andExpect(jsonPath("$.balance").value(360))
+        mvc.perform(get("/api/v1/points").header("Authorization", t)).andExpect(jsonPath("$.balance").value(580))
                 .andExpect(jsonPath("$.todaySolved").value(0)).andExpect(jsonPath("$.quests[0].done").value(false));
         // 오늘 6문제를 더 풀면 5문제 퀘스트 20. 풀이 몫은 오늘 인정 수를 다 써서 다음 날로 넘어간다. 순위 기록만 보내도 바로 들어온다
         solved(t, "quest-device-1", 166);
-        mvc.perform(get("/api/v1/points").header("Authorization", t)).andExpect(jsonPath("$.balance").value(380))
+        mvc.perform(get("/api/v1/points").header("Authorization", t)).andExpect(jsonPath("$.balance").value(600))
                 .andExpect(jsonPath("$.todaySolved").value(6)).andExpect(jsonPath("$.quests[0].done").value(true))
                 .andExpect(jsonPath("$.quests[1].done").value(false));
     }
@@ -158,7 +166,7 @@ class PointShopTest {
     void forgedHugeCountIsLimitedPerDay() throws Exception {
         String t = register("포인트위조");
         solved(t, "forge-device-1", 3000);
-        mvc.perform(get("/api/v1/points").header("Authorization", t)).andExpect(jsonPath("$.balance").value(360))
+        mvc.perform(get("/api/v1/points").header("Authorization", t)).andExpect(jsonPath("$.balance").value(580))
                 .andExpect(jsonPath("$.pendingSolved").value(2900)).andExpect(jsonPath("$.quests[0].done").value(false));
     }
 
