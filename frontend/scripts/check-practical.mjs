@@ -23,6 +23,17 @@ try {
     assert.ok(!`${s.name}${s.sub}${s.short}`.includes('·'), `${key} 섹션 이름 가운데점 금지`);
   }
 
+  // 풍부한 해설: 오답 보기마다 이유, 고친 코드 또는 팁. 정답 번호에는 오답 해설을 달지 않는다
+  const { PRACTICAL_DETAILS: details } = await server.ssrLoadModule('/src/data/practicalDetails.js');
+  for (const q of qs) {
+    const d = details[q.id];
+    assert.ok(d, `${q.id} 풍부한 해설`);
+    const wrong = Object.keys(d.wrong || {}).map(Number).sort();
+    assert.deepEqual(wrong, [0, 1, 2, 3].filter(i => i !== q.a), `${q.id} 오답 보기마다 이유`);
+    assert.ok(d.tips?.length >= 1, `${q.id} 실무 팁`);
+    assert.ok(![...Object.values(d.wrong), ...d.tips].join(' ').includes('·'), `${q.id} 해설 가운데점 금지`);
+  }
+
   let longest = 0;
   const ratios = [];
   for (const q of qs) {
