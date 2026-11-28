@@ -375,9 +375,9 @@ export const COMPANIES = [
   },
   {
     key: "practical", category: "stack", abbr: "실무형", name: "실무형 문제", meta: `상황과 코드를 읽고 판단하는 ${PRACTICAL_QUESTIONS.length}문제, 4지선다`, ready: true,
-    source: { kind: "predicted", label: "자체 제작 문제", detail: "Spring Boot 3, Spring Framework 6.2, Spring Data JPA 3, Hibernate 6, Apache Kafka 3 기준입니다." },
+    source: { kind: "predicted", label: "자체 제작 문제", detail: "Spring Boot 3, Spring Framework 6.2, Spring Data JPA 3, Hibernate 6, MySQL 8, Apache Kafka 3 기준입니다." },
     questions: PRACTICAL_QUESTIONS, sections: PRACTICAL_SECTIONS, minutes: 30,
-    lede: "실제 서비스에서 겪는 상황과 코드를 주고, 무엇이 문제인지 고르는 문제예요. 트랜잭션, JPA, 동시성, API 설계, 캐시와 메시지를 다룹니다.",
+    lede: "실제 서비스에서 겪는 상황과 코드를 주고, 무엇이 문제인지 고르는 문제예요. 트랜잭션, JPA, 동시성, API 설계, 캐시와 메시지, 인덱스와 쿼리, 보안, 외부 연동, 배포와 운영을 다룹니다.",
   },
   {
     key: "spring", category: "stack", abbr: "Spring", name: "Spring · JPA", meta: "코어 · 웹 · JPA · 부트 60문제 · 60분 · 4지선다", ready: true,
