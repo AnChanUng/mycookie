@@ -25,3 +25,8 @@
 
 /* 블로그 바로가기 안의 두 번째 묶음(이력서 블로그) */
 .private-blog-sub { margin-top: var(--ds-s3, 12px); }
+
+/* 블로그 바로가기 분야 묶음 */
+.private-blog-group { display: grid; gap: 2px; }
+.private-blog-group + .private-blog-group { margin-top: 6px; }
+.private-blog-cat { font-size: 11px; font-weight: 700; color: var(--ds-brand); padding: 0 10px; }
