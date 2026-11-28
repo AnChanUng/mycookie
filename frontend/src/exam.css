@@ -2148,3 +2148,8 @@ a.exam-search-bank:hover { color: var(--accent-blue); }
 .exam-again { margin-bottom: 36px; }
 .exam-areas { margin: -6px 0 22px; }
 .exam-home .exam-sections { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
+.exam-explanation h4 + .exam-explanation-list, .exam-explanation h4 + pre { margin-top: 0; }
+.exam-explanation-list { margin: 0 0 14px; padding-left: 18px; display: grid; gap: 6px; }
+.exam-explanation-list li { line-height: 1.65; word-break: keep-all; overflow-wrap: anywhere; }
+.exam-explanation-list li b { display: block; font-weight: 600; }
+.exam-explanation h4:not(:first-child) { margin-top: 14px; }
