@@ -110,6 +110,7 @@ export default function WeakPage() {
           <Link className="exam-btn primary" to="/exam">기업별 기출문제</Link>
           <Link className="exam-btn" to="/ncs">NCS</Link>
         </div>
+        <PracticalLink />
       </div>
     );
   }
@@ -207,6 +208,7 @@ export default function WeakPage() {
         </table>
       </div>
       </details>}
+      <PracticalLink />
     </div>
   );
 }
@@ -248,6 +250,14 @@ function DailyWrongSection({ rows }) {
       </div>
     </>
   );
+}
+
+// 오답노트 맨 아래: 개념을 실무 상황에 적용해 보는 실무형 문제로 이어 준다
+function PracticalLink() {
+  return <Link to="/web/practical" className="weak-practical">
+    <span><b>실무에서는 이렇게 나와요</b><small>실제 코드를 읽고 무엇이 문제인지 찾는 실무형 문제</small></span>
+    <span aria-hidden="true">→</span>
+  </Link>;
 }
 
 function Tile({ k, v, sub, unit }) {

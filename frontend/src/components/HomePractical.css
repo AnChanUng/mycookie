@@ -1,0 +1,29 @@
+/* 첫 화면 실무형 문제 카드: 다른 카드와 같은 흰 바탕에 브랜드 색 테두리만 더한다 */
+.hp { margin-top: 32px; padding: 22px 24px; display: grid; gap: 16px; border-color: color-mix(in srgb, var(--ds-brand) 35%, var(--ds-line)); }
+.hp-loading { min-height: 260px; }
+.hp-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.hp-badge { padding: 3px 10px; border-radius: var(--ds-r-full); background: var(--ds-brand-soft); color: var(--ds-brand); font-size: 12px; font-weight: 700; }
+.hp-title { margin: 0; font-size: 18px; font-weight: 800; letter-spacing: -0.02em; }
+.hp-all { margin-left: auto; font-size: 14px; font-weight: 600; color: var(--ds-text-2); text-decoration: none; }
+.hp-all:hover { color: var(--ds-brand); }
+.hp-today { display: grid; gap: 6px; padding: 16px 18px; border-radius: var(--ds-r-lg); background: var(--ds-surface-2); color: var(--ds-text); text-decoration: none; transition: background var(--ds-fast) ease; }
+.hp-today:hover { background: var(--ds-brand-soft); }
+.hp-today-label { font-size: 12px; font-weight: 700; color: var(--ds-text-3); }
+.hp-today-label em { font-style: normal; margin-left: 6px; color: var(--ds-brand); }
+.hp-ctx { line-height: 1.6; color: var(--ds-text-2); word-break: keep-all; overflow-wrap: anywhere; }
+.hp-q { font-size: 16px; line-height: 1.5; word-break: keep-all; }
+.hp-go { justify-self: end; font-size: 14px; font-weight: 700; color: var(--ds-brand); }
+.hp-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.hp-chip { padding: 6px 12px; border: 1px solid var(--ds-line-strong); border-radius: var(--ds-r-full); font-size: 13px; color: var(--ds-text-2); text-decoration: none; }
+.hp-chip:hover { border-color: var(--ds-brand); color: var(--ds-brand); }
+.hp-progress { display: grid; gap: 6px; }
+.hp-bar { display: block; height: 6px; border-radius: var(--ds-r-full); background: var(--ds-surface-2); overflow: hidden; }
+.hp-bar i { display: block; height: 100%; background: var(--ds-brand); border-radius: inherit; }
+.hp-progress small { font-size: 13px; color: var(--ds-text-3); }
+@media (max-width: 640px) {
+  .hp { margin-top: 24px; padding: 18px 16px; }
+  .hp-all { margin-left: 0; }
+  /* 휴대폰에서는 주제 칩을 한 줄로 두고 옆으로 밀어 본다 */
+  .hp-chips { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; }
+  .hp-chip { flex: none; }
+}

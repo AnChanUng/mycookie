@@ -107,9 +107,18 @@ export function CompanyExamWithProgress({ company, back, progress, initialIds })
     }
   });
   // 첫 화면의 "이어서 하기"로 들어오면(?resume=1) 안내를 거치지 않고 풀던 문제를 바로 연다
+  // 다른 화면의 바로가기: ?q=문항id는 그 한 문제를, ?sec=영역키는 그 영역 연습을 바로 연다(첫 화면 실무형 카드 등)
+  const linked = (() => {
+    const params = new URLSearchParams(window.location.search);
+    const one = params.get('q');
+    if (one && byId[one]) return { name: 'quiz', mode: 'practice', sec: byId[one].sec, ids: [one] };
+    const sec = params.get('sec');
+    const secIds = sec && SECTIONS[sec] ? Q.filter(q => q.sec === sec).map(q => q.id) : [];
+    return secIds.length ? { name: 'quiz', mode: 'practice', sec, ids: secIds } : null;
+  })();
   const [view, setView] = useState(() => initialIds?.length
     ? { name: 'quiz', mode: 'practice', ids: initialIds }
-    : (saved && new URLSearchParams(window.location.search).has('resume')
+    : linked || (saved && new URLSearchParams(window.location.search).has('resume')
     ? { name: 'quiz', mode: saved.mode, sec: saved.sec, ids: saved.ids, resume: saved }
     : { name: 'home' }));
   // 첫 화면은 문제 데이터를 읽지 않으므로, 거기서 보여 줄 이름 · 주소 · 풀이 종류를 함께 적어 둔다

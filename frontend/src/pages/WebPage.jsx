@@ -28,7 +28,7 @@ const GROUPS = [
     title: '③ 실무형 문제',
     note: '실제 코드를 읽고 무엇이 문제인지 찾아요. 예: 서버에서 재고가 가끔 틀린다, 왜일까?',
     items: [
-      { to: '/web/practical', icon: '🛠️', t: '실무형 문제', d: '트랜잭션, JPA, 동시성, API 설계, 캐시와 메시지', m: `${PRACTICAL_QUESTIONS.length}문제`, go: '문제 풀기' },
+      { to: '/web/practical', icon: '🛠️', t: '실무형 문제', d: '트랜잭션, JPA, 동시성, API 설계, 캐시와 메시지, 인덱스와 쿼리, 보안, 외부 연동, 배포와 운영', m: `${PRACTICAL_QUESTIONS.length}문제`, go: '문제 풀기' },
     ],
   },
 ];
