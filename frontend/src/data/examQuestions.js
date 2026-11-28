@@ -23,6 +23,7 @@ import { KINFA_SECTIONS, KINFA_QUESTIONS } from './kinfaQuestions';
 import { SPRING_SECTIONS, SPRING_QUESTIONS } from './springQuestions';
 import { JAVA_SECTIONS, JAVA_QUESTIONS } from './javaQuestions';
 import { SPRING_PRACTICE_SECTIONS, SPRING_PRACTICE_QUESTIONS } from './springPracticeQuestions';
+import { PRACTICAL_SECTIONS, PRACTICAL_QUESTIONS } from './practicalQuestions';
 import { WEB_NOTE_SECTIONS, WEB_NOTE_QUESTIONS } from './webNoteQuestions';
 import { WEB_ESSENTIALS } from './webEssentials';
 import { CS_NOTE_SECTIONS, CS_NOTE_QUESTIONS } from './csNoteQuestions';
@@ -367,10 +368,16 @@ export const COMPANIES = [
     lede: "언어 기초 8문제, 클래스와 객체·컬렉션과 제네릭·예외와 표준 API 각 10문제를 풀어요.",
   },
   {
-    key: "spring-practice", category: "stack", abbr: "Spring", name: "Spring 핵심 실전", meta: "IoC·DI · AOP · MVC · MyBatis · Security 53문제 · 4지선다", ready: true,
+    key: "spring-practice", category: "stack", abbr: "Spring", name: "Spring 핵심", meta: "IoC와 DI, AOP, MVC, MyBatis, Security 53문제, 4지선다", ready: true,
     source: { kind: "predicted", label: "요청 범위 기반 자체 제작 문제", detail: "Spring Boot 3 / Spring Framework 6 / Spring Security 6 / MyBatis 3 / JUnit 5 기준. 별도 설정이 없는 기본 동작을 기준으로 하며 각 코드 문제의 전제 조건을 함께 확인하세요." },
     questions: SPRING_PRACTICE_QUESTIONS, sections: SPRING_PRACTICE_SECTIONS, minutes: 60,
     lede: "Spring 핵심·IoC/DI 11문제, Boot·로깅·테스트 7문제, AOP·트랜잭션 10문제, MVC·웹 계층 13문제, MyBatis·동적 SQL 6문제, Security 6문제. 4지선다 53문제와 해설을 제공합니다. 정답이 가장 긴 보기로 쏠리지 않도록 보기 길이를 맞췄고, Filter와 HandlerInterceptor, @Controller와 @RestController 비교 및 동적 SQL·포인트컷·롤백 실행 결과 예측을 포함합니다.",
+  },
+  {
+    key: "practical", category: "stack", abbr: "실무형", name: "실무형 문제", meta: `상황과 코드를 읽고 판단하는 ${PRACTICAL_QUESTIONS.length}문제, 4지선다`, ready: true,
+    source: { kind: "predicted", label: "공식 문서 근거 자체 제작 문제", detail: "Spring Boot 3, Spring Framework 6.2, Spring Data JPA 3, Hibernate 6, Apache Kafka 3 기준입니다. 문항마다 해설 아래에 근거가 되는 공식 문서 링크가 있습니다." },
+    questions: PRACTICAL_QUESTIONS, sections: PRACTICAL_SECTIONS, minutes: 30,
+    lede: "실제 서비스에서 겪는 상황과 코드를 주고, 무엇이 문제인지 고르는 문제예요. 트랜잭션, JPA, 동시성, API 설계, 캐시와 메시지를 다룹니다.",
   },
   {
     key: "spring", category: "stack", abbr: "Spring", name: "Spring · JPA", meta: "코어 · 웹 · JPA · 부트 60문제 · 60분 · 4지선다", ready: true,
