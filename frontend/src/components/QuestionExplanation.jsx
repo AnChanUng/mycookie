@@ -1,12 +1,12 @@
 import { explanationFor } from '../data/explanationLookup';
-import { QUESTION_DETAILS } from '../data/questionDetails';
+import { detailFor } from '../data/questionDetails';
 import Code from './Code';
 
 const CIRC = ['①', '②', '③', '④'];
 
 export default function QuestionExplanation({ q }) {
   const story = explanationFor(q);
-  const rich = QUESTION_DETAILS[q.id];
+  const rich = detailFor(q);
   if (rich) return <DetailedExplanation q={q} detail={rich} story={story} />;
   if (!story) return null;
   return <section className="exam-explanation" aria-label="문항별 상세 해설">
