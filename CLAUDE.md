@@ -37,7 +37,7 @@
 ## 브랜치와 PR (원본: CONTRIBUTING.md)
 - 먼저 열린 PR과 이슈를 확인한다. 같은 기능·개선 묶음은 기존 PR에 후속 커밋으로 모으고, 관련 이슈가 20개 이상이어도 한 PR에 연결할 수 있다. 이슈 개수나 변경 줄 수를 이유로 PR을 나누지 않는다.
 - 새 브랜치는 새 작업 묶음을 시작할 때 만든다. 배포 시점·승인 담당이 다르거나 독립적으로 배포할 작업이면 분리한다. 개인 학습·개발 일지·기술 블로그 초안은 개인 메모로 관리하고 협업 검토 요청이 있을 때 이슈·PR로 공유한다.
-- 흐름은 항상 작업 브랜치 → `dev` → `master`다. 새 작업 묶음은 **최신 `dev`에서 새 작업 브랜치**(`feature/`, `fix/`, `docs/`, `refactor/`, `chore/`, `hotfix/`)를 따서 작업하고 `dev`로 PR을 올린다. 세션이 정해 준 브랜치 이름이 이 규칙과 다르면 규칙을 따른다. `dev`, `master`에 직접 커밋, 푸시하지 않는다.
+- 흐름은 항상 작업 브랜치 → `dev` → `master`다. 새 작업 묶음은 **최신 `dev`에서 새 작업 브랜치**(`feature/`, `fix/`, `docs/`, `refactor/`, `chore/`, `hotfix/`)를 따서 작업하고 `dev`로 PR을 올린다. 세션이 정해 준 브랜치 이름이 이 규칙과 다르면 규칙을 따른다. 브랜치 접두어는 이 여섯 개만 쓰고 PR 제목 타입을 그대로 쓰지 않는다(`style/`, `test/`, `perf/` 금지). 문구와 디자인은 `fix/`나 `chore/`, 테스트와 CI, 빌드는 `chore/`, 성능은 `refactor/`나 `fix/`로 만들고 세부 성격은 제목 타입(`style:`, `test:`, `perf:` 등)으로 나타낸다. `dev`, `master`에 직접 커밋, 푸시하지 않는다.
 - `master`에는 `dev` → `master` PR만 올리고, 운영 머지는 관리자만 한다. 이 PR은 `release-pr.yml`이 dev 푸시마다 열거나 목록을 갱신하니 손으로 만들지 않는다.
 - 커밋과 PR 제목은 `타입: 한글 요약`(feat, fix, docs, refactor, test, perf, style, ci, build, chore, release, revert). PR 본문은 결과 요약·관련 이슈·검증 결과를 적고, 화면 자료나 배포 주의는 해당할 때 추가한다.
 - 리뷰어(찬웅 `AnChanUng`, 보민 `hiu001045`)는 `auto-assign.yml`이 자동으로 요청한다(작성자 본인은 GitHub이 막아 빠진다).

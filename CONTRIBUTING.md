@@ -27,6 +27,15 @@ feature/xxx ──PR──▶ dev (스테이징 staging.mycookie.dev) ──PR�
 
 영문 소문자와 `-`로 짧게 씁니다. **PR 규칙 검사**가 접두어를 확인합니다.
 
+브랜치 접두어는 위 여섯 개만 씁니다. 커밋, PR 제목의 타입(style, test, perf, ci, build 등)은 더 잘게 나누지만 브랜치에는 그대로 쓰지 않고 가까운 분류를 고릅니다.
+
+| 작업 | 브랜치 | PR 제목 타입 |
+| --- | --- | --- |
+| 문구, 디자인 수정 | `fix/` 또는 `chore/` | `style:` |
+| 테스트 추가 | `chore/` | `test:` |
+| 성능 개선 | `refactor/` 또는 `fix/` | `perf:` |
+| CI, 빌드 설정 | `chore/` | `ci:`, `build:` |
+
 ## 3. 커밋 메시지
 
 ```
