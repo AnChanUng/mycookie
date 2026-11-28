@@ -1,17 +1,23 @@
 // 실무형 문제: 상황과 실제 코드를 읽고 무엇이 문제인지 고른다. 신입 백엔드 기준.
 // 기준 버전: Spring Boot 3.x, Spring Framework 6.2, Spring Data JPA 3.x, Hibernate 6, Apache Kafka 3.x.
 // 정답 위치는 고르게, 정답이 가장 긴 보기로 쏠리지 않게 쓴다(scripts/check-practical.mjs).
+import { PRACTICAL_MORE } from './practicalQuestionsMore';
+
 // 학습 메일 문제와는 따로 만든다(메일 구독자만 받는 문제를 웹에 다시 쓰지 않는다)
 export const PRACTICAL_SECTIONS = {
-  tx: { name: '트랜잭션', short: '트랜잭션', sub: '전파, 자기 호출, 롤백 규칙', count: 3 },
-  jpa: { name: 'JPA', short: 'JPA', sub: 'N+1, 지연 로딩, 변경 감지', count: 3 },
-  conc: { name: '동시성', short: '동시성', sub: '갱신 분실, 락, 재시도', count: 3 },
-  api: { name: 'API 설계', short: 'API', sub: '검증, 예외 응답, 응답 DTO', count: 3 },
-  cache: { name: '캐시와 메시지', short: '캐시, 메시지', sub: 'Redis 캐시, Kafka 순서', count: 3 },
+  tx: { name: '트랜잭션', short: '트랜잭션', sub: '전파, 자기 호출, 롤백 규칙', count: 5 },
+  jpa: { name: 'JPA', short: 'JPA', sub: 'N+1, 지연 로딩, 변경 감지, 대량 저장', count: 5 },
+  conc: { name: '동시성', short: '동시성', sub: '갱신 분실, 락, 중복 발급, 데드락', count: 6 },
+  api: { name: 'API 설계', short: 'API', sub: '검증, 예외 응답, 응답 DTO, 부분 수정', count: 5 },
+  cache: { name: '캐시와 메시지', short: '캐시, 메시지', sub: 'Redis 캐시, Kafka 순서', count: 5 },
+  db: { name: '인덱스와 쿼리', short: '인덱스, 쿼리', sub: '인덱스를 못 쓰는 쿼리, 페이징, 실행 계획', count: 6 },
+  sec: { name: '보안', short: '보안', sub: '권한 누락, 로그, 키 노출, 업로드', count: 6 },
+  ext: { name: '외부 연동', short: '외부 연동', sub: '타임아웃, 재시도, 웹훅, 메시지 중복', count: 6 },
+  ops: { name: '배포와 운영', short: '배포, 운영', sub: '마이그레이션, 컨테이너 메모리, 알림', count: 6 },
 };
 
 
-export const PRACTICAL_QUESTIONS = [
+const BASE_QUESTIONS = [
   {
     id: 'prq01', sec: 'tx', topic: '자기 호출',
     ctx: '결제가 실패하면 주문도 롤백되어야 하는데, 결제 예외가 난 뒤에도 주문이 DB에 남습니다. 기본 프록시 방식의 트랜잭션을 씁니다.',
@@ -315,3 +321,6 @@ public void changePrice(Long id, int price) {
     e: 'Kafka는 한 파티션 안에서만 순서를 보장합니다. 키 없이 보내면 이벤트가 여러 파티션에 흩어져 순서가 섞일 수 있습니다. 주문 ID를 키로 주면 같은 주문의 이벤트가 같은 파티션에 들어가 보낸 순서대로 소비됩니다.',
   },
 ];
+
+// 2차 문항을 이어 붙인다(같은 형식, prq16부터)
+export const PRACTICAL_QUESTIONS = [...BASE_QUESTIONS, ...PRACTICAL_MORE];
