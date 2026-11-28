@@ -2,5 +2,6 @@
 // 각 항목: wrong(오답 보기별 이유), fix(바로잡은 코드, 있을 때만), tips(더 알아 둘 점)
 import { PRACTICAL_DETAILS } from './practicalDetails';
 import { JAVA_DETAILS } from './javaDetails';
+import { SPRING_PRACTICE_DETAILS } from './springPracticeDetails';
 
-export const QUESTION_DETAILS = { ...PRACTICAL_DETAILS, ...JAVA_DETAILS };
+export const QUESTION_DETAILS = { ...PRACTICAL_DETAILS, ...JAVA_DETAILS, ...SPRING_PRACTICE_DETAILS };
