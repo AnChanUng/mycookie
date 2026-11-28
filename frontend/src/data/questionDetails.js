@@ -18,7 +18,7 @@ export const DETAIL_SOURCES = [
 ];
 
 // 문장만으로는 겹친다("다음 코드가 출력하는 값은?" 등). 코드와 보기까지 합쳐 문항을 구분한다
-const keyOf = q => [q.q, q.code || '', ...(q.o || [])].join('');
+const keyOf = q => [q.q, q.code || '', ...(q.o || [])].join('\n---\n');
 const byQuestion = new Map();
 for (const [, questions, details] of DETAIL_SOURCES)
   for (const q of questions) if (details[q.id]) byQuestion.set(keyOf(q), details[q.id]);
