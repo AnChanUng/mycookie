@@ -49,6 +49,7 @@ function claimDeviceRecords(value) {
     // 예전에 번호 없이 닉네임으로 적어 둔 주인은 닉네임이 같으면 같은 계정이다
     if (owner && owner !== next && owner !== `nickname:${value.nickname}`) {
       deviceRecords().keys.forEach(key => { try { localStorage.removeItem(key); } catch { /* skip */ } });
+      localStorage.removeItem('visitor-id');
     }
     localStorage.setItem(OWNER, next);
   } catch { /* storage unavailable */ }
