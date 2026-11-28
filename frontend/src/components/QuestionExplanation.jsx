@@ -1,12 +1,12 @@
 import { explanationFor } from '../data/explanationLookup';
-import { PRACTICAL_DETAILS } from '../data/practicalDetails';
+import { QUESTION_DETAILS } from '../data/questionDetails';
 import Code from './Code';
 
 const CIRC = ['①', '②', '③', '④'];
 
 export default function QuestionExplanation({ q }) {
-  const practical = PRACTICAL_DETAILS[q.id];
-  if (practical) return <PracticalExplanation q={q} detail={practical} />;
+  const practical = QUESTION_DETAILS[q.id];
+  if (practical) return <DetailedExplanation q={q} detail={practical} />;
   const detail = explanationFor(q);
   if (!detail) return null;
   return <section className="exam-explanation" aria-label="문항별 상세 해설">
@@ -15,8 +15,8 @@ export default function QuestionExplanation({ q }) {
   </section>;
 }
 
-// 실무형 문제: 보기별 해설, 고친 코드, 실무 팁을 나눠 보여 준다(길이보다 종류로 풍부하게)
-function PracticalExplanation({ q, detail }) {
+// 풍부한 해설(실무형, 개념 문제집): 보기별 해설, 고친 코드, 실무 팁을 나눠 보여 준다(길이보다 종류로 풍부하게)
+function DetailedExplanation({ q, detail }) {
   const wrong = Object.entries(detail.wrong || {}).sort(([a], [b]) => a - b);
   return <section className="exam-explanation" aria-label="문항별 상세 해설">
     {wrong.length > 0 && <>
