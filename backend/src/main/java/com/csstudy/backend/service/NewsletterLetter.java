@@ -129,8 +129,10 @@ public class NewsletterLetter {
     /**
      * 오늘의 학습 세트 메일: 오늘의 문제 → (오늘의 CS, 있을 때만) → 문제와 이어지는 기술블로그 → 맨 아래 정답과 해설 → 더 공부하기.
      * 기술블로그는 세트에 정해 둔 글을 쓰고, 없으면 발송할 때 고른 수집 글(crawled)을 쓴다. 둘 다 없으면 그 칸을 건너뛴다.
+     * 해설 뒤에는 문제에 나온 개념을 한 줄씩 정리하고, 개념마다 사이트의 자세한 설명 페이지(/concepts/{slug})로 가는 링크를 단다.
+     * 긴 설명은 메일에 넣지 않는다.
      */
-    public Letter buildDaily(NewsletterDailySets.DailySet set, NewsArticle crawled, String baseUrl, String unsubscribeUrl) {
+    public Letter buildDaily(NewsletterDailySets.DailySet set, List<NewsletterConcepts.Concept> concepts, NewsArticle crawled, String baseUrl, String unsubscribeUrl) {
         NewsletterDailySets.Question q = set.question();
         NewsletterDailySets.Cs cs = set.cs();
         int section = 1;
@@ -174,6 +176,12 @@ public class NewsletterLetter {
         doc.heading("정답과 해설");
         doc.line("**정답 " + MARKS[q.answer()] + "** " + q.options().get(q.answer()));
         for (String paragraph : q.explanation()) doc.line(paragraph);
+
+        if (concepts != null && !concepts.isEmpty()) {
+            doc.heading("이 문제에 나온 개념 한 줄 정리");
+            for (NewsletterConcepts.Concept c : concepts) doc.concept(c.term(), c.summary(), baseUrl + "/concepts/" + c.slug());
+            doc.note("개념 이름을 누르면 나의쿠키에서 자세한 설명, 심화 학습 질문, 근거가 되는 공식 문서를 볼 수 있어요.");
+        }
 
         // 연습 문제가 있는 세트는 그날 주제의 문제 5개를 푸는 화면으로, 없으면 첫 화면으로 보낸다
         boolean hasPractice = set.practice() != null && !set.practice().isEmpty();
@@ -233,6 +241,14 @@ public class NewsletterLetter {
             text.append("- ").append(label).append(": ").append(url).append("\n");
             html.append("<p style=\"margin:4px 0 4px 12px\">• <a href=\"").append(attr(url)).append("\" style=\"color:#4f46e5\">")
                     .append(escape(label)).append("</a></p>");
+        }
+
+        // 용어(링크) — 한 줄 정리 · 자세히 보기
+        void concept(String term, String summary, String url) {
+            text.append("- ").append(plain(term)).append(": ").append(plain(summary)).append("\n  자세히 보기: ").append(url).append("\n");
+            html.append("<p style=\"margin:8px 0 8px 12px\">• <a href=\"").append(attr(url)).append("\" style=\"color:#4f46e5;font-weight:700\">")
+                    .append(escape(plain(term))).append("</a> — ").append(inline(summary)).append(" <a href=\"").append(attr(url))
+                    .append("\" style=\"color:#4f46e5;font-size:13px;white-space:nowrap\">자세히 보기 →</a></p>");
         }
 
         void button(String label, String url) {

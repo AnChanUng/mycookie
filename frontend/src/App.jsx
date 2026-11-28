@@ -60,6 +60,7 @@ const WeakPage = lazy(() => import('./pages/WeakPage'));
 const SsafyPage = lazy(() => import('./pages/SsafyPage'));
 const AptitudePage = lazy(() => import('./pages/AptitudePage'));
 const DailyPracticePage = lazy(() => import('./pages/DailyPracticePage'));
+const ConceptPage = lazy(() => import('./pages/ConceptPage'));
 const AuthCallbackPage =lazy(() => import('./pages/AuthCallbackPage'));
 const OnboardingPage = lazy(() => import('./pages/OnboardingPage'));
 const DevLogPage = lazy(() => import('./pages/DevLogPage'));
@@ -109,6 +110,7 @@ function App() {
           <Route path="account" element={<AccountPage />} />
           <Route path="account/retry" element={<AccountRetryPage />} />
           <Route path="daily/:day" element={<DailyPracticePage />} />
+          <Route path="concepts/:slug" element={<ConceptPage />} />
           <Route path="auth/callback"element={<AuthCallbackPage />} />
           <Route path="auth/verify-email" element={<VerifyEmailPage />} />
           <Route path="auth/reset-password" element={<ResetPasswordPage />} />

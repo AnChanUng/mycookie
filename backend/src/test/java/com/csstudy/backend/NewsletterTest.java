@@ -7,6 +7,8 @@ import com.csstudy.backend.news.NewsArticleRepository;
 import com.csstudy.backend.repository.NewsletterDailySetRepository;
 import com.csstudy.backend.repository.NewsletterSubscriberRepository;
 import com.csstudy.backend.service.MailService;
+import com.csstudy.backend.repository.NewsletterConceptRepository;
+import com.csstudy.backend.service.NewsletterConcepts;
 import com.csstudy.backend.service.NewsletterDailySets;
 import com.csstudy.backend.service.NewsletterLetter;
 import com.csstudy.backend.service.NewsletterService;
@@ -33,6 +35,7 @@ import java.util.regex.Pattern;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -50,6 +53,8 @@ class NewsletterTest {
     @Autowired NewsletterDailySets dailySets;
     @Autowired NewsletterDailySetRepository dailySetRows;
     @Autowired NewsArticleRepository articles;
+    @Autowired NewsletterConcepts concepts;
+    @Autowired NewsletterConceptRepository conceptRows;
     @MockitoBean MailService mail;
 
     @BeforeEach
@@ -180,9 +185,9 @@ class NewsletterTest {
         NewsArticle a = article("blog-a"), b = article("blog-b");
         NewsletterDailySets.DailySet first = dailySets.find(1).orElseThrow();
         dailySetRows.save(NewsletterDailySet.builder().dayNo(31).content(json.writeValueAsString(
-                new NewsletterDailySets.DailySet(31, "글이 정해지지 않은 주제", first.question(), null, null, null))).build());
+                new NewsletterDailySets.DailySet(31, "글이 정해지지 않은 주제", first.question(), null, null, null, null))).build());
         dailySetRows.save(NewsletterDailySet.builder().dayNo(32).content(json.writeValueAsString(
-                new NewsletterDailySets.DailySet(32, "글이 정해지지 않은 주제 2", first.question(), null, null, null))).build());
+                new NewsletterDailySets.DailySet(32, "글이 정해지지 않은 주제 2", first.question(), null, null, null, null))).build());
         subscribed("blog@example.com");
         NewsletterSubscriber s = subscriber("blog@example.com");
         assertThat(s.getLastBlogArticleId()).as("세트에 글이 정해져 있으면 수집 글을 쓰지 않는다").isNull();
@@ -207,7 +212,7 @@ class NewsletterTest {
     @Test
     void dailySetLetterIsQuestionThenRelatedBlogThenAnswer() {
         NewsletterDailySets.DailySet set = dailySets.find(1).orElseThrow();
-        NewsletterLetter.Letter letter = letters.buildDaily(set, null, "https://mycookie.dev", "https://mycookie.dev/newsletter/unsubscribe?key=k");
+        NewsletterLetter.Letter letter = letters.buildDaily(set, concepts.findAll(set.concepts()), null, "https://mycookie.dev", "https://mycookie.dev/newsletter/unsubscribe?key=k");
         String text = letter.text();
         assertThat(text).contains("[1. 오늘의 문제", "[2. 이 문제와 이어지는 기술블로그 · " + set.blog().company(), set.blog().url(),
                 "① ", "④ ", "[정답과 해설]", "나의쿠키에서 오늘 주제 5문제 더 풀기", "https://mycookie.dev/daily/1", "수신 거부");
@@ -220,13 +225,79 @@ class NewsletterTest {
                 .doesNotContain("**").doesNotContain("<script");
 
         // 세트에 글이 없으면 수집 글을, 그것도 없으면 그 칸을 건너뛴다
-        NewsletterDailySets.DailySet bare = new NewsletterDailySets.DailySet(99, "주제", set.question(), null, null, null);
+        NewsletterDailySets.DailySet bare = new NewsletterDailySets.DailySet(99, "주제", set.question(), null, null, null, null);
         NewsArticle crawled = NewsArticle.builder().company("toss").sourceName("토스 기술블로그").url("https://toss.tech/article/sample")
                 .title("샘플 글").summary("요약 문장").publishedAt(Instant.parse("2026-11-20T00:00:00Z")).build();
-        assertThat(letters.buildDaily(bare, crawled, "https://mycookie.dev", "https://mycookie.dev/newsletter/unsubscribe?key=k").text())
+        assertThat(letters.buildDaily(bare, java.util.List.of(), crawled, "https://mycookie.dev", "https://mycookie.dev/newsletter/unsubscribe?key=k").text())
                 .contains("[2. 오늘의 기술블로그 · toss]", "샘플 글 (2026.11.20)", "요약 문장");
-        assertThat(letters.buildDaily(bare, null, "https://mycookie.dev", "https://mycookie.dev/newsletter/unsubscribe?key=k").text())
-                .doesNotContain("기술블로그").contains("[정답과 해설]");
+        assertThat(letters.buildDaily(bare, java.util.List.of(), null, "https://mycookie.dev", "https://mycookie.dev/newsletter/unsubscribe?key=k").text())
+                .doesNotContain("기술블로그").contains("[정답과 해설]").doesNotContain("개념 한 줄 정리");
+    }
+
+    @Test
+    void letterListsConceptsInOneLineWithLinksToTheConceptPage() {
+        NewsletterDailySets.DailySet set = dailySets.find(1).orElseThrow();
+        java.util.List<NewsletterConcepts.Concept> found = concepts.findAll(set.concepts());
+        NewsletterLetter.Letter letter = letters.buildDaily(set, found, null, "https://mycookie.dev", "https://mycookie.dev/newsletter/unsubscribe?key=k");
+        String text = letter.text();
+        assertThat(found).hasSize(set.concepts().size());
+        for (NewsletterConcepts.Concept c : found) {
+            assertThat(text).contains("- " + c.term() + ": " + c.summary(), "https://mycookie.dev/concepts/" + c.slug());
+            assertThat(letter.html()).contains("href=\"https://mycookie.dev/concepts/" + c.slug() + "\"");
+            // 자세한 설명은 메일에 넣지 않고 개념 페이지에서 보여 준다
+            assertThat(text).doesNotContain(c.body().get(0));
+        }
+        // 정답과 해설 → 개념 한 줄 정리 → 기존 더 공부하기 버튼 순서
+        int section = text.indexOf("[이 문제에 나온 개념 한 줄 정리]");
+        assertThat(section).isGreaterThan(text.indexOf("[정답과 해설]"));
+        assertThat(text.indexOf("나의쿠키에서 오늘 주제 5문제 더 풀기")).isGreaterThan(section);
+        assertThat(text).contains("https://mycookie.dev/daily/1");
+    }
+
+    @Test
+    void allThirtySetsHaveConceptsStoredInTheDatabase() throws Exception {
+        java.util.Set<String> slugs = new java.util.HashSet<>();
+        for (int day = 1; day <= 30; day++) {
+            NewsletterDailySets.DailySet set = dailySets.find(day).orElseThrow();
+            assertThat(set.concepts()).as("%d번 세트의 개념", day).isNotNull().hasSizeBetween(2, 5);
+            java.util.List<NewsletterConcepts.Concept> found = concepts.findAll(set.concepts());
+            assertThat(found).as("%d번 세트의 개념이 DB에 모두 있다", day).hasSameSizeAs(set.concepts());
+            for (NewsletterConcepts.Concept c : found) {
+                assertThat(c.summary()).isNotBlank().hasSizeLessThanOrEqualTo(120);
+                assertThat(c.body()).isNotEmpty();
+                assertThat(c.deeper()).isNotEmpty();
+                assertThat(c.sources()).isNotEmpty().allSatisfy(s -> assertThat(s.url()).startsWith("https://"));
+                slugs.add(c.slug());
+            }
+        }
+        assertThat(conceptRows.count()).isEqualTo(slugs.size());
+        // 다시 넣어도 개념마다 한 줄
+        concepts.seed();
+        concepts.seed();
+        assertThat(conceptRows.count()).isEqualTo(slugs.size());
+    }
+
+    @Test
+    void conceptPageApiReturnsDetailsAndWhereItAppeared() throws Exception {
+        mvc.perform(get("/api/v1/concepts/mysql-user-lock"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.term").value("MySQL 사용자 락(GET_LOCK)"))
+                .andExpect(jsonPath("$.summary").isNotEmpty())
+                .andExpect(jsonPath("$.body[0]").isNotEmpty())
+                .andExpect(jsonPath("$.deeper[0]").isNotEmpty())
+                .andExpect(jsonPath("$.sources[0].url").value(org.hamcrest.Matchers.startsWith("https://")))
+                .andExpect(jsonPath("$.sets[0].day").value(1))
+                .andExpect(jsonPath("$.related[*].slug").value(org.hamcrest.Matchers.hasItem("connection-pool")));
+        // 여러 세트에 나온 개념은 모두 알려 준다
+        mvc.perform(get("/api/v1/concepts/connection-pool"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.sets[*].day").value(org.hamcrest.Matchers.contains(1, 2)));
+        mvc.perform(get("/api/v1/concepts/no-such-concept"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("NEWSLETTER_CONCEPT_NOT_FOUND"));
+        mvc.perform(get("/api/v1/concepts/Bad_Slug"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("NEWSLETTER_CONCEPT_NOT_FOUND"));
     }
 
     @Test

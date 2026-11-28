@@ -1,0 +1,16 @@
+.concept-page { max-width: 720px; margin: 0 auto; padding: 24px 16px 48px; display: grid; gap: 16px; }
+.concept-kicker { margin: 0 0 4px; font-size: 0.85rem; opacity: 0.7; }
+.concept-card { padding: 16px 18px; border-radius: 12px; border: 1px solid rgba(128, 128, 128, 0.3); display: grid; gap: 10px; }
+.concept-card h2 { margin: 0; font-size: 1.05rem; }
+.concept-card p { margin: 0; line-height: 1.7; }
+.concept-summary { background: rgba(99, 102, 241, 0.08); border-color: rgba(99, 102, 241, 0.35); }
+.concept-summary p { font-weight: 600; }
+.concept-hint { font-size: 0.9rem; opacity: 0.75; }
+.concept-list { margin: 0; padding-left: 20px; display: grid; gap: 6px; line-height: 1.6; }
+.concept-list a { color: inherit; text-decoration: underline; text-underline-offset: 3px; }
+.concept-muted { font-size: 0.85rem; opacity: 0.65; }
+.concept-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.concept-chip { padding: 6px 12px; border-radius: 999px; border: 1px solid rgba(128, 128, 128, 0.4); color: inherit; text-decoration: none; font-size: 0.9rem; }
+.concept-chip:hover { border-color: currentColor; }
+.concept-page p, .concept-list li { word-break: keep-all; overflow-wrap: anywhere; }
+@media (max-width: 480px) { .concept-page { padding: 16px 12px 40px; } .concept-card { padding: 14px; } }
