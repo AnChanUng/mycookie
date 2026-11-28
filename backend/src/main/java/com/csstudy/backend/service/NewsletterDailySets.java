@@ -9,12 +9,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 // 오늘의 학습 세트(오늘의 문제 + 관련 기술블로그). 원본은 newsletter/daily-sets.json이고,
@@ -30,10 +32,12 @@ public class NewsletterDailySets {
     public record Blog(String company, String title, String url, String published, String note) {}
     // cs(오늘의 CS)는 선택 항목이다. 지금 세트는 문제 → 관련 기술블로그 → 정답과 해설로 구성한다
     // practice: 메일의 "더 공부하기"로 들어와 푸는 그날 주제의 연습 문제(5개). 메일 문제와 같은 모양이다
-    public record DailySet(int day, String theme, Question question, Cs cs, Blog blog, List<Question> practice) {}
+    // concepts: 이 문제에 나온 개념의 slug(newsletter/concepts.json). 메일에는 한 줄 정리와 개념 페이지 링크로 들어간다
+    public record DailySet(int day, String theme, Question question, Cs cs, Blog blog, List<Question> practice, List<String> concepts) {}
 
     static final String RESOURCE = "newsletter/daily-sets.json";
     static final int PRACTICE_SIZE = 5;
+    static final int CONCEPTS_MAX = 5;
 
     private final NewsletterDailySetRepository repository;
     private final ObjectMapper json;
@@ -80,6 +84,18 @@ public class NewsletterDailySets {
         });
     }
 
+    /** DB에 있는 모든 세트(day 순). 읽을 수 없는 세트는 건너뛴다. */
+    public List<DailySet> all() {
+        return repository.findAll(Sort.by("dayNo")).stream().map(row -> {
+            try {
+                return json.readValue(row.getContent(), DailySet.class);
+            } catch (IOException e) {
+                log.error("오늘의 학습 세트 {}번을 읽지 못했습니다", row.getDayNo());
+                return null;
+            }
+        }).filter(Objects::nonNull).toList();
+    }
+
     private boolean sameContent(String a, String b) {
         try {
             JsonNode left = json.readTree(a), right = json.readTree(b);
@@ -108,6 +124,11 @@ public class NewsletterDailySets {
                     throw new IllegalStateException(where + "연습 문제 " + (i + 1) + "번은 제목, 질문, 서로 다른 보기 4개, 정답(0~3), 해설이 필요합니다");
                 }
             }
+        }
+        List<String> concepts = set.concepts();
+        if (concepts != null && (concepts.isEmpty() || concepts.size() > CONCEPTS_MAX || concepts.stream().distinct().count() != concepts.size()
+                || concepts.stream().anyMatch(slug -> !NewsletterConcepts.validSlug(slug)))) {
+            throw new IllegalStateException(where + "개념은 서로 다른 slug 1~" + CONCEPTS_MAX + "개여야 합니다");
         }
         Cs cs = set.cs();
         if (cs != null && (blank(cs.title()) || cs.body() == null || cs.body().isEmpty() || cs.points() == null || cs.points().isEmpty())) {
