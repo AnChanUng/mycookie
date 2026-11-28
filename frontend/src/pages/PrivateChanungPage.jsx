@@ -17,18 +17,26 @@ const TechInterview = lazy(() => import('./TechInterviewPage'));
 // 화면 안 링크는 알아보기 어려운 주소로 만든다(privatePath.js)
 const BASE = privatePath();
 
-// 오른쪽 빈 곳에 두는 블로그 글 바로가기(코딩테스트부터 순서대로)
-const BLOG_LINKS = [
-  ['코딩테스트 오답노트', 'https://cookie.tistory.com/195'],
-  ['코딩테스트 문법', 'https://cookie.tistory.com/166'],
-  ['네트워크', 'https://cookie.tistory.com/238'],
-  ['운영체제', 'https://cookie.tistory.com/234'],
-  ['AWS', 'https://cookie.tistory.com/227'],
+// 오른쪽 빈 곳에 두는 블로그 글 바로가기. 분야별로 묶는다
+const BLOG_GROUPS = [
+  ['코딩테스트', [
+    ['코딩테스트 오답노트', 'https://cookie.tistory.com/195'],
+    ['코딩테스트 문법', 'https://cookie.tistory.com/166'],
+  ]],
+  ['CS', [
+    ['네트워크', 'https://cookie.tistory.com/238'],
+    ['운영체제', 'https://cookie.tistory.com/234'],
+  ]],
+  ['DB', [
+    ['Redis', 'https://cookie.tistory.com/177'],
+  ]],
+  ['인프라', [
+    ['AWS', 'https://cookie.tistory.com/227'],
+  ]],
 ];
 // 이력서에 링크로 건 블로그 글. 이력서가 바뀌면 여기도 같이 맞춘다
 const RESUME_BLOG_LINKS = [
   ['개발 워크플로 자동화와 장애 알림', 'https://cookie.tistory.com/247'],
-  ['신입 개발자 온보딩', 'https://cookie.tistory.com/256'],
   ['홈서버 구축과 DB 이전', 'https://cookie.tistory.com/258'],
 ];
 
@@ -248,9 +256,12 @@ function PrivateList({ data }) {
       </div>
       <nav className="private-blog" aria-label="내 블로그 바로가기">
         <span className="private-blog-title">블로그 바로가기</span>
-        {BLOG_LINKS.map(([name, url]) => (
-          <a key={url} href={url} target="_blank" rel="noopener noreferrer">{name}<span aria-hidden="true">↗</span></a>
-        ))}
+        {BLOG_GROUPS.map(([group, links]) => <div key={group} className="private-blog-group">
+          <span className="private-blog-cat">{group}</span>
+          {links.map(([name, url]) => (
+            <a key={url} href={url} target="_blank" rel="noopener noreferrer">{name}<span aria-hidden="true">↗</span></a>
+          ))}
+        </div>)}
         <span className="private-blog-title private-blog-sub">이력서 블로그</span>
         {RESUME_BLOG_LINKS.map(([name, url]) => (
           <a key={url} href={url} target="_blank" rel="noopener noreferrer">{name}<span aria-hidden="true">↗</span></a>
