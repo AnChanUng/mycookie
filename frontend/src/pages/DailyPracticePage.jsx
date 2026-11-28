@@ -109,6 +109,7 @@ function DailyPractice({ day }) {
         {wrongIdx.length > 0 && <button type="button" className="exam-btn sm primary" onClick={() => start(wrongIdx)}>틀린 {wrongIdx.length}문제만 다시 풀기</button>}
         <button type="button" className="exam-btn sm" onClick={() => start(data.practice.map((_, i) => i))}>처음부터 다시</button>
         {data.blog?.url && <a className="exam-btn sm" href={data.blog.url} target="_blank" rel="noopener noreferrer">{data.blog.company} 기술블로그 읽기</a>}
+        <Link className="exam-btn sm" to="/web/practical">실무형 문제 더 풀기</Link>
         <Link className="exam-btn sm" to="/">첫 화면으로</Link>
       </div>
     </section>}
