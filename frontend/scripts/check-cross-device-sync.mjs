@@ -95,6 +95,16 @@ try {
   await act(async()=>{holdGet=null;releaseGet();await settle();});
   assert.ok(progress.data.stats.local,'an answer entered during GET is not replaced in the UI');
   await sync.pushRemoteNow('peer-bank',progress.data);
+  // 실제 계정 전환처럼 저장소를 비워도 열린 화면의 메모리가 섞이면 안 된다.
+  await act(async()=>{
+    localStorage.removeItem('exam-progress:peer-bank');
+    login('B');
+    await settle();
+  });
+  assert.deepEqual(progress.data.stats,{},'account switch clears mounted progress');
+  await act(()=>progress.save(previous=>({...previous,stats:{...previous.stats,onlyB:{c:1,at:30}}})));
+  await sync.pushRemoteNow('peer-bank',progress.data);
+  assert.deepEqual(Object.keys(remote.B['peer-bank'].stats),['onlyB'],'B cannot upload A records from memory');
   await act(()=>view.unmount());view=null;
   offline=true;
   localStorage.setItem('exam-progress:failed-manual',JSON.stringify({stats:{q:{c:1,at:20}}}));
