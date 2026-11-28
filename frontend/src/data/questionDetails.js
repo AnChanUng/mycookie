@@ -8,6 +8,10 @@ import { SPRING_PRACTICE_QUESTIONS } from './springPracticeQuestions';
 import { SPRING_PRACTICE_DETAILS } from './springPracticeDetails';
 import { SPRING_QUESTIONS } from './springQuestions';
 import { SPRING_DETAILS } from './springDetails';
+import { SSAFY_DB_QUESTIONS } from './ssafyDbQuestions';
+import { SSAFY_DB_DETAILS } from './ssafyDbDetails';
+import { WEB_NOTE_QUESTIONS } from './webNoteQuestions';
+import { WEB_NOTE_DETAILS } from './webNoteDetails';
 
 // 문제집 key, 문항 목록, 해설 묶음
 export const DETAIL_SOURCES = [
@@ -15,6 +19,8 @@ export const DETAIL_SOURCES = [
   ['java', JAVA_QUESTIONS, JAVA_DETAILS],
   ['spring-practice', SPRING_PRACTICE_QUESTIONS, SPRING_PRACTICE_DETAILS],
   ['spring', SPRING_QUESTIONS, SPRING_DETAILS],
+  ['ssafydb', SSAFY_DB_QUESTIONS, SSAFY_DB_DETAILS],
+  ['webnote', WEB_NOTE_QUESTIONS, WEB_NOTE_DETAILS],
 ];
 
 // 문장만으로는 겹친다("다음 코드가 출력하는 값은?" 등). 코드와 보기까지 합쳐 문항을 구분한다

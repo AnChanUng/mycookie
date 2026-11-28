@@ -1,6 +1,8 @@
 // 실무형 문제의 풍부한 해설. 길게 늘이지 않고 종류를 나눈다.
 // wrong: 오답 보기 번호(0부터)별로 왜 틀렸는지, fix: 고친 코드, tips: 실무에서 이어지는 함정이나 면접 꼬리질문
-export const PRACTICAL_DETAILS = {
+import { PRACTICAL_DETAILS_MORE } from './practicalDetailsMore';
+
+const BASE_DETAILS = {
   prq01: {
     wrong: {
       1: 'flush는 SQL을 미리 보낼 뿐이고, 이 코드에는 애초에 롤백할 트랜잭션이 없습니다.',
@@ -252,3 +254,5 @@ kafkaTemplate.send("order-events", event.orderId().toString(), event);`,
     ],
   },
 };
+
+export const PRACTICAL_DETAILS = { ...BASE_DETAILS, ...PRACTICAL_DETAILS_MORE };

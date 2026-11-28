@@ -25,7 +25,7 @@ const Rich = ({ text }) => {
 };
 
 // 따로 상단 메뉴를 가진 분류(hub)에서 풀이 화면을 열었을 때 돌아갈 메뉴 이름
-const HUB_NAMES = { ssafy: 'SSAFY', aptitude: 'NCS/인적성', major: '필기이론', web: '웹', ai: 'AI', cs: 'CS · 면접' };
+const HUB_NAMES = { ssafy: 'SSAFY', aptitude: 'NCS/인적성', major: '필기이론', web: '웹', ai: 'AI', cs: 'CS와 면접' };
 
 const shuffle = (arr) => {
   const a = arr.slice();
@@ -46,9 +46,9 @@ const modeLabel = (sections, mode, sec, sets) =>
     : mode === 'wrong' ? '오답 다시 풀기'
     : mode === 'marked' ? '북마크 다시 풀기'
     : mode === 'recall' ? '응시 후기 복원 문제'
-    : mode === 'unit' ? `단원별 문제집 · ${sections[sec]?.name || ''}`
-    : mode === 'cpp' ? `C++ 집중 문제집 · ${sec === 'all' ? '전체' : CPP_GROUPS[sec]?.name || ''}`
-    : `영역별 연습 · ${sections[sec]?.name || ''}`;
+    : mode === 'unit' ? `단원별 문제집: ${sections[sec]?.name || ''}`
+    : mode === 'cpp' ? `C++ 집중 문제집: ${sec === 'all' ? '전체' : CPP_GROUPS[sec]?.name || ''}`
+    : `영역별 연습: ${sections[sec]?.name || ''}`;
 
 // 한 회사 화면에 복기 기반 문제와 예상문제가 함께 있으면 시작 카드마다 어느 쪽인지 표시한다
 const KINDS = {
@@ -107,9 +107,18 @@ export function CompanyExamWithProgress({ company, back, progress, initialIds })
     }
   });
   // 첫 화면의 "이어서 하기"로 들어오면(?resume=1) 안내를 거치지 않고 풀던 문제를 바로 연다
+  // 다른 화면의 바로가기: ?q=문항id는 그 한 문제를, ?sec=영역키는 그 영역 연습을 바로 연다(첫 화면 실무형 카드 등)
+  const linked = (() => {
+    const params = new URLSearchParams(window.location.search);
+    const one = params.get('q');
+    if (one && byId[one]) return { name: 'quiz', mode: 'practice', sec: byId[one].sec, ids: [one] };
+    const sec = params.get('sec');
+    const secIds = sec && SECTIONS[sec] ? Q.filter(q => q.sec === sec).map(q => q.id) : [];
+    return secIds.length ? { name: 'quiz', mode: 'practice', sec, ids: secIds } : null;
+  })();
   const [view, setView] = useState(() => initialIds?.length
     ? { name: 'quiz', mode: 'practice', ids: initialIds }
-    : (saved && new URLSearchParams(window.location.search).has('resume')
+    : linked || (saved && new URLSearchParams(window.location.search).has('resume')
     ? { name: 'quiz', mode: saved.mode, sec: saved.sec, ids: saved.ids, resume: saved }
     : { name: 'home' }));
   // 첫 화면은 문제 데이터를 읽지 않으므로, 거기서 보여 줄 이름 · 주소 · 풀이 종류를 함께 적어 둔다
@@ -191,7 +200,7 @@ export function CompanyExamWithProgress({ company, back, progress, initialIds })
             type="button"
             className={`exam-book wrong${view.name === 'wrongbook' ? ' on' : ''}${everWrongIds.length ? ' has' : ''}`}
             disabled={!everWrongIds.length}
-            title={everWrongIds.length ? '틀리면 자동으로 쌓이는 기록 · 한 번이라도 틀린 문제 모아보기' : '아직 틀린 문제가 없습니다. 문제를 틀리면 자동으로 쌓입니다'}
+            title={everWrongIds.length ? '틀린 문제는 자동으로 쌓여요. 한 번이라도 틀린 문제를 모아 봅니다' : '아직 틀린 문제가 없습니다. 문제를 틀리면 자동으로 쌓입니다'}
             onClick={() => setView({ name: 'wrongbook' })}
           >
             <span className="n">{everWrongIds.length}</span>
@@ -211,8 +220,8 @@ export function CompanyExamWithProgress({ company, back, progress, initialIds })
       )}
       <h1>{title}</h1>
       {account()
-        ? <div className="exam-sync cloud"><i />{account().nickname} 계정에 동기화됨 · 다른 기기에서도 같은 기록을 봅니다</div>
-        : <div className="exam-sync local"><i />이 브라우저에 저장됨 · 기업별 기출문제 목록에서 로그인하면 다른 기기와 동기화됩니다</div>}
+        ? <div className="exam-sync cloud"><i />{account().nickname} 계정에 저장돼서 다른 기기에서도 같은 기록을 볼 수 있어요</div>
+        : <div className="exam-sync local"><i />지금은 이 브라우저에만 저장돼요. 로그인하면 다른 기기에서도 이어서 풀 수 있어요</div>}
     </div>
   );
 
@@ -245,7 +254,7 @@ export function CompanyExamWithProgress({ company, back, progress, initialIds })
       <div className="fade-in">
         {header('채점 결과')}
         <p className="exam-eyebrow">{label(r.mode, r.sec)}</p>
-        <div className="exam-score"><span className="big">{r.score}</span><span className="of">/ {r.total}문제 · {r.total ? Math.round(r.score / r.total * 100) : 0}%</span></div>
+        <div className="exam-score"><span className="big">{r.score}</span><span className="of">/ {r.total}문제 ({r.total ? Math.round(r.score / r.total * 100) : 0}%)</span></div>
         {(r.mode === 'exam' || r.mode === 'set') && (
           <div className="exam-stats">
             {secKeys.map(k => <StatTile key={k} k={SECTIONS[k].name} v={r.secScore[k]} of={r.items.filter(x => x.q.sec === k).length} />)}
@@ -301,7 +310,7 @@ export function CompanyExamWithProgress({ company, back, progress, initialIds })
   const setsBlock = (
     <>
       {!lean && <div className="section-title">{hasSets ? '회차별 모의고사' : '모의고사'}</div>}
-      {hasSets && <p className="exam-lede">{company.setsDescription || <>실제 시험과 같은 문항 수·영역 구성으로 묶은 고정 세트입니다. {splitSets && '복기 기반 회차는 응시 후기에 복원된 문항을 따라 만들었고, 예상문제 회차는 같은 경향으로 새로 만든 문제입니다. '}각 회차는 같은 문제를 같은 순서로 출제하므로 다시 풀었을 때 점수를 비교할 수 있습니다.</>}</p>}
+      {hasSets && <p className="exam-lede">{company.setsDescription || <>실제 시험과 같은 문항 수와 영역 구성으로 묶은 고정 세트입니다. {splitSets && '복기 기반 회차는 응시 후기에 복원된 문항을 따라 만들었고, 예상문제 회차는 같은 경향으로 새로 만든 문제입니다. '}각 회차는 같은 문제를 같은 순서로 출제하므로 다시 풀었을 때 점수를 비교할 수 있습니다.</>}</p>}
       <div className={`exam-sections${lean || examSets.length === 1 ? ' wide' : ''}`}>
         {examSets.map(s => {
           const qs = hasSets ? Q.filter(q => q.set === s.key) : Q;
@@ -311,7 +320,7 @@ export function CompanyExamWithProgress({ company, back, progress, initialIds })
             <button key={s.name} className="exam-section" onClick={() => (hasSets ? start('set', qs.map(q => q.id), s.key) : start('exam', examIds()))}>
               <span className="t">{s.name}<Kind kind={s.kind} /></span>
               <span className="d">{s.sub}</span>
-              <span className="d">{hasSets ? qs.length : examCount}문제 · 시간 제한 없음 · 최근 정답 {right}/{done}</span>
+              <span className="d">{hasSets ? qs.length : examCount}문제, 시간 제한 없음. 최근 {done}문제 중 {right}문제 정답</span>
               <span className="bar"><i style={{ width: `${qs.length ? Math.round(right / qs.length * 100) : 0}%` }} /></span>
             </button>
           );
@@ -326,7 +335,7 @@ export function CompanyExamWithProgress({ company, back, progress, initialIds })
       <div className="fade-in sp-home">
         <Link to={back.to} className="back-link">{back.label}</Link>
         <header className="sp-head">
-          <p className="sp-eyebrow">웹 개발 · 백엔드</p>
+          <p className="sp-eyebrow">웹 개발, 백엔드</p>
           <h1>{company.name}</h1>
           <ul className="sp-areas" aria-label="출제 영역">{areas.map(name => <li key={name}>{name}</li>)}</ul>
         </header>
@@ -362,9 +371,9 @@ export function CompanyExamWithProgress({ company, back, progress, initialIds })
           <b>{plan.name} {plan.left === 0 ? 'D-DAY' : `D-${plan.left}`}</b>
           <span>
             {plan.unseen > 0
-              ? `아직 안 푼 문제 ${plan.unseen}개 · 시험 전까지 다 보려면 하루 ${plan.perDay}문제`
+              ? `아직 안 푼 문제가 ${plan.unseen}개예요. 시험 전까지 다 보려면 하루 ${plan.perDay}문제씩 풀면 돼요`
               : '이 문제집의 문제를 모두 한 번씩 풀었습니다'}
-            {wrongIds.length > 0 && ` · 다시 풀 오답 ${wrongIds.length}개`}
+            {wrongIds.length > 0 && `. 다시 풀 오답은 ${wrongIds.length}개`}
           </span>
         </div>
       )}
@@ -373,7 +382,7 @@ export function CompanyExamWithProgress({ company, back, progress, initialIds })
           <div className="exam-resume-text">
             <strong>풀던 문제가 있습니다</strong>
             <span>
-              {label(saved.mode, saved.sec)} · {Object.keys(saved.answers || {}).length} / {saved.ids.length} 답변
+              {label(saved.mode, saved.sec)}, {saved.ids.length}문제 중 {Object.keys(saved.answers || {}).length}문제 답함
             </span>
           </div>
           <button className="exam-btn primary" onClick={() => { setView({ name: 'quiz', mode: saved.mode, sec: saved.sec, ids: saved.ids, resume: saved }); window.scrollTo({ top: 0 }); }}>이어서 풀기</button>
@@ -390,7 +399,7 @@ export function CompanyExamWithProgress({ company, back, progress, initialIds })
         </dl>
         {hasSets ? setsBlock : <>
           <button type="button" className="sp-cta" onClick={() => start('exam', examIds())}>모의고사 시작하기<span aria-hidden="true">→</span></button>
-          <p className="sp-hint">{examSets[0].sub} · 시간 제한 없음 · 다 풀면 한 번에 채점하고 해설을 보여 줘요.</p>
+          <p className="sp-hint">{examSets[0].sub}. 시간 제한은 없고, 다 풀면 한 번에 채점해서 해설을 보여 줘요.</p>
         </>}
       </section>
       <div className="sp-again exam-again">
@@ -413,8 +422,8 @@ export function CompanyExamWithProgress({ company, back, progress, initialIds })
           <div className="exam-sections">
             <button className="exam-section" onClick={() => start('recall', RECALL.questions.map(q => q.id))}>
               <span className="t">순서대로 풀기</span>
-              <span className="d">프로그래밍 → DB · 네트워크 → 전산학일반 순서 · 한 문제씩 즉시 채점</span>
-              <span className="d">{RECALL.questions.length}문제 · 최근 정답 {RECALL.questions.filter(q => data.stats[q.id]?.last === 'r').length}/{RECALL.questions.filter(q => data.stats[q.id]).length}</span>
+              <span className="d">프로그래밍, DB와 네트워크, 전산학일반 순서로 한 문제씩 바로 채점해요</span>
+              <span className="d">{RECALL.questions.length}문제, 최근 정답 {RECALL.questions.filter(q => data.stats[q.id]?.last === 'r').length}/{RECALL.questions.filter(q => data.stats[q.id]).length}</span>
               <span className="bar"><i style={{ width: `${Math.round(RECALL.questions.filter(q => data.stats[q.id]?.last === 'r').length / RECALL.questions.length * 100)}%` }} /></span>
             </button>
             <button className="exam-section" onClick={() => start('recall', shuffle(RECALL.questions.map(q => q.id)))}>
@@ -436,7 +445,7 @@ export function CompanyExamWithProgress({ company, back, progress, initialIds })
             <button key={k} className="exam-section" onClick={() => start('practice', practiceIds(qs), k)}>
               <span className="t">{s.name}</span>
               <span className="d">{s.sub}</span>
-              <span className="d">{qs.length}문제{company.practiceSize ? ` 중 ${company.practiceSize}문제씩` : ''} · 최근 정답 {right}/{done}</span>
+              <span className="d">{qs.length}문제{company.practiceSize ? ` 중 ${company.practiceSize}문제씩` : ''}, 최근 {done}문제 중 {right}문제 정답</span>
               <span className="bar"><i style={{ width: `${qs.length ? Math.round(right / qs.length * 100) : 0}%` }} /></span>
             </button>
           );
@@ -455,7 +464,7 @@ export function CompanyExamWithProgress({ company, back, progress, initialIds })
                 <button key={k} className="exam-section" onClick={() => start('unit', qs.map(q => q.id), k)}>
                   <span className="t">{s.name}</span>
                   <span className="d">{s.sub}</span>
-                  <span className="d">{qs.length}문제 · 최근 정답 {right}/{done}</span>
+                  <span className="d">{qs.length}문제, 최근 {done}문제 중 {right}문제 정답</span>
                   <span className="bar"><i style={{ width: `${qs.length ? Math.round(right / qs.length * 100) : 0}%` }} /></span>
                 </button>
               );
@@ -469,12 +478,12 @@ export function CompanyExamWithProgress({ company, back, progress, initialIds })
       {CPP.length > 0 && (
         <>
           <div className="section-title">C++ 집중 문제집<Kind kind={mainKind} /></div>
-          <p className="exam-lede">HF 프로그래밍 영역에서 자주 나오는 C++ 실행 결과·개념 문제 {CPP.length}문항. 모의고사 60문제와는 별도이며, 한 문제씩 즉시 채점되고 틀린 문제는 오답노트에 함께 쌓입니다.</p>
+          <p className="exam-lede">HF 프로그래밍 영역에서 자주 나오는 C++ 실행 결과와 개념 문제 {CPP.length}문항. 모의고사 60문제와는 별도이며, 한 문제씩 즉시 채점되고 틀린 문제는 오답노트에 함께 쌓입니다.</p>
           <div className="exam-sections">
             <button className="exam-section cpp" onClick={() => start('cpp', shuffle(CPP.map(q => q.id)), 'all')}>
               <span className="t">전체 문제 풀기</span>
               <span className="d">세 분야를 섞어서 무작위 순서로 출제</span>
-              <span className="d">{CPP.length}문제 · 최근 정답 {CPP.filter(q => data.stats[q.id]?.last === 'r').length}/{CPP.filter(q => data.stats[q.id]).length}</span>
+              <span className="d">{CPP.length}문제, 최근 정답 {CPP.filter(q => data.stats[q.id]?.last === 'r').length}/{CPP.filter(q => data.stats[q.id]).length}</span>
               <span className="bar"><i style={{ width: `${Math.round(CPP.filter(q => data.stats[q.id]?.last === 'r').length / CPP.length * 100)}%` }} /></span>
             </button>
             {Object.entries(CPP_GROUPS).map(([k, g]) => {
@@ -485,7 +494,7 @@ export function CompanyExamWithProgress({ company, back, progress, initialIds })
                 <button key={k} className="exam-section cpp" onClick={() => start('cpp', shuffle(qs.map(q => q.id)), k)}>
                   <span className="t">{g.name}</span>
                   <span className="d">{g.sub}</span>
-                  <span className="d">{qs.length}문제 · 최근 정답 {right}/{done}</span>
+                  <span className="d">{qs.length}문제, 최근 {done}문제 중 {right}문제 정답</span>
                   <span className="bar"><i style={{ width: `${qs.length ? Math.round(right / qs.length * 100) : 0}%` }} /></span>
                 </button>
               );
@@ -499,14 +508,14 @@ export function CompanyExamWithProgress({ company, back, progress, initialIds })
           <div className="section-title">응시 기록</div>
           <div className="exam-table-wrap">
             <table className="exam-table">
-              <thead><tr><th>일시</th><th>유형</th><th>점수</th><th>{secKeys.map(k => SECTIONS[k].short).join(' · ')}</th></tr></thead>
+              <thead><tr><th>일시</th><th>유형</th><th>점수</th><th>{secKeys.map(k => SECTIONS[k].short).join(', ')}</th></tr></thead>
               <tbody>
                 {data.history.slice().reverse().slice(0, 15).map((h, i) => (
                   <tr key={i}>
                     <td>{fmtDate(h.at)}</td>
                     <td>{label(h.mode, h.sec)}</td>
                     <td className="num">{h.score} / {h.total}</td>
-                    <td className="num">{h.sections ? secKeys.map(k => h.sections[k] ?? 0).join('·') : '–'}</td>
+                    <td className="num">{h.sections ? secKeys.map(k => h.sections[k] ?? 0).join(' / ') : '–'}</td>
                   </tr>
                 ))}
               </tbody>
@@ -630,7 +639,7 @@ function Quiz({ byId, stats, mode, sec, title, ids, sections, onPractice, onFini
                 {q.strict && <button className="exam-btn ghost" onClick={() => choose('w')}>모르겠어요</button>}
               </div>
             )}
-            {q.strict && !shown && <p className="exam-written-hint">띄어쓰기·대소문자는 상관없어요. 우리말과 영문 표기 모두 정답으로 인정해요.</p>}
+            {q.strict && !shown && <p className="exam-written-hint">띄어쓰기와 대소문자는 상관없어요. 우리말과 영문 표기 모두 정답으로 인정해요.</p>}
             {!shown && peeked[q.id] && (
               <div className="exam-expl">
                 <ModelAnswer q={q} />
@@ -660,7 +669,7 @@ function Quiz({ byId, stats, mode, sec, title, ids, sections, onPractice, onFini
         )}
         {shown && (
           <div className={`exam-expl ${isRight(q, sel) ? 'ok' : 'bad'}`}>
-            <div className="lab">{q.kind ? (isRight(q, sel) ? '정답' : '오답') : sel === q.a ? '정답' : `오답 · 정답은 ${CIRC[q.a]}`}</div>
+            <div className="lab">{q.kind ? (isRight(q, sel) ? '정답' : '오답') : sel === q.a ? '정답' : `오답이에요. 정답은 ${CIRC[q.a]}`}</div>
             {q.strict && (texts[q.id] || '').trim() && <div className="exam-my-answer">내 답 <b>{texts[q.id]}</b></div>}
             {q.kind && <ModelAnswer q={q} />}
             <div>{q.e}</div>
@@ -692,7 +701,7 @@ function Quiz({ byId, stats, mode, sec, title, ids, sections, onPractice, onFini
             return <button key={id} className={cls} onClick={() => setIdx(i)}>{i + 1}</button>;
           })}
         </div>
-        <div className="exam-keyhint">{q.kind ? '키보드: 답을 적고 Enter로 채점 · ← → 문제 이동(입력칸 밖에서)' : `키보드: 숫자 1~${q.o?.length || 4} 보기 선택 · ← → 문제 이동`}</div>
+        <div className="exam-keyhint">{q.kind ? '키보드: 답을 적고 Enter로 채점, 입력칸 밖에서 ← →로 문제 이동' : `키보드: 숫자 1~${q.o?.length || 4} 보기 선택, ← →로 문제 이동`}</div>
       </aside>
       </div>
     </div>
@@ -721,7 +730,7 @@ function CodingEntry({ coding }) {
         ))}
         <Link to={coding.to} className="exam-section coding go">
           <span className="t">문제 목록 열기 →</span>
-          <span className="d">{coding.count}문제 · 통과 {solved}/{coding.count}</span>
+          <span className="d">{coding.count}문제, {solved}문제 통과</span>
           <span className="bar"><i style={{ width: `${Math.round(solved / coding.count * 100)}%` }} /></span>
         </Link>
       </div>
@@ -877,7 +886,7 @@ function MarkBook({ Q, ids, stats, sections, marks, onMark }) {
               sections={sections}
               marked
               onMark={onMark}
-              extra={s ? <span className={`exam-chip ${s.last === 'w' ? 'wrong' : ''}`}>{s.last === 'w' ? `최근 오답 · 누적 ${s.w}회` : '최근 정답'}</span> : <span className="exam-chip">아직 안 푼 문제</span>}
+              extra={s ? <span className={`exam-chip ${s.last === 'w' ? 'wrong' : ''}`}>{s.last === 'w' ? `최근 오답, 지금까지 ${s.w}번 틀림` : '최근 정답'}</span> : <span className="exam-chip">아직 안 푼 문제</span>}
             />
           );
         })}
