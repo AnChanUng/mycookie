@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { createServer } from 'vite';
 
-// 실무형 문제: 문항마다 상황, 코드, 공식 문서 근거가 있고, 정답이 길이나 위치로 짐작되지 않는지 확인한다.
+// 실무형 문제: 문항마다 상황과 코드가 있고, 정답이 길이나 위치로 짐작되지 않는지 확인한다.
 // 화면 문구 규칙에 따라 가운데점(·)을 쓰지 않는다
 const server = await createServer({ server: { middlewareMode: true }, appType: 'custom', logLevel: 'silent' });
 try {
@@ -15,7 +15,6 @@ try {
     assert.equal(new Set(q.o).size, 4, `${q.id} 보기가 서로 달라야 한다`);
     assert.ok(Number.isInteger(q.a) && q.a >= 0 && q.a < 4, `${q.id} 정답 번호`);
     assert.ok(q.q && q.e && q.e.length >= 30, `${q.id} 문제와 해설`);
-    assert.ok(q.ref?.label && /^https:\/\//.test(q.ref.url), `${q.id} 공식 문서 근거`);
     const text = [q.ctx, q.q, q.e, q.topic, ...q.o].join(' ');
     assert.ok(!text.includes('·'), `${q.id} 가운데점 금지`);
   }

@@ -9,7 +9,7 @@ import privateNotes from '../src/data/privateExplanations.json' with { type: 'js
 
 // 2026-11-18 문제집 정비로 실제 응시 후기 기반 문제집은 비공개(privateBanks.js, privateExplanations.json)로 옮겼다.
 // 공개 이론 문항의 상세 해설과 공개·비공개 해설 데이터의 합계를 확인한다
-// 실무형 문제는 문항 안의 긴 해설(e)과 공식 문서 근거(ref)로 설명한다(check:practical이 검사). 상세 해설 데이터에서 뺀다
+// 실무형 문제는 문항 안의 긴 해설(e)로 설명한다(check:practical이 검사). 상세 해설 데이터에서 뺀다
 const SELF_EXPLAINED = ['practical'];
 const old = BANKS.filter(b => b.key !== 'pearl' && !SELF_EXPLAINED.includes(b.key)).flatMap(allQuestions).filter(theoryFor);
 // 기존 문제집의 기준 수와 새 Spring 문제집의 이론 연결 수를 나눠 검증한다.

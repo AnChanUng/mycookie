@@ -664,7 +664,6 @@ function Quiz({ byId, stats, mode, sec, title, ids, sections, onPractice, onFini
             {q.strict && (texts[q.id] || '').trim() && <div className="exam-my-answer">내 답 <b>{texts[q.id]}</b></div>}
             {q.kind && <ModelAnswer q={q} />}
             <div>{q.e}</div>
-            {q.ref && <a className="exam-note-link" href={q.ref.url} target="_blank" rel="noopener noreferrer">근거: {q.ref.label} ↗</a>}
             {q.link &&<Link className="exam-note-link" to={q.link}>노트 다시 읽기 →</Link>}
             <QuestionSim key={`g${q.id}`} q={q} />
             <QuestionExplanation key={q.id} q={q} />
@@ -797,7 +796,6 @@ export function ReviewCard({ q, a, extra, sections, marked, onMark }) {
         </div>
       )}
       <div className="ex">{q.e}</div>
-      {q.ref && <a className="exam-note-link" href={q.ref.url} target="_blank" rel="noopener noreferrer">근거: {q.ref.label} ↗</a>}
       <QuestionSim q={q} />
       <QuestionExplanation q={q} />
       <ReportButton q={q} />

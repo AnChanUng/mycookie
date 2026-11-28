@@ -1,6 +1,6 @@
 // 실무형 문제: 상황과 실제 코드를 읽고 무엇이 문제인지 고른다. 신입 백엔드 기준.
 // 기준 버전: Spring Boot 3.x, Spring Framework 6.2, Spring Data JPA 3.x, Hibernate 6, Apache Kafka 3.x.
-// 문항마다 ref에 근거가 되는 공식 문서를 적는다. 정답 위치는 고르게, 정답이 가장 긴 보기로 쏠리지 않게 쓴다(scripts/check-practical.mjs).
+// 정답 위치는 고르게, 정답이 가장 긴 보기로 쏠리지 않게 쓴다(scripts/check-practical.mjs).
 // 학습 메일 문제와는 따로 만든다(메일 구독자만 받는 문제를 웹에 다시 쓰지 않는다)
 export const PRACTICAL_SECTIONS = {
   tx: { name: '트랜잭션', short: '트랜잭션', sub: '전파, 자기 호출, 롤백 규칙', count: 3 },
@@ -10,7 +10,6 @@ export const PRACTICAL_SECTIONS = {
   cache: { name: '캐시와 메시지', short: '캐시, 메시지', sub: 'Redis 캐시, Kafka 순서', count: 3 },
 };
 
-const TX_DOC = 'https://docs.spring.io/spring-framework/reference/data-access/transaction/declarative/annotations.html';
 
 export const PRACTICAL_QUESTIONS = [
   {
@@ -38,7 +37,6 @@ public class OrderService {
     ],
     a: 0,
     e: '프록시 방식에서는 프록시를 거쳐 들어온 외부 호출만 트랜잭션이 걸립니다. placeOrder가 같은 객체의 saveWithPayment를 부르면 프록시를 지나지 않아 트랜잭션 없이 실행되고, save가 바로 반영됩니다. placeOrder에 @Transactional을 붙이거나 트랜잭션 메서드를 다른 빈으로 옮깁니다. RuntimeException은 기본 롤백 대상입니다.',
-    ref: { label: 'Spring Framework 6.2, Using @Transactional', url: TX_DOC },
   },
   {
     id: 'prq02', sec: 'tx', topic: '롤백 규칙',
@@ -57,7 +55,6 @@ public void write(PostRequest req, MultipartFile file) throws IOException {
     ],
     a: 1,
     e: '선언적 트랜잭션은 기본으로 RuntimeException과 Error에서만 롤백하고, 체크 예외에서는 커밋합니다. IOException은 체크 예외라 게시글이 커밋됩니다. @Transactional(rollbackFor = IOException.class)로 지정하거나 런타임 예외로 감싸 던집니다.',
-    ref: { label: 'Spring Framework 6.2, Rolling Back a Declarative Transaction', url: 'https://docs.spring.io/spring-framework/reference/data-access/transaction/declarative/rolling-back.html' },
   },
   {
     id: 'prq03', sec: 'tx', topic: '전파',
@@ -84,7 +81,6 @@ public void saveFailure(TransferRequest req, Exception e) { ... }`,
     ],
     a: 2,
     e: '기본 전파 속성 REQUIRED는 이미 진행 중인 트랜잭션에 참여합니다. saveFailure는 transfer의 트랜잭션 안에서 실행되고, 예외를 다시 던지면 전체가 롤백되며 실패 기록도 사라집니다. saveFailure에 propagation = REQUIRES_NEW를 주면 별도 트랜잭션으로 커밋됩니다.',
-    ref: { label: 'Spring Framework 6.2, Transaction Propagation', url: 'https://docs.spring.io/spring-framework/reference/data-access/transaction/declarative/tx-propagation.html' },
   },
   {
     id: 'prq04', sec: 'jpa', topic: 'N+1',
@@ -104,7 +100,6 @@ public List<OrderResponse> list() {
     ],
     a: 3,
     e: '주문 1번 조회 뒤 주문마다 회원을 따로 불러 N+1 문제가 생깁니다. JPQL 페치 조인이나 Spring Data JPA의 @EntityGraph로 회원을 함께 가져오면 한 번에 조회됩니다. EAGER로 바꿔도 findAll 같은 JPQL에서는 회원을 따로 조회할 수 있어 해결책이 되지 않습니다.',
-    ref: { label: 'Spring Data JPA, Using @EntityGraph', url: 'https://docs.spring.io/spring-data/jpa/reference/jpa/query-methods.html#jpa.entity-graph' },
   },
   {
     id: 'prq05', sec: 'jpa', topic: '지연 로딩',
@@ -130,7 +125,6 @@ public TeamResponse detail(@PathVariable Long id) {
     ],
     a: 0,
     e: 'open-in-view를 끄면 영속성 컨텍스트가 트랜잭션과 함께 닫힙니다. 서비스가 반환한 뒤 컨트롤러에서 members를 처음 읽으면 초기화할 세션이 없어 예외가 납니다. 서비스 안에서 DTO로 바꿔 반환하거나 페치 조인으로 미리 가져옵니다.',
-    ref: { label: 'Spring Boot, spring.jpa.open-in-view 속성', url: 'https://docs.spring.io/spring-boot/appendix/application-properties/index.html#application-properties.data.spring.jpa.open-in-view' },
   },
   {
     id: 'prq06', sec: 'jpa', topic: '변경 감지',
@@ -150,7 +144,6 @@ public void rename(Long id, String nickname) {
     ],
     a: 1,
     e: '트랜잭션 안에서 조회한 엔티티는 영속성 컨텍스트가 관리합니다. 커밋 직전 flush에서 처음 상태와 비교해 바뀐 값이 있으면 UPDATE를 보냅니다(변경 감지). 정상 동작이며, 의도하지 않은 수정을 막으려면 조회 전용 메서드에 readOnly를 쓰거나 엔티티 변경 메서드를 함부로 부르지 않습니다.',
-    ref: { label: 'Hibernate ORM 6, Persistence Context', url: 'https://docs.jboss.org/hibernate/orm/6.6/userguide/html_single/Hibernate_User_Guide.html#pc' },
   },
   {
     id: 'prq07', sec: 'conc', topic: '갱신 분실',
@@ -169,7 +162,6 @@ public void order(Long productId) {
     ],
     a: 2,
     e: '두 트랜잭션이 모두 10을 읽고 9로 덮어쓰는 갱신 분실입니다. @Version으로 낙관적 락을 걸어 충돌을 감지하거나, 비관적 락(SELECT FOR UPDATE), 또는 UPDATE product SET stock = stock - 1 같은 원자적 쿼리로 막습니다.',
-    ref: { label: 'Spring Data JPA, Locking', url: 'https://docs.spring.io/spring-data/jpa/reference/jpa/locking.html' },
   },
   {
     id: 'prq08', sec: 'conc', topic: 'synchronized와 트랜잭션',
@@ -188,7 +180,6 @@ public synchronized void order(Long productId) {
     ],
     a: 3,
     e: '트랜잭션 프록시는 메서드 호출 전에 트랜잭션을 열고, 메서드가 끝난 뒤 커밋합니다. synchronized 락은 메서드가 끝날 때 풀리므로, 커밋 전에 다른 스레드가 들어와 아직 반영되지 않은 재고를 읽습니다. 서버가 여러 대면 더욱 소용없으니 DB 락이나 원자적 쿼리를 씁니다.',
-    ref: { label: 'Spring Framework 6.2, Understanding the Spring Framework Declarative Transaction Implementation', url: 'https://docs.spring.io/spring-framework/reference/data-access/transaction/declarative/tx-decl-explained.html' },
   },
   {
     id: 'prq09', sec: 'conc', topic: '낙관적 락 충돌',
@@ -208,7 +199,6 @@ public class Product {
     ],
     a: 0,
     e: '@Version이 있으면 UPDATE할 때 버전을 비교하고, 그 사이 다른 트랜잭션이 바꿨다면 예외(Spring에서는 ObjectOptimisticLockingFailureException)가 납니다. 갱신 분실 대신 충돌을 알려 주는 정상 동작입니다. 예외를 잡아 다시 읽고 재시도하거나, 사용자에게 다시 시도하라고 안내합니다. 버전 값은 JPA가 자동으로 올립니다.',
-    ref: { label: 'Spring Framework 6.2, ObjectOptimisticLockingFailureException', url: 'https://docs.spring.io/spring-framework/docs/6.2.x/javadoc-api/org/springframework/orm/ObjectOptimisticLockingFailureException.html' },
   },
   {
     id: 'prq10', sec: 'api', topic: '요청 검증',
@@ -229,7 +219,6 @@ public ResponseEntity<Void> signup(@RequestBody SignupRequest req) {
     ],
     a: 1,
     e: 'Spring MVC는 @RequestBody 인자에 @Valid나 @Validated가 있을 때만 Bean Validation을 실행합니다. 붙이면 검증 실패 시 MethodArgumentNotValidException이 나고 기본으로 400을 돌려줍니다. @NotBlank는 null, 빈 문자열, 공백만 있는 문자열을 모두 거절합니다.',
-    ref: { label: 'Spring Framework 6.2, Spring MVC Validation', url: 'https://docs.spring.io/spring-framework/reference/web/webmvc/mvc-controller/ann-validation.html' },
   },
   {
     id: 'prq11', sec: 'api', topic: '예외 응답',
@@ -249,7 +238,6 @@ public MemberResponse get(@PathVariable Long id) {
     ],
     a: 2,
     e: '처리하지 않은 예외는 500이 됩니다. 회원 없음 같은 예외를 전용 클래스로 만들고 @RestControllerAdvice의 @ExceptionHandler에서 404와 정해진 응답 모양으로 바꾸면 모든 컨트롤러에 한 번에 적용됩니다. 응답에는 내부 정보를 넣지 않습니다.',
-    ref: { label: 'Spring Framework 6.2, Controller Advice', url: 'https://docs.spring.io/spring-framework/reference/web/webmvc/mvc-controller/ann-advice.html' },
   },
   {
     id: 'prq12', sec: 'api', topic: '응답 DTO',
@@ -267,7 +255,6 @@ public Member get(@PathVariable Long id) {
     ],
     a: 3,
     e: '@RestController가 반환한 객체는 HttpMessageConverter(기본 Jackson)가 게터 기준으로 JSON을 만들어, 엔티티의 모든 필드가 나갈 수 있습니다. 응답 전용 DTO에 필요한 필드만 담으면 노출을 막고, 엔티티 구조가 바뀌어도 API가 흔들리지 않습니다. 엔티티에 null을 넣으면 변경 감지로 DB까지 바뀔 수 있습니다.',
-    ref: { label: 'Spring Framework 6.2, @ResponseBody', url: 'https://docs.spring.io/spring-framework/reference/web/webmvc/mvc-controller/ann-methods/responsebody.html' },
   },
   {
     id: 'prq13', sec: 'cache', topic: '캐시 자기 호출',
@@ -292,7 +279,6 @@ public class ProductService {
     ],
     a: 0,
     e: '캐시 애너테이션도 트랜잭션처럼 프록시로 동작해, 같은 객체 안에서 this로 부르면 캐시를 거치지 않습니다. 목록을 다른 빈에서 부르거나 캐시 메서드를 별도 빈으로 옮깁니다.',
-    ref: { label: 'Spring Framework 6.2, Declarative Annotation-based Caching', url: 'https://docs.spring.io/spring-framework/reference/integration/cache/annotations.html' },
   },
   {
     id: 'prq14', sec: 'cache', topic: '캐시 무효화',
@@ -313,7 +299,6 @@ public void changePrice(Long id, int price) {
     ],
     a: 1,
     e: '@Cacheable은 값이 캐시에 있으면 메서드를 실행하지 않고 그 값을 돌려줍니다. 데이터를 바꾸는 쪽에서 @CacheEvict(value = "product", key = "#id")로 지우거나 @CachePut으로 갱신해야 합니다. JPA 변경 감지는 DB만 바꾸고 캐시는 모릅니다.',
-    ref: { label: 'Spring Framework 6.2, Declarative Annotation-based Caching', url: 'https://docs.spring.io/spring-framework/reference/integration/cache/annotations.html' },
   },
   {
     id: 'prq15', sec: 'cache', topic: 'Kafka 순서',
@@ -328,6 +313,5 @@ public void changePrice(Long id, int price) {
     ],
     a: 2,
     e: 'Kafka는 한 파티션 안에서만 순서를 보장합니다. 키 없이 보내면 이벤트가 여러 파티션에 흩어져 순서가 섞일 수 있습니다. 주문 ID를 키로 주면 같은 주문의 이벤트가 같은 파티션에 들어가 보낸 순서대로 소비됩니다.',
-    ref: { label: 'Apache Kafka 문서, Introduction (Concepts and Terms)', url: 'https://kafka.apache.org/documentation/#intro_concepts_and_terms' },
   },
 ];
