@@ -65,6 +65,6 @@ export default function SocialLogin({ user }) {
       </button>)}
     </div>}
     {message && <p className="auth-message" role="alert">{message}</p>}
-    <div className="auth-divider"><span>이미 계정이 있다면 닉네임 · 이메일로</span></div>
+    <div className="auth-divider" aria-hidden="true" />
   </div>;
 }
