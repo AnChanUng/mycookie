@@ -664,7 +664,7 @@ function Quiz({ byId, stats, mode, sec, title, ids, sections, onPractice, onFini
             {q.strict && (texts[q.id] || '').trim() && <div className="exam-my-answer">내 답 <b>{texts[q.id]}</b></div>}
             {q.kind && <ModelAnswer q={q} />}
             <div>{q.e}</div>
-            {q.link && <Link className="exam-note-link" to={q.link}>노트 다시 읽기 →</Link>}
+            {q.link &&<Link className="exam-note-link" to={q.link}>노트 다시 읽기 →</Link>}
             <QuestionSim key={`g${q.id}`} q={q} />
             <QuestionExplanation key={q.id} q={q} />
             {!q.kind && !isRight(q, sel) && <SimilarQuestion key={`s${q.id}`} q={q} />}

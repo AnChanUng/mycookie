@@ -10,6 +10,8 @@
     "check:chatbot-corpus": "node --import ./scripts/extensionless-loader.mjs scripts/export-chatbot.mjs --check",
     "check:study-coach": "node --import ./scripts/extensionless-loader.mjs scripts/check-study-coach.mjs",
     "check:daily-practice": "node scripts/check-daily-practice.mjs",
+    "check:question-details": "node scripts/check-question-details.mjs",
+    "check:practical": "node scripts/check-practical.mjs",
     "check:feedback": "node --import ./scripts/extensionless-loader.mjs scripts/check-feedback.mjs",
     "check:interview-audio": "node scripts/check-interview-audio.mjs",
     "check:chanung": "node scripts/check-chanung.mjs",

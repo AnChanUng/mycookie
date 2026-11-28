@@ -47,6 +47,7 @@ public class NewsletterService {
     private final NewsletterSubscriberRepository subscribers;
     private final NewsletterLetter letters;
     private final NewsletterDailySets dailySets;
+    private final NewsletterConcepts concepts;
     private final NewsArticleRepository articles;
     private final MailService mail;
     private final TransactionTemplate tx;
@@ -54,7 +55,7 @@ public class NewsletterService {
     private final int dailyLimit;
     private final int maxSubscribers;
 
-    public NewsletterService(NewsletterSubscriberRepository subscribers, NewsletterLetter letters, NewsletterDailySets dailySets, NewsArticleRepository articles, MailService mail,
+    public NewsletterService(NewsletterSubscriberRepository subscribers, NewsletterLetter letters, NewsletterDailySets dailySets, NewsletterConcepts concepts, NewsArticleRepository articles, MailService mail,
                              TransactionTemplate tx,
                              @Value("${app.base-url:http://localhost:3000}") String baseUrl,
                              @Value("${app.newsletter.daily-limit:400}") int dailyLimit,
@@ -62,6 +63,7 @@ public class NewsletterService {
         this.subscribers = subscribers;
         this.letters = letters;
         this.dailySets = dailySets;
+        this.concepts = concepts;
         this.articles = articles;
         this.mail = mail;
         this.tx = tx;
@@ -241,7 +243,7 @@ public class NewsletterService {
                     // 세트에 문제와 이어지는 글이 정해져 있으면 그것을 쓰고, 없을 때만 수집 글에서 고른다
                     NewsArticle blog = set.blog() == null ? nextBlog(s) : null;
                     if (blog != null) s.setLastBlogArticleId(blog.getId());
-                    return letters.buildDaily(set, blog, baseUrl, unsubscribeUrl);
+                    return letters.buildDaily(set, concepts.findAll(set.concepts()), blog, baseUrl, unsubscribeUrl);
                 })
                 .orElseGet(() -> {
                     // 받을 세트가 아직 없으면 같은 세트를 되풀이하지 않고 웹 필수지식 편지를 보낸다

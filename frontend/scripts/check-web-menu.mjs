@@ -12,7 +12,9 @@ try {
   const { default: Web } = await server.ssrLoadModule('/src/pages/WebPage.jsx');
   const web = render(Web);
   assert.ok(web.includes('href="/web/spring"'));
-  assert.ok(web.includes('웹 필수지식'));
+  // 무엇을 하는 곳인지로 나눈 세 묶음과 실무형 문제 링크
+  for (const title of ['개념 읽기', '개념 문제', '실무형 문제']) assert.ok(web.includes(title), title);
+  assert.ok(web.includes('href="/web/practical"'));
   assert.ok(web.includes('href="/web-essentials"'));
   const { WEB_ESSENTIALS } = await server.ssrLoadModule('/src/data/webEssentials.js');
   assert.equal(WEB_ESSENTIALS.items.length, 57);

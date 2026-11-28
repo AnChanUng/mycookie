@@ -56,7 +56,7 @@ function absorbAccountRecords(company) {
   let found = false;
   try {
     for (const k of Object.keys(localStorage)) {
-      if (!k.startsWith(prefix)) continue;
+      if (!account()?.id || k !== `${prefix}${account().id}`) continue;
       try { merged = mergeProgress(merged, { ...EMPTY, ...JSON.parse(localStorage.getItem(k)) }); } catch { /* skip */ }
       localStorage.removeItem(k);
       found = true;
@@ -139,7 +139,12 @@ export function useExamProgress(company) {
       finally { busy = false; }
     };
     void refresh();
-    const off = onAccountChange(refresh);
+    const off = onAccountChange(() => {
+      // 로그인 전 계정의 메모리 기록을 새 계정의 서버 응답과 합치지 않는다.
+      latest.current = readLocal(company, null);
+      setState(prev => prev.company === company ? { ...prev, data: latest.current } : prev);
+      void refresh();
+    });
     window.addEventListener('online', refresh);
     window.addEventListener('focus', refresh);
     globalThis.document?.addEventListener?.('visibilitychange', refresh);

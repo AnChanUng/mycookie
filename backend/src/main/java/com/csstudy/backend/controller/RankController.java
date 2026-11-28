@@ -80,15 +80,6 @@ public class RankController {
     public Map<String, Object> solved(@RequestHeader(value = "X-Visitor-Id", required = false) String visitorId,
                                       @RequestParam(defaultValue = "false") boolean all,
                                       HttpServletRequest request) {
-        // 로그인한 기기가 순위를 볼 때도 계정에 묶는다. 문제 수를 알리는 요청을 놓쳤어도 여기서 합쳐진다
-        if (visitorId != null) {
-            authService.currentUser(request).map(User::getId).ifPresent(userId ->
-                    solvedRepository.findByVisitorId(visitorId).filter(v -> !userId.equals(v.getUserId())).ifPresent(v -> {
-                        v.setUserId(userId);
-                        solvedRepository.save(v);
-                        cached = null;
-                    }));
-        }
         Board board = board();
         List<Solver> top = all ? board.ranked() : board.ranked().subList(0, Math.min(TOP, board.ranked().size()));
         User currentUser = authService.currentUser(request).orElse(null);
@@ -135,7 +126,9 @@ public class RankController {
         var before=account.isPresent()?membershipService.membership(account.get()):membershipService.visitor(visitorId);
         VisitorSolved solved = solvedRepository.findByVisitorId(visitorId)
                 .orElseGet(() -> VisitorSolved.builder().visitorId(visitorId).count(-1).build());
-        // 로그인한 기기면 계정에 묶어 둔다. 로그아웃한 뒤에도 같은 사람이므로 묶음은 그대로 둔다
+        // 연결된 기록은 다른 계정이나 로그아웃한 요청이 변경할 수 없다.
+        if (solved.getUserId() != null && !Objects.equals(solved.getUserId(), account.map(User::getId).orElse(null)))
+            return ResponseEntity.status(403).build();
         Long userId = authService.currentUser(request).map(User::getId).orElse(solved.getUserId());
         if (solved.getCount() != count || !Objects.equals(solved.getUserId(), userId)) {
             solved.setCount(count);

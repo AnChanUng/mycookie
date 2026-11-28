@@ -105,6 +105,11 @@
           "그래서 분산 락은 '누가 쥐고 있는가'와 '언제 풀리는가'를 함께 설계해야 합니다."
         ]
       }
+    ],
+    "concepts": [
+      "mysql-user-lock",
+      "connection-pool",
+      "spring-transaction-connection"
     ]
   },
   {
@@ -210,6 +215,11 @@
           "시각만으로는 서버 간 시계 차이와 동시 요청 때문에 흐름을 정확히 이을 수 없습니다."
         ]
       }
+    ],
+    "concepts": [
+      "pipe-buffer-blocking",
+      "logback-async-appender",
+      "connection-pool"
     ]
   },
   {
@@ -315,6 +325,11 @@
           "개선 전후를 같은 부하로 비교해 숫자로 남겨야 효과를 증명할 수 있습니다."
         ]
       }
+    ],
+    "concepts": [
+      "softirq",
+      "rss-rps",
+      "per-core-cpu"
     ]
   },
   {
@@ -421,6 +436,11 @@
           "특정 시기(월말 정산 등)에만 쓰는 인덱스가 있을 수 있어 관찰 기간을 충분히 잡습니다."
         ]
       }
+    ],
+    "concepts": [
+      "mysql-invisible-index",
+      "index-write-cost",
+      "mysql-explain"
     ]
   },
   {
@@ -526,6 +546,11 @@
           "스트리밍 응답에서도 느린 클라이언트가 서버 스레드를 오래 붙잡지 않도록 타임아웃을 둡니다."
         ]
       }
+    ],
+    "concepts": [
+      "chunked-transfer",
+      "output-buffer-flush",
+      "ndjson"
     ]
   },
   {
@@ -631,6 +656,11 @@
           "Java 21의 가상 스레드로 MVC에서도 블로킹 호출의 동시성을 높일 수 있습니다."
         ]
       }
+    ],
+    "concepts": [
+      "traffic-mirroring",
+      "idempotency",
+      "canary-release"
     ]
   },
   {
@@ -736,6 +766,11 @@
           "CPU 작업은 쪼개서 setImmediate로 양보하거나 worker로 옮깁니다."
         ]
       }
+    ],
+    "concepts": [
+      "node-event-loop",
+      "libuv-threadpool",
+      "worker-threads"
     ]
   },
   {
@@ -841,6 +876,11 @@
           "차이를 줄이려고 애그리거트 단위로 설계하는 접근도 있습니다."
         ]
       }
+    ],
+    "concepts": [
+      "spring-data-jdbc-converter",
+      "jpa-attribute-converter",
+      "aggregate"
     ]
   },
   {
@@ -946,6 +986,11 @@
           "record는 불변 값 객체를 간단히 만드는 방법이고 equals와 hashCode도 필드 기준으로 만들어 줍니다."
         ]
       }
+    ],
+    "concepts": [
+      "composite-key",
+      "equals-hashcode",
+      "java-record"
     ]
   },
   {
@@ -1051,6 +1096,11 @@
           "예상 못 한 예외는 500으로 감추고 ERROR 로그로 남기는 것이 안전합니다."
         ]
       }
+    ],
+    "concepts": [
+      "result-type",
+      "sealed-class",
+      "spring-rollback-rules"
     ]
   },
   {
@@ -1155,6 +1205,11 @@
           "각 서버는 자기 연결 목록만 알고 있으므로 이벤트를 모든 서버에 퍼뜨려야 합니다. 전달 계층이 꺼져도 동작하도록 한 서버 안에서 바로 처리하는 대체 경로를 남겨 둡니다."
         ]
       }
+    ],
+    "concepts": [
+      "server-sent-events",
+      "websocket",
+      "proxy-buffering"
     ]
   },
   {
@@ -1260,6 +1315,12 @@
           "여러 서버가 동시에 같은 건을 완료 처리하려 해도 한 곳만 성공합니다."
         ]
       }
+    ],
+    "concepts": [
+      "skip-locked",
+      "select-for-update",
+      "transaction-isolation",
+      "idempotency"
     ]
   },
   {
@@ -1360,6 +1421,11 @@
           "네이티브 화면은 앱 번들에 이미 들어 있지만 웹뷰는 에셋을 받아야 합니다. 그래서 꼭 필요한 스크립트를 인라인으로 넣고 캐시와 사전 로딩을 활용합니다."
         ]
       }
+    ],
+    "concepts": [
+      "script-defer-async",
+      "critical-rendering-path",
+      "http-caching"
     ]
   },
   {
@@ -1463,6 +1529,12 @@
           "ACL은 '어떤 계정이 어떤 토픽에 읽기·쓰기를 할 수 있는가'를 정합니다. 디스크 접근이나 네트워크 도청은 별도의 대책(디스크 암호화, TLS, 종단 간 암호화)이 필요합니다."
         ]
       }
+    ],
+    "concepts": [
+      "tls-in-transit",
+      "end-to-end-encryption",
+      "envelope-encryption",
+      "kafka-acl"
     ]
   },
   {
@@ -1563,6 +1635,11 @@
           "서버 내부 지표는 네트워크, DNS, 프록시 문제를 보지 못합니다. 외부에서 주기적으로 요청하는 프로브가 사용자 경험에 가깝습니다."
         ]
       }
+    ],
+    "concepts": [
+      "sli-slo-sla",
+      "error-budget",
+      "burn-rate-alert"
     ]
   },
   {
@@ -1663,6 +1740,11 @@
           "'학교에서', '학교를'이 다른 토큰이면 '학교' 검색에 안 잡힐 수 있습니다. 형태소 분석기와 사용자 사전이 어간을 뽑아 줍니다."
         ]
       }
+    ],
+    "concepts": [
+      "inverted-index",
+      "text-analyzer",
+      "index-alias-reindex"
     ]
   },
   {
@@ -1763,6 +1845,11 @@
           "집계 쿼리는 일부 컬럼만 쓰므로 그 컬럼만 읽으면 됩니다. 반대로 한 행을 자주 갱신하는 OLTP에는 행 기반이 어울립니다."
         ]
       }
+    ],
+    "concepts": [
+      "apache-iceberg",
+      "time-travel-snapshot",
+      "hidden-partitioning"
     ]
   },
   {
@@ -1863,6 +1950,11 @@
           "GPU 메모리는 비싸고 작습니다. 밀려난 캐시를 느린 저장소에 두었다가 재사용 시 다시 올리면 재계산보다 싸지만 이동 비용이 있습니다."
         ]
       }
+    ],
+    "concepts": [
+      "kv-cache",
+      "prefill-decode",
+      "prefix-caching"
     ]
   },
   {
@@ -1963,6 +2055,11 @@
           "영역이 많으면 먼저 공간 인덱스나 셀 매핑으로 후보를 줄이고, 마지막에 포함 판정으로 확정합니다."
         ]
       }
+    ],
+    "concepts": [
+      "geohash",
+      "h3-grid",
+      "haversine-distance"
     ]
   },
   {
@@ -2063,6 +2160,11 @@
           "한 앱에서 어떤 코드는 import, 어떤 코드는 require로 같은 패키지를 부르면 모듈 인스턴스가 둘이 됩니다. 상태를 가진 코드는 한 구현에 두고 다른 형식은 감싸기만 합니다."
         ]
       }
+    ],
+    "concepts": [
+      "esm-cjs",
+      "dual-package-hazard",
+      "package-exports"
     ]
   },
   {
@@ -2163,6 +2265,11 @@
           "필요한 부분만 검색해 넣는 RAG가 비용과 정확도 면에서 유리한 경우가 많습니다."
         ]
       }
+    ],
+    "concepts": [
+      "llm-token-billing",
+      "tokenizer",
+      "prompt-caching"
     ]
   },
   {
@@ -2263,6 +2370,11 @@
           "액세스 토큰은 만료까지 유효하므로 수명을 짧게 하거나 폐기 목록을 둡니다. 리프레시 토큰을 서버에서 지우면 더 이상 갱신되지 않습니다."
         ]
       }
+    ],
+    "concepts": [
+      "jwt-access-token",
+      "refresh-token-rotation",
+      "secure-token-storage"
     ]
   },
   {
@@ -2363,6 +2475,11 @@
           "쿼리 캐시는 테이블이 바뀔 때마다 무효화되어 동시성이 높은 환경에서 병목이 되어 제거되었습니다. 필요하면 애플리케이션이나 Redis에서 캐시합니다."
         ]
       }
+    ],
+    "concepts": [
+      "caching-sha2-password",
+      "utf8mb4-collation",
+      "mysql-upgrade-check"
     ]
   },
   {
@@ -2463,6 +2580,11 @@
           "Service는 레이블로 선택한 파드 집합 앞에 고정 가상 IP와 DNS 이름을 둡니다. 파드가 바뀌어도 이름은 그대로입니다."
         ]
       }
+    ],
+    "concepts": [
+      "readiness-probe",
+      "liveness-probe",
+      "startup-probe"
     ]
   },
   {
@@ -2563,6 +2685,11 @@
           "같은 디스크에만 있으면 함께 잃을 수 있으므로 매체를 나누고, 화재·도난 같은 재해를 위해 외부 보관본을 둡니다."
         ]
       }
+    ],
+    "concepts": [
+      "rpo-rto",
+      "ha-vs-dr",
+      "backup-verification"
     ]
   },
   {
@@ -2663,6 +2790,11 @@
           "긴급은 즉시 호출, 경고는 요약 알림처럼 나누면 중요한 신호를 놓치지 않습니다."
         ]
       }
+    ],
+    "concepts": [
+      "alert-fatigue",
+      "alert-grouping",
+      "retry-alert-policy"
     ]
   },
   {
@@ -2763,6 +2895,11 @@
           "histogram은 구간(버킷)별 건수를 저장하고 histogram_quantile()로 분위수를 계산합니다. 평균은 느린 요청을 가립니다."
         ]
       }
+    ],
+    "concepts": [
+      "prometheus-counter",
+      "prometheus-gauge",
+      "label-cardinality"
     ]
   },
   {
@@ -2863,6 +3000,11 @@
           "블랙리스트 문자열 검사는 우회가 쉽습니다. 권한 분리처럼 DB가 강제하는 방어를 기본으로 하고 문자열 검사는 보조로 씁니다."
         ]
       }
+    ],
+    "concepts": [
+      "prompt-injection",
+      "least-privilege-db-account",
+      "statement-timeout"
     ]
   },
   {
@@ -2963,6 +3105,11 @@
           "1차로 후보를 좁히고 2차로 정밀하게 정렬합니다. 정확하지만 느리므로 후보 수를 줄여 지연을 관리합니다."
         ]
       }
+    ],
+    "concepts": [
+      "ann-search",
+      "hnsw",
+      "vector-similarity"
     ]
   },
   {
@@ -3063,6 +3210,11 @@
           "키 하나가 처리량 한계를 넘기면 그 키의 순서와 병렬성을 같이 가질 수 없습니다. 화면에서는 방 안 증가 순번으로 순서를 바로잡습니다."
         ]
       }
+    ],
+    "concepts": [
+      "kafka-partition-order",
+      "idempotent-producer",
+      "consumer-group"
     ]
   }
 ]

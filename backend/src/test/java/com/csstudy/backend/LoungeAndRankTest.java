@@ -208,10 +208,17 @@ class LoungeAndRankTest {
         mvc.perform(put("/api/v1/rank/solved").contentType(MediaType.APPLICATION_JSON)
                         .content("{\"visitorId\":\"rank-visitor-phone\",\"count\":250}"))
                 .andExpect(status().isOk());
-        // 문제 수를 알릴 때 계정을 함께 보내지 못한 기기는 아직 따로 나온다. 로그인한 채 순위를 보면 그때 묶인다
+        // 문제 수를 알릴 때 계정을 함께 보내지 못한 기기는 아직 따로 나온다
         mvc.perform(get("/api/v1/rank/solved").header("X-Visitor-Id", "rank-visitor-phone"))
                 .andExpect(jsonPath("$.top[1].count").value(250))
                 .andExpect(jsonPath("$.account").value(false));
+        // 순위를 보기만 해서는 묶이지 않는다. 로그인한 채 문제 수를 알릴 때 계정에 묶인다
+        mvc.perform(get("/api/v1/rank/solved").header("X-Visitor-Id", "rank-visitor-phone").header("Authorization", "Bearer " + token))
+                .andExpect(jsonPath("$.top[1].count").value(250));
+        mvc.perform(put("/api/v1/rank/solved").contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization", "Bearer " + token)
+                        .content("{\"visitorId\":\"rank-visitor-phone\",\"count\":250}"))
+                .andExpect(status().isOk());
         mvc.perform(get("/api/v1/rank/solved").header("X-Visitor-Id", "rank-visitor-phone").header("Authorization", "Bearer " + token))
                 .andExpect(jsonPath("$.top[0].count").value(300))
                 .andExpect(jsonPath("$.top[0].nickname").value("rank-account"))

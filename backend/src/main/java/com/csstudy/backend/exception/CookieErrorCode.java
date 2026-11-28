@@ -40,6 +40,7 @@ public enum CookieErrorCode {
     DONATION_DAILY_LIMIT(HttpStatus.TOO_MANY_REQUESTS, "오늘은 더 올릴 수 없습니다. 내일 다시 시도해 주세요."),
     NEWSLETTER_ALREADY(HttpStatus.CONFLICT, "이미 등록된 메일입니다."),
     NEWSLETTER_FULL(HttpStatus.CONFLICT, "학습 메일 구독자가 가득 찼어요. 자리가 나면 다시 열릴 테니 나중에 다시 신청해 주세요."),
+    NEWSLETTER_CONCEPT_NOT_FOUND(HttpStatus.NOT_FOUND, "찾는 개념 설명이 없어요. 메일의 링크를 다시 확인해 주세요."),
 
     // 계정
     NICKNAME_DUPLICATED(HttpStatus.CONFLICT, "이미 사용 중인 닉네임입니다. 다른 이름을 사용해 주세요."),

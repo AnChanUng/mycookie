@@ -39,6 +39,7 @@ const TierShopPage = lazy(() => import('./pages/TierShopPage'));
 const PaymentResultPage = lazy(() => import('./pages/PaymentResultPage'));
 const RankPage = lazy(() => import('./pages/RankPage'));
 const PointShopPage = lazy(() => import('./pages/PointShopPage'));
+const QuestPage = lazy(() => import('./pages/QuestPage'));
 const TechBlogsPage = lazy(() => import('./pages/TechBlogsPage'));
 const StudyCoachPage = lazy(() => import('./pages/StudyCoachPage'));
 const CertificationsPage = lazy(() => import('./pages/CertificationsPage'));
@@ -60,6 +61,7 @@ const WeakPage = lazy(() => import('./pages/WeakPage'));
 const SsafyPage = lazy(() => import('./pages/SsafyPage'));
 const AptitudePage = lazy(() => import('./pages/AptitudePage'));
 const DailyPracticePage = lazy(() => import('./pages/DailyPracticePage'));
+const ConceptPage = lazy(() => import('./pages/ConceptPage'));
 const AuthCallbackPage =lazy(() => import('./pages/AuthCallbackPage'));
 const OnboardingPage = lazy(() => import('./pages/OnboardingPage'));
 const DevLogPage = lazy(() => import('./pages/DevLogPage'));
@@ -109,6 +111,7 @@ function App() {
           <Route path="account" element={<AccountPage />} />
           <Route path="account/retry" element={<AccountRetryPage />} />
           <Route path="daily/:day" element={<DailyPracticePage />} />
+          <Route path="concepts/:slug" element={<ConceptPage />} />
           <Route path="auth/callback"element={<AuthCallbackPage />} />
           <Route path="auth/verify-email" element={<VerifyEmailPage />} />
           <Route path="auth/reset-password" element={<ResetPasswordPage />} />
@@ -147,6 +150,7 @@ function App() {
           <Route path="tiers" element={<TierShopPage />} />
           <Route path="rank" element={<RankPage />} />
           <Route path="shop" element={<PointShopPage />} />
+          <Route path="quests" element={<QuestPage />} />
           <Route path="payments/success" element={<PaymentResultPage ok />} />
           <Route path="payments/fail" element={<PaymentResultPage ok={false} />} />
           <Route path="ai" element={<AiPage />} />

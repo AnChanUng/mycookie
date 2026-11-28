@@ -9,11 +9,6 @@ import './PointShopPage.css';
 
 // 포인트 상점. 출석 · 문제 풀이 · 승급으로 모은 포인트로 프로필 꾸미기 아이템을 산다.
 // 지급 기준은 서버 PointService와 같은 값이다. 새 풀이는 하루 100문제까지 인정하고, 넘는 몫(예전 기록 포함)은 다음 날 이어서 들어온다
-const RULES = [
-  { icon: '📅', title: '출석', text: '접속하면 하루 10P 자동', sub: '7일 연속마다 50P 더' },
-  { icon: '✏️', title: '문제 풀이', text: '새로 푼 문제 1개당 1P', sub: '같은 문제는 한 번만 · 하루 100문제까지' },
-  { icon: '🏅', title: '승급', text: '단계마다 20 · 50 · 100 · 150 · 300P', sub: '새 등급에 오르면 200~1,500P 더' },
-];
 const REASONS = { ATTEND: '출석', SOLVED: '문제 풀이', TIER_UP: '승급', QUEST: '퀘스트', PURCHASE: '구매' };
 const KINDS = [
   { kind: 'avatar', title: '대표 아이콘', note: '프로필 · 채팅 · 순위에 보이는 아이콘' },
@@ -108,7 +103,7 @@ export default function PointShopPage() {
   return <div className="ps fade-in">
     <header className="page-header">
       <h1>포인트 상점</h1>
-      <p>출석하고 문제를 풀고 승급하면 포인트가 쌓여요. 모은 포인트로 프로필을 꾸며 보세요.</p>
+      <p>모은 포인트로 프로필을 꾸며 보세요. 포인트 모으는 법은 <Link to="/quests">오늘의 퀘스트</Link>에서 봐요.</p>
     </header>
 
     {!token ? <div className="ps-card ps-empty">
@@ -131,25 +126,7 @@ export default function PointShopPage() {
       {message && <p className={`ps-message${message.ok ? '' : ' bad'}`} role={message.ok ? 'status' : 'alert'}>{message.text}</p>}
     </>}
 
-    {s?.quests?.length > 0 && <section className="ps-quests" aria-label="오늘의 퀘스트">
-      <div className="ps-section-head"><h2>오늘의 퀘스트</h2><span>오늘 새로 푼 문제 {s.todaySolved.toLocaleString()}개 · 다 채우면 자동으로 받아요</span></div>
-      <ul>
-        {s.quests.map(q => {
-          const percent = Math.min(100, Math.round(s.todaySolved / q.count * 100));
-          return <li key={q.count} className={q.done ? 'done' : ''}>
-            <div><b>{q.count}문제 풀기</b><span>{q.done ? '✓ 받음' : `+${q.point}P`}</span></div>
-            <span className="ps-quest-bar" role="progressbar" aria-valuemin={0} aria-valuemax={q.count} aria-valuenow={Math.min(q.count, s.todaySolved)} aria-label={`${q.count}문제 퀘스트 진행`}><i style={{ width: `${percent}%` }} /></span>
-            <small>{Math.min(q.count, s.todaySolved)} / {q.count}</small>
-          </li>;
-        })}
-      </ul>
-      <Link to="/exam" className="ps-quest-go">문제 풀러 가기 →</Link>
-    </section>}
-
-    <section className="ps-rules" aria-label="포인트 받는 법">
-      {RULES.map(r => <div key={r.title}><span className="ps-rule-icon" aria-hidden="true">{r.icon}</span><b>{r.title}</b><p>{r.text}</p><small>{r.sub}</small></div>)}
-    </section>
-
+    {/* 상점에는 포인트와 아이템만 둔다. 오늘의 퀘스트와 포인트 받는 법은 /quests 화면에서 본다 */}
     {KINDS.map(({ kind, title, note }) => {
       const list = (s?.shop || []).filter(i => i.key.startsWith(`${kind}:`));
       if (!list.length) return null;

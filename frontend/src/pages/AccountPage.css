@@ -72,6 +72,7 @@
 .auth-note { margin: var(--ds-s4) 0 0; font-size: var(--ds-fs-caption); line-height: 1.6; color: var(--ds-text-3); text-align: center; }
 .auth-message { margin: var(--ds-s4) 0 0; padding: var(--ds-s3); border-radius: var(--ds-r-md); background: var(--ds-surface-2); font-size: var(--ds-fs-small); color: var(--ds-text-2); line-height: 1.55; }
 .auth-divider { display: flex; align-items: center; gap: var(--ds-s3); margin: var(--ds-s5) 0; font-size: var(--ds-fs-caption); color: var(--ds-text-3); }
+.auth-divider:empty { gap: 0; }
 .auth-divider::before, .auth-divider::after { content: ''; flex: 1; height: 1px; background: var(--ds-line-strong); }
 
 /* 간편 로그인 버튼. 제공자 안내 색이라 화면 모드와 상관없이 같다 */
