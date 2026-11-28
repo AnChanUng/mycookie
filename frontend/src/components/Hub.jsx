@@ -57,8 +57,8 @@ export function HubSection({ title, note, children }) {
   );
 }
 
-// ' · '(앞뒤 띄어쓰기)로 이은 주제 글을 작은 칩으로 나눈다. 'IoC·DI'처럼 붙여 쓴 건 한 칩으로 둔다
-const split = text => (text || '').split(/\s+·\s+/).map(t => t.trim()).filter(Boolean);
+// 쉼표나 ' · '(앞뒤 띄어쓰기)로 이은 주제 글을 작은 칩으로 나눈다. 'IoC·DI'처럼 붙여 쓴 건 한 칩으로 둔다
+const split = text => (text || '').split(/\s+·\s+|,\s*/).map(t => t.trim()).filter(Boolean);
 
 // 칸 하나: 아이콘 · 배지 / 제목 / 설명 또는 주제 칩 / 아래쪽 바로가기
 export function HubCard({ to, href, icon, badge, title, desc, topics, go, label }) {

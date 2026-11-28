@@ -9,7 +9,9 @@ import privateNotes from '../src/data/privateExplanations.json' with { type: 'js
 
 // 2026-11-18 문제집 정비로 실제 응시 후기 기반 문제집은 비공개(privateBanks.js, privateExplanations.json)로 옮겼다.
 // 공개 이론 문항의 상세 해설과 공개·비공개 해설 데이터의 합계를 확인한다
-const old = BANKS.filter(b => b.key !== 'pearl').flatMap(allQuestions).filter(theoryFor);
+// 실무형 문제는 문항 안의 긴 해설(e)로 설명한다(check:practical이 검사). 상세 해설 데이터에서 뺀다
+const SELF_EXPLAINED = ['practical'];
+const old = BANKS.filter(b => b.key !== 'pearl' && !SELF_EXPLAINED.includes(b.key)).flatMap(allQuestions).filter(theoryFor);
 // 기존 문제집의 기준 수와 새 Spring 문제집의 이론 연결 수를 나눠 검증한다.
 // 새 문제집 추가 때문에 기존 기준 수를 무조건 올려 누락을 감추지 않는다.
 const springPractice = BANKS.find(b => b.key === 'spring-practice');
@@ -18,7 +20,7 @@ const springTheory = springPractice.questions.filter(theoryFor);
 // 노트 문제(웹노트 · 전공노트)는 상세 해설 대신 근거 노트로 돌아가는 링크를 단다(check:note-quiz가 링크를 검사)
 const NOTE_BANKS = ['webnote', 'csnote'];
 const noteTheory = BANKS.filter(b => NOTE_BANKS.includes(b.key)).flatMap(allQuestions).filter(theoryFor);
-const legacyTheory = BANKS.filter(b => !['pearl', 'spring-practice', ...NOTE_BANKS].includes(b.key)).flatMap(allQuestions).filter(theoryFor);
+const legacyTheory = BANKS.filter(b => !['pearl', 'spring-practice', ...NOTE_BANKS, ...SELF_EXPLAINED].includes(b.key)).flatMap(allQuestions).filter(theoryFor);
 assert.equal(legacyTheory.length, 466);
 assert.equal(old.length, legacyTheory.length + springTheory.length + noteTheory.length);
 assert.ok(noteTheory.every(q => q.link), '노트 문제에는 근거 노트 링크가 있어야 함');
@@ -26,7 +28,7 @@ assert.ok(noteTheory.every(q => q.link), '노트 문제에는 근거 노트 링�
 // 새로 생기는 공백은 실패시키고, 이 목록은 해설을 채우면서 줄여 간다(목표 0개)
 const KNOWN_GAPS = {};  // 2026-11-20 CU 42, SSAFY DB 4문항 상세 해설을 채워 0개
 const gaps = {};
-for (const bank of BANKS.filter(b => b.key !== 'pearl' && !NOTE_BANKS.includes(b.key)))
+for (const bank of BANKS.filter(b => b.key !== 'pearl' && !NOTE_BANKS.includes(b.key) && !SELF_EXPLAINED.includes(b.key)))
   for (const q of allQuestions(bank).filter(theoryFor))
     if (!(explanationFor(q)?.length > 70)) gaps[bank.key] = (gaps[bank.key] || 0) + 1;
 for (const [bank, count] of Object.entries(gaps)) assert.ok(count <= (KNOWN_GAPS[bank] || 0), `상세 해설 없는 문항이 늘었음: ${bank} ${count}개(허용 ${KNOWN_GAPS[bank] || 0})`);
