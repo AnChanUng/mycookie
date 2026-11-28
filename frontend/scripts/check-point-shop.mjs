@@ -35,7 +35,13 @@ try {
   assert.ok(all.includes('레어') && all.includes('전설'), '레어 · 전설 표시');
   assert.ok(all.includes('수정구슬 아이콘') && all.includes('은하 아이콘') && all.includes('오팔 테마') && all.includes('성운 테마'));
   assert.ok(view.root.findAll(n => /ps-item legend/.test(n.props.className || '')).length >= 3, '전설 품목은 전설 카드');
-  assert.ok(all.includes('20 · 50 · 100 · 150 · 300P'), '승급 포인트 안내');
+  // 상점에는 아이템만 둔다. 퀘스트와 포인트 받는 법은 /quests 화면에 있다
+  assert.ok(!all.includes('20 · 50 · 100 · 150 · 300P') && !all.includes('문제 풀러 가기'), '상점에는 퀘스트 · 받는 법 없음');
+  const { default: Quests } = await server.ssrLoadModule('/src/pages/QuestPage.jsx');
+  let quests;
+  await act(async () => { quests = TestRenderer.create(React.createElement(MemoryRouter, null, React.createElement(Quests))); });
+  assert.ok(text(quests.toJSON()).includes('20 · 50 · 100 · 150 · 300P'), '퀘스트 화면에 승급 포인트 안내');
+  quests.unmount();
   console.log('PASS: 대표 아이콘 한 줄 진열대, 레어 · 전설 테마 · 아이콘 표시');
 } finally {
   if (view) await act(async () => view.unmount());
